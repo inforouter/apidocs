@@ -1,8 +1,7 @@
 ﻿################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
-
-/.vs/apidocs.slnx/FileContentIndex
+.vs/
 .cache/
 www/
 /.github/workflows/docs.yml
