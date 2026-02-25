@@ -6,3 +6,5 @@
 www/
 /.github/workflows/docs.yml
 /.github/workflows/jekyll-gh-pages.yml
+/.vs/apidocs.slnx/v18/DocumentLayout.backup.json
+/.vs/apidocs.slnx/v18/DocumentLayout.json
