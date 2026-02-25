@@ -1,4 +1,4 @@
-﻿# AddUserAsDomainMember API
+# AddUserAsDomainMember API
 
 Adds an existing infoRouter user to the member list of the specified domain/library. Once added as a member, the user gains access to the domain's content according to the domain's permissions configuration.
 
@@ -117,5 +117,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/AddUserAsDomainMember*

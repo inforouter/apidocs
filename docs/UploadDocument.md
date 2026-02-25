@@ -1,4 +1,4 @@
-﻿# UploadDocument API
+# UploadDocument API
 
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array. If no document exists at the path, a new document is created. If a document already exists, a new version is added. This is the base upload method; use numbered variants (`UploadDocument1` through `UploadDocument4`) for additional options such as version comments, post-upload checkout, and extended XML parameters.
 
@@ -11,7 +11,7 @@ Uploads a new document or creates a new version of an existing document at the s
 ## Methods
 
 - **GET** `/srv.asmx/UploadDocument?authenticationTicket=...&path=...&fileContent=...`
-- **POST** `/srv.asmx/UploadDocument` (form data — recommended for binary content)
+- **POST** `/srv.asmx/UploadDocument` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadDocument`
 
 ## Parameters
@@ -95,7 +95,7 @@ Content-Type: application/octet-stream
 
 ## Notes
 
-- For large files, use the chunked upload approach: `CreateUploadHandler` → `UploadFileChunk` (repeat) → `UploadDocumentWithHandler`.
+- For large files, use the chunked upload approach: `CreateUploadHandler` -' `UploadFileChunk` (repeat) -' `UploadDocumentWithHandler`.
 - The file extension in `path` determines the document's MIME type and thumbnail behavior.
 - If a document already exists at the path, a new version is created automatically. The document ID remains the same.
 - The folder path component of `path` must already exist. Use `CreateFolder` to create missing folders first.
@@ -126,5 +126,3 @@ Content-Type: application/octet-stream
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocument*

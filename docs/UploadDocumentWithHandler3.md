@@ -1,4 +1,4 @@
-﻿# UploadDocumentWithHandler3 API
+# UploadDocumentWithHandler3 API
 
 Finalizes a chunked file upload and creates a new document or a new version of an existing document at the specified path, with extended options supplied through an XML parameters string. This is the most flexible handler-finalization method and supports all upload options including version comment, publish option, checkout, keywords, text-only content, manual version numbers, custom dates, and email notifications.
 
@@ -53,9 +53,9 @@ See `UploadDocument4` for the full list of supported XML parameter keys and thei
 ## Chunked Upload Workflow
 
 ```
-1. CreateUploadHandler        → returns UploadHandler GUID + ChunkSize
-2. UploadFileChunk            → repeat until LastChunk=true
-3. UploadDocumentWithHandler3 → finalize with XML parameters
+1. CreateUploadHandler        -' returns UploadHandler GUID + ChunkSize
+2. UploadFileChunk            -' repeat until LastChunk=true
+3. UploadDocumentWithHandler3 -' finalize with XML parameters
 ```
 
 ---
@@ -130,5 +130,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocumentWithHandler3*

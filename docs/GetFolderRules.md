@@ -1,4 +1,4 @@
-﻿# GetFolderRules API
+# GetFolderRules API
 
 Returns the rules (policies) configured for the specified folder. Rules govern what operations are allowed or disallowed within the folder, such as file type restrictions, checkout/checkin policies, and document/folder deletion permissions.
 
@@ -133,5 +133,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetFolderRules*

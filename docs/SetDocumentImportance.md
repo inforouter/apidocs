@@ -1,4 +1,4 @@
-﻿# SetDocumentImportance API
+# SetDocumentImportance API
 
 Sets the importance level of the specified document. Importance is a metadata flag used to communicate the urgency or priority of a document to readers. The value can be one of five levels ranging from no marking through vital. Any authenticated user with write access to the document can update this flag.
 
@@ -115,5 +115,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/SetDocumentImportance*

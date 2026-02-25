@@ -1,4 +1,4 @@
-﻿# GetFoldersAndDocuments2 API
+# GetFoldersAndDocuments2 API
 
 Returns the list of documents and folders at the specified path in a lightweight ("ultra-fast") format. This API is optimized for speed and returns a minimal set of attributes for each item. Use this when you need a quick listing and do not require full property details.
 
@@ -117,5 +117,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetFoldersAndDocuments2*

@@ -1,4 +1,4 @@
-﻿# AddPropertySetRowForUser API
+# AddPropertySetRowForUser API
 
 Adds one or more property set rows to the specified infoRouter user. Property sets are custom metadata schemas; each row contains field values for a given property set definition.
 
@@ -143,5 +143,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/AddPropertySetRowForUser*

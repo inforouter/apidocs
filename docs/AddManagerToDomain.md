@@ -1,4 +1,4 @@
-﻿# AddManagerToDomain API
+# AddManagerToDomain API
 
 Adds an existing infoRouter user as a domain/library manager. The user must already be a member of the domain/library before being designated as a manager.
 
@@ -118,5 +118,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/AddManagerToDomain*

@@ -1,4 +1,4 @@
-﻿# SetAccessList API
+# SetAccessList API
 
 Sets the access list (security permissions) for the document or folder at the specified path.
 
@@ -58,7 +58,7 @@ The `AccessListXML` parameter must be a valid XML string with the following stru
 
 - **Global user groups** have an empty `DomainName` attribute or omit it entirely.
 - Omitting `<Anonymous>` or `<DomainMembers>` leaves those entries unchanged or set to no access.
-- Right values outside the range 0–6 are clamped: values below 0 are treated as 0, values above 6 are treated as 6.
+- Right values outside the range 0-"6 are clamped: values below 0 are treated as 0, values above 6 are treated as 6.
 
 ---
 
@@ -166,5 +166,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/SetAccessList*

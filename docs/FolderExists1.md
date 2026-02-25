@@ -1,4 +1,4 @@
-﻿# FolderExists1 API
+# FolderExists1 API
 
 Determines whether a subfolder with the given name exists inside the specified parent folder. Returns success if the subfolder is found, or an error if it does not exist. Use this variant when you have the parent path and the subfolder name as separate values.
 
@@ -26,13 +26,13 @@ Determines whether a subfolder with the given name exists inside the specified p
 
 ## Response
 
-### Success Response — Subfolder Exists
+### Success Response -" Subfolder Exists
 
 ```xml
 <response success="true" />
 ```
 
-### Error Response — Subfolder Does Not Exist
+### Error Response -" Subfolder Does Not Exist
 
 ```xml
 <response error="Folder not found." />
@@ -114,5 +114,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/FolderExists1*

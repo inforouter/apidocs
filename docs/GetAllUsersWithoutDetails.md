@@ -1,4 +1,4 @@
-﻿# GetAllUsersWithoutDetails API
+# GetAllUsersWithoutDetails API
 
 Returns a paged and filtered list of infoRouter users without preference detail (lighter response), supporting the same filters and sorting as `GetAllUsers2`.
 
@@ -38,7 +38,7 @@ Returns a paged and filtered list of infoRouter users without preference detail 
 
 ### Success Response
 
-Returns a `<users>` collection. Each `<User>` element contains only the basic identity attributes — no `<Preferences>` child element is included.
+Returns a `<users>` collection. Each `<User>` element contains only the basic identity attributes -" no `<Preferences>` child element is included.
 
 ```xml
 <response success="true" error="" totalusercount="150">
@@ -155,5 +155,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetAllUsersWithoutDetails*

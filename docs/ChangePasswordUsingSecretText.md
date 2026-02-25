@@ -1,9 +1,9 @@
-﻿# ChangePasswordUsingSecretText API
+# ChangePasswordUsingSecretText API
 
 Changes a user's password using a one-time password-reset token (the "secret text") that was issued by the `ForgotPassword` or `ForgotPasswordByUserName` API and delivered to the user by email.
 
 This method is used to complete the self-service password-reset flow:
-1. The user calls `ForgotPassword` (by email) or `ForgotPasswordByUserName` — the server emails them a reset link containing a GUID token.
+1. The user calls `ForgotPassword` (by email) or `ForgotPasswordByUserName` -" the server emails them a reset link containing a GUID token.
 2. The user (or the application handling the reset link) calls `ChangePasswordUsingSecretText` with that token and the desired new password.
 
 No authentication ticket is required.
@@ -109,6 +109,6 @@ SOAPAction: "http://tempuri.org/ChangePasswordUsingSecretText"
 |-------|-------------|
 | `Invalid or expired reset code` | The `secretText` is not a valid GUID, does not match the stored token for the given user, or the token has expired |
 | `User not found` | The `userName` does not correspond to any user account in the system |
-| `External authentication — password cannot be changed` | The user's account is managed by an external authentication source (LDAP, AD, etc.) and the password cannot be changed via infoRouter |
+| `External authentication -" password cannot be changed` | The user's account is managed by an external authentication source (LDAP, AD, etc.) and the password cannot be changed via infoRouter |
 | `New password cannot be the same as old password` | The supplied `newPassword` is identical to the user's current password |
 | Password policy violation message | The `newPassword` does not meet the configured complexity requirements (the exact message describes the unmet rule) |

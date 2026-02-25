@@ -1,4 +1,4 @@
-﻿# DomainExists API
+# DomainExists API
 
 Determines whether a domain/library with the given name exists in the infoRouter system. Returns success if the domain exists, or an error if it does not.
 
@@ -84,9 +84,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- The check is **case-insensitive** — `Finance` and `finance` are treated as the same domain name.
-- This API does not check whether the calling user has access to the domain — it only checks for existence.
-- Archived and hidden domains are found by this check — `success="true"` is returned for them as well.
+- The check is **case-insensitive** -" `Finance` and `finance` are treated as the same domain name.
+- This API does not check whether the calling user has access to the domain -" it only checks for existence.
+- Archived and hidden domains are found by this check -" `success="true"` is returned for them as well.
 - To get the full properties of the domain, use `GetDomain`.
 
 ---
@@ -109,5 +109,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/DomainExists*

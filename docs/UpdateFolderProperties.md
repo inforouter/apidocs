@@ -1,4 +1,4 @@
-﻿# UpdateFolderProperties API
+# UpdateFolderProperties API
 
 Updates the name and/or description of the specified folder. The folder itself must already exist; only its metadata is changed.
 
@@ -118,5 +118,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UpdateFolderProperties*

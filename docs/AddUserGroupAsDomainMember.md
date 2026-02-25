@@ -1,4 +1,4 @@
-﻿# AddUserGroupAsDomainMember API
+# AddUserGroupAsDomainMember API
 
 Adds an existing infoRouter global user group to the member list of the specified domain/library. All users in the group gain access to the domain according to its permissions configuration.
 
@@ -117,5 +117,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/AddUserGroupAsDomainMember*

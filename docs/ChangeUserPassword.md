@@ -1,4 +1,4 @@
-﻿# ChangeUserPassword API
+# ChangeUserPassword API
 
 Changes the password of the specified infoRouter user. A user may change their own password; changing another user's password requires the **User Manager** administrative role.
 
@@ -43,14 +43,14 @@ Changes the password of the specified infoRouter user. A user may change their o
 
 ## Example
 
-### Request (GET) — user changing their own password
+### Request (GET) -" user changing their own password
 
 ```
 GET /srv.asmx/ChangeUserPassword?AuthenticationTicket=abc123&UserName=jsmith&NewPassword=NewSecure!99 HTTP/1.1
 Host: server.example.com
 ```
 
-### Request (POST) — admin changing another user's password
+### Request (POST) -" admin changing another user's password
 
 ```
 POST /srv.asmx/ChangeUserPassword HTTP/1.1
@@ -82,7 +82,7 @@ SOAPAction: "http://tempuri.org/ChangeUserPassword"
 
 - **Same-password restriction:** The new password must differ from the user's current password. Submitting the same password is rejected.
 - **Password policy enforcement:** The new password is validated against the application's password complexity rules (minimum length, required character types, etc.) as configured in `GetAuthenticationAndPasswordPolicy`. If the password does not comply, the call fails and the response `error` attribute contains a descriptive message identifying the unmet rule.
-- **No old password required:** Unlike typical self-service password-change forms, this API does not require the user to supply their current password — only the authentication ticket is used to verify the caller's identity. Administrative tooling or trusted integrations should therefore protect this endpoint accordingly.
+- **No old password required:** Unlike typical self-service password-change forms, this API does not require the user to supply their current password -" only the authentication ticket is used to verify the caller's identity. Administrative tooling or trusted integrations should therefore protect this endpoint accordingly.
 - **Use `ChangePasswordUsingSecretText` for unauthenticated resets:** If the user has forgotten their password and cannot log in, use the `ForgotPassword` / `ForgotPasswordByUserName` + `ChangePasswordUsingSecretText` flow instead.
 
 ## Related APIs

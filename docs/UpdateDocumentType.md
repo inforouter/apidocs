@@ -1,4 +1,4 @@
-﻿# UpdateDocumentType API
+# UpdateDocumentType API
 
 Updates the document type assigned to the specified document. Document types are administrator-defined classifications that can have required property sets attached. Changing the document type may enforce or relax property set requirements on the document.
 
@@ -90,7 +90,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Use `GetDocumentTypes` to retrieve all defined document type IDs and names before calling this API.
 - Passing `documentTypeID=0` clears the document type assignment.
-- The new document type may have a required property set — if the required properties are not yet filled in, publishing or other operations may be affected.
+- The new document type may have a required property set -" if the required properties are not yet filled in, publishing or other operations may be affected.
 
 ---
 
@@ -115,5 +115,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UpdateDocumentType*

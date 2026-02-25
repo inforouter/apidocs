@@ -1,6 +1,6 @@
-﻿# isValidTicket API
+# isValidTicket API
 
-Checks whether an existing authentication ticket is still valid and returns the session profile associated with it. Unlike `RenewTicket`, this method does not require credentials and does not extend the ticket's expiration — it is a passive, read-only check.
+Checks whether an existing authentication ticket is still valid and returns the session profile associated with it. Unlike `RenewTicket`, this method does not require credentials and does not extend the ticket's expiration -" it is a passive, read-only check.
 
 Use this method when a client application needs to confirm that a previously obtained ticket is still alive before making further API calls.
 
@@ -102,7 +102,7 @@ SOAPAction: "http://tempuri.org/isValidTicket"
 
 - **Passive check only:** This method does not renew or extend the ticket's 30-day sliding expiration. The expiration timestamp returned in `expireOn` reflects the current value, unchanged by this call.
 - **Cookie fallback:** If `AuthenticationTicket` is not supplied as a parameter, the server checks for a `ticket` HTTP cookie. Browser-based clients that store the ticket in a cookie can omit the parameter entirely.
-- **No credentials required:** Unlike `RenewTicket`, no `UID` or `PWD` need to be supplied — the ticket itself is the only input.
+- **No credentials required:** Unlike `RenewTicket`, no `UID` or `PWD` need to be supplied -" the ticket itself is the only input.
 - **Use `RenewTicket` to extend sessions:** If you want to both validate and reset the expiration window, use `RenewTicket` instead.
 - **Already-expired tickets return `[901]`:** Once a ticket has expired and been evicted from the session cache, it cannot be recovered. A new login via `AuthenticateUser` is required.
 

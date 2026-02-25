@@ -1,4 +1,4 @@
-﻿# GetMyDocumentsAndFolders API
+# GetMyDocumentsAndFolders API
 
 Returns all documents and folders owned by the currently authenticated user, across all locations in the infoRouter system. Optional flags control the level of detail included for each item.
 
@@ -64,7 +64,7 @@ Returns all documents and folders owned by the currently authenticated user, acr
 
 ## Required Permissions
 
-The calling user must be authenticated. Only items owned by the current user are returned — no special permissions are required beyond being logged in.
+The calling user must be authenticated. Only items owned by the current user are returned -" no special permissions are required beyond being logged in.
 
 ---
 
@@ -157,5 +157,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetMyDocumentsAndFolders*

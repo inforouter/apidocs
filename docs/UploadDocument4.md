@@ -1,4 +1,4 @@
-﻿# UploadDocument4 API
+# UploadDocument4 API
 
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with extended options supplied through an XML parameters string. This is the most flexible direct-upload variant and supports all upload options including version comment, checkout, publish option, keywords, text-only content, custom dates, and more.
 
@@ -11,7 +11,7 @@ Uploads a new document or creates a new version of an existing document at the s
 ## Methods
 
 - **GET** `/srv.asmx/UploadDocument4?authenticationTicket=...&path=...&fileContent=...&xmlParameters=...`
-- **POST** `/srv.asmx/UploadDocument4` (form data — recommended for binary content)
+- **POST** `/srv.asmx/UploadDocument4` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadDocument4`
 
 ## Parameters
@@ -147,5 +147,3 @@ Content-Disposition: form-data; name="xmlParameters"
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocument4*

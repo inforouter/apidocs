@@ -1,4 +1,4 @@
-﻿# DeleteFolder API
+# DeleteFolder API
 
 Deletes the folder at the specified path, including all its contents (subfolders and documents). This operation is permanent and cannot be undone unless items are in the recycle bin.
 
@@ -113,5 +113,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/DeleteFolder*

@@ -1,4 +1,4 @@
-﻿# UploadDocument3 API
+# UploadDocument3 API
 
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with both a version comment and a post-upload checkout option. This combines the features of `UploadDocument1` (version comment) and `UploadDocument2` (checkout).
 
@@ -11,7 +11,7 @@ Uploads a new document or creates a new version of an existing document at the s
 ## Methods
 
 - **GET** `/srv.asmx/UploadDocument3?authenticationTicket=...&path=...&fileContent=...&versionComment=...&checkout=...`
-- **POST** `/srv.asmx/UploadDocument3` (form data — recommended for binary content)
+- **POST** `/srv.asmx/UploadDocument3` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadDocument3`
 
 ## Parameters
@@ -101,7 +101,7 @@ true
 
 ## Notes
 
-- For large files, use the chunked upload approach: `CreateUploadHandler` → `UploadFileChunk` → `UploadDocumentWithHandler1` (with version comment).
+- For large files, use the chunked upload approach: `CreateUploadHandler` -' `UploadFileChunk` -' `UploadDocumentWithHandler1` (with version comment).
 - Use `UploadDocument4` for additional options (publish option, send emails, custom dates) via an XML parameters string.
 
 ---
@@ -127,5 +127,3 @@ true
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocument3*

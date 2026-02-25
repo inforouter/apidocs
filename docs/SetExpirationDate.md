@@ -1,6 +1,6 @@
-﻿# SetExpirationDate API
+# SetExpirationDate API
 
-Sets the expiration date of the specified document. When a document reaches its expiration date, infoRouter can optionally notify a designated user a configurable number of days before expiration. Expiration is informational metadata — it does not automatically archive or delete the document.
+Sets the expiration date of the specified document. When a document reaches its expiration date, infoRouter can optionally notify a designated user a configurable number of days before expiration. Expiration is informational metadata -" it does not automatically archive or delete the document.
 
 ## Endpoint
 
@@ -124,5 +124,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/SetExpirationDate*

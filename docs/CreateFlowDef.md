@@ -1,12 +1,12 @@
-﻿# CreateFlowDef API
+# CreateFlowDef API
 
-Creates a new workflow definition on the specified domain/library. The workflow is created in **inactive** state — steps and tasks must be added with `AddFlowStepDef` and `AddFlowTaskDef` before activating it with `ActivateFlowDef`.
+Creates a new workflow definition on the specified domain/library. The workflow is created in **inactive** state -" steps and tasks must be added with `AddFlowStepDef` and `AddFlowTaskDef` before activating it with `ActivateFlowDef`.
 
 This is the minimal variant. Use the numbered variants for additional configuration:
 
 | Variant | Extra parameters |
 |---------|-----------------|
-| `CreateFlowDef` | *(base — no extras)* |
+| `CreateFlowDef` | *(base -" no extras)* |
 | `CreateFlowDef1` | `OnEndMoveToPath` |
 | `CreateFlowDef2` | `OnEndMoveToPath`, `Supervisor` |
 | `CreateFlowDef3` | `OnEndMoveToPath`, `Supervisor`, `OnEndEventUrl`, `Hide` |
@@ -108,25 +108,25 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 - `FlowName` must be alphanumeric, maximum 32 characters, and must be unique within the domain/library.
 - `ActiveFolderPath` must refer to an existing infoRouter folder. It cannot be empty.
 - The `OnEndMoveToPath`, supervisor, `OnEndEventUrl`, and `Hide` fields are all left at their defaults (empty / `false`) by this variant. Use `CreateFlowDef1`, `CreateFlowDef2`, or `CreateFlowDef3` to configure those.
-- The typical workflow-building sequence is: **CreateFlowDef → AddFlowStepDef → AddFlowTaskDef → ActivateFlowDef**.
+- The typical workflow-building sequence is: **CreateFlowDef -' AddFlowStepDef -' AddFlowTaskDef -' ActivateFlowDef**.
 
 ## Related APIs
 
-- [CreateFlowDef1](CreateFlowDef1.md) – Creates a workflow definition with an on-end destination folder.
-- [CreateFlowDef2](CreateFlowDef2.md) – Creates a workflow definition with an on-end folder and a supervisor.
-- [CreateFlowDef3](CreateFlowDef3.md) – Creates a workflow definition with all options including event URL and hidden flag.
-- [AddFlowStepDef](AddFlowStepDef.md) – Add steps to the workflow definition after creation.
-- [AddFlowTaskDef](AddFlowTaskDef.md) – Add task definitions to workflow steps.
-- [ActivateFlowDef](ActivateFlowDef.md) – Activate the workflow so documents can be submitted to it.
-- [GetFlowDef](GetFlowDef.md) – Retrieve the full definition of a workflow.
-- [DeactivateFlowDef](DeactivateFlowDef.md) – Deactivate a workflow to modify its steps.
-- [DeleteWorkflow](DeleteWorkflow.md) – Permanently delete a workflow definition.
+- [CreateFlowDef1](CreateFlowDef1.md) -" Creates a workflow definition with an on-end destination folder.
+- [CreateFlowDef2](CreateFlowDef2.md) -" Creates a workflow definition with an on-end folder and a supervisor.
+- [CreateFlowDef3](CreateFlowDef3.md) -" Creates a workflow definition with all options including event URL and hidden flag.
+- [AddFlowStepDef](AddFlowStepDef.md) -" Add steps to the workflow definition after creation.
+- [AddFlowTaskDef](AddFlowTaskDef.md) -" Add task definitions to workflow steps.
+- [ActivateFlowDef](ActivateFlowDef.md) -" Activate the workflow so documents can be submitted to it.
+- [GetFlowDef](GetFlowDef.md) -" Retrieve the full definition of a workflow.
+- [DeactivateFlowDef](DeactivateFlowDef.md) -" Deactivate a workflow to modify its steps.
+- [DeleteWorkflow](DeleteWorkflow.md) -" Permanently delete a workflow definition.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Domain not found | The specified `DomainName` does not exist. |
 | Folder not found | The specified `ActiveFolderPath` does not exist. |

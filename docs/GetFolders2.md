@@ -1,4 +1,4 @@
-﻿# GetFolders2 API
+# GetFolders2 API
 
 Returns the list of direct subfolders of the specified folder in short form, applying the system's configured maximum folder display count limit. This API is used by the infoRouter UI folder panel to avoid overloading the interface with extremely large folder lists.
 
@@ -115,5 +115,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetFolders2*

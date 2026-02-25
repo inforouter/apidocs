@@ -1,4 +1,4 @@
-﻿# GetDueTaskDocuments API
+# GetDueTaskDocuments API
 
 Returns the list of documents that have active (due) workflow tasks currently assigned to the authenticated user. Results are sorted by task due date in ascending order.
 
@@ -69,7 +69,7 @@ Any authenticated user may call this API. Only tasks assigned to the calling use
 
 ## Notes
 
-- Only documents with tasks in **Due** status are returned — tasks that are currently active and within their scheduled time window.
+- Only documents with tasks in **Due** status are returned -" tasks that are currently active and within their scheduled time window.
 - Overdue tasks (past their due date), completed tasks, and tasks not yet started are excluded.
 - The list is sorted by **task due date ascending** (earliest due date first).
 - Each `<document>` element contains standard document properties. Rules, custom property sets, security details, and version history are not included in the response.
@@ -77,14 +77,14 @@ Any authenticated user may call this API. Only tasks assigned to the calling use
 
 ## Related APIs
 
-- [GetTask](GetTask.md) – Get full details of a specific workflow task.
-- [getTasks](getTasks.md) – Get a filtered and sorted list of workflow tasks.
-- [CompleteTask](CompleteTask.md) – Mark a task as completed.
-- [ChangeTaskDueDate](ChangeTaskDueDate.md) – Change the due date of an active task.
+- [GetTask](GetTask.md) -" Get full details of a specific workflow task.
+- [getTasks](getTasks.md) -" Get a filtered and sorted list of workflow tasks.
+- [CompleteTask](CompleteTask.md) -" Mark a task as completed.
+- [ChangeTaskDueDate](ChangeTaskDueDate.md) -" Change the due date of an active task.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |

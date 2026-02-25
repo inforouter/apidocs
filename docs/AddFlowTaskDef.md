@@ -1,6 +1,6 @@
-﻿# AddFlowTaskDef API
+# AddFlowTaskDef API
 
-Adds a task definition to a specified step of an existing workflow definition. The entire task configuration — name, deadline, assignees, permissions, requirements, and instructions — is passed as a single XML string in the `TaskDefXML` parameter.
+Adds a task definition to a specified step of an existing workflow definition. The entire task configuration -" name, deadline, assignees, permissions, requirements, and instructions -" is passed as a single XML string in the `TaskDefXML` parameter.
 
 The workflow definition must be in **inactive** (deactivated) state. Multiple tasks can be added to the same step; each call adds one task to the step.
 
@@ -222,18 +222,18 @@ Host: yourserver
 
 ## Related APIs
 
-- [AddFlowStepDef](AddFlowStepDef.md) – Add a step to the workflow definition before adding tasks.
-- [AddFlowStepDef1](AddFlowStepDef1.md) – Add a step with an on-start folder move.
-- [CreateFlowDef](CreateFlowDef.md) – Create the workflow definition.
-- [DeactivateFlowDef](DeactivateFlowDef.md) – Deactivate an active workflow before modifying it.
-- [DeleteFlowTaskDef](DeleteFlowTaskDef.md) – Delete a task definition from a workflow step.
-- [GetFlowDef](GetFlowDef.md) – Retrieve the full workflow definition including steps and tasks.
+- [AddFlowStepDef](AddFlowStepDef.md) -" Add a step to the workflow definition before adding tasks.
+- [AddFlowStepDef1](AddFlowStepDef1.md) -" Add a step with an on-start folder move.
+- [CreateFlowDef](CreateFlowDef.md) -" Create the workflow definition.
+- [DeactivateFlowDef](DeactivateFlowDef.md) -" Deactivate an active workflow before modifying it.
+- [DeleteFlowTaskDef](DeleteFlowTaskDef.md) -" Delete a task definition from a workflow step.
+- [GetFlowDef](GetFlowDef.md) -" Retrieve the full workflow definition including steps and tasks.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Invalid XML | `TaskDefXML` could not be parsed as valid XML. |
 | Workflow not found | The specified `DomainName`/`FlowName` combination does not exist. |

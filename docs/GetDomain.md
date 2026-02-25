@@ -1,4 +1,4 @@
-﻿# GetDomain API
+# GetDomain API
 
 Returns the properties of the specified domain/library, including its ID, name, visibility settings, archive status, and welcome message.
 
@@ -106,7 +106,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- This API returns domain metadata only — it does not return members, managers, or folder/document listings.
+- This API returns domain metadata only -" it does not return members, managers, or folder/document listings.
 - Use `GetDomainMembers` to retrieve the domain's membership list.
 - Use `GetManagers` to retrieve the domain's manager list.
 - Use `GetDomains` to list all domains and check their archive/hidden status.
@@ -134,5 +134,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetDomain*

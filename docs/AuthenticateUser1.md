@@ -1,4 +1,4 @@
-﻿# AuthenticateUser1 API
+# AuthenticateUser1 API
 
 Authenticates a user against infoRouter using their user name and password, and creates a session using the specified language ID. Returns an authentication ticket and basic profile information. Use this variant instead of `AuthenticateUser` when your application needs to force a specific UI language for the session.
 
@@ -22,7 +22,7 @@ Authenticates a user against infoRouter using their user name and password, and 
 | `PWD` | string | Yes | The user's password |
 | `Lang` | string | No | Language code for the session (e.g. `en`, `de`, `fr`, `tr`, `nl`). If omitted or empty, the user's preferred language from their profile is used. The value is matched case-insensitively against the languages configured on the server. |
 
-> **Note:** This method does not require an `authenticationTicket` — it is a login method that produces one.
+> **Note:** This method does not require an `authenticationTicket` -" it is a login method that produces one.
 
 ## Response
 
@@ -109,7 +109,7 @@ SOAPAction: "http://tempuri.org/AuthenticateUser1"
 - The `Lang` parameter overrides the user's own preferred language setting for this session only. The user's stored profile preference is not permanently changed.
 - If an unrecognised or unsupported language code is supplied, the server falls back to the system default language.
 - The returned `ticket` must be stored by the client and passed as `authenticationTicket` in every subsequent API call.
-- Tickets use a **30-day sliding expiration** — each successful API call resets the timer.
+- Tickets use a **30-day sliding expiration** -" each successful API call resets the timer.
 - To simply authenticate without specifying a language, use `AuthenticateUser`.
 
 ## Related APIs

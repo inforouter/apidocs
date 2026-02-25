@@ -1,4 +1,4 @@
-﻿# Move API
+# Move API
 
 Moves a document or folder from the source path to the destination path. Both documents and folders can be moved in a single call. The destination path must specify the target location including the new name.
 
@@ -130,5 +130,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/Move*

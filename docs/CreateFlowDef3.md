@@ -1,4 +1,4 @@
-﻿# CreateFlowDef3 API
+# CreateFlowDef3 API
 
 Creates a new workflow definition on the specified domain/library with the full set of configuration options: on-end destination folder, supervisor, webhook event URL, and visibility. The workflow is created in **inactive** state.
 
@@ -109,25 +109,25 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 - `Hide=true` hides the workflow from the folder-level workflow list in the document library UI, but administrators and managers can still see it.
 - `FlowName` must be alphanumeric, maximum 32 characters, and unique within the domain/library.
 - `ActiveFolderPath` must refer to an existing infoRouter folder and cannot be empty.
-- The workflow is created in **inactive** state. The typical build sequence is: **CreateFlowDef3 → AddFlowStepDef → AddFlowTaskDef → ActivateFlowDef**.
+- The workflow is created in **inactive** state. The typical build sequence is: **CreateFlowDef3 -' AddFlowStepDef -' AddFlowTaskDef -' ActivateFlowDef**.
 
 ## Related APIs
 
-- [CreateFlowDef](CreateFlowDef.md) – Minimal variant with only the three required parameters.
-- [CreateFlowDef1](CreateFlowDef1.md) – Adds `OnEndMoveToPath`.
-- [CreateFlowDef2](CreateFlowDef2.md) – Adds `OnEndMoveToPath` and `Supervisor`.
-- [AddFlowStepDef](AddFlowStepDef.md) – Add steps to the workflow after creation.
-- [AddFlowTaskDef](AddFlowTaskDef.md) – Add task definitions to workflow steps.
-- [ActivateFlowDef](ActivateFlowDef.md) – Activate the workflow so documents can be submitted to it.
-- [GetFlowDef](GetFlowDef.md) – Retrieve the full definition of a workflow.
-- [DeactivateFlowDef](DeactivateFlowDef.md) – Deactivate a workflow to modify it.
-- [DeleteWorkflow](DeleteWorkflow.md) – Permanently delete a workflow definition.
+- [CreateFlowDef](CreateFlowDef.md) -" Minimal variant with only the three required parameters.
+- [CreateFlowDef1](CreateFlowDef1.md) -" Adds `OnEndMoveToPath`.
+- [CreateFlowDef2](CreateFlowDef2.md) -" Adds `OnEndMoveToPath` and `Supervisor`.
+- [AddFlowStepDef](AddFlowStepDef.md) -" Add steps to the workflow after creation.
+- [AddFlowTaskDef](AddFlowTaskDef.md) -" Add task definitions to workflow steps.
+- [ActivateFlowDef](ActivateFlowDef.md) -" Activate the workflow so documents can be submitted to it.
+- [GetFlowDef](GetFlowDef.md) -" Retrieve the full definition of a workflow.
+- [DeactivateFlowDef](DeactivateFlowDef.md) -" Deactivate a workflow to modify it.
+- [DeleteWorkflow](DeleteWorkflow.md) -" Permanently delete a workflow definition.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Domain not found | The specified `DomainName` does not exist. |
 | Folder not found | `ActiveFolderPath` or `OnEndMoveToPath` does not exist. |

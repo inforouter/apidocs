@@ -1,4 +1,4 @@
-﻿# GetMemberDomains API
+# GetMemberDomains API
 
 Returns a list of domains/libraries where the currently authenticated user is a member. Results are sorted alphabetically by domain name.
 
@@ -118,7 +118,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- Returns only domains where the **currently authenticated user** is a member — both direct memberships and memberships through user groups are included.
+- Returns only domains where the **currently authenticated user** is a member -" both direct memberships and memberships through user groups are included.
 - Archived and hidden domains are included in the results if the user is a member.
 - Results are sorted alphabetically by domain name.
 - To get domain memberships for a **specific user** (not just the calling user), use `GetDomainMembershipsOfUser`.
@@ -145,5 +145,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetMemberDomains*

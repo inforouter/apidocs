@@ -1,8 +1,8 @@
-﻿# UploadNewDocumentWidthHandler API
+# UploadNewDocumentWidthHandler API
 
 Uploads a **new** document (never an existing-document version) to the specified folder path using a pre-staged upload handler, with extended options via an XML parameters string. The folder path and document name are specified separately, allowing the caller to place the new file independently of any existing document path.
 
-> **Note:** The method name contains a typo ("Width" instead of "With") — this is the original API name and is preserved for backward compatibility.
+> **Note:** The method name contains a typo ("Width" instead of "With") -" this is the original API name and is preserved for backward compatibility.
 
 ## Endpoint
 
@@ -31,9 +31,9 @@ Uploads a **new** document (never an existing-document version) to the specified
 ## Chunked Upload Workflow
 
 ```
-1. CreateUploadHandler              → returns UploadHandler GUID + ChunkSize
-2. UploadFileChunk                  → repeat until LastChunk=true
-3. UploadNewDocumentWidthHandler    → create the new document
+1. CreateUploadHandler              -' returns UploadHandler GUID + ChunkSize
+2. UploadFileChunk                  -' repeat until LastChunk=true
+3. UploadNewDocumentWidthHandler    -' create the new document
 ```
 
 ---
@@ -122,5 +122,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadNewDocumentWidthHandler*

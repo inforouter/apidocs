@@ -1,4 +1,4 @@
-﻿# GetDomainUsers API
+# GetDomainUsers API
 
 Returns a list of all users who are members of the specified domain/library, including both directly-added users and users who are members indirectly through user group membership. Returns full user detail for each user.
 
@@ -116,7 +116,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - Always returns results in default sort order with full user detail mode.
 - For sort and detail-mode control, use `GetDomainUsers1`.
 - `GetDomainMembers` returns users and groups separately; `GetDomainUsers` flattens groups and returns only individual users.
-- Large domains may return a significant number of users — consider using `GetDomainUsers1` with `detailMode=false` for performance-sensitive scenarios.
+- Large domains may return a significant number of users -" consider using `GetDomainUsers1` with `detailMode=false` for performance-sensitive scenarios.
 
 ---
 
@@ -139,5 +139,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetDomainUsers*

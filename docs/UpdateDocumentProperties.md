@@ -1,6 +1,6 @@
-﻿# UpdateDocumentProperties API
+# UpdateDocumentProperties API
 
-Updates the core properties of the specified document: display name, description, and update instructions. All three fields are optional — only the fields provided are updated. This is the base version of the API; use `UpdateDocumentProperties1` or `UpdateDocumentProperties2` to also update source, language, author, and importance.
+Updates the core properties of the specified document: display name, description, and update instructions. All three fields are optional -" only the fields provided are updated. This is the base version of the API; use `UpdateDocumentProperties1` or `UpdateDocumentProperties2` to also update source, language, author, and importance.
 
 ## Endpoint
 
@@ -100,7 +100,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - Line endings in `newDescription` and `newUpdateInstructions` are normalized to the server format.
 - To also update `source`, `language`, and `author`, use `UpdateDocumentProperties1`.
 - To also update `importance`, use `UpdateDocumentProperties2`.
-- Renaming a document via `newDocumentName` does not change its URL path — the path uses the file name including extension.
+- Renaming a document via `newDocumentName` does not change its URL path -" the path uses the file name including extension.
 
 ---
 
@@ -123,5 +123,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UpdateDocumentProperties*

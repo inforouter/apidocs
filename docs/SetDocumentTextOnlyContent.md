@@ -1,4 +1,4 @@
-﻿# SetDocumentTextOnlyContent API
+# SetDocumentTextOnlyContent API
 
 Updates the plain-text alternative content of the latest version of the specified document. The text-only content is a searchable plain-text representation stored alongside the binary document file. It is used for full-text indexing when the binary content cannot be indexed directly (e.g. encrypted or proprietary formats). Calling this API replaces any previously stored text-only content for the latest version.
 
@@ -92,7 +92,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - Line endings in `contentText` are normalized to the server format before storing.
 - Passing `null` or an empty string clears the previously stored text-only content.
 - The stored text content is used by the full-text search index. After updating, the document may need to be re-indexed before the new text becomes searchable.
-- This API does not modify the binary file — only the stored plain-text metadata.
+- This API does not modify the binary file -" only the stored plain-text metadata.
 
 ---
 
@@ -115,5 +115,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/SetDocumentTextOnlyContent*

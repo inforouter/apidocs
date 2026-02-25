@@ -1,4 +1,4 @@
-﻿# RemoveFolderCutoffDate API
+# RemoveFolderCutoffDate API
 
 Removes the cutoff date from the specified folder and, optionally, from its subfolders and documents. Returns a log of the operation. If any individual item fails, the overall success flag returns `false` even if other items succeeded.
 
@@ -27,13 +27,13 @@ Removes the cutoff date from the specified folder and, optionally, from its subf
 
 ## Response
 
-### Success Response — No Errors
+### Success Response -" No Errors
 
 ```xml
 <response success="true" error="" />
 ```
 
-### Partial Success Response — Some Items Failed
+### Partial Success Response -" Some Items Failed
 
 ```xml
 <response success="false" error="MultiStatus">
@@ -132,5 +132,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/RemoveFolderCutoffDate*

@@ -1,4 +1,4 @@
-﻿# CreateDomain API
+# CreateDomain API
 
 Creates a new infoRouter domain/library with the specified name and configuration. Domains (also called libraries) are the top-level containers in infoRouter that hold folders, documents, and workflow definitions.
 
@@ -139,5 +139,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/CreateDomain*

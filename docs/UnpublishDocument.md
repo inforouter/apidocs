@@ -1,6 +1,6 @@
-﻿# UnpublishDocument API
+# UnpublishDocument API
 
-Sets the document at the specified path to an unpublished state. An unpublished document is not visible to regular users who only have read access — it behaves as if no version has been officially released. This is the reverse of `PublishDocument`. Use this API to retract a previously published document while keeping all versions, metadata, and history intact.
+Sets the document at the specified path to an unpublished state. An unpublished document is not visible to regular users who only have read access -" it behaves as if no version has been officially released. This is the reverse of `PublishDocument`. Use this API to retract a previously published document while keeping all versions, metadata, and history intact.
 
 ## Endpoint
 
@@ -85,7 +85,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ## Notes
 
 - This API sets the publishing rule to `UNPUBLISHED`, hiding the document from read-only users.
-- All document versions, metadata, and history are preserved — unpublishing does not delete any data.
+- All document versions, metadata, and history are preserved -" unpublishing does not delete any data.
 - If the document is already in an unpublished state, this call returns success without making any changes.
 - To re-publish the document, use `PublishDocument`.
 
@@ -109,5 +109,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UnpublishDocument*

@@ -1,4 +1,4 @@
-﻿# AuthenticateUser API
+# AuthenticateUser API
 
 Authenticates a user against infoRouter using their user name and password, and returns an authentication ticket along with basic profile information. The ticket must be passed to all subsequent API calls as `authenticationTicket`.
 
@@ -21,7 +21,7 @@ Authenticates a user against infoRouter using their user name and password, and 
 | `UID` | string | Yes | The user's login name (case-insensitive) |
 | `PWD` | string | Yes | The user's password |
 
-> **Note:** This method does not require an `authenticationTicket` — it is the login method that produces one.
+> **Note:** This method does not require an `authenticationTicket` -" it is the login method that produces one.
 
 ## Response
 
@@ -65,7 +65,7 @@ Authenticates a user against infoRouter using their user name and password, and 
 
 - No prior authentication is required.
 - The user account must exist and be **active** (not disabled or deleted).
-- If the application is configured for Windows Authentication, native credential login may be restricted — use `AuthenticateUserViaWindows` instead.
+- If the application is configured for Windows Authentication, native credential login may be restricted -" use `AuthenticateUserViaWindows` instead.
 
 ## Example
 
@@ -106,7 +106,7 @@ SOAPAction: "http://tempuri.org/AuthenticateUser"
 ## Notes
 
 - The `ticket` value in the response is a GUID and must be stored by the client and passed as `authenticationTicket` in every subsequent API call.
-- Tickets use a **30-day sliding expiration** — each successful API call resets the timer.
+- Tickets use a **30-day sliding expiration** -" each successful API call resets the timer.
 - The system administrator account (`SysadminAccountName` in config) cannot generate tickets via this method.
 - If Windows Authentication is enabled at the IIS/server level, all requests may be pre-authenticated by the OS; use `AuthenticateUserViaWindows` in that configuration.
 - Passwords are validated against the configured authentication source (native infoRouter database, LDAP, or an external authority defined in `appsettings.json`).

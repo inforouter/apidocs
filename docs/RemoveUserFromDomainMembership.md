@@ -1,4 +1,4 @@
-﻿# RemoveUserFromDomainMembership API
+# RemoveUserFromDomainMembership API
 
 Removes the specified user from the member list of the given domain/library. The user loses access to the domain's content after removal.
 
@@ -89,7 +89,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ## Notes
 
 - If the user is also a manager of the domain, their manager role is also removed upon membership removal.
-- This operation removes individual user membership only — it does not affect user group memberships. If the user is a member of a group that is also a domain member, they may retain indirect access.
+- This operation removes individual user membership only -" it does not affect user group memberships. If the user is a member of a group that is also a domain member, they may retain indirect access.
 - Use `GetDomainMembers` to verify the member list after removal.
 
 ---
@@ -115,5 +115,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/RemoveUserFromDomainMembership*

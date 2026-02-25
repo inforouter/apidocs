@@ -1,4 +1,4 @@
-﻿# DeleteUser API
+# DeleteUser API
 
 Deletes the specified infoRouter user account. If the system is configured to require password confirmation for user deletion, this method will fail and `DeleteUser1` must be used instead.
 
@@ -116,11 +116,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 |-------|-------------|
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `[2767]` | Password confirmation required — use `DeleteUser1` instead. |
+| `[2767]` | Password confirmation required -" use `DeleteUser1` instead. |
 | User not found | The specified username does not exist. |
 | Access denied | The calling user is not a system administrator. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/DeleteUser*

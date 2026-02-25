@@ -1,4 +1,4 @@
-﻿# VerifyVersionHash API
+# VerifyVersionHash API
 
 Verifies the integrity of a specific version of a document by comparing the stored content hash against the actual file in the warehouse storage. Returns whether the hash matches, indicating the file has not been corrupted or tampered with since it was stored.
 
@@ -26,13 +26,13 @@ Verifies the integrity of a specific version of a document by comparing the stor
 
 ## Response
 
-### Success Response — Hash Verified
+### Success Response -" Hash Verified
 
 ```xml
 <root success="true" hashVerified="true" />
 ```
 
-### Success Response — Hash Mismatch (file corrupted or tampered)
+### Success Response -" Hash Mismatch (file corrupted or tampered)
 
 ```xml
 <root success="true" hashVerified="false" />
@@ -125,5 +125,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/VerifyVersionHash*

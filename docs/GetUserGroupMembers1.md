@@ -1,4 +1,4 @@
-﻿# GetUserGroupMembers1 API
+# GetUserGroupMembers1 API
 
 Returns a list of members of the specified user group with configurable sort order and detail level.
 
@@ -165,5 +165,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetUserGroupMembers1*

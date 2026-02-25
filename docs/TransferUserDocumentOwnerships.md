@@ -1,4 +1,4 @@
-﻿# TransferUserDocumentOwnerships API
+# TransferUserDocumentOwnerships API
 
 Transfers document ownerships from one user to another. All documents owned by the source user are reassigned to the target user.
 
@@ -120,5 +120,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/TransferUserDocumentOwnerships*

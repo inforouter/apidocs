@@ -1,4 +1,4 @@
-﻿# TransferUserWorkflowDefinitions API
+# TransferUserWorkflowDefinitions API
 
 Transfers workflow definition roles (assignees and supervisors) from one user to another. The target user replaces the source user in all workflow definitions where the source user is assigned as an assignee or supervisor.
 
@@ -119,5 +119,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/TransferUserWorkflowDefinitions*

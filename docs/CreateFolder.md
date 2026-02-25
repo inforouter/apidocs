@@ -1,6 +1,6 @@
-﻿# CreateFolder API
+# CreateFolder API
 
-Creates a folder at the specified path. Multiple sub-folders can be created in a single call by providing a full path. The top-level folder (domain/library) must already exist — this API cannot create root-level libraries.
+Creates a folder at the specified path. Multiple sub-folders can be created in a single call by providing a full path. The top-level folder (domain/library) must already exist -" this API cannot create root-level libraries.
 
 ## Endpoint
 
@@ -118,5 +118,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/CreateFolder*

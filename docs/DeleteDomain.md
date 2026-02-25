@@ -1,4 +1,4 @@
-﻿# DeleteDomain API
+# DeleteDomain API
 
 Permanently deletes the specified domain/library and all of its contents, including all folders, documents, versions, and associated data. This operation is irreversible.
 
@@ -111,5 +111,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/DeleteDomain*

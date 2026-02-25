@@ -1,6 +1,6 @@
-﻿# GetUserTaskRedirectionTo API
+# GetUserTaskRedirectionTo API
 
-Returns the task redirection that is currently configured for a user — i.e., the user to whom all new tasks assigned to the specified user are being forwarded.
+Returns the task redirection that is currently configured for a user -" i.e., the user to whom all new tasks assigned to the specified user are being forwarded.
 
 If no redirection is active, the response contains no `<TaskRedirection>` element.
 
@@ -25,7 +25,7 @@ If no redirection is active, the response contains no `<TaskRedirection>` elemen
 
 ## Response
 
-### Success Response — redirection active
+### Success Response -" redirection active
 
 ```xml
 <root success="true">
@@ -40,7 +40,7 @@ If no redirection is active, the response contains no `<TaskRedirection>` elemen
 </root>
 ```
 
-### Success Response — no redirection configured
+### Success Response -" no redirection configured
 
 ```xml
 <root success="true" />
@@ -101,15 +101,15 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=john.smith
 
 ## Related APIs
 
-- [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) – List all users who are redirecting their tasks to a given user.
-- [SetUserTaskRedirection](SetUserTaskRedirection.md) – Set or update a task redirection for a user.
-- [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) – Remove a user's task redirection.
-- [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) – Change the target of an existing task redirection.
+- [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) -" List all users who are redirecting their tasks to a given user.
+- [SetUserTaskRedirection](SetUserTaskRedirection.md) -" Set or update a task redirection for a user.
+- [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) -" Remove a user's task redirection.
+- [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) -" Change the target of an existing task redirection.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | User not found | The specified `userName` does not exist. |

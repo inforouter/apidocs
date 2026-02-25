@@ -1,4 +1,4 @@
-﻿# GetManagers API
+# GetManagers API
 
 Returns a list of users who are designated as managers of the specified domain/library. Domain managers can administer members, workflows, and other domain settings.
 
@@ -113,7 +113,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- Returns only users with manager status — regular members are not included. Use `GetDomainMembers` for all members.
+- Returns only users with manager status -" regular members are not included. Use `GetDomainMembers` for all members.
 - Users are returned in full detail mode (includes domain, logon dates, authentication source, preferences).
 - A domain can have multiple managers. An empty `<users>` element is returned if no managers are assigned.
 - Domain managers can manage domain membership, configure workflows, set policies, and perform other administrative tasks within the domain.
@@ -140,5 +140,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetManagers*

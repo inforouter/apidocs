@@ -1,4 +1,4 @@
-﻿# CreateFlowDef2 API
+# CreateFlowDef2 API
 
 Creates a new workflow definition on the specified domain/library with an optional on-end destination folder and an optional supervisor. The workflow is created in **inactive** state.
 
@@ -107,17 +107,17 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 
 ## Related APIs
 
-- [CreateFlowDef](CreateFlowDef.md) – Minimal variant.
-- [CreateFlowDef1](CreateFlowDef1.md) – Adds `OnEndMoveToPath` only.
-- [CreateFlowDef3](CreateFlowDef3.md) – Full variant with all options including event URL and hidden flag.
-- [AddFlowStepDef](AddFlowStepDef.md) – Add steps after creation.
-- [ActivateFlowDef](ActivateFlowDef.md) – Activate the workflow definition.
+- [CreateFlowDef](CreateFlowDef.md) -" Minimal variant.
+- [CreateFlowDef1](CreateFlowDef1.md) -" Adds `OnEndMoveToPath` only.
+- [CreateFlowDef3](CreateFlowDef3.md) -" Full variant with all options including event URL and hidden flag.
+- [AddFlowStepDef](AddFlowStepDef.md) -" Add steps after creation.
+- [ActivateFlowDef](ActivateFlowDef.md) -" Activate the workflow definition.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Domain not found | The specified `DomainName` does not exist. |
 | Folder not found | `ActiveFolderPath` or `OnEndMoveToPath` does not exist. |

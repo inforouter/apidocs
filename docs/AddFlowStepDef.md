@@ -1,6 +1,6 @@
-﻿# AddFlowStepDef API
+# AddFlowStepDef API
 
-Adds a new step to an existing workflow definition. Steps are numbered sequentially starting at 1; the new step receives the next available number automatically. The workflow definition must be in **inactive** (deactivated) state — you cannot add steps to an active workflow.
+Adds a new step to an existing workflow definition. Steps are numbered sequentially starting at 1; the new step receives the next available number automatically. The workflow definition must be in **inactive** (deactivated) state -" you cannot add steps to an active workflow.
 
 Use `AddFlowStepDef1` if you also need to specify a folder where documents are moved when this step starts.
 
@@ -85,18 +85,18 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 
 ## Related APIs
 
-- [AddFlowStepDef1](AddFlowStepDef1.md) – Same operation with an additional `OnStartMoveTo` folder ID parameter.
-- [AddFlowTaskDef](AddFlowTaskDef.md) – Add a task definition to a workflow step.
-- [CreateFlowDef](CreateFlowDef.md) – Create the workflow definition before adding steps.
-- [DeactivateFlowDef](DeactivateFlowDef.md) – Deactivate an active workflow so its steps can be modified.
-- [DeleteFlowStepDef](DeleteFlowStepDef.md) – Delete a step from a workflow definition.
-- [GetFlowDef](GetFlowDef.md) – Retrieve the full definition of a workflow including its steps.
+- [AddFlowStepDef1](AddFlowStepDef1.md) -" Same operation with an additional `OnStartMoveTo` folder ID parameter.
+- [AddFlowTaskDef](AddFlowTaskDef.md) -" Add a task definition to a workflow step.
+- [CreateFlowDef](CreateFlowDef.md) -" Create the workflow definition before adding steps.
+- [DeactivateFlowDef](DeactivateFlowDef.md) -" Deactivate an active workflow so its steps can be modified.
+- [DeleteFlowStepDef](DeleteFlowStepDef.md) -" Delete a step from a workflow definition.
+- [GetFlowDef](GetFlowDef.md) -" Retrieve the full definition of a workflow including its steps.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Workflow active error | Cannot add steps to an active workflow definition. Deactivate first using `DeactivateFlowDef`. |
 | Name validation error | Step name exceeds 32 characters or contains invalid characters. |

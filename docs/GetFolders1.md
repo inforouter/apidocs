@@ -1,4 +1,4 @@
-﻿# GetFolders1 API
+# GetFolders1 API
 
 Returns the list of direct subfolders of the specified folder in short form (folder names and IDs only). This is a lightweight alternative to `GetFolders` when you do not need rules, property sets, security, or owner details.
 
@@ -114,5 +114,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetFolders1*

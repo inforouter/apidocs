@@ -1,4 +1,4 @@
-﻿# GetFoldersAndDocumentsByPage2 API
+# GetFoldersAndDocumentsByPage2 API
 
 Returns a paged list of documents and folders at the specified path using an advanced XML-based filter and sort criteria. This API integrates with the infoRouter full-text search engine and supports complex multi-field filtering and relevance ranking. After this call, use the search session to retrieve results page by page.
 
@@ -22,7 +22,7 @@ Returns a paged list of documents and folders at the specified path using an adv
 | `Path` | string | Yes | Full infoRouter path to the folder to list (e.g. `/Finance/Reports`). Only direct children are included. |
 | `filterXml` | string | No | Optional XML filter criteria. Defines field-level filters, date ranges, and full-text query terms. Pass empty string or null for no filtering. |
 | `SortBy` | string | Yes | Field name to sort results by (e.g. `DocumentName`, `ModificationDate`, `Rank`). |
-| `AscendingOrder` | bool | Yes | Sort direction. `true` = ascending (A→Z, oldest first), `false` = descending (Z→A, newest first). |
+| `AscendingOrder` | bool | Yes | Sort direction. `true` = ascending (A-'Z, oldest first), `false` = descending (Z-'A, newest first). |
 
 ---
 
@@ -106,7 +106,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Returns only **direct** children (one level deep) of the specified path.
 - The API response contains a `count` and creates a server-side search session. Use the search session to retrieve paginated results.
-- `filterXml` syntax is defined by the infoRouter search filter format — the same format used by the `Search` API.
+- `filterXml` syntax is defined by the infoRouter search filter format -" the same format used by the `Search` API.
 - When `SortBy=Rank`, results are sorted by full-text search relevance; `ranksorted="true"` is returned in the response.
 - This API requires the infoRouter content search service to be configured and running for full-text filtering.
 - For simpler paged listings (name filter only), use `GetFoldersAndDocumentsByPage`.
@@ -132,5 +132,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetFoldersAndDocumentsByPage2*

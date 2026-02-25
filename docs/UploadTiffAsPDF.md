@@ -1,4 +1,4 @@
-﻿# UploadTiffAsPDF API
+# UploadTiffAsPDF API
 
 Uploads a TIFF image file and stores it as a PDF document at the specified path. The server converts the TIFF to PDF automatically before storing. If no document exists at the path, a new document is created. If a document already exists, a new version is added.
 
@@ -11,7 +11,7 @@ Uploads a TIFF image file and stores it as a PDF document at the specified path.
 ## Methods
 
 - **GET** `/srv.asmx/UploadTiffAsPDF?authenticationTicket=...&path=...&fileContent=...`
-- **POST** `/srv.asmx/UploadTiffAsPDF` (form data — recommended for binary content)
+- **POST** `/srv.asmx/UploadTiffAsPDF` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadTiffAsPDF`
 
 ## Parameters
@@ -91,7 +91,7 @@ Content-Type: image/tiff
 
 - The PDF conversion is performed server-side. The infoRouter PDF conversion service must be configured and running.
 - The `path` should end in `.pdf` to reflect the converted output format.
-- For large TIFF files, use the chunked upload approach: `CreateUploadHandler` → `UploadFileChunk` → `UploadTiffAsPDFWithHandler`.
+- For large TIFF files, use the chunked upload approach: `CreateUploadHandler` -' `UploadFileChunk` -' `UploadTiffAsPDFWithHandler`.
 - Multi-page TIFF files are converted to multi-page PDFs.
 
 ---
@@ -116,5 +116,3 @@ Content-Type: image/tiff
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadTiffAsPDF*

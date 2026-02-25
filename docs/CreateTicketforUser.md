@@ -1,4 +1,4 @@
-﻿# CreateTicketforUser API
+# CreateTicketforUser API
 
 Creates an authentication ticket for any specified infoRouter user without requiring that user's password. Instead, a server-side **trusted user password** (configured in the application settings) is presented by the calling application. This enables secure server-to-server impersonation and integration scenarios.
 
@@ -40,7 +40,7 @@ A typical use case is a trusted back-end service that needs to act on behalf of 
 | `success` | boolean | `true` on success |
 | `ticket` | GUID string | Authentication ticket to use in subsequent API calls on behalf of `UserName` |
 
-> **Note:** Unlike `AuthenticateUser`, this response returns **only** `ticket` — it does not include `userid`, `username`, `firstName`, `lastName`, `email`, `expireOn`, or `isAuthenticated`.
+> **Note:** Unlike `AuthenticateUser`, this response returns **only** `ticket` -" it does not include `userid`, `username`, `firstName`, `lastName`, `email`, `expireOn`, or `isAuthenticated`.
 
 ### Error Response
 
@@ -52,7 +52,7 @@ A typical use case is a trusted back-end service that needs to act on behalf of 
 
 - No infoRouter authentication ticket is required.
 - The caller must know the **trusted user password** configured on the server.
-- The system administrator account (configured as `SysadminAccountName` in `appsettings.json`) **cannot** be impersonated — attempting to do so always returns `[902]`.
+- The system administrator account (configured as `SysadminAccountName` in `appsettings.json`) **cannot** be impersonated -" attempting to do so always returns `[902]`.
 
 ## Example
 
@@ -92,12 +92,12 @@ SOAPAction: "http://tempuri.org/CreateTicketforUser"
 
 ## Notes
 
-- **Trusted password is a server secret:** The `TrustedUserPwd` value is set in `appsettings.json` on the infoRouter server. It is not a user password and is not stored in the user database. Treat it like an API key — rotate it periodically and never expose it in client-side code.
+- **Trusted password is a server secret:** The `TrustedUserPwd` value is set in `appsettings.json` on the infoRouter server. It is not a user password and is not stored in the user database. Treat it like an API key -" rotate it periodically and never expose it in client-side code.
 - **Sysadmin is always blocked:** Creating a ticket for the system administrator account is explicitly prevented regardless of the trusted password. This is a hardcoded security constraint.
 - **Ticket privileges:** The returned ticket carries the full permissions of the impersonated user. Any subsequent API call using this ticket is indistinguishable from the user having logged in normally.
 - **Ticket expiry:** The created ticket uses the standard 30-day sliding expiration.
 - **Reduced response:** This method returns only `ticket` on success, unlike `AuthenticateUser` which also returns `userid`, `username`, `firstName`, `lastName`, `email`, `expireOn`, and `isAuthenticated`. If profile information is needed, call `GetCurrentUser` using the returned ticket.
-- **Transport security:** Because `TrustedUserPwd` grants impersonation of any user, always transmit it over HTTPS. Never pass it in query string parameters in production environments — use POST instead.
+- **Transport security:** Because `TrustedUserPwd` grants impersonation of any user, always transmit it over HTTPS. Never pass it in query string parameters in production environments -" use POST instead.
 
 ## Related APIs
 

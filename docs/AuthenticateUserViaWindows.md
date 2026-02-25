@@ -1,6 +1,6 @@
-﻿# AuthenticateUserViaWindows API
+# AuthenticateUserViaWindows API
 
-Authenticates the currently logged-in Windows user against infoRouter using the HTTP request's Windows identity (NTLM/Kerberos), and returns an authentication ticket. No user name or password is passed in the request — the Windows account is determined automatically from the authenticated HTTP context.
+Authenticates the currently logged-in Windows user against infoRouter using the HTTP request's Windows identity (NTLM/Kerberos), and returns an authentication ticket. No user name or password is passed in the request -" the Windows account is determined automatically from the authenticated HTTP context.
 
 Use this method when the infoRouter server is deployed behind IIS or Kestrel with Windows Authentication enabled, and you want seamless single-sign-on for domain users.
 
@@ -23,7 +23,7 @@ Use this method when the infoRouter server is deployed behind IIS or Kestrel wit
 | `language` | string | No | Language code for the session (e.g. `en`, `de`, `fr`, `tr`). If omitted or empty, the user's preferred language from their profile is used. |
 | `oldTicket` | string | No | An existing infoRouter ticket GUID to renew. If omitted or empty, the server checks the request's `ticket` cookie. If neither is present, a fresh session is created. Must be a valid GUID string if supplied; an invalid format returns an error. |
 
-> **Note:** This method does not require an `authenticationTicket` parameter — it is a login method that produces one. The caller's Windows identity is read directly from the HTTP request context.
+> **Note:** This method does not require an `authenticationTicket` parameter -" it is a login method that produces one. The caller's Windows identity is read directly from the HTTP request context.
 
 ## Response
 
@@ -72,7 +72,7 @@ Use this method when the infoRouter server is deployed behind IIS or Kestrel wit
 
 ## Example
 
-### Request (GET) — fresh session
+### Request (GET) -" fresh session
 
 ```
 GET /srv.asmx/AuthenticateUserViaWindows?language=en HTTP/1.1
@@ -80,7 +80,7 @@ Host: server.example.com
 Authorization: Negotiate <kerberos-token>
 ```
 
-### Request (GET) — renewing an existing ticket
+### Request (GET) -" renewing an existing ticket
 
 ```
 GET /srv.asmx/AuthenticateUserViaWindows?language=en&oldTicket=3f2a1b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c HTTP/1.1
@@ -124,7 +124,7 @@ Authorization: Negotiate <kerberos-token>
 - **Windows identity resolution:** The server reads `context.User.Identity.Name`, which is set by the IIS/Kestrel Windows Authentication middleware. The value is typically in `DOMAIN\username` format; the domain portion is parsed separately to identify the authentication source.
 - **Account mapping:** The Windows account must correspond to an active infoRouter user. If no matching user is found, authentication fails with `[900] Authentication failed`.
 - **Not for non-Windows deployments:** This method only works when the hosting environment supports Windows Authentication. On Linux/Docker or when anonymous authentication is used exclusively, calls will fail with an unauthenticated user error.
-- **Language behaviour:** `language` overrides the session language only — it does not permanently change the user's profile preference.
+- **Language behaviour:** `language` overrides the session language only -" it does not permanently change the user's profile preference.
 
 ## Related APIs
 
@@ -138,6 +138,6 @@ Authorization: Negotiate <kerberos-token>
 
 | Error | Description |
 |-------|-------------|
-| `[900] Authentication failed — Unauthenticated User.` | The HTTP request was not authenticated by Windows Authentication (no `Authorization` header or authentication not enabled on the server) |
+| `[900] Authentication failed -" Unauthenticated User.` | The HTTP request was not authenticated by Windows Authentication (no `Authorization` header or authentication not enabled on the server) |
 | `[900] Authentication failed` | The Windows account could not be mapped to an active infoRouter user |
 | `invalid ticket format` | The `oldTicket` parameter was supplied but is not a valid GUID string |

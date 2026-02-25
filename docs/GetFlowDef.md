@@ -1,4 +1,4 @@
-﻿# GetFlowDef API
+# GetFlowDef API
 
 Returns the complete definition of a workflow, including all step definitions and their task definitions.
 
@@ -132,27 +132,27 @@ Returns the complete definition of a workflow, including all step definitions an
 
 ### `<Requirements>`
 Lists completion requirements. Each `<Requirement>` element has:
-- `Name` — Requirement type (e.g. `LastestVersionRead`, `Edit`, `Comments`, `Approval`, `SOXReview`, `ISOReview`).
-- `Definition` — Supplemental definition text (used for some requirement types).
-- `RefObjectId` — Referenced object ID (used for some requirement types).
+- `Name` -" Requirement type (e.g. `LastestVersionRead`, `Edit`, `Comments`, `Approval`, `SOXReview`, `ISOReview`).
+- `Definition` -" Supplemental definition text (used for some requirement types).
+- `RefObjectId` -" Referenced object ID (used for some requirement types).
 
 ### `<Permissions>`
 Six named boolean permissions for the task assignee:
-- `EditDocument` — Assignee may edit the document.
-- `ChangeFinishdate` — Assignee may change the finish date.
-- `Postpone` — Assignee may change the due date.
-- `ChangePriority` — Assignee may change the task priority.
-- `EditNextStep` — Assignee may change next-step routing.
-- `EditAllSteps` — Assignee may change routing for all remaining steps.
+- `EditDocument` -" Assignee may edit the document.
+- `ChangeFinishdate` -" Assignee may change the finish date.
+- `Postpone` -" Assignee may change the due date.
+- `ChangePriority` -" Assignee may change the task priority.
+- `EditNextStep` -" Assignee may change next-step routing.
+- `EditAllSteps` -" Assignee may change routing for all remaining steps.
 
 ### `<instruction>`
 Free-text instruction for the task assignee.
 
 ### `<AssigneeList>`
 Contains three sub-elements:
-- `<Users>` — Individual users (`<user id="..." login="..." fullname="..."/>`).
-- `<UserGroups>` — User groups (`<group id="..." name="..."/>`).
-- `<SpecialUserRoles>` — Special roles such as document owner or submitter (`<SpecialUserRole RoleId="..." RoleDescription="..."/>`).
+- `<Users>` -" Individual users (`<user id="..." login="..." fullname="..."/>`).
+- `<UserGroups>` -" User groups (`<group id="..." name="..."/>`).
+- `<SpecialUserRoles>` -" Special roles such as document owner or submitter (`<SpecialUserRole RoleId="..." RoleDescription="..."/>`).
 
 ## Required Permissions
 
@@ -189,20 +189,20 @@ AuthenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&W
 
 ## Related APIs
 
-- [GetDomainFlows](GetDomainFlows.md) – List all workflow definitions for a domain (without step detail).
-- [GetFolderFlows](GetFolderFlows.md) – List workflow definitions active on a specific folder.
-- [CreateFlowDef](CreateFlowDef.md) – Create a new workflow definition.
-- [ActivateFlowDef](ActivateFlowDef.md) – Activate a workflow definition.
-- [DeactivateFlowDef](DeactivateFlowDef.md) – Deactivate a workflow definition to allow changes.
-- [AddFlowStepDef](AddFlowStepDef.md) – Add a step to a workflow definition.
-- [AddFlowTaskDef](AddFlowTaskDef.md) – Add a task definition to a workflow step.
-- [DeleteWorkflow](DeleteWorkflow.md) – Permanently delete a workflow definition.
+- [GetDomainFlows](GetDomainFlows.md) -" List all workflow definitions for a domain (without step detail).
+- [GetFolderFlows](GetFolderFlows.md) -" List workflow definitions active on a specific folder.
+- [CreateFlowDef](CreateFlowDef.md) -" Create a new workflow definition.
+- [ActivateFlowDef](ActivateFlowDef.md) -" Activate a workflow definition.
+- [DeactivateFlowDef](DeactivateFlowDef.md) -" Deactivate a workflow definition to allow changes.
+- [AddFlowStepDef](AddFlowStepDef.md) -" Add a step to a workflow definition.
+- [AddFlowTaskDef](AddFlowTaskDef.md) -" Add a task definition to a workflow step.
+- [DeleteWorkflow](DeleteWorkflow.md) -" Permanently delete a workflow definition.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Domain not found | The specified `DomainName` does not exist. |
 | Workflow not found | No workflow named `WorkflowName` exists in the specified domain. |

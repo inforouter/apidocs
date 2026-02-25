@@ -4,5 +4,6 @@
 .vs/
 .cache/
 www/
+fix-encoding.ps1
 /.vs/apidocs.slnx/v18/DocumentLayout.backup.json
 /.vs/apidocs.slnx/v18/DocumentLayout.json

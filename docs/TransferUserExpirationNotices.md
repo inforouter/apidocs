@@ -1,4 +1,4 @@
-﻿# TransferUserExpirationNotices API
+# TransferUserExpirationNotices API
 
 Transfers document expiration notices from one user to another. The target user takes over responsibility for receiving and acting on document expiration alerts that were assigned to the source user.
 
@@ -119,5 +119,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/TransferUserExpirationNotices*

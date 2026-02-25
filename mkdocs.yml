@@ -41,6 +41,11 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - tables
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
+  - abbr
   - toc:
       permalink: true
 
@@ -49,9 +54,20 @@ plugins:
       separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)'
 
 extra:
+  generator: false
   social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/inforouter/apidocs
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/infoRouter
+      name: infoRouter on Facebook
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/infoRouter
+      name: infoRouter on Twitter
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/inforouter
+      name: infoRouter on LinkedIn
+
+copyright: Copyright &copy; 2026 infoRouter. All rights reserved.
+
 
 nav:
   - Home: index.md
@@ -67,6 +83,7 @@ nav:
     - ForgotPassword: ForgotPassword.md
     - ForgotPasswordByUserName: ForgotPasswordByUserName.md
     - ChangePasswordUsingSecretText: ChangePasswordUsingSecretText.md
+    - ChangeUserPassword: ChangeUserPassword.md
 
   - Folders:
     - GetFolder: GetFolder.md
@@ -101,7 +118,6 @@ nav:
     - SetFolderCutoffDate: SetFolderCutoffDate.md
     - RemoveFolderCutoffDate: RemoveFolderCutoffDate.md
     - UpdateFolderProperties: UpdateFolderProperties.md
-    - ApplyInheritedAccessList: ApplyInheritedAccessList.md
 
   - Documents:
     - GetDocument: GetDocument.md
@@ -117,9 +133,8 @@ nav:
     - GetDocumentVersions: GetDocumentVersions.md
     - GetDocumentViewLog: GetDocumentViewLog.md
     - GetVersionTextOnlyContent: GetVersionTextOnlyContent.md
-    - GetVersionCreateLog: GetVersionCreateLog.md
-    - GetVersionDeleteLog: GetVersionDeleteLog.md
     - GetRecentDocuments: GetRecentDocuments.md
+    - GetAuthoredDocuments: GetAuthoredDocuments.md
     - DocumentExists: DocumentExists.md
     - DocumentExists1: DocumentExists1.md
     - DocumentAccessAllowed: DocumentAccessAllowed.md
@@ -185,8 +200,6 @@ nav:
   - Checkout & Locking:
     - GetCheckedoutDocuments: GetCheckedoutDocuments.md
     - GetCheckedoutDocumentsByUser: GetCheckedoutDocumentsByUser.md
-    - GetCheckInLog: GetCheckInLog.md
-    - GetCheckoutLog: GetCheckoutLog.md
     - IsLockPossible: IsLockPossible.md
     - Lock: Lock.md
     - UnLock: UnLock.md
@@ -195,6 +208,10 @@ nav:
     - GetCurrentUser: GetCurrentUser.md
     - GetUser: GetUser.md
     - GetLocalUsers: GetLocalUsers.md
+    - GetAllUsers: GetAllUsers.md
+    - GetAllUsers1: GetAllUsers1.md
+    - GetAllUsers2: GetAllUsers2.md
+    - GetAllUsersWithoutDetails: GetAllUsersWithoutDetails.md
     - GetUserGroup: GetUserGroup.md
     - GetUserGroupMembers: GetUserGroupMembers.md
     - GetUserGroupMembers1: GetUserGroupMembers1.md
@@ -204,10 +221,6 @@ nav:
     - GetUserStatistics: GetUserStatistics.md
     - GetUsersTaskPerformance: GetUsersTaskPerformance.md
     - GetUsersWorkflowRoles: GetUsersWorkflowRoles.md
-    - GetUserViewLog: GetUserViewLog.md
-    - GetUserViewLog1: GetUserViewLog1.md
-    - GetUserTaskRedirectionsFrom: GetUserTaskRedirectionsFrom.md
-    - GetUserTaskRedirectionTo: GetUserTaskRedirectionTo.md
     - GetGroupMembershipsOfUser: GetGroupMembershipsOfUser.md
     - UserExists: UserExists.md
     - CreateUser: CreateUser.md
@@ -223,7 +236,6 @@ nav:
     - UpdateUserGroupName1: UpdateUserGroupName1.md
     - UpdateUserPreferences: UpdateUserPreferences.md
     - UpdateUserProfile: UpdateUserProfile.md
-    - ChangeUserPassword: ChangeUserPassword.md
     - ChangeUserStatus: ChangeUserStatus.md
     - ChangeUserType: ChangeUserType.md
     - RegisterEmail: RegisterEmail.md
@@ -252,6 +264,7 @@ nav:
     - DeleteDomain: DeleteDomain.md
     - ArchiveDomain: ArchiveDomain.md
     - UnarchiveDomain: UnarchiveDomain.md
+    - GetAuthenticationAndPasswordPolicy: GetAuthenticationAndPasswordPolicy.md
     - SetDomainPolicies: SetDomainPolicies.md
     - SetAuthenticationAndPasswordPolicy: SetAuthenticationAndPasswordPolicy.md
     - SetAuthenticationAndPasswordPolicy - Implementation Summary: SetAuthenticationAndPasswordPolicy-IMPLEMENTATION-SUMMARY.md
@@ -283,43 +296,143 @@ nav:
     - DeleteFlowStepDef: DeleteFlowStepDef.md
     - DeleteFlowTaskDef: DeleteFlowTaskDef.md
     - DeleteWorkflow: DeleteWorkflow.md
+    - SubmitDocumentToFlow: SubmitDocumentToFlow.md
+    - SubmitDocumentToFlow1: SubmitDocumentToFlow1.md
     - CompleteTask: CompleteTask.md
+    - ReassignTask: ReassignTask.md
     - ChangeTaskDueDate: ChangeTaskDueDate.md
+    - UpdateTaskFinishDate: UpdateTaskFinishDate.md
     - DeleteTask: DeleteTask.md
+    - SetTaskApprovalStatus: SetTaskApprovalStatus.md
+    - SetTaskComment: SetTaskComment.md
+    - SetTaskPriority: SetTaskPriority.md
+    - SetUserTaskRedirection: SetUserTaskRedirection.md
+    - RemoveUserTaskRedirection: RemoveUserTaskRedirection.md
+    - GetUserTaskRedirectionsFrom: GetUserTaskRedirectionsFrom.md
+    - GetUserTaskRedirectionTo: GetUserTaskRedirectionTo.md
+    - RerouteUserTaskRedirection: RerouteUserTaskRedirection.md
+    - TestTaskCompletion: TestTaskCompletion.md
+    - StopCurrentWorkflow: StopCurrentWorkflow.md
+    - RemoveCurrentWorkflow: RemoveCurrentWorkflow.md
     - AddISOComment: AddISOComment.md
     - AddSOXComment: AddSOXComment.md
 
   - Security & Access:
     - GetAccessList: GetAccessList.md
     - GetAccessListHistory: GetAccessListHistory.md
-    - GetSecurityChangeLog: GetSecurityChangeLog.md
     - GetOwner: GetOwner.md
     - GetOwnershipChangeLog: GetOwnershipChangeLog.md
+    - GetSecurityChangeLog: GetSecurityChangeLog.md
     - SetOwner: SetOwner.md
     - SetAccessList: SetAccessList.md
     - SetClassificationLevel: SetClassificationLevel.md
+    - DocumentAccessAllowed: DocumentAccessAllowed.md
+    - FolderAccessAllowed: FolderAccessAllowed.md
+    - ApplyInheritedAccessList: ApplyInheritedAccessList.md
+
+  - Audit Logs:
+    - GetCheckInLog: GetCheckInLog.md
+    - GetCheckoutLog: GetCheckoutLog.md
+    - GetClassificationLogs: GetClassificationLogs.md
+    - GetDeleteLog: GetDeleteLog.md
+    - GetDispositionLog: GetDispositionLog.md
+    - GetDocumentReadLogHistory: GetDocumentReadLogHistory.md
+    - GetDocumentViewLog: GetDocumentViewLog.md
+    - GetISOLogs: GetISOLogs.md
+    - GetNewDocumentsAndFoldersLog: GetNewDocumentsAndFoldersLog.md
+    - GetOwnershipChangeLog: GetOwnershipChangeLog.md
+    - GetSecurityChangeLog: GetSecurityChangeLog.md
+    - GetSoxLogs: GetSoxLogs.md
+    - GetUserViewLog: GetUserViewLog.md
+    - GetUserViewLog1: GetUserViewLog1.md
+    - GetVersionCreateLog: GetVersionCreateLog.md
+    - GetVersionDeleteLog: GetVersionDeleteLog.md
 
   - Retention & Lifecycle:
     - GetRetentionSourceAuthorities: GetRetentionSourceAuthorities.md
-    - GetDispositionLog: GetDispositionLog.md
     - CreateRetentionSourceAuthority: CreateRetentionSourceAuthority.md
     - UpdateRetentionSourceAuthority: UpdateRetentionSourceAuthority.md
     - DeleteRetentionSourceAuthority: DeleteRetentionSourceAuthority.md
-    - SetDocumentRetention: SetDocumentRetention.md
     - SetExpirationDate: SetExpirationDate.md
     - RemoveExpirationDate: RemoveExpirationDate.md
     - SetDocumentCutoffDate: SetDocumentCutoffDate.md
     - RemoveDocumentCutoffDate: RemoveDocumentCutoffDate.md
-    - SetFolderCutoffDate: SetFolderCutoffDate.md
-    - RemoveFolderCutoffDate: RemoveFolderCutoffDate.md
+    - SetDocumentRetention: SetDocumentRetention.md
+    - GetRandDSchedules: GetRandDSchedules.md
+    - GetRandDScheduleInfo: GetRandDScheduleInfo.md
+    - GetDocumentRandDSchedule: GetDocumentRandDSchedule.md
+    - GetFolderRandDSchedule: GetFolderRandDSchedule.md
+    - CreateRandDSchedule: CreateRandDSchedule.md
+    - UpdateRandDSchedule: UpdateRandDSchedule.md
+    - DeleteRandDSchedule: DeleteRandDSchedule.md
+    - SetDocumentRandDSchedule: SetDocumentRandDSchedule.md
+    - SetFolderRandDSchedule: SetFolderRandDSchedule.md
+    - RemoveDocumentRandDSchedule: RemoveDocumentRandDSchedule.md
+    - RemoveFolderRandDSchedule: RemoveFolderRandDSchedule.md
+
+  - Property Sets:
+    - GetPropertySets: GetPropertySets.md
+    - GetPropertySetDefinition: GetPropertySetDefinition.md
+    - GetPropertySetDefinitions: GetPropertySetDefinitions.md
+    - GetPropertySetDefinitions1: GetPropertySetDefinitions1.md
+    - GetPropertySetFieldOptions: GetPropertySetFieldOptions.md
+    - GetPublishingRequirements: GetPublishingRequirements.md
+    - CreatePropertySetDefinition: CreatePropertySetDefinition.md
+    - CreatePropertySetDefinition1: CreatePropertySetDefinition1.md
+    - UpdatePropertySetDefinition: UpdatePropertySetDefinition.md
+    - UpdatePropertySetDefinition1: UpdatePropertySetDefinition1.md
+    - DeletePropertySetDefinition: DeletePropertySetDefinition.md
+    - AddPropertySetField: AddPropertySetField.md
+    - DeletePropertySetField: DeletePropertySetField.md
+    - AddPropertySetFieldOption: AddPropertySetFieldOption.md
+    - DeletePropertySetFieldOption: DeletePropertySetFieldOption.md
+    - AddPropertySetRow: AddPropertySetRow.md
+    - AddPropertySetRowForUser: AddPropertySetRowForUser.md
+    - UpdatePropertySetRow: UpdatePropertySetRow.md
+    - UpdatePropertySetRowForUser: UpdatePropertySetRowForUser.md
+    - DeletePropertySetRow: DeletePropertySetRow.md
+    - DeletePropertySetRowForUser: DeletePropertySetRowForUser.md
+    - SetPropertySetLookupFieldParametersForSQLServer: SetPropertySetLookupFieldParametersForSQLServer.md
+    - SetPropertySetLookupFieldParametersForMYSQL: SetPropertySetLookupFieldParametersForMYSQL.md
+    - SetPropertySetLookupFieldParametersForORACLE: SetPropertySetLookupFieldParametersForORACLE.md
+
+  - Tags:
+    - GetTagDefintions: GetTagDefintions.md
+    - SetTagToDocument: SetTagToDocument.md
+    - RemoveTagFromDocument: RemoveTagFromDocument.md
+
+  - Document Associations:
+    - AssociateDocument: AssociateDocument.md
+    - AssociateFolder: AssociateFolder.md
+    - AssociatedDocuments: AssociatedDocuments.md
+    - AssociatedFolders: AssociatedFolders.md
+    - AssociatedFoldersAndDocuments: AssociatedFoldersAndDocuments.md
+    - AssociationTypes: AssociationTypes.md
+    - RemoveAssociation: RemoveAssociation.md
 
   - Favorites & Subscriptions:
     - GetFavorites: GetFavorites.md
     - AddToFavorites: AddToFavorites.md
     - RemoveFromFavorites: RemoveFromFavorites.md
+    - GetSubscriptions: GetSubscriptions.md
     - GetSubscriptionsByUser: GetSubscriptionsByUser.md
-    - RemoveAllSubscriptions: RemoveAllSubscriptions.md
+    - GetSubscribers: GetSubscribers.md
+    - AddUserToDocumentSubscribers: AddUserToDocumentSubscribers.md
+    - AddUsergroupToDocumentSubscribers: AddUsergroupToDocumentSubscribers.md
+    - RemoveUserFromDocumentSubscribers: RemoveUserFromDocumentSubscribers.md
+    - RemoveUsergroupFromDocumentSubscribers: RemoveUsergroupFromDocumentSubscribers.md
+    - AddUserToFolderSubscribers: AddUserToFolderSubscribers.md
+    - AddUsergroupToFolderSubscribers: AddUsergroupToFolderSubscribers.md
     - RemoveUserFromFolderSubscribers: RemoveUserFromFolderSubscribers.md
+    - RemoveUsergroupFromFolderSubscribers: RemoveUsergroupFromFolderSubscribers.md
+    - RemoveAllSubscriptions: RemoveAllSubscriptions.md
+
+  - Recycle Bin:
+    - GetRecycleBinContent: GetRecycleBinContent.md
+    - SearchRecycledItems: SearchRecycledItems.md
+    - RestoreRecycleBinItem: RestoreRecycleBinItem.md
+    - PurgeRecycleBinItem: PurgeRecycleBinItem.md
+    - EmptyRecycleBin: EmptyRecycleBin.md
 
   - Transfer Operations:
     - TransferUserCheckedOutDocuments: TransferUserCheckedOutDocuments.md
@@ -336,25 +449,25 @@ nav:
     - TransferUserTasks: TransferUserTasks.md
     - TransferUserWorkflowDefinitions: TransferUserWorkflowDefinitions.md
 
-  - Property Sets:
-    - GetPublishingRequirements: GetPublishingRequirements.md
-    - AddPropertySetRowForUser: AddPropertySetRowForUser.md
-    - DeletePropertySetRowForUser: DeletePropertySetRowForUser.md
-
   - System & Administration:
     - ServerInfo: ServerInfo.md
+    - getApplicationParameters: getApplicationParameters.md
     - GetLicenseInfo: GetLicenseInfo.md
     - UpdateApplicationLicense: UpdateApplicationLicense.md
     - GetLogs: GetLogs.md
     - GetLogStatistics: GetLogStatistics.md
     - GetMaintenanceJobsStatus: GetMaintenanceJobsStatus.md
     - GetWarehouseStatus: GetWarehouseStatus.md
-    - GetSystemBehaviorSettings: GetSystemBehaviorSettings.md
-    - SetSystemBehaviorSettings: SetSystemBehaviorSettings.md
     - GetGeneralAppSettings: GetGeneralAppSettings.md
     - SetGeneralAppSettings: SetGeneralAppSettings.md
+    - GetSystemBehaviorSettings: GetSystemBehaviorSettings.md
+    - SetSystemBehaviorSettings: SetSystemBehaviorSettings.md
     - GetMimeTypes: GetMimeTypes.md
     - FlushApplicationCache: FlushApplicationCache.md
+    - GetLocalizedResources: GetLocalizedResources.md
+    - GetAddInInfo: GetAddInInfo.md
+    - GetAddInPart: GetAddInPart.md
     - CreateDiskMountURL: CreateDiskMountURL.md
     - CreateEditDocumentURL: CreateEditDocumentURL.md
     - CreateURL: CreateURL.md
+    - MaintenanceBeat: MaintenanceBeat.md

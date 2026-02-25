@@ -1,4 +1,4 @@
-﻿# GetDomainUsers1 API
+# GetDomainUsers1 API
 
 Returns a list of all users who are members of the specified domain/library (directly or indirectly through group membership), with control over sort order and the level of user detail returned.
 
@@ -21,7 +21,7 @@ Returns a list of all users who are members of the specified domain/library (dir
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `domainName` | string | Yes | Name of the domain/library whose users to retrieve. |
 | `sortBy` | int | Yes | Sort field for the user list. Valid values: `0` = default, `1` = USERNAME, `2` = FIRSTNAME_LASTNAME, `3` = LASTNAME_FIRSTNAME, `4` = EMAIL, `5` = STATUS, `6` = AUTHENTICATION_SOURCE, `7` = Library, `8` = UserType. |
-| `sortAscending` | bool | Yes | Sort direction. `true` = ascending (A→Z), `false` = descending (Z→A). |
+| `sortAscending` | bool | Yes | Sort direction. `true` = ascending (A-'Z), `false` = descending (Z-'A). |
 | `detailMode` | bool | Yes | If `true`, returns full user details including domain, logon dates, authentication source, and preferences. If `false`, returns only basic fields (name, email, enabled status). |
 
 ---
@@ -155,5 +155,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetDomainUsers1*

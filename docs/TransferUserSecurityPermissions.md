@@ -1,4 +1,4 @@
-﻿# TransferUserSecurityPermissions API
+# TransferUserSecurityPermissions API
 
 Transfers security permissions (ACL entries) from one user to another. The target user receives all folder and document access rights that were individually assigned to the source user.
 
@@ -121,5 +121,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/TransferUserSecurityPermissions*

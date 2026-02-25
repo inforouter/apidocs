@@ -1,4 +1,4 @@
-﻿# UpdateDocumentTypeDef API
+# UpdateDocumentTypeDef API
 
 Updates the definition of an existing document type. Allows renaming the document type and optionally changing its required property set. Document type definitions are system-wide and affect all documents assigned to that type.
 
@@ -92,7 +92,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- Renaming a document type affects all documents currently assigned to that type — they will appear under the new name.
+- Renaming a document type affects all documents currently assigned to that type -" they will appear under the new name.
 - Changing the required property set may affect compliance validation for documents already assigned to this type.
 - Anonymous users cannot call this API (returns an insufficient rights error).
 - Use `GetDocumentTypes` to retrieve all existing document type IDs and names.
@@ -118,5 +118,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UpdateDocumentTypeDef*

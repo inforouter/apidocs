@@ -1,4 +1,4 @@
-﻿# FolderExists API
+# FolderExists API
 
 Determines whether a folder exists at the specified path. Returns success if the path resolves to an existing folder, or an error if the folder is not found or cannot be accessed.
 
@@ -25,13 +25,13 @@ Determines whether a folder exists at the specified path. Returns success if the
 
 ## Response
 
-### Success Response — Folder Exists
+### Success Response -" Folder Exists
 
 ```xml
 <response success="true" />
 ```
 
-### Error Response — Folder Does Not Exist
+### Error Response -" Folder Does Not Exist
 
 ```xml
 <response error="Folder not found." />
@@ -87,7 +87,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ## Notes
 
 - This API only checks for folders. To check for a document, use `DocumentExists`.
-- The response does not include a `folderExists` attribute — existence is indicated by whether `success="true"` or an error is returned.
+- The response does not include a `folderExists` attribute -" existence is indicated by whether `success="true"` or an error is returned.
 - Use `FolderExists1` to check for a subfolder by parent path and folder name as separate parameters.
 
 ---
@@ -111,5 +111,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/FolderExists*

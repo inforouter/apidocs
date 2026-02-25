@@ -1,4 +1,4 @@
-﻿# UploadDocument1 API
+# UploadDocument1 API
 
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with an optional version comment. This is identical to `UploadDocument` with the addition of a `versionComment` parameter that is recorded in the document's version history.
 
@@ -11,7 +11,7 @@ Uploads a new document or creates a new version of an existing document at the s
 ## Methods
 
 - **GET** `/srv.asmx/UploadDocument1?authenticationTicket=...&path=...&fileContent=...&versionComment=...`
-- **POST** `/srv.asmx/UploadDocument1` (form data — recommended for binary content)
+- **POST** `/srv.asmx/UploadDocument1` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadDocument1`
 
 ## Parameters
@@ -96,7 +96,7 @@ Updated figures for Q1
 ## Notes
 
 - `versionComment` is optional. Omitting it or passing `null` creates a version with no comment.
-- For large files, use the chunked upload approach: `CreateUploadHandler` → `UploadFileChunk` → `UploadDocumentWithHandler1`.
+- For large files, use the chunked upload approach: `CreateUploadHandler` -' `UploadFileChunk` -' `UploadDocumentWithHandler1`.
 - Use `UploadDocument2` if you need post-upload checkout instead of a version comment.
 - Use `UploadDocument3` if you need both a version comment and post-upload checkout.
 
@@ -123,5 +123,3 @@ Updated figures for Q1
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocument1*

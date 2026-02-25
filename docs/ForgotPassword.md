@@ -1,4 +1,4 @@
-﻿# ForgotPassword API
+# ForgotPassword API
 
 Initiates the self-service password-reset flow for the user account(s) registered with the specified email address. The server looks up the account(s), generates a one-time reset token, and sends a password-reset email to the address. The token is then used with `ChangePasswordUsingSecretText` to set a new password.
 

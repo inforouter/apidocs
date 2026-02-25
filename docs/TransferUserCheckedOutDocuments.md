@@ -1,4 +1,4 @@
-﻿# TransferUserCheckedOutDocuments API
+# TransferUserCheckedOutDocuments API
 
 Transfers checked-out documents from one user to another. The check-out ownership is reassigned so the target user can check in or cancel the check-out.
 
@@ -120,5 +120,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/TransferUserCheckedOutDocuments*

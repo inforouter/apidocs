@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Fix encoding and links
+        run: |
+          python fix_encoding.py
+          python fix_links.py
+
       - name: Build site
         run: zensical build -f mkdocs.yml
 

@@ -1,4 +1,4 @@
-﻿# GetFolderFlows API
+# GetFolderFlows API
 
 Returns the workflow definitions that are active on a specified folder. Optionally includes workflows inherited from parent folders.
 
@@ -118,15 +118,15 @@ AuthenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&FolderPath=/Corporate/
 
 ## Related APIs
 
-- [GetDomainFlows](GetDomainFlows.md) – List all workflow definitions for a domain.
-- [GetFlowDef](GetFlowDef.md) – Get the full definition of a single workflow including steps and tasks.
-- [SubmitDocumentToFlow](SubmitDocumentToFlow.md) – Submit a document to a workflow.
-- [CreateFlowDef](CreateFlowDef.md) – Create a new workflow definition.
+- [GetDomainFlows](GetDomainFlows.md) -" List all workflow definitions for a domain.
+- [GetFlowDef](GetFlowDef.md) -" Get the full definition of a single workflow including steps and tasks.
+- [SubmitDocumentToFlow](SubmitDocumentToFlow.md) -" Submit a document to a workflow.
+- [CreateFlowDef](CreateFlowDef.md) -" Create a new workflow definition.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Folder not found | The specified `FolderPath` does not exist. |

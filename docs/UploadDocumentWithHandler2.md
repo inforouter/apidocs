@@ -1,4 +1,4 @@
-﻿# UploadDocumentWithHandler2 API
+# UploadDocumentWithHandler2 API
 
 Finalizes a chunked file upload and creates a new document or a new version of an existing document at the specified path, with an optional version comment and explicit manual version numbers (Major.Minor.Revision). This extends `UploadDocumentWithHandler1` by supporting the three-part manual version label that appears in the document's version list.
 
@@ -22,18 +22,18 @@ Finalizes a chunked file upload and creates a new document or a new version of a
 | `path` | string | Yes | Full infoRouter destination path including file name (e.g. `/Finance/Reports/Q1-Report.pdf`). |
 | `uploadHandler` | string (GUID) | Yes | The upload handler GUID returned by `CreateUploadHandler` after all chunks have been uploaded. |
 | `versionComments` | string | No | A comment describing the changes in this version. |
-| `mpVersionMajor` | short | Yes | Major component of the manual version label (e.g. `2` for version `2.0.1`). Range: 1–2400. |
-| `mpVersionMinor` | short | Yes | Minor component of the manual version label (e.g. `0` for version `2.0.1`). Range: 0–999. |
-| `mpVersionRevision` | short | Yes | Revision component of the manual version label (e.g. `1` for version `2.0.1`). Range: 0–999. |
+| `mpVersionMajor` | short | Yes | Major component of the manual version label (e.g. `2` for version `2.0.1`). Range: 1-"2400. |
+| `mpVersionMinor` | short | Yes | Minor component of the manual version label (e.g. `0` for version `2.0.1`). Range: 0-"999. |
+| `mpVersionRevision` | short | Yes | Revision component of the manual version label (e.g. `1` for version `2.0.1`). Range: 0-"999. |
 
 ---
 
 ## Chunked Upload Workflow
 
 ```
-1. CreateUploadHandler        → returns UploadHandler GUID + ChunkSize
-2. UploadFileChunk            → repeat until LastChunk=true
-3. UploadDocumentWithHandler2 → finalize with version comment and manual version number
+1. CreateUploadHandler        -' returns UploadHandler GUID + ChunkSize
+2. UploadFileChunk            -' repeat until LastChunk=true
+3. UploadDocumentWithHandler2 -' finalize with version comment and manual version number
 ```
 
 ---
@@ -101,7 +101,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ## Notes
 
 - The manual version label (e.g. `2.0.1`) is a human-readable label separate from the internal infoRouter version ID.
-- Valid ranges: `mpVersionMajor` 1–2400, `mpVersionMinor` 0–999, `mpVersionRevision` 0–999. Out-of-range values return an error.
+- Valid ranges: `mpVersionMajor` 1-"2400, `mpVersionMinor` 0-"999, `mpVersionRevision` 0-"999. Out-of-range values return an error.
 - Use `UploadDocumentWithHandler3` for the most flexible option set (XML parameters string).
 
 ---
@@ -128,5 +128,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocumentWithHandler2*

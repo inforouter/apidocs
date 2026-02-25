@@ -1,4 +1,4 @@
-﻿# DeactivateFlowDef API
+# DeactivateFlowDef API
 
 Sets a workflow definition back to **inactive** state so its steps and tasks can be modified. A workflow must be inactive before steps or tasks can be added, removed, or changed.
 
@@ -68,27 +68,27 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&domainName=Corporate&f
 ## Notes
 
 - The operation is **idempotent**: if the workflow is already inactive, the call succeeds without error.
-- Unlike `ActivateFlowDef`, deactivation does not perform structural validation — it always succeeds as long as permissions are met.
+- Unlike `ActivateFlowDef`, deactivation does not perform structural validation -" it always succeeds as long as permissions are met.
 - After deactivating, you can add or remove steps and task definitions. When finished, call `ActivateFlowDef` to put the workflow back into service.
 - Active workflow **instances** (documents currently in the workflow) are not affected by deactivation. Only new submissions are blocked while the definition is inactive.
-- The typical edit cycle is: **DeactivateFlowDef → AddFlowStepDef / AddFlowTaskDef / DeleteFlowStepDef / DeleteFlowTaskDef → ActivateFlowDef**.
+- The typical edit cycle is: **DeactivateFlowDef -' AddFlowStepDef / AddFlowTaskDef / DeleteFlowStepDef / DeleteFlowTaskDef -' ActivateFlowDef**.
 
 ## Related APIs
 
-- [ActivateFlowDef](ActivateFlowDef.md) – Activate the workflow definition so documents can be submitted to it.
-- [CreateFlowDef](CreateFlowDef.md) – Create a new workflow definition (created in inactive state).
-- [AddFlowStepDef](AddFlowStepDef.md) – Add a step to an inactive workflow definition.
-- [AddFlowTaskDef](AddFlowTaskDef.md) – Add a task definition to a workflow step.
-- [DeleteFlowStepDef](DeleteFlowStepDef.md) – Remove a step from an inactive workflow definition.
-- [DeleteFlowTaskDef](DeleteFlowTaskDef.md) – Remove a task definition from a workflow step.
-- [GetFlowDef](GetFlowDef.md) – Retrieve the current state and definition of a workflow.
-- [DeleteWorkflow](DeleteWorkflow.md) – Permanently delete a workflow definition.
+- [ActivateFlowDef](ActivateFlowDef.md) -" Activate the workflow definition so documents can be submitted to it.
+- [CreateFlowDef](CreateFlowDef.md) -" Create a new workflow definition (created in inactive state).
+- [AddFlowStepDef](AddFlowStepDef.md) -" Add a step to an inactive workflow definition.
+- [AddFlowTaskDef](AddFlowTaskDef.md) -" Add a task definition to a workflow step.
+- [DeleteFlowStepDef](DeleteFlowStepDef.md) -" Remove a step from an inactive workflow definition.
+- [DeleteFlowTaskDef](DeleteFlowTaskDef.md) -" Remove a task definition from a workflow step.
+- [GetFlowDef](GetFlowDef.md) -" Retrieve the current state and definition of a workflow.
+- [DeleteWorkflow](DeleteWorkflow.md) -" Permanently delete a workflow definition.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Domain not found | The specified `domainName` does not exist. |
 | Workflow not found | No workflow named `flowName` exists in the specified domain. |

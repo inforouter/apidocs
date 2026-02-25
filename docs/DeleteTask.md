@@ -1,4 +1,4 @@
-﻿# DeleteTask API
+# DeleteTask API
 
 Deletes an active workflow task by its task ID. All task attachments are also removed as part of the operation.
 
@@ -47,7 +47,7 @@ The exact behavior depends on the relationship between the task and its workflow
 |----------|--------|
 | Task belongs to the current workflow definition | Task record and all its attachments are permanently deleted. |
 | Ad-hoc task whose workflow definition has since changed | Task status is set to **Dropped** (soft delete); workflow advancement is triggered if it was the last task in its step. |
-| Regular workflow task whose workflow definition has since changed | Returns an error — such tasks cannot be deleted directly. |
+| Regular workflow task whose workflow definition has since changed | Returns an error -" such tasks cannot be deleted directly. |
 
 ## Example
 
@@ -80,17 +80,17 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812
 
 ## Related APIs
 
-- [GetTask](GetTask.md) – Retrieve full details of a task including its task ID.
-- [getTasks](getTasks.md) – Get a filtered list of workflow tasks.
-- [CompleteTask](CompleteTask.md) – Mark a task as completed.
-- [ReassignTask](ReassignTask.md) – Reassign a task to a different user.
-- [StopCurrentWorkflow](StopCurrentWorkflow.md) – Stop the entire active workflow on a document.
+- [GetTask](GetTask.md) -" Retrieve full details of a task including its task ID.
+- [getTasks](getTasks.md) -" Get a filtered list of workflow tasks.
+- [CompleteTask](CompleteTask.md) -" Mark a task as completed.
+- [ReassignTask](ReassignTask.md) -" Reassign a task to a different user.
+- [StopCurrentWorkflow](StopCurrentWorkflow.md) -" Stop the entire active workflow on a document.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Task not found | No task with the specified `taskId` exists. |
 | Permission error | Calling user does not have the Remove Task permission on the document. |

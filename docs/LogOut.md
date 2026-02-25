@@ -1,4 +1,4 @@
-﻿# LogOut API
+# LogOut API
 
 Logs out the authenticated user by invalidating their authentication ticket and clearing their server-side session variables. After a successful logout, the ticket can no longer be used for API calls.
 
@@ -77,7 +77,7 @@ SOAPAction: "http://tempuri.org/LogOut"
 
 - **Ticket is removed from memory cache:** The session entry is deleted from the server's in-memory cache. Any subsequent API call using the same ticket will immediately receive a `[901] Session expired or Invalid ticket` error.
 - **Cookie fallback:** If `AuthenticationTicket` is not supplied in the request parameters, the server checks for a `ticket` HTTP cookie. This is useful for browser-based clients that store the ticket in a cookie rather than passing it explicitly.
-- **Already-expired tickets return an error:** If the ticket has already expired before `LogOut` is called, the server cannot find the session to remove and returns `[901]`. This is expected behaviour — the session was already gone. Callers should not treat this as a critical failure during cleanup.
+- **Already-expired tickets return an error:** If the ticket has already expired before `LogOut` is called, the server cannot find the session to remove and returns `[901]`. This is expected behaviour -" the session was already gone. Callers should not treat this as a critical failure during cleanup.
 - **Best practice:** Always call `LogOut` at the end of an integration session to release the server-side session entry and free memory cache resources, rather than simply abandoning the ticket to expire naturally after 30 days.
 
 ## Related APIs

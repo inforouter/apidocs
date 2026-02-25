@@ -1,4 +1,4 @@
-﻿# TransferUserISOTasks API
+# TransferUserISOTasks API
 
 Transfers ISO review tasks from one user to another. Used when an ISO reviewer is unavailable or leaving the organization.
 
@@ -120,5 +120,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/TransferUserISOTasks*

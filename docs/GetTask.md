@@ -1,4 +1,4 @@
-﻿# GetTask API
+# GetTask API
 
 Returns the full details of a single workflow task by its task ID.
 
@@ -146,7 +146,7 @@ Returns the full details of a single workflow task by its task ID.
 
 | Element | Description |
 |---------|-------------|
-| `StartDtae` | Date and time the task was started. *(Note: field name contains a typo — `Dtae` not `Date`.)* |
+| `StartDtae` | Date and time the task was started. *(Note: field name contains a typo -" `Dtae` not `Date`.)* |
 | `FinishDate` | Date and time the task was completed. `1900-01-01 00:00:00` if not yet finished. |
 | `DueDate` | Deadline for the task. `1900-01-01 00:00:00` if no deadline set. |
 | `DeadLine` | Number of hours from task creation until due. `0` means no deadline. |
@@ -184,22 +184,22 @@ Returns the full details of a single workflow task by its task ID.
 ### Requirements
 
 The `<RequirementDetails>` element lists each task requirement with:
-- `<Name>` — Requirement type name (e.g. `LastestVersionRead`, `Edit`, `Comments`, `Approval`, `SOXReview`).
-- `<RequirementType>` — Numeric value of the requirement type.
-- `<Definition>` — Supplemental definition (for certain requirement types).
-- `<ObjectId>` — Referenced object ID (for certain requirement types).
+- `<Name>` -" Requirement type name (e.g. `LastestVersionRead`, `Edit`, `Comments`, `Approval`, `SOXReview`).
+- `<RequirementType>` -" Numeric value of the requirement type.
+- `<Definition>` -" Supplemental definition (for certain requirement types).
+- `<ObjectId>` -" Referenced object ID (for certain requirement types).
 
 The `<Requirements>` element is always empty (legacy field, reserved).
 
 ### Attachments
 
 The `<Attachments>` element lists documents attached to the task during execution. Each `<Attachment>` has:
-- `<AttachmentDate>` — Date/time the attachment was added.
-- `<DocumentId>` — Document ID of the attachment.
-- `<WorkflowId>` — Workflow instance ID.
-- `<StepNumber>` — Step number where the attachment was added.
-- `<StepName>` — Step name.
-- `<UserId>` — User ID of the person who added the attachment.
+- `<AttachmentDate>` -" Date/time the attachment was added.
+- `<DocumentId>` -" Document ID of the attachment.
+- `<WorkflowId>` -" Workflow instance ID.
+- `<StepNumber>` -" Step number where the attachment was added.
+- `<StepName>` -" Step name.
+- `<UserId>` -" User ID of the person who added the attachment.
 
 ## Required Permissions
 
@@ -235,18 +235,18 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812
 
 ## Related APIs
 
-- [getTasks](getTasks.md) – Get a filtered list of task IDs and summaries.
-- [GetDueTaskDocuments](GetDueTaskDocuments.md) – Get documents with due tasks for the current user.
-- [CompleteTask](CompleteTask.md) – Mark a task as completed.
-- [DeleteTask](DeleteTask.md) – Delete a task.
-- [ReassignTask](ReassignTask.md) – Reassign a task to another user.
-- [ChangeTaskDueDate](ChangeTaskDueDate.md) – Change the due date of an active task.
+- [getTasks](getTasks.md) -" Get a filtered list of task IDs and summaries.
+- [GetDueTaskDocuments](GetDueTaskDocuments.md) -" Get documents with due tasks for the current user.
+- [CompleteTask](CompleteTask.md) -" Mark a task as completed.
+- [DeleteTask](DeleteTask.md) -" Delete a task.
+- [ReassignTask](ReassignTask.md) -" Reassign a task to another user.
+- [ChangeTaskDueDate](ChangeTaskDueDate.md) -" Change the due date of an active task.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Task not found | No task with the specified `taskId` exists. |
 | Permission error | Anonymous access is not permitted. |

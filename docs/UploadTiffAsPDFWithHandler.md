@@ -1,4 +1,4 @@
-﻿# UploadTiffAsPDFWithHandler API
+# UploadTiffAsPDFWithHandler API
 
 Uploads a TIFF image using a pre-staged chunked upload handler and stores it as a PDF document at the specified path. The server converts the TIFF to PDF automatically before storing. Use this API for large TIFF files that need to be uploaded in chunks.
 
@@ -27,9 +27,9 @@ Uploads a TIFF image using a pre-staged chunked upload handler and stores it as 
 ## Chunked Upload Workflow
 
 ```
-1. CreateUploadHandler         → returns UploadHandler GUID + ChunkSize
-2. UploadFileChunk             → repeat until LastChunk=true (upload all TIFF chunks)
-3. UploadTiffAsPDFWithHandler  → finalize: convert TIFF to PDF and store
+1. CreateUploadHandler         -' returns UploadHandler GUID + ChunkSize
+2. UploadFileChunk             -' repeat until LastChunk=true (upload all TIFF chunks)
+3. UploadTiffAsPDFWithHandler  -' finalize: convert TIFF to PDF and store
 ```
 
 ---
@@ -118,5 +118,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadTiffAsPDFWithHandler*

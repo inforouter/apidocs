@@ -1,6 +1,6 @@
-﻿# UnLock API
+# UnLock API
 
-Unlocks (checks in) a document or all documents in a folder at the specified path. When `force` is `true`, the calling user can unlock a document currently locked by another user — this is an administrative action that discards the other user's in-progress changes. When `force` is `false`, only the user who locked the document can unlock it.
+Unlocks (checks in) a document or all documents in a folder at the specified path. When `force` is `true`, the calling user can unlock a document currently locked by another user -" this is an administrative action that discards the other user's in-progress changes. When `force` is `false`, only the user who locked the document can unlock it.
 
 ## Endpoint
 
@@ -20,7 +20,7 @@ Unlocks (checks in) a document or all documents in a folder at the specified pat
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document or folder (e.g. `/Finance/Reports/Q1-Report.pdf`). When a folder path is given, all locked documents in that folder are unlocked. |
-| `force` | bool | Yes | `true` to force-unlock a document locked by another user (administrator action — discards their in-progress changes). `false` to only unlock documents locked by the calling user. |
+| `force` | bool | Yes | `true` to force-unlock a document locked by another user (administrator action -" discards their in-progress changes). `false` to only unlock documents locked by the calling user. |
 
 ---
 
@@ -115,5 +115,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UnLock*

@@ -1,4 +1,4 @@
-﻿# UploadDocumentWithHandler1 API
+# UploadDocumentWithHandler1 API
 
 Finalizes a chunked file upload and creates a new document or a new version of an existing document at the specified path, with an optional version comment. Extends `UploadDocumentWithHandler` by accepting a `versionComments` parameter that is recorded in the document's version history.
 
@@ -28,9 +28,9 @@ Finalizes a chunked file upload and creates a new document or a new version of a
 ## Chunked Upload Workflow
 
 ```
-1. CreateUploadHandler      → returns UploadHandler GUID + ChunkSize
-2. UploadFileChunk          → repeat until LastChunk=true
-3. UploadDocumentWithHandler1 → finalize with version comment
+1. CreateUploadHandler      -' returns UploadHandler GUID + ChunkSize
+2. UploadFileChunk          -' repeat until LastChunk=true
+3. UploadDocumentWithHandler1 -' finalize with version comment
 ```
 
 ---
@@ -120,5 +120,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocumentWithHandler1*

@@ -1,4 +1,4 @@
-﻿# infoRouter Web API Documentation
+# infoRouter Web API Documentation
 
 Welcome to the comprehensive documentation for the infoRouter Web Services API.
 
@@ -53,11 +53,15 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 ### Audit Logs
 - [GetCheckInLog](GetCheckInLog.md) - Get check-in log entries for documents
 - [GetCheckoutLog](GetCheckoutLog.md) - Get checkout log entries for documents
+- [GetClassificationLogs](GetClassificationLogs.md) - Get classification level change history for a document or folder
 - [GetDeleteLog](GetDeleteLog.md) - Get deletion log entries for documents and folders
 - [GetDispositionLog](GetDispositionLog.md) - Get disposition log entries for documents
+- [GetDocumentReadLogHistory](GetDocumentReadLogHistory.md) - Get the read/view log history for a single user on a specific document
+- [GetISOLogs](GetISOLogs.md) - Get the ISO compliance review log for a document
 - [GetNewDocumentsAndFoldersLog](GetNewDocumentsAndFoldersLog.md) - Get creation log entries for new documents and folders
 - [GetOwnershipChangeLog](GetOwnershipChangeLog.md) - Get ownership change log entries for documents and folders
 - [GetSecurityChangeLog](GetSecurityChangeLog.md) - Get security change log entries for documents and folders
+- [GetSoxLogs](GetSoxLogs.md) - Get the SOX compliance review log for a document
 - [GetUserViewLog](GetUserViewLog.md) - Get the complete read/view log history for a specified user
 - [GetUserViewLog1](GetUserViewLog1.md) - Get the read/view log history for a specified user filtered by date range
 - [GetVersionCreateLog](GetVersionCreateLog.md) - Get version creation log entries for documents
@@ -155,12 +159,12 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [RemoveDocumentCutoffDate](RemoveDocumentCutoffDate.md) - Remove the cutoff date from a document, returning it to an unconstrained state
 - [RemoveExpirationDate](RemoveExpirationDate.md) - Remove the expiration date from a document, returning it to a non-expiring state
 - [RemoveFromFavorites](RemoveFromFavorites.md) - Remove a document or folder from the current user's favorites list
-- [ServerSideImport](ServerSideImport.md) - **[Obsolete]** Server-side file system import — always returns an error, do not use
+- [ServerSideImport](ServerSideImport.md) - **[Obsolete]** Server-side file system import -" always returns an error, do not use
 - [SetClassificationLevel](SetClassificationLevel.md) - Set the classification level (NoMarkings/Declassified/Confidential/Secret/TopSecret) of a document or folder
 - [SetDocumentCompletionStatus](SetDocumentCompletionStatus.md) - Set the completion status (PercentComplete and CompletionDate) of a document
 - [SetDocumentCutoffDate](SetDocumentCutoffDate.md) - Apply a cutoff date to a document, freezing it from further modification
 - [SetDocumentImportance](SetDocumentImportance.md) - Set the importance level (NoMarkings/Low/Normal/High/Vital) of a document
-- [SetDocumentRetention](SetDocumentRetention.md) - **[Obsolete since 8.1.155]** Disabled — always returns an error, use SetDocumentRandDSchedule instead
+- [SetDocumentRetention](SetDocumentRetention.md) - **[Obsolete since 8.1.155]** Disabled -" always returns an error, use SetDocumentRandDSchedule instead
 - [SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md) - Update the stored plain-text alternative content of the latest document version
 - [SetExpirationDate](SetExpirationDate.md) - Set the expiration date and pre-expiration notification on a document
 - [SetVersionTextOnlyContent](SetVersionTextOnlyContent.md) - Update the stored plain-text alternative content of a specific document version
@@ -244,6 +248,19 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetTask](GetTask.md) - Return the full details of a single workflow task including status, assignee, dates, requirements, and attachments
 - [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) - Return the task redirection configured for a user (the user their tasks are being forwarded to)
 - [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) - Return the list of users who are redirecting their tasks to a specified user
+- [ReassignTask](ReassignTask.md) - Reassign an active workflow task to a different user with a new due date and instructions
+- [RemoveCurrentWorkflow](RemoveCurrentWorkflow.md) - Permanently remove a running workflow from a document (hard delete, no notifications; blocked if any tasks are already completed)
+- [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) - Remove the task redirection configured for a user so incoming tasks are no longer forwarded
+- [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) - Change the target user of an existing task redirection while keeping the original date window
+- [SetTaskApprovalStatus](SetTaskApprovalStatus.md) - Set the approval decision (Approve/Reject/clear) on a workflow task with an Approval requirement
+- [SetTaskComment](SetTaskComment.md) - Set or clear the user comment on an active workflow task
+- [SetTaskPriority](SetTaskPriority.md) - Set the priority level of a workflow task (NoPriority/Low/Normal/High/Urgent)
+- [SetUserTaskRedirection](SetUserTaskRedirection.md) - Set or replace a task redirection for a user so incoming tasks are forwarded during a date window
+- [StopCurrentWorkflow](StopCurrentWorkflow.md) - Gracefully stop a running workflow with notifications to task assignees, submitter, and supervisors
+- [SubmitDocumentToFlow](SubmitDocumentToFlow.md) - Submit a document to an active workflow definition using the workflow's default task assignees
+- [SubmitDocumentToFlow1](SubmitDocumentToFlow1.md) - Submit a document to a workflow with custom user/group assignees for the first step
+- [TestTaskCompletion](TestTaskCompletion.md) - Dry-run check of whether a workflow task can be completed (validates all requirements without completing)
+- [UpdateTaskFinishDate](UpdateTaskFinishDate.md) - Retroactively update the finish date of a completed workflow task
 - [DeleteFlowTaskDef](DeleteFlowTaskDef.md) - Delete a task definition from a workflow step
 - [DeleteWorkflow](DeleteWorkflow.md) - Permanently delete a workflow definition by ID
 - [getTasks](getTasks.md) - Get a filtered list of workflow tasks with sorting and XML-based search criteria
@@ -251,11 +268,45 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) - Get workflow roles assigned to a user (supervisor and assignee roles)
 - [GetWorkflowStatistics](GetWorkflowStatistics.md) - Get workflow performance statistics (pending, completed, overdue counts)
 
+### Property Sets
+- [AddPropertySetField](AddPropertySetField.md) - Add a new field to an existing custom property set definition (BOOLEAN/NUMBER/CHAR/DATE)
+- [AddPropertySetFieldOption](AddPropertySetFieldOption.md) - Add a static option value to a COMBO BOX, LIST BOX, or RADIO BUTTON property set field
+- [AddPropertySetRow](AddPropertySetRow.md) - Add a new property set row to a document or folder (path-based; resolves document first, then folder)
+- [CreatePropertySetDefinition](CreatePropertySetDefinition.md) - Create a new public custom property set definition with optional domain restriction
+- [CreatePropertySetDefinition1](CreatePropertySetDefinition1.md) - Create a custom property set definition with explicit PrivatePropertySet flag (hides from anonymous users when true)
+- [DeletePropertySetDefinition](DeletePropertySetDefinition.md) - Permanently delete a property set definition and all associated data including the database table (irreversible)
+- [DeletePropertySetField](DeletePropertySetField.md) - Permanently delete a field from a property set and drop its column from the database (irreversible)
+- [DeletePropertySetFieldOption](DeletePropertySetFieldOption.md) - Remove a static option value from a COMBO BOX, LIST BOX, or RADIO BUTTON field (idempotent)
+- [DeletePropertySetRow](DeletePropertySetRow.md) - Delete a property set row from a document or folder by path (by rownbr or field value match)
+- [GetPropertySetDefinition](GetPropertySetDefinition.md) - Get the full definition of a property set including all field definitions, domain restrictions, and flags
+- [GetPropertySetDefinitions](GetPropertySetDefinitions.md) - List all property set definitions in the system (no filtering; no field details)
+- [GetPropertySetDefinitions1](GetPropertySetDefinitions1.md) - Filtered list of property set definitions by library and/or object type (documents/folders/users)
+- [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) - Get option values for a field: static list for COMBO/LIST/RADIO fields, or live DB query results for LOOKUP fields
+- [GetPropertySets](GetPropertySets.md) - Get all applied property set rows for a document or folder (path-based; document resolved first, then folder)
+- [SetPropertySetLookupFieldParametersForMYSQL](SetPropertySetLookupFieldParametersForMYSQL.md) - Configure a LOOKUP property set field to query an external MySQL database
+- [SetPropertySetLookupFieldParametersForORACLE](SetPropertySetLookupFieldParametersForORACLE.md) - Configure a LOOKUP property set field to query an external Oracle database
+- [SetPropertySetLookupFieldParametersForSQLServer](SetPropertySetLookupFieldParametersForSQLServer.md) - Configure a LOOKUP property set field to query an external SQL Server database
+- [UpdatePropertySetDefinition](UpdatePropertySetDefinition.md) - Update property set name, caption, object types, and domain restrictions (does not modify PrivatePropertySet flag)
+- [UpdatePropertySetDefinition1](UpdatePropertySetDefinition1.md) - Update property set definition including the PrivatePropertySet flag
+- [UpdatePropertySetRow](UpdatePropertySetRow.md) - Update an existing property set row on a document or folder by path (document resolved first, then folder)
+- [UpdatePropertySetRowForUser](UpdatePropertySetRowForUser.md) - Update an existing property set row for a user
+
 ### Retention & Disposition
-- [GetRetentionSourceAuthorities](GetRetentionSourceAuthorities.md) - List all retention source authorities
+- [CreateRandDSchedule](CreateRandDSchedule.md) - Create a new Retention and Disposition schedule definition
 - [CreateRetentionSourceAuthority](CreateRetentionSourceAuthority.md) - Create a new retention source authority
-- [UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md) - Update (rename) a retention source authority
+- [DeleteRandDSchedule](DeleteRandDSchedule.md) - Delete an R&D schedule definition (blocked if assigned to documents or folders)
 - [DeleteRetentionSourceAuthority](DeleteRetentionSourceAuthority.md) - Delete a retention source authority
+- [GetDocumentRandDSchedule](GetDocumentRandDSchedule.md) - Get the R&D schedule assigned to a document (returns DefId=0 if none)
+- [GetFolderRandDSchedule](GetFolderRandDSchedule.md) - Get the R&D schedule assigned to a folder (returns DefId=0 if none)
+- [GetRandDScheduleInfo](GetRandDScheduleInfo.md) - Get full details of a specific R&D schedule definition
+- [GetRandDSchedules](GetRandDSchedules.md) - List all R&D schedule definitions (summary: ID, name, description)
+- [GetRetentionSourceAuthorities](GetRetentionSourceAuthorities.md) - List all retention source authorities
+- [RemoveDocumentRandDSchedule](RemoveDocumentRandDSchedule.md) - Remove (unassign) the R&D schedule from a document
+- [RemoveFolderRandDSchedule](RemoveFolderRandDSchedule.md) - Remove the R&D schedule from a folder, optionally cascading to subfolders and documents
+- [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md) - Assign an R&D schedule to a document
+- [SetFolderRandDSchedule](SetFolderRandDSchedule.md) - Assign an R&D schedule to a folder, optionally cascading to subfolders and documents
+- [UpdateRandDSchedule](UpdateRandDSchedule.md) - Update an existing R&D schedule definition with optional date recalculation for assigned objects
+- [UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md) - Update (rename) a retention source authority
 
 ### User Group Management
 - [AddUsergroupMember](AddUsergroupMember.md) - Add a user to a user group
@@ -279,10 +330,40 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetPreviousSearchPage](GetPreviousSearchPage.md) - Get the previous page of a prepared search result set
 - [Search](Search.md) - Prepare a search result set using XML-based criteria with sorting options
 
+### Document Associations
+- [AssociateDocument](AssociateDocument.md) - Create an association between a document and another document or folder
+- [AssociateFolder](AssociateFolder.md) - Create an association between a folder and another document or folder
+- [AssociatedDocuments](AssociatedDocuments.md) - Get the list of documents associated with a document or folder
+- [AssociatedFolders](AssociatedFolders.md) - Get the list of folders associated with a document or folder
+- [AssociatedFoldersAndDocuments](AssociatedFoldersAndDocuments.md) - Get all associated items of a document or folder
+- [AssociationTypes](AssociationTypes.md) - Get the list of configured association types
+- [RemoveAssociation](RemoveAssociation.md) - Remove an existing association between two items
+
+### Tags
+- [GetTagDefintions](GetTagDefintions.md) - Get the list of all tag definitions configured in the system
+- [RemoveTagFromDocument](RemoveTagFromDocument.md) - Remove a tag from a document
+- [SetTagToDocument](SetTagToDocument.md) - Apply a tag to the latest version of a document
+
 ### Subscription Management
+- [AddUsergroupToDocumentSubscribers](AddUsergroupToDocumentSubscribers.md) - Add a user group to a document's subscription list with configurable event notifications
+- [AddUsergroupToFolderSubscribers](AddUsergroupToFolderSubscribers.md) - Add a user group to a folder's subscription list with configurable event notifications and optional sub-folder cascading
+- [AddUserToDocumentSubscribers](AddUserToDocumentSubscribers.md) - Add a user to a document's subscription list with configurable event notifications
+- [AddUserToFolderSubscribers](AddUserToFolderSubscribers.md) - Add a user to a folder's subscription list with configurable event notifications and optional sub-folder cascading
+- [GetSubscribers](GetSubscribers.md) - Get the complete subscriber list (users and groups) of a document or folder
+- [GetSubscriptions](GetSubscriptions.md) - Get all subscribed documents and folders for the current user
+- [RemoveUserFromDocumentSubscribers](RemoveUserFromDocumentSubscribers.md) - Remove a user from a document's subscription list
+- [RemoveUsergroupFromDocumentSubscribers](RemoveUsergroupFromDocumentSubscribers.md) - Remove a user group from a document's subscription list
 - [GetSubscriptionsByUser](GetSubscriptionsByUser.md) - Retrieve folder and document subscriptions for a specific user
 - [RemoveAllSubscriptions](RemoveAllSubscriptions.md) - Remove all folder and document subscriptions for a user
 - [RemoveUserFromFolderSubscribers](RemoveUserFromFolderSubscribers.md) - Remove a user from a folder's subscription list
+- [RemoveUsergroupFromFolderSubscribers](RemoveUsergroupFromFolderSubscribers.md) - Remove a user group from a folder's subscription list
+
+### Recycle Bin
+- [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's Recycle Bin
+- [GetRecycleBinContent](GetRecycleBinContent.md) - List all documents and folders currently in the current user's Recycle Bin
+- [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single item from the Recycle Bin by handler (admin only)
+- [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a single Recycle Bin item to its original or a specified folder location
+- [SearchRecycledItems](SearchRecycledItems.md) - Search documents and folders across all users' Recycle Bins with optional filters (admin only)
 
 ### User Management
 - [AddPropertySetRowForUser](AddPropertySetRowForUser.md) - Add a property set row to a user
@@ -320,6 +401,12 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UpdateUserPreferences](UpdateUserPreferences.md) - Update a user's display and notification preferences
 - [UpdateUserProfile](UpdateUserProfile.md) - Update a user's name, username, and authentication source
 - [UserExists](UserExists.md) - Check if a username exists
+
+### Miscellaneous
+- [GetAddInInfo](GetAddInInfo.md) - Get version and description information for a deployed client Add-in
+- [GetAddInPart](GetAddInPart.md) - Download the installation package (parts.zip) for a deployed client Add-in as a byte array
+- [GetLocalizedResources](GetLocalizedResources.md) - Get localized display strings for specified infoRouter resource IDs
+- [MaintenanceBeat](MaintenanceBeat.md) - **Obsolete** -" formerly triggered server self-maintenance tasks; the implementation is a no-op and returns no response
 
 ## Common Patterns
 

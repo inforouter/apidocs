@@ -1,6 +1,6 @@
-﻿# UpdateDocumentProperties1 API
+# UpdateDocumentProperties1 API
 
-Updates the core properties of the specified document: display name, description, update instructions, source, language, and author. All fields are optional — only the fields provided are updated. This is an extended version of `UpdateDocumentProperties` that adds source, language, and author fields. To also update importance, use `UpdateDocumentProperties2`.
+Updates the core properties of the specified document: display name, description, update instructions, source, language, and author. All fields are optional -" only the fields provided are updated. This is an extended version of `UpdateDocumentProperties` that adds source, language, and author fields. To also update importance, use `UpdateDocumentProperties2`.
 
 ## Endpoint
 
@@ -134,5 +134,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UpdateDocumentProperties1*

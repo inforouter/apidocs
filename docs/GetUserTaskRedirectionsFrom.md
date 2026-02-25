@@ -1,4 +1,4 @@
-﻿# GetUserTaskRedirectionsFrom API
+# GetUserTaskRedirectionsFrom API
 
 Returns the list of users who are currently redirecting their tasks **to** the specified user. Each entry represents a different user whose tasks will be forwarded to the named user during the configured date range.
 
@@ -50,7 +50,7 @@ This is the reverse view of [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.
 </root>
 ```
 
-### Success Response — no inbound redirections
+### Success Response -" no inbound redirections
 
 ```xml
 <root success="true">
@@ -113,15 +113,15 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=alice.jones
 
 ## Related APIs
 
-- [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) – Get the user that a given user's tasks are being forwarded to.
-- [SetUserTaskRedirection](SetUserTaskRedirection.md) – Set or update a task redirection for a user.
-- [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) – Remove a user's task redirection.
-- [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) – Change the target of an existing task redirection.
+- [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) -" Get the user that a given user's tasks are being forwarded to.
+- [SetUserTaskRedirection](SetUserTaskRedirection.md) -" Set or update a task redirection for a user.
+- [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) -" Remove a user's task redirection.
+- [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) -" Change the target of an existing task redirection.
 
 ## Error Codes
 
 | Error | Description |
 |-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
+| `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | User not found | The specified `userName` does not exist. |

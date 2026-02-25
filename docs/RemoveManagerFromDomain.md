@@ -1,4 +1,4 @@
-﻿# RemoveManagerFromDomain API
+# RemoveManagerFromDomain API
 
 Removes domain manager status from the specified user in the given domain/library. The user remains a member of the domain but loses manager privileges.
 
@@ -88,7 +88,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- This operation only removes the manager role — the user remains a member of the domain.
+- This operation only removes the manager role -" the user remains a member of the domain.
 - To remove the user entirely from the domain, use `RemoveUserFromDomainMembership`.
 - Use `GetManagers` to verify the current manager list before and after the operation.
 - Use `AddManagerToDomain` to re-designate a user as a manager.
@@ -116,5 +116,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/RemoveManagerFromDomain*

@@ -1,4 +1,4 @@
-﻿# GetFolderStatistics API
+# GetFolderStatistics API
 
 Returns usage statistics for the specified folder, including subfolder count, total document count, checked-out document count, and total storage size of all documents in the folder tree.
 
@@ -124,5 +124,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetFolderStatistics*

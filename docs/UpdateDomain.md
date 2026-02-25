@@ -1,4 +1,4 @@
-﻿# UpdateDomain API
+# UpdateDomain API
 
 Updates the properties of an existing domain/library, including its name, anonymous access setting, visibility, and welcome message.
 
@@ -115,7 +115,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To keep the current name unchanged, pass the same value in both `DomainName` and `NewDomainName`.
 - If `NewDomainName` is different from `DomainName`, it must not conflict with an existing domain name.
-- All parameters (name, anonymous, hidden, welcome message) are updated in a single call — there is no way to update only one property.
+- All parameters (name, anonymous, hidden, welcome message) are updated in a single call -" there is no way to update only one property.
 - The `WelcomeMessage` supports multi-line text; newlines are preserved.
 - To archive/unarchive a domain, use `ArchiveDomain` and `UnarchiveDomain` instead.
 
@@ -142,5 +142,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UpdateDomain*

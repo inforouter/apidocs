@@ -1,4 +1,4 @@
-﻿# UpdateUserGroupName1 API
+# UpdateUserGroupName1 API
 
 Updates the name and member visibility setting of the specified infoRouter user group.
 
@@ -134,5 +134,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UpdateUserGroupName1*

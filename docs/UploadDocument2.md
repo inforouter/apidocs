@@ -1,4 +1,4 @@
-﻿# UploadDocument2 API
+# UploadDocument2 API
 
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with a post-upload checkout option. When `checkout=true`, the document is immediately locked (checked out) to the calling user after upload, preventing others from creating new versions.
 
@@ -11,7 +11,7 @@ Uploads a new document or creates a new version of an existing document at the s
 ## Methods
 
 - **GET** `/srv.asmx/UploadDocument2?authenticationTicket=...&path=...&fileContent=...&checkout=...`
-- **POST** `/srv.asmx/UploadDocument2` (form data — recommended for binary content)
+- **POST** `/srv.asmx/UploadDocument2` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadDocument2`
 
 ## Parameters
@@ -96,7 +96,7 @@ true
 ## Notes
 
 - When `checkout=true`, the document is checked out to the calling user immediately after upload. Other users cannot create new versions until the document is unlocked.
-- For large files, use the chunked upload approach with `CreateUploadHandler` → `UploadFileChunk` → `UploadDocumentWithHandler`.
+- For large files, use the chunked upload approach with `CreateUploadHandler` -' `UploadFileChunk` -' `UploadDocumentWithHandler`.
 - Use `UploadDocument3` if you also need a version comment along with checkout.
 
 ---
@@ -122,5 +122,3 @@ true
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadDocument2*

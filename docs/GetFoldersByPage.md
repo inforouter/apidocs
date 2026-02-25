@@ -1,4 +1,4 @@
-﻿# GetFoldersByPage API
+# GetFoldersByPage API
 
 Returns a page of direct subfolders from the specified parent folder, with optional name filtering. Each page contains up to 20 folders. Use `PageNumber` to navigate through large folder lists.
 
@@ -133,5 +133,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/GetFoldersByPage*

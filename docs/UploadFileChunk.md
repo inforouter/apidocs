@@ -1,4 +1,4 @@
-﻿# UploadFileChunk API
+# UploadFileChunk API
 
 Uploads a single binary chunk to a server-side upload handler as part of a chunked large-file upload workflow. Each chunk is verified against its CRC32 checksum before being appended. When `lastChunk=true`, the handler is marked as complete and ready for finalization.
 
@@ -11,7 +11,7 @@ Uploads a single binary chunk to a server-side upload handler as part of a chunk
 ## Methods
 
 - **GET** `/srv.asmx/UploadFileChunk?authenticationTicket=...&uploadHandler=...&fileChunk=...&chunkHEXCRC=...&lastChunk=...`
-- **POST** `/srv.asmx/UploadFileChunk` (form data — recommended for binary content)
+- **POST** `/srv.asmx/UploadFileChunk` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadFileChunk`
 
 ## Parameters
@@ -29,12 +29,12 @@ Uploads a single binary chunk to a server-side upload handler as part of a chunk
 ## Chunked Upload Workflow
 
 ```
-1. CreateUploadHandler  → returns UploadHandler GUID + recommended ChunkSize
-2. UploadFileChunk      → upload chunk 1 (lastChunk=false)
-3. UploadFileChunk      → upload chunk 2 (lastChunk=false)
+1. CreateUploadHandler  -' returns UploadHandler GUID + recommended ChunkSize
+2. UploadFileChunk      -' upload chunk 1 (lastChunk=false)
+3. UploadFileChunk      -' upload chunk 2 (lastChunk=false)
    ...
-N. UploadFileChunk      → upload last chunk (lastChunk=true)
-N+1. UploadDocumentWithHandler[X] → finalize and create the document
+N. UploadFileChunk      -' upload last chunk (lastChunk=true)
+N+1. UploadDocumentWithHandler[X] -' finalize and create the document
 ```
 
 ---
@@ -59,7 +59,7 @@ N+1. UploadDocumentWithHandler[X] → finalize and create the document
 <root success="true" tryagain="true" />
 ```
 
-> When `tryagain="true"` is returned, the chunk was NOT appended — resend the same chunk.
+> When `tryagain="true"` is returned, the chunk was NOT appended -" resend the same chunk.
 
 ### Error Response
 
@@ -111,7 +111,7 @@ false
 
 ## Notes
 
-- Always check the `tryagain` attribute in the response. If `tryagain="true"`, the chunk checksum did not match — resend the same chunk without advancing.
+- Always check the `tryagain` attribute in the response. If `tryagain="true"`, the chunk checksum did not match -" resend the same chunk without advancing.
 - The recommended chunk size is returned by `CreateUploadHandler` and is between 256 KB and 32 MB.
 - Chunk sizes below 256 KB are automatically raised to 256 KB by the server.
 - CRC32 is computed over the raw binary chunk bytes before Base64 encoding.
@@ -135,10 +135,8 @@ false
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `Invalid upload handler.` | The GUID is not a valid GUID format. |
-| Handler not found / expired | The handler file does not exist — it may have expired or been deleted. |
-| `tryagain="true"` | Chunk checksum mismatch — resend the chunk. |
+| Handler not found / expired | The handler file does not exist -" it may have expired or been deleted. |
+| `tryagain="true"` | Chunk checksum mismatch -" resend the chunk. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/UploadFileChunk*

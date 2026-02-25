@@ -1,4 +1,4 @@
-﻿# ForgotPasswordByUserName API
+# ForgotPasswordByUserName API
 
 Initiates the self-service password-reset flow for the infoRouter user with the specified login name. The server generates a one-time reset token and sends a password-reset email to the address registered on that account. The token is then used with `ChangePasswordUsingSecretText` to set a new password.
 
@@ -93,7 +93,7 @@ The `secretText` value (a GUID) and the `username` from this link are then passe
 ## Notes
 
 - **Token expiry:** The reset token is valid for **1 hour** from the time the email is sent. After expiry, it cannot be used and a new reset must be initiated.
-- **Single account:** Because `userName` is unique in infoRouter, exactly one account is processed per call — unlike `ForgotPassword` which may match multiple accounts sharing the same email address.
+- **Single account:** Because `userName` is unique in infoRouter, exactly one account is processed per call -" unlike `ForgotPassword` which may match multiple accounts sharing the same email address.
 - **External-auth users:** For accounts managed by an external authentication source (Windows/NTLM, LDAP, Active Directory), no reset token is generated. Instead, the user receives an informational email stating their account is externally managed and they should contact their administrator.
 - **Empty user name rejected:** Passing an empty or blank `userName` returns an error immediately without any database lookup.
 - **Returns an error if user not found:** Unlike some implementations that silently succeed, this API returns a failure when the specified `userName` does not exist. Applications wishing to avoid user-name enumeration should suppress this error response before presenting feedback to end users.

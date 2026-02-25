@@ -1,4 +1,4 @@
-﻿# SetFolderRules API
+# SetFolderRules API
 
 Sets the rules (policies) for the specified folder using an XML rules definition. Rules control allowed file types, checkout/checkin policies, document and folder deletion permissions, and other folder behaviors. Optionally applies the rules to the entire subfolder tree.
 
@@ -143,5 +143,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/SetFolderRules*

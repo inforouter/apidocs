@@ -1,4 +1,4 @@
-﻿# TransferUserTasks API
+# TransferUserTasks API
 
 Transfers all open workflow tasks from one user to another. Used when a user is leaving or is temporarily unavailable.
 
@@ -121,5 +121,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-*For detailed documentation visit: https://support.inforouter.com/api-docs/TransferUserTasks*
