@@ -29,7 +29,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install mkdocs-material zensical
+        run: pip install -r requirements.txt
 
       - name: Build site
         run: zensical build -f mkdocs.yml
