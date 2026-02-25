@@ -1,0 +1,128 @@
+# AuthenticateUser1 API
+
+Authenticates a user against infoRouter using their user name and password, and creates a session using the specified language ID. Returns an authentication ticket and basic profile information. Use this variant instead of `AuthenticateUser` when your application needs to force a specific UI language for the session.
+
+## Endpoint
+
+```
+/srv.asmx/AuthenticateUser1
+```
+
+## Methods
+
+- **GET** `/srv.asmx/AuthenticateUser1?UID=...&PWD=...&Lang=...`
+- **POST** `/srv.asmx/AuthenticateUser1` (form data)
+- **SOAP** Action: `http://tempuri.org/AuthenticateUser1`
+
+## Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `UID` | string | Yes | The user's login name (case-insensitive) |
+| `PWD` | string | Yes | The user's password |
+| `Lang` | string | No | Language code for the session (e.g. `en`, `de`, `fr`, `tr`, `nl`). If omitted or empty, the user's preferred language from their profile is used. The value is matched case-insensitively against the languages configured on the server. |
+
+> **Note:** This method does not require an `authenticationTicket` — it is a login method that produces one.
+
+## Response
+
+### Success Response
+
+```xml
+<root success="true"
+      ticket="3f2a1b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c"
+      userid="42"
+      username="jsmith"
+      firstName="John"
+      lastName="Smith"
+      fullname="John Smith"
+      email="jsmith@example.com"
+      expireOn="2026-03-20T14:35:00Z"
+      isAuthenticated="True" />
+```
+
+### Response Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `success` | boolean | `true` on successful authentication |
+| `ticket` | GUID string | Authentication ticket to use in all subsequent API calls |
+| `userid` | integer | Internal numeric user ID |
+| `username` | string | The user's login name |
+| `firstName` | string | User's first name |
+| `lastName` | string | User's last name |
+| `fullname` | string | User's full display name (`firstName lastName`) |
+| `email` | string | User's email address |
+| `expireOn` | datetime (UTC) | Ticket expiration timestamp (30-day sliding window) |
+| `isAuthenticated` | boolean string | Whether the session is authenticated (`True`/`False`) |
+
+### Error Response
+
+```xml
+<root success="false" error="[900] Authentication failed" />
+```
+
+## Required Permissions
+
+- No prior authentication is required.
+- The user account must exist and be **active** (not disabled or deleted).
+
+## Example
+
+### Request (GET)
+
+```
+GET /srv.asmx/AuthenticateUser1?UID=jsmith&PWD=Secret123!&Lang=de HTTP/1.1
+Host: server.example.com
+```
+
+### Request (POST)
+
+```
+POST /srv.asmx/AuthenticateUser1 HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+UID=jsmith&PWD=Secret123!&Lang=de
+```
+
+### Request (SOAP 1.1)
+
+```xml
+POST /srv.asmx HTTP/1.1
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://tempuri.org/AuthenticateUser1"
+
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <AuthenticateUser1 xmlns="http://tempuri.org/">
+      <UID>jsmith</UID>
+      <PWD>Secret123!</PWD>
+      <Lang>de</Lang>
+    </AuthenticateUser1>
+  </soap:Body>
+</soap:Envelope>
+```
+
+## Notes
+
+- The `Lang` parameter overrides the user's own preferred language setting for this session only. The user's stored profile preference is not permanently changed.
+- If an unrecognised or unsupported language code is supplied, the server falls back to the system default language.
+- The returned `ticket` must be stored by the client and passed as `authenticationTicket` in every subsequent API call.
+- Tickets use a **30-day sliding expiration** — each successful API call resets the timer.
+- To simply authenticate without specifying a language, use `AuthenticateUser`.
+
+## Related APIs
+
+- [AuthenticateUser](AuthenticateUser) - Authenticate without specifying a session language
+- [AuthenticateUserViaWindows](AuthenticateUserViaWindows) - Authenticate using Windows (NTLM/Kerberos) credentials
+- [RenewTicket](RenewTicket) - Renew a ticket that is about to expire
+- [isValidTicket](isValidTicket) - Check whether a ticket is still valid
+- [LogOut](LogOut) - Invalidate the authentication ticket
+
+## Error Codes
+
+| Error | Description |
+|-------|-------------|
+| `[900] Authentication failed` | The user name or password is incorrect, or the account is disabled/does not exist |
+| `[902] Ticket generation not allowed` | The account is not permitted to generate API tickets |
