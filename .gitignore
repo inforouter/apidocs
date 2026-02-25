@@ -5,3 +5,5 @@
 /.vs/apidocs.slnx/FileContentIndex
 .cache/
 www/
+/.github/workflows/docs.yml
+/.github/workflows/jekyll-gh-pages.yml
