@@ -88,6 +88,12 @@ System administrators receive all public parameters plus additional configuratio
     <PWDNOUSERNAME>TRUE</PWDNOUSERNAME>
     <PWDNOEMAIL>TRUE</PWDNOEMAIL>
 
+    <!-- Authentication Authorities -->
+    <AuthenticationAuthorities>
+      <AuthenticationAuthority>MicrosoftEntraID</AuthenticationAuthority>
+      <AuthenticationAuthority>CompanyLDAP</AuthenticationAuthority>
+    </AuthenticationAuthorities>
+
     <!-- Server Information -->
     <ServerName>SERVER-NAME</ServerName>
     <IPAddressList>
@@ -164,6 +170,12 @@ These additional parameters are returned only when the authenticated user is a s
 | `PWDNONALPHA` | TRUE/FALSE | Password must include non-alphanumeric characters |
 | `PWDNOUSERNAME` | TRUE/FALSE | Password must not equal the username |
 | `PWDNOEMAIL` | TRUE/FALSE | Password must not equal the email address |
+
+### Authentication Authorities
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `AuthenticationAuthorities` | element | List of `AuthenticationAuthority` elements, each containing the name of a configured external authentication authority (e.g. LDAP, OAuth/OIDC providers). Empty if no external authorities are configured. |
 
 ### Server Information
 
