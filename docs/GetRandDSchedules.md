@@ -30,11 +30,19 @@ Returns a summary list of all Retention and Disposition (R&D) schedule definitio
     <RetentionAndDispositionSchedule
       RDDefID="47"
       RDName="Standard 7-Year Retention"
-      Description="Retain documents for 7 years then destroy" />
+      Description="Retain documents for 7 years then destroy"
+      RetentionType="1"
+      RetentionTypeText="Fixed Date"
+      DispositionType="2"
+      DispositionTypeText="Destroy" />
     <RetentionAndDispositionSchedule
       RDDefID="48"
       RDName="Permanent Legal Hold"
-      Description="Permanent retention for legal documents" />
+      Description="Permanent retention for legal documents"
+      RetentionType="3"
+      RetentionTypeText="Permanent"
+      DispositionType="0"
+      DispositionTypeText="None" />
   </RetentionAndDispositionSchedules>
 </root>
 ```
@@ -64,6 +72,10 @@ Container element for all schedule summaries.
 | `RDDefID` | Numeric ID of the schedule definition. Use this value in other R&D APIs. |
 | `RDName` | Schedule name. |
 | `Description` | Schedule description. |
+| `RetentionType` | Numeric code for the retention type. |
+| `RetentionTypeText` | Human-readable label for the retention type (localized). |
+| `DispositionType` | Numeric code for the disposition type. |
+| `DispositionTypeText` | Human-readable label for the disposition type (localized). |
 
 ## Required Permissions
 
@@ -92,7 +104,7 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
 
 ## Notes
 
-- Returns a summary list (ID, name, description only). For the full definition including retention/disposition settings and audit information, call [GetRandDScheduleInfo](GetRandDScheduleInfo.md) with the `RDDefID`.
+- Returns a summary list of all schedules including retention and disposition type codes and their localized text labels. For the complete definition with all settings and audit information, call [GetRandDScheduleInfo](GetRandDScheduleInfo.md) with the `RDDefID`.
 - All schedules in the system are returned regardless of assignment status.
 
 ## Related APIs

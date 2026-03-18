@@ -1,6 +1,6 @@
 # GetWorkflowDefinitions API
 
-Returns all workflow definitions defined in the system, optionally filtered to active definitions only.
+Returns all workflow definitions defined in the system, optionally filtered by domain/library and/or active status.
 
 Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowDef.md) to retrieve the full definition with steps and tasks for a specific workflow.
 
@@ -12,7 +12,7 @@ Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowD
 
 ## Methods
 
-- **GET** `/srv.asmx/GetWorkflowDefinitions?authenticationTicket=...&activeWorkflowOnly=...`
+- **GET** `/srv.asmx/GetWorkflowDefinitions?authenticationTicket=...&domainName=...&activeWorkflowOnly=...`
 - **POST** `/srv.asmx/GetWorkflowDefinitions` (form data)
 - **SOAP** Action: `http://tempuri.org/GetWorkflowDefinitions`
 
@@ -21,6 +21,7 @@ Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowD
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
+| `domainName` | string | No | Name of the domain/library to filter by. Omit or leave empty to return workflow definitions across all domains. |
 | `activeWorkflowOnly` | boolean | Yes | `true` to return only active workflow definitions; `false` to return all definitions including inactive ones. |
 
 ## Response
@@ -104,7 +105,18 @@ Requires system administrator role.
 ```
 GET /srv.asmx/GetWorkflowDefinitions
     ?authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
+    &domainName=Corporate
     &activeWorkflowOnly=false
+HTTP/1.1
+Host: yourserver
+```
+
+All domains (omit `domainName`):
+
+```
+GET /srv.asmx/GetWorkflowDefinitions
+    ?authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
+    &activeWorkflowOnly=true
 HTTP/1.1
 Host: yourserver
 ```
@@ -116,7 +128,7 @@ POST /srv.asmx/GetWorkflowDefinitions HTTP/1.1
 Host: yourserver
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&activeWorkflowOnly=false
+authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&domainName=Corporate&activeWorkflowOnly=false
 ```
 
 ### SOAP 1.1 Request
@@ -131,6 +143,7 @@ SOAPAction: "http://tempuri.org/GetWorkflowDefinitions"
   <soap:Body>
     <GetWorkflowDefinitions xmlns="http://tempuri.org/">
       <authenticationTicket>3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c</authenticationTicket>
+      <domainName>Corporate</domainName>
       <activeWorkflowOnly>false</activeWorkflowOnly>
     </GetWorkflowDefinitions>
   </soap:Body>
@@ -142,7 +155,7 @@ SOAPAction: "http://tempuri.org/GetWorkflowDefinitions"
 - Step and task definitions are **not** included. To get the full workflow definition with all steps and tasks, call [GetFlowDef](GetFlowDef.md) with the `FlowName` and `DomainName` from the response.
 - Use `activeWorkflowOnly=true` to limit results to workflows that can currently accept document submissions.
 - Use `activeWorkflowOnly=false` to see all workflows including those that are still being configured (inactive).
-- To list workflows scoped to a specific domain/library, use [GetDomainFlows](GetDomainFlows.md).
+- Pass `domainName` to scope results to a single domain/library; omit it to return workflows across all domains.
 - To list workflows active on a specific folder, use [GetFolderFlows](GetFolderFlows.md).
 
 ## Related APIs
