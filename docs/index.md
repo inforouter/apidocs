@@ -266,6 +266,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [getTasks](getTasks.md) - Get a filtered list of workflow tasks with sorting and XML-based search criteria
 - [GetUsersTaskPerformance](GetUsersTaskPerformance.md) - Get user task performance statistics (due and overdue task counts)
 - [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) - Get workflow roles assigned to a user (supervisor and assignee roles)
+- [GetWorkflowDefinitions](GetWorkflowDefinitions.md) - Get all workflow definitions in the system with optional active-only filter (admin only)
 - [GetWorkflowStatistics](GetWorkflowStatistics.md) - Get workflow performance statistics (pending, completed, overdue counts)
 
 ### Property Sets
