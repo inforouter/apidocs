@@ -43,6 +43,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 
 ### Server & License Management
 - [GetLicenseInfo](GetLicenseInfo.md) - Get application license details, user counts, and subscription dates (admin only)
+- [GetSystemStatistics](GetSystemStatistics.md) - Get system-wide statistics: user counts, document counts, total document size, and checked-out documents (admin only)
 - [GetLogs](GetLogs.md) - Get server log entries by type and date (admin only)
 - [GetLogStatistics](GetLogStatistics.md) - Get available log dates and entry counts by log type (admin only)
 - [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) - Get status of all system maintenance jobs (admin only)
