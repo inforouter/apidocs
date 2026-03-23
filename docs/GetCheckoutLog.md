@@ -21,7 +21,7 @@ Returns the checkout log for documents matching the specified date range and pat
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `StartDate` | DateTime | No | Start date for the log query range |
 | `EndDate` | DateTime | No | End date for the log query range |
-| `PathFilter` | string | No | Path filter with optional wildcard (e.g. `\MyLibrary\Reports*`) |
+| `PathFilter` | string | No | Path filter to restrict results to a specific library or folder path (e.g. `\MyLibrary` or `\MyLibrary\Reports*`). Also determines the required privilege level — see **Required Permissions** below. |
 
 ## Response Structure
 
@@ -68,7 +68,15 @@ Each `<log>` element contains:
 ## Required Permissions
 
 - User must be authenticated (valid authentication ticket required)
-- User must have `ViewAuditLogs` admin permission
+- The required privilege depends on the value of `PathFilter`:
+
+| `PathFilter` value | Required permission |
+|--------------------|---------------------|
+| Empty / omitted | System-wide `ViewAuditLogs` admin permission |
+| Domain name only (e.g. `\MyLibrary`) | `ViewAuditLogs` permission on that specific library/domain |
+| Full path (e.g. `\MyLibrary\Reports*`) | `ViewAuditLogs` permission on the library/domain that contains the path |
+
+When `PathFilter` includes a domain name or path, the system resolves the domain from the first path segment and performs the access check against that domain only. Callers who are library-level audit log administrators can therefore scope queries to their own library without needing system-wide admin rights.
 
 ## Example Requests
 
@@ -112,6 +120,9 @@ SOAPAction: "http://tempuri.org/GetCheckoutLog"
 
 - Results are ordered by action date descending (most recent first).
 - The `PathFilter` parameter supports wildcard matching using `*` (e.g., `\MyLibrary\Reports*`).
+- When `PathFilter` is just a domain/library name (e.g. `\MyLibrary`), all checkouts within that domain are returned and the path portion of the filter is cleared internally.
+- When `PathFilter` contains a sub-path (e.g. `\MyLibrary\Reports*`), the domain is derived from the first path segment and the remainder is used as the path filter.
+- Omitting `PathFilter` returns system-wide results, but requires system-wide `ViewAuditLogs` admin permission.
 - If `StartDate` and `EndDate` are omitted, all available log entries are returned.
 - UTC dates are automatically converted to local server time.
 - Checkout logging must be enabled in the domain policies for entries to be recorded.
@@ -123,7 +134,7 @@ Common error responses:
 | Error | Description |
 |-------|-------------|
 | `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| Insufficient permissions | Caller does not have `ViewAuditLogs` admin permission |
+| Access denied | Caller lacks the required `ViewAuditLogs` permission — system-wide when `PathFilter` is omitted, or domain-level for the resolved library when `PathFilter` is supplied |
 
 ## Related APIs
 

@@ -30,7 +30,10 @@ Returns usage statistics for the specified folder, including subfolder count, to
 ```xml
 <response success="true">
   <statistics SubFolderCount="5" TotalDocumentCount="123" CheckedOutCount="3"
-              TotalSize="10485760" FolderID="456" Name="Reports" />
+              TotalSize="10485760"
+              RegisteredDocumentsIn30Days="12" RegisteredDocumentsIn60Days="34"
+              RegisteredDocumentsIn90Days="67"
+              FolderID="456" Name="Reports" />
 </response>
 ```
 
@@ -48,6 +51,9 @@ Returns usage statistics for the specified folder, including subfolder count, to
 | `TotalDocumentCount` | Total number of documents in the folder and all subfolders. |
 | `CheckedOutCount` | Number of currently checked-out documents in the folder tree. |
 | `TotalSize` | Total storage size in bytes of all documents in the folder tree. |
+| `RegisteredDocumentsIn30Days` | Number of documents registered in the last 30 days. |
+| `RegisteredDocumentsIn60Days` | Number of documents registered in the last 60 days. |
+| `RegisteredDocumentsIn90Days` | Number of documents registered in the last 90 days. |
 | `FolderID` | Internal ID of the folder. |
 | `Name` | Name of the folder. |
 
