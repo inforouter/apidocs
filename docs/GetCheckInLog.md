@@ -21,7 +21,7 @@ Returns the check-in log for documents matching the specified date range and pat
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `startDate` | DateTime | No | Start date for the log query range |
 | `endDate` | DateTime | No | End date for the log query range |
-| `pathFilter` | string | No | Path filter with optional wildcard (e.g. `\MyLibrary\Reports*`) |
+| `pathFilter` | string | No | Path filter scoping the query (see [Required Permissions](#required-permissions) for how this affects access control). Supports wildcard `*` at the end (e.g. `\MyLibrary\Reports*`). |
 
 ## Response Structure
 
@@ -30,8 +30,12 @@ Returns the check-in log for documents matching the specified date range and pat
 ```xml
 <response success="true">
   <logs>
-    <log TYPE="DOCUMENT" ID="1234" NAME="Report.docx" DATE="2026-02-01 14:30:00" DOMAINID="1" PATH="\MyLibrary\Reports" USERID="5" FULLNAME="John Smith" />
-    <log TYPE="DOCUMENT" ID="1235" NAME="Invoice.pdf" DATE="2026-01-28 09:15:00" DOMAINID="1" PATH="\MyLibrary\Finance" USERID="8" FULLNAME="Jane Doe" />
+    <log TYPE="DOCUMENT" ID="1234" NAME="Report.docx" DATE="2026-02-01 14:30:00"
+         DOMAINID="1" DOMAINNAME="MyLibrary" PATH="\MyLibrary\Reports"
+         USERID="5" FULLNAME="John Smith" />
+    <log TYPE="DOCUMENT" ID="1235" NAME="Invoice.pdf" DATE="2026-01-28 09:15:00"
+         DOMAINID="1" DOMAINNAME="MyLibrary" PATH="\MyLibrary\Finance"
+         USERID="8" FULLNAME="Jane Doe" />
   </logs>
 </response>
 ```
@@ -56,23 +60,38 @@ Each `<log>` element contains:
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `TYPE` | string | Object type (typically `DOCUMENT`) |
+| `TYPE` | string | Object type — always `DOCUMENT` |
 | `ID` | integer | Document identifier |
 | `NAME` | string | Name of the checked-in document |
 | `DATE` | DateTime | Date and time of the check-in action |
-| `DOMAINID` | integer | Domain/library identifier |
-| `PATH` | string | Parent path of the document |
-| `USERID` | integer | User identifier who performed the check-in |
+| `DOMAINID` | integer | Library/domain identifier |
+| `DOMAINNAME` | string | Library name (first path segment of the document path) |
+| `PATH` | string | Full parent path of the document |
+| `USERID` | integer | Identifier of the user who performed the check-in |
 | `FULLNAME` | string | Full name of the user who performed the check-in |
 
 ## Required Permissions
 
-- User must be authenticated (valid authentication ticket required)
-- User must have `ViewAuditLogs` admin permission
+The required permission level depends on the `pathFilter` value:
+
+| `pathFilter` value | Required permission |
+|--------------------|---------------------|
+| Empty or omitted | System-wide **ViewAuditLogs** admin permission |
+| Unresolvable path (library name not found) | System-wide **ViewAuditLogs** admin permission |
+| Starts with a valid library name (e.g. `\MyLibrary` or `\MyLibrary\Reports*`) | **ViewAuditLogs** permission for that library only |
+
+When a library name is resolved from the path, the query is automatically scoped to that library. Library-level audit log administrators can therefore query their own library without system-wide admin rights.
 
 ## Example Requests
 
-### Request (GET)
+### Request (GET) — system-wide query
+
+```
+GET /srv.asmx/GetCheckInLog?authenticationTicket=abc123-def456&startDate=2026-01-01&endDate=2026-02-01 HTTP/1.1
+Host: server.example.com
+```
+
+### Request (GET) — scoped to a library
 
 ```
 GET /srv.asmx/GetCheckInLog?authenticationTicket=abc123-def456&startDate=2026-01-01&endDate=2026-02-01&pathFilter=\MyLibrary* HTTP/1.1
@@ -111,26 +130,27 @@ SOAPAction: "http://tempuri.org/GetCheckInLog"
 ## Notes
 
 - Results are ordered by action date descending (most recent first).
-- The `pathFilter` parameter supports wildcard matching using `*` (e.g., `\MyLibrary\Reports*`).
-- If `startDate` and `endDate` are omitted, all available log entries are returned.
-- UTC dates are automatically converted to local server time.
+- When `pathFilter` begins with a valid library name, the query is scoped to that library and `DomainId` is set automatically — you do not need to specify the domain separately.
+- If `pathFilter` is exactly a library name with no sub-path (e.g. `\MyLibrary`), the path filter is cleared internally and all check-in records within that library are returned.
+- If `startDate` and `endDate` are omitted, all available log entries matching the path filter are returned.
 - Check-in logging must be enabled in the domain policies for entries to be recorded.
 
 ## Error Codes
 
-Common error responses:
-
 | Error | Description |
 |-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| Insufficient permissions | Caller does not have `ViewAuditLogs` admin permission |
+| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
+| Access denied | Caller does not have the required `ViewAuditLogs` permission (see [Required Permissions](#required-permissions)) |
+| Folder not found / Document not found | The path or ID specified in the filter does not exist |
 
 ## Related APIs
 
 - `GetCheckoutLog` - Get checkout log entries
 - `GetDeleteLog` - Get deletion log entries
 - `GetNewDocumentsAndFoldersLog` - Get creation log entries for new documents and folders
+- `GetVersionCreateLog` - Get version creation log entries
 
 ## Version History
 
+- **Updated**: `pathFilter` now controls both query scope and required permission level. `DOMAINNAME` attribute added to each log entry.
 - **New**: Added to provide programmatic access to check-in log previously only available through the Control Panel UI
