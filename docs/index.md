@@ -352,10 +352,11 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [AddUserToDocumentSubscribers](AddUserToDocumentSubscribers.md) - Add a user to a document's subscription list with configurable event notifications
 - [AddUserToFolderSubscribers](AddUserToFolderSubscribers.md) - Add a user to a folder's subscription list with configurable event notifications and optional sub-folder cascading
 - [GetSubscribers](GetSubscribers.md) - Get the complete subscriber list (users and groups) of a document or folder
+- [GetSubscribedDocumentsByUser](GetSubscribedDocumentsByUser.md) - Get subscribed documents for a specified user with pagination support
+- [GetSubscribedFoldersByUser](GetSubscribedFoldersByUser.md) - Get subscribed folders for a specified user with pagination support
 - [GetSubscriptions](GetSubscriptions.md) - Get all subscribed documents and folders for the current user
 - [RemoveUserFromDocumentSubscribers](RemoveUserFromDocumentSubscribers.md) - Remove a user from a document's subscription list
 - [RemoveUsergroupFromDocumentSubscribers](RemoveUsergroupFromDocumentSubscribers.md) - Remove a user group from a document's subscription list
-- [GetSubscriptionsByUser](GetSubscriptionsByUser.md) - Retrieve folder and document subscriptions for a specific user
 - [RemoveAllSubscriptions](RemoveAllSubscriptions.md) - Remove all folder and document subscriptions for a user
 - [RemoveUserFromFolderSubscribers](RemoveUserFromFolderSubscribers.md) - Remove a user from a folder's subscription list
 - [RemoveUsergroupFromFolderSubscribers](RemoveUsergroupFromFolderSubscribers.md) - Remove a user group from a folder's subscription list
