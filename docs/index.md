@@ -124,7 +124,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [DownloadFileChunk](DownloadFileChunk.md) - Download a single chunk of a staged file using a download handler
 - [DownloadZip](DownloadZip.md) - Zip and download specified documents and folders as a raw byte array
 - [DownloadZipWithHandler](DownloadZipWithHandler.md) - Stage a zip archive server-side and return a handler GUID for chunked retrieval
-- [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get documents authored by a specified user
+- [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked out documents for a specified user
 - [GetDocument](GetDocument.md) - Get the full properties of a document by path or short ID
@@ -145,8 +145,10 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDownloadInfo](GetDownloadInfo.md) - Get download metadata for the latest version of a document without staging the file
 - [GetDownloadInfoByVersion](GetDownloadInfoByVersion.md) - Get download metadata for a specific version of a document without staging the file
 - [GetDownloadQue](GetDownloadQue.md) - Get the list of documents and folders in the current user's download queue
+- [GetFavoriteDocumentsOfUser](GetFavoriteDocumentsOfUser.md) - Get a paged list of documents marked as favorites by a specified user
+- [GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md) - Get a paged list of folders marked as favorites by a specified user
 - [GetFavorites](GetFavorites.md) - Get the list of documents and folders marked as favorites by the current user
-- [GetISOReviewAssignments](GetISOReviewAssignments.md) - Get documents assigned to a user for ISO review
+- [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md) - Get a paged list of documents assigned to a specified user for ISO review
 - [GetPublishingRequirements](GetPublishingRequirements.md) - Get the publishing requirements configured for a domain/library
 - [GetRecentDocuments](GetRecentDocuments.md) - Get the list of documents recently accessed by the current authenticated user
 - [GetVersionTextOnlyContent](GetVersionTextOnlyContent.md) - Get the plain-text alternative content stored for a specific version of a document
