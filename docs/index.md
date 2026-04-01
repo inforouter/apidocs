@@ -65,6 +65,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetSoxLogs](GetSoxLogs.md) - Get the SOX compliance review log for a document
 - [GetUserViewLog](GetUserViewLog.md) - Get the complete read/view log history for a specified user
 - [GetUserViewLog1](GetUserViewLog1.md) - Get the read/view log history for a specified user filtered by date range
+- [GetUserViewLogLite](GetUserViewLogLite.md) - Get a paginated read/view log for a specified user filtered by date range
 - [GetVersionCreateLog](GetVersionCreateLog.md) - Get version creation log entries for documents
 - [GetVersionDeleteLog](GetVersionDeleteLog.md) - Get version deletion log entries for documents
 
