@@ -33,11 +33,13 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetAllFolderColumns](GetAllFolderColumns.md) - Get all 34 available folder column definitions
 - [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) - Get authentication and password policy settings (complexity requirements, re-prompt actions)
 - [GetDefaultFolderColumns](GetDefaultFolderColumns.md) - Get the system default folder columns for list views
+- [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) - Get email and notification settings (subscription alerts, Send To email, attachment policies)
 - [GetGeneralAppSettings](GetGeneralAppSettings.md) - Get general application settings including upload limits, work days, holidays, and system preferences
 - [GetMimeTypes](GetMimeTypes.md) - Get the list of all defined MIME types in the system
 - [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) - Get system behavior settings (login logging, anti-brute-force, library manager permissions)
 - [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md) - Update authentication and password policy settings (complexity rules, expiration policies)
 - [SetDefaultFolderColumns](SetDefaultFolderColumns.md) - Set the system default folder columns using comma-separated column names
+- [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md) - Update email and notification settings (subscription alerts, Send To email, attachment policies)
 - [SetGeneralAppSettings](SetGeneralAppSettings.md) - Update general application settings (upload limits, recycle bin policies, workdays/holidays)
 - [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md) - Update system behavior settings (login logging and login delay configuration)
 
@@ -390,6 +392,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetLocalUsers](GetLocalUsers.md) - Get direct (local) user members of a domain/library
 - [GetUser](GetUser.md) - Get full properties of a specific user
 - [GetUserStatistics](GetUserStatistics.md) - Get activity and membership statistics for a user
+- [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md) - Send a welcome email to a user with login URL and password reset link (admin only)
 - [TransferUserCheckedOutDocuments](TransferUserCheckedOutDocuments.md) - Transfer checked-out document ownership between users
 - [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships between users
 - [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) - Transfer document subscriptions between users
