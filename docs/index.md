@@ -245,6 +245,8 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [CreateFlowDef1](CreateFlowDef1.md) - Create a new workflow definition with an on-end destination folder
 - [CreateFlowDef2](CreateFlowDef2.md) - Create a new workflow definition with an on-end folder and a supervisor
 - [CreateFlowDef3](CreateFlowDef3.md) - Create a new workflow definition with all options (on-end folder, supervisor, event URL, hidden flag)
+- [CreateRelatedTask](CreateRelatedTask.md) - Create a related ad-hoc task linked to an existing workflow task
+- [CreateTask](CreateTask.md) - Create a standalone ad-hoc workflow task and assign it to a document
 - [DeactivateFlowDef](DeactivateFlowDef.md) - Set a workflow definition back to inactive state so its steps and tasks can be modified
 - [DeleteFlowStepDef](DeleteFlowStepDef.md) - Delete a step from a workflow definition
 - [DeleteTask](DeleteTask.md) - Delete an active workflow task and all its attachments by task ID
@@ -406,6 +408,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [TransferUserSecurityPermissions](TransferUserSecurityPermissions.md) - Transfer security (ACL) permissions between users
 - [TransferUserTasks](TransferUserTasks.md) - Transfer open workflow tasks between users
 - [TransferUserWorkflowDefinitions](TransferUserWorkflowDefinitions.md) - Transfer workflow definition roles between users
+- [UpdateUserContactInfo](UpdateUserContactInfo.md) - Update a user's email address and mobile number
 - [UpdateUserEmail](UpdateUserEmail.md) - Update a user's email address
 - [UpdateUserPreferences](UpdateUserPreferences.md) - Update a user's display and notification preferences
 - [UpdateUserProfile](UpdateUserProfile.md) - Update a user's name, username, and authentication source
