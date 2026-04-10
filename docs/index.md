@@ -269,6 +269,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [SubmitDocumentToFlow1](SubmitDocumentToFlow1.md) - Submit a document to a workflow with custom user/group assignees for the first step
 - [TestTaskCompletion](TestTaskCompletion.md) - Dry-run check of whether a workflow task can be completed (validates all requirements without completing)
 - [UpdateTaskFinishDate](UpdateTaskFinishDate.md) - Retroactively update the finish date of a completed workflow task
+- [UpdateWorkflowDefinition](UpdateWorkflowDefinition.md) - Update the properties of an existing workflow definition (name, folder, supervisor, active status, visibility)
 - [DeleteFlowTaskDef](DeleteFlowTaskDef.md) - Delete a task definition from a workflow step
 - [DeleteWorkflow](DeleteWorkflow.md) - Permanently delete a workflow definition by ID
 - [getTasks](getTasks.md) - Get a filtered list of workflow tasks with sorting and XML-based search criteria

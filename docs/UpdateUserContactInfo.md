@@ -95,6 +95,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - To update only email without changing the mobile number, use `UpdateUserEmail` instead.
 - The email address is used for notifications, workflow alerts, and password reset emails.
 - The mobile number is stored as a plain string; no format validation is enforced server-side.
+- Passing an empty string `""` for `emailAddress` or `mobileNumber` clears that field. To keep a field unchanged, pass its current value — retrieve it first with `GetUser` (attributes `Email` and `MobileNumber` on the `<User>` element).
+- Via SOAP, passing `null` for `emailAddress` or `mobileNumber` preserves the existing value without clearing it. This null-preservation is not available through the HTTP GET/POST endpoints.
 
 ---
 
