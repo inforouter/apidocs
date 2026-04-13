@@ -270,6 +270,8 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [TestTaskCompletion](TestTaskCompletion.md) - Dry-run check of whether a workflow task can be completed (validates all requirements without completing)
 - [UpdateTaskFinishDate](UpdateTaskFinishDate.md) - Retroactively update the finish date of a completed workflow task
 - [UpdateWorkflowDefinition](UpdateWorkflowDefinition.md) - Update the properties of an existing workflow definition (name, folder, supervisor, active status, visibility)
+- [UpdateWorkflowStepDef](UpdateWorkflowStepDef.md) - Update the name and on-start folder move of an existing workflow step definition
+- [UpdateWorkflowTaskDef](UpdateWorkflowTaskDef.md) - Update an existing task definition within a workflow step (name, deadline, assignees, permissions, requirements)
 - [DeleteFlowTaskDef](DeleteFlowTaskDef.md) - Delete a task definition from a workflow step
 - [DeleteWorkflow](DeleteWorkflow.md) - Permanently delete a workflow definition by ID
 - [getTasks](getTasks.md) - Get a filtered list of workflow tasks with sorting and XML-based search criteria
