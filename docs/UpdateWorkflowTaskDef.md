@@ -72,7 +72,7 @@ Grants the assignee additional task-level permissions beyond simple completion.
 | Permission Name | Description |
 |-----------------|-------------|
 | `EditDocument` | Assignee can edit the document content. |
-| `Postpone` | Assignee can change the task due date. |
+| `Postpone` | Assignee can  change the task due date. |
 | `ChangeFinishdate` | Assignee can change the task finish date. |
 | `ChangePriority` | Assignee can change the task priority. |
 | `EditNextStep` | Assignee can modify the next workflow step. |
