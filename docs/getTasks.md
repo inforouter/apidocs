@@ -113,7 +113,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 ### Success Response
 
 ```xml
-<response success="true">
+<response success="true" taskCount="1">
   <tasks>
     <Task>
       <TaskID>301</TaskID>
@@ -127,6 +127,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
       <Priority>High</Priority>
       <TaskStatus>InProgress</TaskStatus>
       <ApprovalStatus>Pending</ApprovalStatus>
+      <StartDate>2026-02-01 09:00:00</StartDate>
       <StartDtae>2026-02-01 09:00:00</StartDtae>
       <FinishDate></FinishDate>
       <DueDate>2026-02-15 17:00:00</DueDate>
@@ -193,6 +194,14 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 <response success="false" error="[ErrorCode] Error message" />
 ```
 
+## Response Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `success` | boolean | `true` if the request succeeded, `false` otherwise. |
+| `taskCount` | integer | Total number of `<Task>` elements returned in this response. |
+| `error` | string | Present only when `success="false"`. Contains the error code and message. |
+
 ## Task Element Properties
 
 | Element | Type | Description |
@@ -208,7 +217,8 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 | `Priority` | string | Task priority: `Low`, `Normal`, `High`, `Urgent` |
 | `TaskStatus` | string | Current task status |
 | `ApprovalStatus` | string | Approval status of the task |
-| `StartDtae` | DateTime | Task start date |
+| `StartDate` | DateTime | Task start date. **Use this element.** |
+| `StartDtae` | DateTime | **Deprecated.** Same value as `StartDate`. Retained for backward compatibility only (typo in an earlier release). Do not use in new integrations. |
 | `FinishDate` | DateTime | Task completion date (empty if not finished) |
 | `DueDate` | DateTime | Task due date |
 | `ShortComments` | string | Brief comments on the task |
@@ -336,6 +346,7 @@ async function getTasks(filters, sortBy = "DueDate", ascending = true) {
 
     const root = xmlDoc.querySelector("response");
     if (root.getAttribute("success") === "true") {
+        const count = parseInt(root.getAttribute("taskCount") ?? "0");
         const tasks = [];
         xmlDoc.querySelectorAll("Task").forEach(task => {
             tasks.push({
@@ -407,6 +418,7 @@ using (var client = new SrvSoapClient())
 
         if (root.Attribute("success")?.Value == "true")
         {
+            int taskCount = int.Parse(root.Attribute("taskCount")?.Value ?? "0");
             var tasks = root.Descendants("Task")
                 .Select(t => new
                 {
@@ -421,7 +433,7 @@ using (var client = new SrvSoapClient())
                 })
                 .ToList();
 
-            Console.WriteLine($"Found {tasks.Count} tasks");
+            Console.WriteLine($"Found {taskCount} tasks");
             foreach (var task in tasks)
             {
                 Console.WriteLine($"[{task.Priority}] {task.TaskName} - {task.FlowName}");
@@ -448,7 +460,7 @@ using (var client = new SrvSoapClient())
 - Filter parameters are case-insensitive for the `NAME` attribute (internally converted to uppercase).
 - Unrecognized parameter names in `xmlcriteria` will cause an error response.
 - Invalid enum values for `SortBy`, `TASKCOMPLETIONSTATUS`, or `PRIORITY` will return a descriptive error.
-- The `StartDtae` element name in the response contains a known typo (retained for backward compatibility).
+- The response includes both `<StartDate>` (correct spelling, use this) and `<StartDtae>` (legacy typo, deprecated). Do not use `<StartDtae>` in new integrations — it will be removed in a future version.
 - Task requirements and attachments are dynamically loaded for each task in the result set.
 - Version numbers are returned in external format (e.g., `1.0`, `2.0`).
 

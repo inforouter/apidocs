@@ -39,6 +39,7 @@ Returns the full details of a single workflow task by its task ID.
     <Priority>Normal</Priority>
     <TaskStatus>InProgress</TaskStatus>
     <ApprovalStatus>NoResult</ApprovalStatus>
+    <StartDate>2024-03-01 09:00:00</StartDate>
     <StartDtae>2024-03-01 09:00:00</StartDtae>
     <FinishDate>1900-01-01 00:00:00</FinishDate>
     <DueDate>2024-03-05 17:00:00</DueDate>
@@ -146,7 +147,8 @@ Returns the full details of a single workflow task by its task ID.
 
 | Element | Description |
 |---------|-------------|
-| `StartDtae` | Date and time the task was started. *(Note: field name contains a typo -" `Dtae` not `Date`.)* |
+| `StartDate` | Date and time the task was started. **Use this element.** |
+| `StartDtae` | **Deprecated.** Same value as `StartDate`. This element exists only for backward compatibility due to a typo in an earlier release (`Dtae` instead of `Date`). Do not use it in new integrations — it will be removed in a future version. |
 | `FinishDate` | Date and time the task was completed. `1900-01-01 00:00:00` if not yet finished. |
 | `DueDate` | Deadline for the task. `1900-01-01 00:00:00` if no deadline set. |
 | `DeadLine` | Number of hours from task creation until due. `0` means no deadline. |
@@ -231,7 +233,7 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812
 
 - Task IDs are available from [getTasks](getTasks.md) and [GetDueTaskDocuments](GetDueTaskDocuments.md).
 - Dates of `1900-01-01 00:00:00` indicate the field has no value (not set).
-- The element `<StartDtae>` contains a typo in the field name (`Dtae` instead of `Date`); this is the actual output and must be handled as-is by API clients.
+- Use `<StartDate>` to read the task start date. The response also includes `<StartDtae>` (a legacy typo) for backward compatibility only — do not use it in new code.
 
 ## Related APIs
 
