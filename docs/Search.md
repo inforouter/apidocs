@@ -137,7 +137,7 @@ Each element uses three attributes:
 | `VIEWCRITERIA` | -" | `NOVIEW` / `UPDATED` / `SAW` | Filters by view state. Add `USERNAME="username"` attribute to filter by another user's view state. |
 | `CHECKOUTSTATUS` | -" | `CHECKEDOUT` / `NOTCHECKEDOUT` / `CHECKEDOUTBYME` / `CHECKEDOUTBYUSER` | Filters by checkout status. `CHECKEDOUTBYUSER` also requires a `USERNAME="username"` attribute on the element. |
 | `USERNAME` | -" | infoRouter username | Filters documents by author (owner). |
-| `SIZEIS` | `EQLT` (at least) / `EQGT` (at most) | Size in bytes | Filters by file size. |
+| `SIZEIS` | `EQLT` (at most) / `EQGT` (at least) | Size in bytes | Filters by file size. |
 | `IMPORTANCE` | `EQ` / `GT-EQ` / `GT` / `LT` / `LT-EQ` | `LOW` / `NORMAL` / `HIGH` / `VITAL` | Filters by document importance. |
 | `CLEVEL` | -" | `NOMARKINGS` / `DECLASSIFIED` / `CONFIDENTIAL` / `SECRET` / `TOPSECRET` | Filters by classification level. |
 | `DATECRITERIA` | `EQ` / `EQLT` / `EQGT` / `BETWEEN` | Date string `yyyy-MM-dd`; for `BETWEEN` use `date1\|date2` | Filters by a date field. Add `SUBTYPE` attribute to specify which date field (see **Date Criteria Subtypes** below). |
