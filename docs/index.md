@@ -250,6 +250,9 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [DeactivateFlowDef](DeactivateFlowDef.md) - Set a workflow definition back to inactive state so its steps and tasks can be modified
 - [DeleteFlowStepDef](DeleteFlowStepDef.md) - Delete a step from a workflow definition
 - [DeleteTask](DeleteTask.md) - Delete an active workflow task and all its attachments by task ID
+- [GetDocumentTasks](GetDocumentTasks.md) - Return all workflow tasks for a document with optional filtering by completion status, sorted by due date
+- [GetDocumentWorkflow](GetDocumentWorkflow.md) - Return the details of a specific running workflow instance on a document
+- [GetDocumentWorkflows](GetDocumentWorkflows.md) - Return all workflow instances (current and historical) for a document with optional filtering
 - [GetDueTaskDocuments](GetDueTaskDocuments.md) - Return documents that have active (due) workflow tasks assigned to the authenticated user, sorted by due date
 - [GetFlowDef](GetFlowDef.md) - Return the complete definition of a workflow including all step and task definitions
 - [GetFolderFlows](GetFolderFlows.md) - Return workflow definitions active on a folder, optionally including inherited flows from parent folders
@@ -271,6 +274,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UpdateTaskFinishDate](UpdateTaskFinishDate.md) - Retroactively update the finish date of a completed workflow task
 - [UpdateWorkflowDefinition](UpdateWorkflowDefinition.md) - Update the properties of an existing workflow definition (name, folder, supervisor, active status, visibility)
 - [UpdateWorkflowStepDef](UpdateWorkflowStepDef.md) - Update the name and on-start folder move of an existing workflow step definition
+- [UpdateRunningWorkflowTaskDef](UpdateRunningWorkflowTaskDef.md) - Update a task definition on a currently executing (running) workflow step
 - [UpdateWorkflowTaskDef](UpdateWorkflowTaskDef.md) - Update an existing task definition within a workflow step (name, deadline, assignees, permissions, requirements)
 - [DeleteFlowTaskDef](DeleteFlowTaskDef.md) - Delete a task definition from a workflow step
 - [DeleteWorkflow](DeleteWorkflow.md) - Permanently delete a workflow definition by ID
