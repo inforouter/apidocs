@@ -176,6 +176,8 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
         <Attachment>
           <AttachmentDate>2026-02-05 10:30:00</AttachmentDate>
           <DocumentId>1235</DocumentId>
+          <DocumentName>SupportingEvidence.pdf</DocumentName>
+          <Path>/Main Library/Contracts</Path>
           <WorkflowId>50</WorkflowId>
           <StepNumber>1</StepNumber>
           <StepName>Submit Step</StepName>
@@ -208,7 +210,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 |---------|------|-------------|
 | `TaskID` | integer | Unique identifier of the task instance |
 | `TaskName` | string | Name of the task |
-| `ShortInstruction` | string | Brief instruction text for the assignee |
+| `ShortInstruction` | string | First 255 characters of the task instruction. For the full text use [GetTask](GetTask.md) which also returns `extendedInstruction`. |
 | `StepNumber` | integer | Step number within the workflow |
 | `StepName` | string | Name of the workflow step |
 | `FlowID` | integer | Workflow instance (flow) ID |
@@ -221,7 +223,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 | `StartDtae` | DateTime | **Deprecated.** Same value as `StartDate`. Retained for backward compatibility only (typo in an earlier release). Do not use in new integrations. |
 | `FinishDate` | DateTime | Task completion date (empty if not finished) |
 | `DueDate` | DateTime | Task due date |
-| `ShortComments` | string | Brief comments on the task |
+| `ShortComments` | string | First 255 characters of the assignee's comments. For the full text use [GetTask](GetTask.md) which also returns `extendedComment`. |
 | `TaskDefID` | integer | Task definition ID |
 | `LinkedTaskID` | integer | ID of a linked task (0 if none) |
 | `AssigneeID` | integer | User ID of the task assignee |
@@ -255,7 +257,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 | `AllowedStartDate` | DateTime | Earliest allowed start date |
 | `ReminderTimeSpan` | integer | Reminder time span in days |
 | `ReminderDate` | DateTime | Date when reminder is sent |
-| `Attachments` | XML | Nested list of workflow attachments |
+| `Attachments` | XML | Nested list of workflow attachments. Each `<Attachment>` includes `<AttachmentDate>`, `<DocumentId>`, `<DocumentName>`, `<Path>` (folder path only, does not include the document name), `<WorkflowId>`, `<StepNumber>`, `<StepName>`, and `<UserId>`. |
 
 ## Required Permissions
 

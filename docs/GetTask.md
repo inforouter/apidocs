@@ -84,10 +84,14 @@ Returns the full details of a single workflow task by its task ID.
     <AllowedStartDate>1900-01-01 00:00:00</AllowedStartDate>
     <ReminderTimeSpan>0</ReminderTimeSpan>
     <ReminderDate>1900-01-01 00:00:00</ReminderDate>
+    <extendedInstruction>Full task instruction text, may exceed 255 characters.</extendedInstruction>
+    <extendedComment>Full assignee comment text, may exceed 255 characters.</extendedComment>
     <Attachments>
       <Attachment>
         <AttachmentDate>2024-03-02 10:30:00</AttachmentDate>
         <DocumentId>1025</DocumentId>
+        <DocumentName>SupportingEvidence.pdf</DocumentName>
+        <Path>/Corporate/Legal</Path>
         <WorkflowId>225</WorkflowId>
         <StepNumber>1</StepNumber>
         <StepName>Review</StepName>
@@ -182,6 +186,8 @@ Returns the full details of a single workflow task by its task ID.
 |---------|-------------|
 | `ShortInstruction` | First 255 characters of the task instruction. |
 | `ShortComments` | First 255 characters of the assignee's comments. |
+| `extendedInstruction` | Full task instruction text. Identical to `ShortInstruction` when the instruction is 255 characters or fewer; contains the complete text when it is longer. |
+| `extendedComment` | Full assignee comment text. Identical to `ShortComments` when the comment is 255 characters or fewer; contains the complete text when it is longer. |
 
 ### Requirements
 
@@ -196,12 +202,14 @@ The `<Requirements>` element is always empty (legacy field, reserved).
 ### Attachments
 
 The `<Attachments>` element lists documents attached to the task during execution. Each `<Attachment>` has:
-- `<AttachmentDate>` -" Date/time the attachment was added.
-- `<DocumentId>` -" Document ID of the attachment.
-- `<WorkflowId>` -" Workflow instance ID.
-- `<StepNumber>` -" Step number where the attachment was added.
-- `<StepName>` -" Step name.
-- `<UserId>` -" User ID of the person who added the attachment.
+- `<AttachmentDate>` — Date/time the attachment was added.
+- `<DocumentId>` — Document ID of the attachment.
+- `<DocumentName>` — File name of the attached document.
+- `<Path>` — Folder path containing the attached document (does not include the document name).
+- `<WorkflowId>` — Workflow instance ID.
+- `<StepNumber>` — Step number where the attachment was added.
+- `<StepName>` — Step name.
+- `<UserId>` — User ID of the person who added the attachment.
 
 ## Required Permissions
 
