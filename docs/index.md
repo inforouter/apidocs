@@ -236,6 +236,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 
 ### Workflow Management
 - [ActivateFlowDef](ActivateFlowDef.md) - Activate a workflow definition
+- [AddWorkflowAttachment](AddWorkflowAttachment.md) - Attach a document to an active workflow task
 - [AddFlowStepDef](AddFlowStepDef.md) - Add a new step to an inactive workflow definition (step number auto-assigned)
 - [AddFlowStepDef1](AddFlowStepDef1.md) - Add a new step to an inactive workflow definition with an optional on-start folder move
 - [AddFlowTaskDef](AddFlowTaskDef.md) - Add a task definition to a step of an inactive workflow definition
@@ -280,6 +281,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [DeleteFlowTaskDef](DeleteFlowTaskDef.md) - Delete a task definition from a workflow step
 - [DeleteWorkflow](DeleteWorkflow.md) - Permanently delete a workflow definition by ID
 - [getTasks](getTasks.md) - Get a filtered list of workflow tasks with sorting and XML-based search criteria
+- [GetTasks1](GetTasks1.md) - Get a paged list of workflow tasks with startingRow and rowCount pagination support
 - [GetUsersTaskPerformance](GetUsersTaskPerformance.md) - Get user task performance statistics (due and overdue task counts)
 - [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) - Get workflow roles assigned to a user (supervisor and assignee roles)
 - [GetWorkflowDefinitions](GetWorkflowDefinitions.md) - Get all workflow definitions in the system with optional active-only filter (admin only)

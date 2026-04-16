@@ -30,16 +30,14 @@ The `xmlRules` parameter must be a valid XML string with `<Rules>` as the root e
 ```xml
 <Rules>
   <Rule Name="ALLOWABLEFILETYPES" Value="*" />
-  <Rule Name="DISALLOWNEWFOLDERS" Value="0" />
-  <Rule Name="DISALLOWFOLDERDELETE" Value="0" />
-  <Rule Name="DISALLOWDOCUMENTCHECKOUT" Value="0" />
-  <Rule Name="DISALLOWDOCUMENTCHECKIN" Value="0" />
-  <Rule Name="DISALLOWDOCUMENTDELETE" Value="0" />
-  <Rule Name="DISALLOWNEWDOCUMENT" Value="0" />
-  <Rule Name="ALLOWCLASSIFIEDDOCUMENTS" Value="0" />
-  <Rule Name="DEFAULTVIEWSTYLE" Value="0" />
-  <Rule Name="MANDATORYVIEWSTYLE" Value="0" />
-  <Rule Name="AUTOPROMPTPROPERTYSETID" Value="0" />
+  <Rule Name="NEWFOLDERS" Value="allows" />
+  <Rule Name="FOLDERDELETES" Value="allows" />
+  <Rule Name="CHECKOUTS" Value="allows" />
+  <Rule Name="CHECKINS" Value="allows" />
+  <Rule Name="DOCUMENTDELETES" Value="allows" />
+  <Rule Name="NEWDOCUMENTS" Value="allows" />
+  <Rule Name="CLASSIFIEDDOCUMENTS" Value="allows" />
+  <Rule Name="AUTOPROMPTPROPERTYSETNAME" Value="" />
 </Rules>
 ```
 
@@ -48,16 +46,16 @@ The `xmlRules` parameter must be a valid XML string with `<Rules>` as the root e
 | Rule Name | Values | Description |
 |-----------|--------|-------------|
 | `ALLOWABLEFILETYPES` | `*` or comma-separated extensions (e.g. `.pdf,.docx,.xlsx`) | Restricts uploadable file types. `*` allows all types. |
-| `DISALLOWNEWFOLDERS` | `"1"` = disallow, `"0"` = allow | Prevents creation of new subfolders. |
-| `DISALLOWFOLDERDELETE` | `"1"` = disallow, `"0"` = allow | Prevents deletion of subfolders. |
-| `DISALLOWDOCUMENTCHECKOUT` | `"1"` = disallow, `"0"` = allow | Prevents document check-outs. |
-| `DISALLOWDOCUMENTCHECKIN` | `"1"` = disallow, `"0"` = allow | Prevents document check-ins. |
-| `DISALLOWDOCUMENTDELETE` | `"1"` = disallow, `"0"` = allow | Prevents document deletion. |
-| `DISALLOWNEWDOCUMENT` | `"1"` = disallow, `"0"` = allow | Prevents uploading new documents. |
-| `ALLOWCLASSIFIEDDOCUMENTS` | `"1"` = allow, `"0"` = disallow | Allows classified (restricted) documents. |
-| `DEFAULTVIEWSTYLE` | Integer | Default view style for the folder. |
-| `MANDATORYVIEWSTYLE` | Integer | Mandatory view style that overrides user preference. |
-| `AUTOPROMPTPROPERTYSETID` | Integer (property set ID) | Auto-prompts users to fill a property set when uploading. |
+| `NEWFOLDERS` | `"allows"` or `"disallows"` | Controls creation of new subfolders. |
+| `FOLDERDELETES` | `"allows"` or `"disallows"` | Controls deletion of subfolders. |
+| `CHECKOUTS` | `"allows"` or `"disallows"` | Controls document check-outs. |
+| `CHECKINS` | `"allows"` or `"disallows"` | Controls document check-ins. |
+| `DOCUMENTDELETES` | `"allows"` or `"disallows"` | Controls document deletion. |
+| `NEWDOCUMENTS` | `"allows"` or `"disallows"` | Controls uploading of new documents. |
+| `CLASSIFIEDDOCUMENTS` | `"allows"` or `"disallows"` | Controls whether classified (restricted) documents are permitted. |
+| `AUTOPROMPTPROPERTYSETNAME` | Property set name string, or empty string to clear | Auto-prompts users to fill the named property set when uploading. Pass an empty string to remove the prompt. |
+
+> **Note:** Rule names are case-insensitive. Only rules present in `xmlRules` are updated; omitted rules retain their current values.
 
 ---
 
@@ -66,13 +64,13 @@ The `xmlRules` parameter must be a valid XML string with `<Rules>` as the root e
 ### Success Response
 
 ```xml
-<response success="true" error="" />
+<root success="true" />
 ```
 
 ### Error Response
 
 ```xml
-<response success="false" error="Folder not found." />
+<root success="false" error="Folder not found." />
 ```
 
 ---
@@ -93,7 +91,7 @@ Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &Path=/Finance/Reports
-&xmlRules=<Rules><Rule Name="ALLOWABLEFILETYPES" Value=".pdf"/><Rule Name="DISALLOWDOCUMENTDELETE" Value="1"/></Rules>
+&xmlRules=<Rules><Rule Name="ALLOWABLEFILETYPES" Value=".pdf"/><Rule Name="DOCUMENTDELETES" Value="disallows"/></Rules>
 &ApplyToTree=false
 ```
 
@@ -141,5 +139,3 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Access denied | The user does not have the required permissions. |
 | Invalid xmlRules | The `xmlRules` parameter is not a valid XML string. |
 | `SystemError:...` | An unexpected server-side error occurred. |
-
----
