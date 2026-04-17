@@ -82,6 +82,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 ### Folder Management
 - [CreateFolder](CreateFolder.md) - Create a folder from a single full path (intermediate folders created automatically)
 - [CreateFolder1](CreateFolder1.md) - Create a subfolder with optional description using separate parent path and name parameters
+- [CreateHtmlDocument](CreateHtmlDocument.md) - Create a new HTML document in a folder with raw HTML content
 - [DeleteFolder](DeleteFolder.md) - Delete a folder and all its contents
 - [FolderExists](FolderExists.md) - Check whether a folder exists at the specified path
 - [FolderExists1](FolderExists1.md) - Check whether a named subfolder exists within a specified parent folder
@@ -116,6 +117,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [CreateUploadHandler](CreateUploadHandler.md) - Create a server-side upload handler for chunked large file uploads
 - [DeleteDocument](DeleteDocument.md) - Move a document to the recycle bin
 - [DeleteDocumentComment](DeleteDocumentComment.md) - Delete a specific comment from a document
+- [DeleteDocumentThumbnail](DeleteDocumentThumbnail.md) - Remove the thumbnail image from a document
 - [DeleteDocumentTypeDef](DeleteDocumentTypeDef.md) - Delete a document type definition
 - [DeleteDocumentVersion](DeleteDocumentVersion.md) - Permanently delete a specific version of a document
 - [DeleteDownloadHandler](DeleteDownloadHandler.md) - Delete a download handler and discard its temporary file
@@ -136,6 +138,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDocumentComments](GetDocumentComments.md) - Get all comments attached to a document
 - [GetDocumentKeywords](GetDocumentKeywords.md) - Get user-defined keywords assigned to a document
 - [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md) - Get the stored plain-text alternative content of the latest published version of a document
+- [GetDocumentThumbnail](GetDocumentThumbnail.md) - Retrieve the thumbnail image bytes for a document
 - [GetDocumentTypes](GetDocumentTypes.md) - Get all document type definitions configured in the system
 - [GetDocumentVersion](GetDocumentVersion.md) - Get the metadata for a specific version of a document
 - [GetDocumentVersions](GetDocumentVersions.md) - Get the complete version history for a document
@@ -157,6 +160,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetVersionTextOnlyContent](GetVersionTextOnlyContent.md) - Get the plain-text alternative content stored for a specific version of a document
 - [IsLockPossible](IsLockPossible.md) - Check whether the current user can lock (check out) the document at the specified path
 - [Lock](Lock.md) - Lock (check out) the document or all documents in a folder at the specified path
+- [PruneDocumentVersions](PruneDocumentVersions.md) - Delete old document versions retaining the N most recent published and M most recent unpublished
 - [PublishDocument](PublishDocument.md) - Set the published version of a document
 - [RegisterEmail](RegisterEmail.md) - Register an email message as a document in infoRouter
 - [RegisterEmail1](RegisterEmail1.md) - Register an email message as a document in infoRouter and set user-defined keywords
@@ -180,8 +184,12 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UpdateDocumentProperties](UpdateDocumentProperties.md) - Update a document's name, description, and update instructions
 - [UpdateDocumentProperties1](UpdateDocumentProperties1.md) - Update a document's name, description, instructions, source, language, and author
 - [UpdateDocumentProperties2](UpdateDocumentProperties2.md) - Update all document properties including importance level
+- [UpdateDocumentThumbnail](UpdateDocumentThumbnail.md) - Upload or replace the thumbnail image for a document
 - [UpdateDocumentType](UpdateDocumentType.md) - Change the document type assigned to a document
 - [UpdateDocumentTypeDef](UpdateDocumentTypeDef.md) - Rename a document type definition and change its required property set
+- [UpdateHtmlDocument](UpdateHtmlDocument.md) - Update the HTML content and description of an existing HTML document
+- [UpdateURLDocument](UpdateURLDocument.md) - Update the hyperlink address of an existing URL shortcut document
+- [UpdateVersionComment](UpdateVersionComment.md) - Update the author comment on a specific document version
 - [UploadDocument](UploadDocument.md) - Upload a new document or new version using a raw byte array
 - [UploadDocument1](UploadDocument1.md) - Upload a new document or version with an optional version comment
 - [UploadDocument2](UploadDocument2.md) - Upload a new document or version with a post-upload checkout option
@@ -262,6 +270,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) - Return the list of users who are redirecting their tasks to a specified user
 - [ReassignTask](ReassignTask.md) - Reassign an active workflow task to a different user with a new due date and instructions
 - [RemoveCurrentWorkflow](RemoveCurrentWorkflow.md) - Permanently remove a running workflow from a document (hard delete, no notifications; blocked if any tasks are already completed)
+- [RemoveWorkflowAttachment](RemoveWorkflowAttachment.md) - Remove a previously attached document from an active workflow task
 - [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) - Remove the task redirection configured for a user so incoming tasks are no longer forwarded
 - [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) - Change the target user of an existing task redirection while keeping the original date window
 - [SetTaskApprovalStatus](SetTaskApprovalStatus.md) - Set the approval decision (Approve/Reject/clear) on a workflow task with an Approval requirement
