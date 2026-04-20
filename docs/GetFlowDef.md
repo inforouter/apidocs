@@ -55,6 +55,7 @@ Returns the complete definition of a workflow, including all step definitions an
           <Requirements>
             <Requirement Name="LastestVersionRead" Definition="" RefObjectId="0" />
           </Requirements>
+          <RightType RightTypeId="2" RightTypeName="READ" RightTypeText="Read Only" />
           <Permissions>
             <Permission Name="EditDocument" Value="False" />
             <Permission Name="ChangeFinishdate" Value="False" />
@@ -135,6 +136,12 @@ Lists completion requirements. Each `<Requirement>` element has:
 - `Name` -" Requirement type (e.g. `LastestVersionRead`, `Edit`, `Comments`, `Approval`, `SOXReview`, `ISOReview`).
 - `Definition` -" Supplemental definition text (used for some requirement types).
 - `RefObjectId` -" Referenced object ID (used for some requirement types).
+
+### `<RightType>`
+Describes the minimum document access right required for this task. Attributes:
+- `RightTypeId` — Numeric right type value (`0`=NOACCESS, `1`=LIST, `2`=READ, `3`=ADD, `4`=ADDREAD, `5`=CHANGE, `6`=FULLCONTROL).
+- `RightTypeName` — C# enum member name (e.g. `READ`, `CHANGE`, `FULLCONTROL`).
+- `RightTypeText` — Localized display label of the right type.
 
 ### `<Permissions>`
 Six named boolean permissions for the task assignee:

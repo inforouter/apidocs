@@ -44,6 +44,15 @@ Returns all workflow tasks associated with a document, with optional filtering b
       <FinishDate>0001-01-01T00:00:00</FinishDate>
       <DueDate>2026-04-04T08:00:00</DueDate>
       <DeadLine>72</DeadLine>
+      <RightType RightTypeId="2" RightTypeName="READ" RightTypeText="Read Only" />
+      <Permissions>
+        <Permission Name="EditDocument" Value="False" />
+        <Permission Name="ChangeFinishdate" Value="False" />
+        <Permission Name="Postpone" Value="False" />
+        <Permission Name="ChangePriority" Value="False" />
+        <Permission Name="EditNextStep" Value="False" />
+        <Permission Name="EditAllSteps" Value="False" />
+      </Permissions>
       <Priority>Normal</Priority>
       <TaskStatus>InProgress</TaskStatus>
       <ApprovalStatus>NoResult</ApprovalStatus>
@@ -106,7 +115,9 @@ When the document has no matching tasks the `<Value>` element is present but emp
 | `StartDate` | datetime | Date and time the task was started. `0001-01-01T00:00:00` if not yet started. |
 | `FinishDate` | datetime | Date and time the task was finished. `0001-01-01T00:00:00` if still active. |
 | `DueDate` | datetime | Deadline for the task. |
-| `DeadLine` | integer | Deadline in hours from assignment time. |
+| `DeadLine` | integer | Deadline in hours from assignment time. `0` means no deadline. |
+| `RightType` | XML element | Document access right required by this task. Attributes: `RightTypeId` (integer: `0`=NOACCESS, `1`=LIST, `2`=READ, `3`=ADD, `4`=ADDREAD, `5`=CHANGE, `6`=FULLCONTROL), `RightTypeName` (enum name, e.g. `READ`), `RightTypeText` (localized label). |
+| `Permissions` | XML element | Six task-assignee permissions. Each `<Permission Name="..." Value="True\|False"/>`: `EditDocument`, `ChangeFinishdate`, `Postpone`, `ChangePriority`, `EditNextStep`, `EditAllSteps`. |
 | `Priority` | string | Task priority. Values: `NoPriority`, `Low`, `Normal`, `High`, `Urgent`. |
 | `TaskStatus` | string | Current task status. Values: `NotStarted`, `InProgress`, `DueDateChanged`, `Completed`, `Dropped`, `Reassigned`. |
 | `ApprovalStatus` | string | Approval decision if the task has an Approval requirement. Values: `NoResult`, `Reject`, `Approve`. |

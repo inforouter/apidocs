@@ -69,6 +69,15 @@ Returns the full details of a single workflow task by its task ID.
     <RedirectedFrom_UserName></RedirectedFrom_UserName>
     <AdHoc>False</AdHoc>
     <DeadLine>48</DeadLine>
+    <RightType RightTypeId="2" RightTypeName="READ" RightTypeText="Read Only" />
+    <Permissions>
+      <Permission Name="EditDocument" Value="False" />
+      <Permission Name="ChangeFinishdate" Value="False" />
+      <Permission Name="Postpone" Value="False" />
+      <Permission Name="ChangePriority" Value="False" />
+      <Permission Name="EditNextStep" Value="False" />
+      <Permission Name="EditAllSteps" Value="False" />
+    </Permissions>
     <RequirementDetails>
       <Requirement>
         <Name>LastestVersionRead</Name>
@@ -188,6 +197,27 @@ Returns the full details of a single workflow task by its task ID.
 | `ShortComments` | First 255 characters of the assignee's comments. |
 | `extendedInstruction` | Full task instruction text. Identical to `ShortInstruction` when the instruction is 255 characters or fewer; contains the complete text when it is longer. |
 | `extendedComment` | Full assignee comment text. Identical to `ShortComments` when the comment is 255 characters or fewer; contains the complete text when it is longer. |
+
+### Right Type & Permissions
+
+The `<RightType>` element describes the document access right required by this task:
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `RightTypeId` | integer | Numeric right type value (`0`=NOACCESS, `1`=LIST, `2`=READ, `3`=ADD, `4`=ADDREAD, `5`=CHANGE, `6`=FULLCONTROL). |
+| `RightTypeName` | string | C# enum member name of the right type (e.g. `READ`, `CHANGE`, `FULLCONTROL`). |
+| `RightTypeText` | string | Localized display label of the right type. |
+
+The `<Permissions>` element lists six boolean task-assignee permissions, each as `<Permission Name="..." Value="True|False"/>`:
+
+| Name | Description |
+|------|-------------|
+| `EditDocument` | Assignee may edit the document. |
+| `ChangeFinishdate` | Assignee may change the finish date. |
+| `Postpone` | Assignee may change the due date. |
+| `ChangePriority` | Assignee may change the task priority. |
+| `EditNextStep` | Assignee may change next-step routing. |
+| `EditAllSteps` | Assignee may change routing for all remaining steps. |
 
 ### Requirements
 

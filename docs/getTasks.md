@@ -157,6 +157,15 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
       <RedirectedFrom_UserName></RedirectedFrom_UserName>
       <AdHoc>false</AdHoc>
       <DeadLine>14</DeadLine>
+      <RightType RightTypeId="2" RightTypeName="READ" RightTypeText="Read Only" />
+      <Permissions>
+        <Permission Name="EditDocument" Value="False" />
+        <Permission Name="ChangeFinishdate" Value="False" />
+        <Permission Name="Postpone" Value="False" />
+        <Permission Name="ChangePriority" Value="False" />
+        <Permission Name="EditNextStep" Value="False" />
+        <Permission Name="EditAllSteps" Value="False" />
+      </Permissions>
       <RequirementDetails>
         <Requirement>
           <Name>Approval Required</Name>
@@ -248,7 +257,9 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 | `RedirectedFrom_UserID` | integer | Original assignee user ID if task was redirected (0 if not redirected) |
 | `RedirectedFrom_UserName` | string | Original assignee name if redirected |
 | `AdHoc` | boolean | Whether this is an ad-hoc task |
-| `DeadLine` | integer | Deadline in days |
+| `DeadLine` | integer | Deadline in hours from task creation. `0` means no deadline. |
+| `RightType` | XML element | Document access right required by this task. Attributes: `RightTypeId` (integer: `0`=NOACCESS … `6`=FULLCONTROL), `RightTypeName` (enum name, e.g. `READ`), `RightTypeText` (localized label). |
+| `Permissions` | XML element | Six task-assignee permissions. Each `<Permission Name="..." Value="True\|False"/>`: `EditDocument`, `ChangeFinishdate`, `Postpone`, `ChangePriority`, `EditNextStep`, `EditAllSteps`. |
 | `RequirementDetails` | XML | Nested list of task requirements |
 | `Requirements` | string | Requirements summary |
 | `Supervisor_NotificationOnDue` | integer | Days before due date to notify supervisor |
