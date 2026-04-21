@@ -21,12 +21,12 @@ Updates the properties of an existing workflow definition, including its name, a
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `domainName` | string | Yes | The domain (library) name that owns the workflow definition. |
 | `workflowName` | string | Yes | The current name of the workflow definition to update. Used to locate the definition. |
-| `xmlParameters` | string | Yes | XML-serialized `WorkflowDefintionRequestModel` containing all updated property values (see structure below). |
+| `xmlParameters` | string | Yes | XML-serialized `WorkflowDefinitionRequestModel` containing all updated property values (see structure below). |
 
 ### xmlParameters Structure
 
 ```xml
-<WorkflowDefintionRequestModel>
+<WorkflowDefinitionRequestModel>
   <NewFlowName>Document Approval</NewFlowName>
   <ActiveFolderPath>/MyDomain/Active Documents</ActiveFolderPath>
   <Active>false</Active>
@@ -39,7 +39,7 @@ Updates the properties of an existing workflow definition, including its name, a
   <SupervisorUsergroupNames>
     <string>MyDomain/Approvers</string>
   </SupervisorUsergroupNames>
-</WorkflowDefintionRequestModel>
+</WorkflowDefinitionRequestModel>
 ```
 
 To specify no supervisors, use empty elements:
@@ -49,7 +49,7 @@ To specify no supervisors, use empty elements:
 <SupervisorUsergroupNames />
 ```
 
-#### WorkflowDefintionRequestModel Fields
+#### WorkflowDefinitionRequestModel Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -97,7 +97,7 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &domainName=MyDomain
 &workflowName=Document+Approval
-&xmlParameters=<WorkflowDefintionRequestModel><NewFlowName>Document+Approval</NewFlowName><ActiveFolderPath>/MyDomain/Active+Documents</ActiveFolderPath><Active>false</Active><OnEndMoveToPath>/MyDomain/Archive</OnEndMoveToPath><OnEndEventUrl></OnEndEventUrl><Hide>false</Hide><SupervisorUserNames><string>jdoe</string></SupervisorUserNames><SupervisorUsergroupNames /></WorkflowDefintionRequestModel>
+&xmlParameters=<WorkflowDefinitionRequestModel><NewFlowName>Document+Approval</NewFlowName><ActiveFolderPath>/MyDomain/Active+Documents</ActiveFolderPath><Active>false</Active><OnEndMoveToPath>/MyDomain/Archive</OnEndMoveToPath><OnEndEventUrl></OnEndEventUrl><Hide>false</Hide><SupervisorUserNames><string>jdoe</string></SupervisorUserNames><SupervisorUsergroupNames /></WorkflowDefinitionRequestModel>
 ```
 
 ### Request (GET)
@@ -122,7 +122,7 @@ HTTP/1.1
       <tns:domainName>MyDomain</tns:domainName>
       <tns:workflowName>Document Approval</tns:workflowName>
       <tns:xmlParameters>
-        &lt;WorkflowDefintionRequestModel&gt;
+        &lt;WorkflowDefinitionRequestModel&gt;
           &lt;NewFlowName&gt;Document Approval&lt;/NewFlowName&gt;
           &lt;ActiveFolderPath&gt;/MyDomain/Active Documents&lt;/ActiveFolderPath&gt;
           &lt;Active&gt;false&lt;/Active&gt;
@@ -131,7 +131,7 @@ HTTP/1.1
           &lt;Hide&gt;false&lt;/Hide&gt;
           &lt;SupervisorUserNames&gt;&lt;string&gt;jdoe&lt;/string&gt;&lt;/SupervisorUserNames&gt;
           &lt;SupervisorUsergroupNames /&gt;
-        &lt;/WorkflowDefintionRequestModel&gt;
+        &lt;/WorkflowDefinitionRequestModel&gt;
       </tns:xmlParameters>
     </tns:UpdateWorkflowDefinition>
   </soap:Body>
@@ -150,7 +150,7 @@ HTTP/1.1
 - Multiple supervisors can be specified — both individual users (`SupervisorUserNames`) and groups (`SupervisorUsergroupNames`) are supported simultaneously.
 - For `SupervisorUsergroupNames`, use the format `DomainName/GroupName` when the group name is not unique across domains. If the group name is unique, just the group name is sufficient.
 - Use `ActivateFlowDef` or `DeactivateFlowDef` if you only need to toggle the active state without changing other properties.
-- Note: The class name in the XML root element is `WorkflowDefintionRequestModel` (single `i` in `Defintion` — this is the spelling used in the codebase).
+- Note: The class name in the XML root element is `WorkflowDefinitionRequestModel` (single `i` in `Defintion` — this is the spelling used in the codebase).
 
 ---
 
@@ -160,7 +160,7 @@ HTTP/1.1
 |-------|-------------|
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Invalid XML format | `xmlParameters` could not be deserialized into `WorkflowDefintionRequestModel`. |
+| Invalid XML format | `xmlParameters` could not be deserialized into `WorkflowDefinitionRequestModel`. |
 | Workflow not found | The `domainName` + `workflowName` combination does not exist. |
 | Access denied | The calling user is not an administrator or supervisor of this workflow. |
 | Flow with this name already exists | `NewFlowName` is already used by another workflow in the same domain. |

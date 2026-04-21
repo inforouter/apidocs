@@ -326,6 +326,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [CreateRandDSchedule](CreateRandDSchedule.md) - Create a new Retention and Disposition schedule definition
 - [CreateRetentionSourceAuthority](CreateRetentionSourceAuthority.md) - Create a new retention source authority
 - [DeleteRandDSchedule](DeleteRandDSchedule.md) - Delete an R&D schedule definition (blocked if assigned to documents or folders)
+- [DeleteRandDSchedule1](DeleteRandDSchedule1.md) - Delete an R&D schedule definition with optional force-unassign before deletion
 - [DeleteRetentionSourceAuthority](DeleteRetentionSourceAuthority.md) - Delete a retention source authority
 - [GetDocumentRandDSchedule](GetDocumentRandDSchedule.md) - Get the R&D schedule assigned to a document (returns DefId=0 if none)
 - [GetFolderRandDSchedule](GetFolderRandDSchedule.md) - Get the R&D schedule assigned to a folder (returns DefId=0 if none)
