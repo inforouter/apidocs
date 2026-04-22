@@ -47,7 +47,8 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetLicenseInfo](GetLicenseInfo.md) - Get application license details, user counts, and subscription dates (admin only)
 - [GetSystemStatistics](GetSystemStatistics.md) - Get system-wide statistics: user counts, document counts, total document size, and checked-out documents (admin only)
 - [GetLogs](GetLogs.md) - Get server log entries by type and date (admin only)
-- [GetLogStatistics](GetLogStatistics.md) - Get available log dates and entry counts by log type (admin only)
+- [GetLogStatistics](GetLogStatistics.md) - Get log dates and entry counts by log type, fixed 90-day window (admin only)
+- [GetLogStatistics1](GetLogStatistics1.md) - Get log dates and entry counts by log type with a caller-supplied lookback window (admin only)
 - [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) - Get status of all system maintenance jobs (admin only)
 - [GetWarehouseStatus](GetWarehouseStatus.md) - Get warehouse storage status, document counts, and disk information (admin only)
 - [ServerInfo](ServerInfo.md) - Get server version, time, and basic license info (no authentication required)
@@ -324,11 +325,14 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 
 ### Retention & Disposition
 - [CreateRandDSchedule](CreateRandDSchedule.md) - Create a new Retention and Disposition schedule definition
+- [DisposeItem](DisposeItem.md) - Dispose a document or folder by path per its active R&D schedule (auto-detects path type; folder disposal is recursive)
 - [CreateRetentionSourceAuthority](CreateRetentionSourceAuthority.md) - Create a new retention source authority
 - [DeleteRandDSchedule](DeleteRandDSchedule.md) - Delete an R&D schedule definition (blocked if assigned to documents or folders)
 - [DeleteRandDSchedule1](DeleteRandDSchedule1.md) - Delete an R&D schedule definition with optional force-unassign before deletion
 - [DeleteRetentionSourceAuthority](DeleteRetentionSourceAuthority.md) - Delete a retention source authority
+- [GetAppliedRDScheduleLogs](GetAppliedRDScheduleLogs.md) - Get history of R&D schedules applied to a document or folder by path
 - [GetDocumentRandDSchedule](GetDocumentRandDSchedule.md) - Get the R&D schedule assigned to a document (returns DefId=0 if none)
+- [GetRdFreezeLogs](GetRdFreezeLogs.md) - Get the R&D freeze flag change history for a document or folder by path
 - [GetFolderRandDSchedule](GetFolderRandDSchedule.md) - Get the R&D schedule assigned to a folder (returns DefId=0 if none)
 - [GetRandDScheduleInfo](GetRandDScheduleInfo.md) - Get full details of a specific R&D schedule definition
 - [GetRandDSchedules](GetRandDSchedules.md) - List all R&D schedule definitions (summary: ID, name, description)
@@ -337,8 +341,17 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [RemoveFolderRandDSchedule](RemoveFolderRandDSchedule.md) - Remove the R&D schedule from a folder, optionally cascading to subfolders and documents
 - [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md) - Assign an R&D schedule to a document
 - [SetFolderRandDSchedule](SetFolderRandDSchedule.md) - Assign an R&D schedule to a folder, optionally cascading to subfolders and documents
+- [SetRdFreezeFlag](SetRdFreezeFlag.md) - Set or clear the R&D freeze flag on a document or folder by path (auto-detects path type; folder update is recursive)
 - [UpdateRandDSchedule](UpdateRandDSchedule.md) - Update an existing R&D schedule definition with optional date recalculation for assigned objects
 - [UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md) - Update (rename) a retention source authority
+
+### ISO Review
+- [GetISOReviewDefinition](GetISOReviewDefinition.md) - Get the ISO review schedule definition for a document
+- [RemoveISOReviewDefinition](RemoveISOReviewDefinition.md) - Remove the ISO review schedule from a document
+- [SetISOReviewDefinition](SetISOReviewDefinition.md) - Set the ISO review schedule on a document
+
+### Notifications & Distribution
+- [DistributeDocument](DistributeDocument.md) - Send OnChange distribution notification email to all subscribers of a document
 
 ### User Group Management
 - [AddUsergroupMember](AddUsergroupMember.md) - Add a user to a user group
