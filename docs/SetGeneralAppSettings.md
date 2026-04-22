@@ -100,12 +100,16 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
           </Workdays>
           <HolidayList>
             <Holiday>
-              <HolidayDate>2025-01-01T00:00:00</HolidayDate>
-              <Description>New Year</Description>
+              <HolidayDate>2000-01-01T00:00:00</HolidayDate>
+              <Description>New Year (recurring every Jan 1)</Description>
+            </Holiday>
+            <Holiday>
+              <HolidayDate>2000-12-25T00:00:00</HolidayDate>
+              <Description>Christmas Day (recurring every Dec 25)</Description>
             </Holiday>
             <Holiday>
               <HolidayDate>2025-07-04T00:00:00</HolidayDate>
-              <Description>Independence Day</Description>
+              <Description>Independence Day (one-time, 2025 only)</Description>
             </Holiday>
           </HolidayList>
           <ZipDownloadSetting>
@@ -152,9 +156,15 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
     <EndMinute>0</EndMinute>
   </Workdays>
   <HolidayList>
+    <!-- Recurring holiday: year 2000 means every Jan 1st -->
     <Holiday>
-      <HolidayDate>2025-01-01T00:00:00</HolidayDate>
+      <HolidayDate>2000-01-01T00:00:00</HolidayDate>
       <Description>New Year</Description>
+    </Holiday>
+    <!-- One-time holiday: applies only on this exact date -->
+    <Holiday>
+      <HolidayDate>2025-07-04T00:00:00</HolidayDate>
+      <Description>Independence Day</Description>
     </Holiday>
   </HolidayList>
   <ZipDownloadSetting>
@@ -163,6 +173,32 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
     <MaxTotalCount>1000</MaxTotalCount>
   </ZipDownloadSetting>
 </GeneralSettings>
+```
+
+## Holiday Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `HolidayDate` | DateTime | Date of the holiday in ISO 8601 format (e.g. `2025-07-04T00:00:00`) |
+| `Description` | string | Name or description of the holiday |
+
+### Recurring vs One-Time Holidays
+
+A holiday whose `HolidayDate` year is **2000** is treated as a **recurring (annual) holiday** — it applies on that month and day every year.  
+A holiday whose year is any other value is a **one-time holiday** that applies only on that exact date.
+
+```xml
+<!-- Recurring: applies every December 25th regardless of year -->
+<Holiday>
+  <HolidayDate>2000-12-25T00:00:00</HolidayDate>
+  <Description>Christmas Day</Description>
+</Holiday>
+
+<!-- One-time: applies only on July 4, 2025 -->
+<Holiday>
+  <HolidayDate>2025-07-04T00:00:00</HolidayDate>
+  <Description>Independence Day</Description>
+</Holiday>
 ```
 
 > **Important:** The `HolidayList` element is required if you want to persist holidays. If you omit it, existing holiday definitions will be cleared.
@@ -180,6 +216,7 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
 - All numeric values are expressed in *bytes* unless the property name indicates minutes/hours.
 - Upload limits must stay within the server's IIS `maxRequestLength` and execution timeout settings.
 - Holidays are serialized through `HolidayList` (dictionary values are not serialized directly).
+- A `HolidayDate` with year `2000` marks a recurring annual holiday (matched by month/day only). Any other year marks a one-time holiday matched by exact date.
 - Failure responses always include a localized message in the `error` attribute.
 - Because this API overwrites the entire `GeneralSettings` object, avoid sending partial XML documents.
 - Audit and change tracking should be handled at the application level by storing copies of previous XML payloads.
