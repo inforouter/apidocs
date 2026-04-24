@@ -375,6 +375,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetNextSearchPage](GetNextSearchPage.md) - Get the next page of a prepared search result set
 - [GetPreviousSearchPage](GetPreviousSearchPage.md) - Get the previous page of a prepared search result set
 - [DeleteSearchPage](DeleteSearchPage.md) - Delete a saved search page definition by ID
+- [GetSearchPage](GetSearchPage.md) - Get the full definition of a single search page including field-visibility configuration
 - [GetSearchPages](GetSearchPages.md) - List all search page definitions visible to the current user
 - [SaveSearchPage](SaveSearchPage.md) - Create or update a search page definition
 - [Search](Search.md) - Prepare a search result set using XML-based criteria with sorting options
