@@ -352,6 +352,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 
 ### Notifications & Distribution
 - [DistributeDocument](DistributeDocument.md) - Send OnChange distribution notification email to all subscribers of a document
+- [SendEmail](SendEmail.md) - Send documents and/or folders to recipients by email as links, ZIP, or individual attachments
 
 ### User Group Management
 - [AddUsergroupMember](AddUsergroupMember.md) - Add a user to a user group
@@ -373,6 +374,9 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 ### Search
 - [GetNextSearchPage](GetNextSearchPage.md) - Get the next page of a prepared search result set
 - [GetPreviousSearchPage](GetPreviousSearchPage.md) - Get the previous page of a prepared search result set
+- [DeleteSearchPage](DeleteSearchPage.md) - Delete a saved search page definition by ID
+- [GetSearchPages](GetSearchPages.md) - List all search page definitions visible to the current user
+- [SaveSearchPage](SaveSearchPage.md) - Create or update a search page definition
 - [Search](Search.md) - Prepare a search result set using XML-based criteria with sorting options
 
 ### Document Associations
