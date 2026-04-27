@@ -204,6 +204,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UploadDocumentWithHandler2](UploadDocumentWithHandler2.md) - Finalize a chunked upload with version comment and manual version numbers
 - [UploadDocumentWithHandler3](UploadDocumentWithHandler3.md) - Finalize a chunked upload with extended XML parameters
 - [UploadFileChunk](UploadFileChunk.md) - Upload a single binary chunk to a server-side upload handler
+- [UploadZip](UploadZip.md) - Import a ZIP archive as a folder and document structure into a destination folder
 - [UploadNewDocumentWidthHandler](UploadNewDocumentWidthHandler.md) - Upload a new document to a folder using a chunked handler and XML parameters
 - [UploadTiffAsPDF](UploadTiffAsPDF.md) - Upload a TIFF image and store it as a PDF document
 - [UploadTiffAsPDFWithHandler](UploadTiffAsPDFWithHandler.md) - Upload a large TIFF image using chunked handler and store as PDF
@@ -374,10 +375,11 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 ### Search
 - [GetNextSearchPage](GetNextSearchPage.md) - Get the next page of a prepared search result set
 - [GetPreviousSearchPage](GetPreviousSearchPage.md) - Get the previous page of a prepared search result set
-- [DeleteSearchPage](DeleteSearchPage.md) - Delete a saved search page definition by ID
-- [GetSearchPage](GetSearchPage.md) - Get the full definition of a single search page including field-visibility configuration
-- [GetSearchPages](GetSearchPages.md) - List all search page definitions visible to the current user
-- [SaveSearchPage](SaveSearchPage.md) - Create or update a search page definition
+- [CreateSavedSearch](CreateSavedSearch.md) - Create a new saved search or search page definition
+- [DeleteSavedSearch](DeleteSavedSearch.md) - Delete a saved search or search page definition by ID
+- [GetSavedSearch](GetSavedSearch.md) - Get the full definition of a single saved search or search page including field-visibility configuration
+- [GetSavedSearches](GetSavedSearches.md) - List saved searches and/or search page definitions visible to the current user
+- [UpdateSavedSearch](UpdateSavedSearch.md) - Update an existing saved search or search page definition
 - [Search](Search.md) - Prepare a search result set using XML-based criteria with sorting options
 
 ### Document Associations
