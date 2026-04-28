@@ -79,7 +79,7 @@ The sample below uses the browser `File` API and `fetch`. It covers all four ste
  * @param {File}   file                  File object from <input type="file">
  * @param {string} irPath                Destination path, e.g. "/Finance/Reports/Q1.pdf"
  * @param {string} xmlParameters         XML options string, or "" for server defaults
- * @returns {% raw %}{{ documentId: string, versionId: string }}{% endraw %}
+ * @returns {{ documentId: string, versionId: string }}
  */
 async function uploadWithChunks(baseUrl, authenticationTicket, file, irPath, xmlParameters) {
   const endpoint = `${baseUrl}/srv.asmx`;
