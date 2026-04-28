@@ -53,9 +53,180 @@ See `UploadDocument4` for the full list of supported XML parameter keys and thei
 ## Chunked Upload Workflow
 
 ```
-1. CreateUploadHandler        -' returns UploadHandler GUID + ChunkSize
-2. UploadFileChunk            -' repeat until LastChunk=true
-3. UploadDocumentWithHandler3 -' finalize with XML parameters
+1. CreateUploadHandler        — negotiate chunk size, receive handler GUID
+2. UploadFileChunk            — send chunks sequentially; include CRC32 per chunk
+3. UploadDocumentWithHandler3 — finalize: set path, metadata, and XML parameters
+4. DeleteUploadHandler        — release the server-side temp file immediately after success
+```
+
+Each chunk must include a CRC32 hex checksum of that chunk's bytes (`ChunkHEXCRC`). On the last chunk the server returns the accumulated `filehexcrc` of the entire file — compare it against your locally computed file CRC to verify a clean transfer. If they differ, abort and retry the upload from step 1.
+
+The server may respond with `tryagain="true"` on a transient failure for a single chunk — retry that same chunk without advancing the offset.
+
+---
+
+### JavaScript Sample
+
+The sample below uses the browser `File` API and `fetch`. It covers all four steps, computes CRC32 in-browser, handles `tryagain` retries, verifies the final file checksum, and explicitly deletes the upload handler after a successful finalization.
+
+```javascript
+/**
+ * Upload a file to infoRouter using the chunked upload API.
+ *
+ * @param {string} baseUrl               Server root, e.g. "https://your-server"
+ * @param {string} authenticationTicket  Ticket from AuthenticateUser
+ * @param {File}   file                  File object from <input type="file">
+ * @param {string} irPath                Destination path, e.g. "/Finance/Reports/Q1.pdf"
+ * @param {string} xmlParameters         XML options string, or "" for server defaults
+ * @returns {{ documentId: string, versionId: string }}
+ */
+async function uploadWithChunks(baseUrl, authenticationTicket, file, irPath, xmlParameters) {
+  const endpoint = `${baseUrl}/srv.asmx`;
+
+  // ── CRC32 lookup table (IEEE 802.3 polynomial) ────────────────────────────
+  const crcTable = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[i] = c;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++)
+      crc = crcTable[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;  // unsigned 32-bit
+  }
+
+  function toHex(n) { return n.toString(16).toUpperCase(); }
+
+  function parseXml(text) {
+    return new DOMParser().parseFromString(text, "text/xml").documentElement;
+  }
+
+  // POST application/x-www-form-urlencoded fields
+  async function post(action, fields) {
+    const res = await fetch(`${endpoint}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(fields).toString()
+    });
+    return parseXml(await res.text());
+  }
+
+  // POST a single binary chunk as multipart/form-data
+  async function postChunk(uploadHandler, chunkBytes, chunkHexCrc, lastChunk) {
+    const form = new FormData();
+    form.append("authenticationTicket", authenticationTicket);
+    form.append("uploadHandler", uploadHandler);
+    form.append("FileChunk", new Blob([chunkBytes]));
+    form.append("ChunkHEXCRC", chunkHexCrc);
+    form.append("LastChunk", String(lastChunk));
+    const res = await fetch(`${endpoint}/UploadFileChunk`, { method: "POST", body: form });
+    return parseXml(await res.text());
+  }
+
+  // ── Step 1: CreateUploadHandler ───────────────────────────────────────────
+  const handlerXml = await post("CreateUploadHandler", {
+    authenticationTicket,
+    ChunkSize: 512 * 1024     // suggest 512 KB; server may return a different size
+  });
+
+  if (handlerXml.getAttribute("success") !== "true")
+    throw new Error("CreateUploadHandler failed: " + handlerXml.getAttribute("error"));
+
+  const uploadHandler = handlerXml.getAttribute("UploadHandler");
+  const chunkSize     = parseInt(handlerXml.getAttribute("ChunkSize"), 10);
+
+  // ── Step 2: Read file bytes and compute full-file CRC32 ───────────────────
+  const fileBytes = new Uint8Array(await file.arrayBuffer());
+  const fileCrc   = crc32(fileBytes);
+
+  // ── Step 3: Upload chunks ─────────────────────────────────────────────────
+  let offset = 0;
+  while (offset < fileBytes.length) {
+    const chunk     = fileBytes.slice(offset, offset + chunkSize);
+    const chunkCrc  = crc32(chunk);
+    const lastChunk = (offset + chunk.length) >= fileBytes.length;
+
+    let xml;
+    // Inner retry loop: repeat the same chunk if server responds tryagain="true"
+    while (true) {
+      xml = await postChunk(uploadHandler, chunk, toHex(chunkCrc), lastChunk);
+
+      if (xml.getAttribute("success") === "true") break;
+
+      if (xml.getAttribute("tryagain") === "true") continue;   // transient — retry
+
+      throw new Error("UploadFileChunk failed: " + xml.getAttribute("error"));
+    }
+
+    // After the last chunk, verify the server's accumulated file CRC
+    if (lastChunk) {
+      const serverCrc = parseInt(xml.getAttribute("filehexcrc"), 16);
+      if (serverCrc !== fileCrc)
+        throw new Error(
+          `File CRC mismatch — local: ${toHex(fileCrc)}, server: ${xml.getAttribute("filehexcrc")}`
+        );
+    }
+
+    offset += chunk.length;
+  }
+
+  // ── Step 4: Finalize ──────────────────────────────────────────────────────
+  const finalXml = await post("UploadDocumentWithHandler3", {
+    authenticationTicket,
+    path: irPath,
+    uploadHandler,
+    xmlParameters
+  });
+
+  if (finalXml.getAttribute("success") !== "true")
+    throw new Error("UploadDocumentWithHandler3 failed: " + finalXml.getAttribute("error"));
+
+  // ── Step 5: DeleteUploadHandler ───────────────────────────────────────────
+  // Release the server-side temp file immediately. The server would eventually
+  // clean it up on its own, but calling this right after a successful finalize
+  // frees the storage without waiting for the background cleanup interval.
+  await post("DeleteUploadHandler", { authenticationTicket, uploadHandler });
+
+  return {
+    documentId: finalXml.getAttribute("DocumentId"),
+    versionId:  finalXml.getAttribute("VersionId")
+  };
+}
+```
+
+#### Usage
+
+```javascript
+document.getElementById("uploadBtn").addEventListener("click", async () => {
+  const file = document.getElementById("fileInput").files[0];
+
+  const xmlParameters = [
+    "<parameters>",
+    '  <parameter key="VERSIONCOMMENT">Uploaded via JS</parameter>',
+    '  <parameter key="PUBLISHOPTION">Publish</parameter>',
+    '  <parameter key="SENDEMAILS">true</parameter>',
+    "</parameters>"
+  ].join("\n");
+
+  try {
+    const { documentId, versionId } = await uploadWithChunks(
+      "https://your-inforouter-server",
+      "your-auth-ticket",
+      file,
+      "/Finance/Reports/" + file.name,
+      xmlParameters
+    );
+    console.log("Uploaded — DocumentId:", documentId, "VersionId:", versionId);
+  } catch (err) {
+    console.error("Upload failed:", err.message);
+  }
+});
 ```
 
 ---
