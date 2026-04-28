@@ -31,16 +31,15 @@ Imports a ZIP archive as a folder and document structure into the specified fold
 
 ```xml
 <root success="true">
-  <logs>
-    <log><item>documents/report.pdf</item><error>Imported successfully</error></log>
-    <log><item>documents/notes.docx</item><error>Updated (changed)</error></log>
-  </logs>
+  <logs />
 </root>
 ```
 
+The `<logs>` element is empty on a fully successful import. Log entries are only written for items that could not be processed.
+
 ### Failure
 
-When the ZIP extraction or import fails, `success="false"` is returned. All log entries describing what was processed before failure are inside `<logs>`:
+When the ZIP extraction or import fails, `success="false"` is returned. The `<logs>` element contains an entry for each item that could not be processed:
 
 ```xml
 <root success="false">

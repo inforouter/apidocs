@@ -205,6 +205,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UploadDocumentWithHandler3](UploadDocumentWithHandler3.md) - Finalize a chunked upload with extended XML parameters
 - [UploadFileChunk](UploadFileChunk.md) - Upload a single binary chunk to a server-side upload handler
 - [UploadZip](UploadZip.md) - Import a ZIP archive as a folder and document structure into a destination folder
+- [UploadZipWithHandler](UploadZipWithHandler.md) - Import a ZIP archive supplied as a chunked upload handler into a destination folder
 - [UploadNewDocumentWidthHandler](UploadNewDocumentWidthHandler.md) - Upload a new document to a folder using a chunked handler and XML parameters
 - [UploadTiffAsPDF](UploadTiffAsPDF.md) - Upload a TIFF image and store it as a PDF document
 - [UploadTiffAsPDFWithHandler](UploadTiffAsPDFWithHandler.md) - Upload a large TIFF image using chunked handler and store as PDF
@@ -457,8 +458,13 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UpdateUserProfile](UpdateUserProfile.md) - Update a user's name, username, and authentication source
 - [UserExists](UserExists.md) - Check if a username exists
 
+### User Interface Settings
+- [GetUserFolderColumns](GetUserFolderColumns.md) - Get the column layout and property set preference for the authenticated user on a folder
+- [SetUserFolderColumns](SetUserFolderColumns.md) - Save the column layout and property set preference for the authenticated user on a folder
+
 ### Miscellaneous
 - [GetAddInInfo](GetAddInInfo.md) - Get version and description information for a deployed client Add-in
+- [GetAddIns](GetAddIns.md) - List all available client add-ins with name, version, and description
 - [GetAddInPart](GetAddInPart.md) - Download the installation package (parts.zip) for a deployed client Add-in as a byte array
 - [GetLocalizedResources](GetLocalizedResources.md) - Get localized display strings for specified infoRouter resource IDs
 - [MaintenanceBeat](MaintenanceBeat.md) - **Obsolete** -" formerly triggered server self-maintenance tasks; the implementation is a no-op and returns no response
