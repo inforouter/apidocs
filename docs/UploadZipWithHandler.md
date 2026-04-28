@@ -56,7 +56,7 @@ The sample below uses the browser `File` API and `fetch`. It covers all four ste
  * @param {boolean} changedOnly           Update existing docs only when content differs
  * @param {boolean} checkOutCheckIn       Use checkout/checkin flow for existing docs
  * @param {boolean} sendEmail             Send email notifications to subscribers
- * @returns {{ success: boolean, logs: Array<{ item: string, error: string }> }}
+ * @returns {% raw %}{{ success: boolean, logs: Array<{ item: string, error: string }> }}{% endraw %}
  */
 async function uploadZipWithChunks(baseUrl, authenticationTicket, file, folderPath, changedOnly, checkOutCheckIn, sendEmail) {
   const endpoint = `${baseUrl}/srv.asmx`;
