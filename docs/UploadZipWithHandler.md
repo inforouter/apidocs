@@ -44,6 +44,7 @@ The server may respond with `tryagain="true"` on a transient failure for a singl
 
 The sample below uses the browser `File` API and `fetch`. It covers all four steps, computes CRC32 in-browser, handles `tryagain` retries, verifies the final file checksum, and explicitly deletes the upload handler after a successful import.
 
+{% raw %}
 ```javascript
 /**
  * Upload a ZIP archive to infoRouter using the chunked upload API.
@@ -181,6 +182,7 @@ async function uploadZipWithChunks(baseUrl, authenticationTicket, file, folderPa
   return { success: true, logs };
 }
 ```
+{% endraw %}
 
 #### Usage
 
