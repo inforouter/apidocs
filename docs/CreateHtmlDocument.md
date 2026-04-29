@@ -10,7 +10,7 @@ Creates a new HTML document in the specified folder. The HTML content is stored 
 
 ## Methods
 
-- **GET** `/srv.asmx/CreateHtmlDocument?authenticationTicket=...&folderPath=...&name=...&htmlContent=...&description=...&sendMail=...&publishOption=...`
+- **GET** `/srv.asmx/CreateHtmlDocument?authenticationTicket=...&folderPath=...&name=...&htmlContent=...&xmlParameters=...`
 - **POST** `/srv.asmx/CreateHtmlDocument` (form data)
 - **SOAP** Action: `http://tempuri.org/CreateHtmlDocument`
 
@@ -22,17 +22,49 @@ Creates a new HTML document in the specified folder. The HTML content is stored 
 | `folderPath` | string | Yes | Full infoRouter path of the destination folder (e.g. `/Finance/Reports`). |
 | `name` | string | Yes | Document name. The `.htm` extension is appended automatically if the name does not already end with `.htm` or `.html`. |
 | `htmlContent` | string | Yes | Raw HTML body text to store as the document content. |
-| `description` | string | Yes | Document description. Pass an empty string for no description. |
-| `sendMail` | bool | Yes | Whether to send subscription notification emails to folder subscribers after creation. |
-| `publishOption` | integer | Yes | Controls how the new document version is published. `0` = ServerDefault, `1` = Publish, `2` = DontPublish. |
+| `xmlParameters` | string | No | XML string containing optional upload options. Pass an empty string to use server defaults. See format below. |
 
-## publishOption Values
+## xmlParameters Format
 
-| Value | Name | Behaviour |
-|-------|------|-----------|
-| `0` | ServerDefault | Applies the folder's configured publishing rule. |
-| `1` | Publish | Forces the new document to be published immediately. |
-| `2` | DontPublish | Saves the document without publishing it. |
+`xmlParameters` is an XML document with a root element containing `<Parameter>` child elements. Each element specifies a `Name` attribute (case-insensitive) and either a `Value` attribute or inner text.
+
+```xml
+<Parameters>
+  <Parameter Name="Description" Value="Q1 financial summary" />
+  <Parameter Name="PublishOption" Value="Publish" />
+  <Parameter Name="SendEmails" Value="true" />
+  <Parameter Name="Keywords" Value="finance quarterly" />
+  <Parameter Name="VersionComment" Value="Initial draft" />
+  <Parameter Name="CreationDate" Value="2025-01-15T09:00:00" />
+  <Parameter Name="ModificationDate" Value="2025-01-15T09:00:00" />
+  <Parameter Name="MpVersionMajor" Value="1" />
+  <Parameter Name="MpVersionMinor" Value="0" />
+  <Parameter Name="MpVersionRevision" Value="0" />
+</Parameters>
+```
+
+### Supported Parameter Names
+
+| Name | Type | Description |
+|------|------|-------------|
+| `Description` | string | Document description. |
+| `PublishOption` | string | Controls publishing after creation. Values: `ServerDefault`, `Publish`, `DontPublish`. Defaults to `ServerDefault`. |
+| `SendEmails` | bool | Whether to send subscription notification emails to folder subscribers. Values: `true`, `false`. |
+| `Keywords` | string | Space-separated user-defined keywords. |
+| `VersionComment` | string | Comment attached to the first document version. |
+| `CreationDate` | datetime | Override the document creation date. |
+| `ModificationDate` | datetime | Override the document modification date. |
+| `MpVersionMajor` | short | Manual version major number (1–2400). |
+| `MpVersionMinor` | short | Manual version minor number (1–999). |
+| `MpVersionRevision` | short | Manual version revision number (1–999). |
+
+### PublishOption Values
+
+| Value | Behaviour |
+|-------|-----------|
+| `ServerDefault` | Applies the folder's configured publishing rule. |
+| `Publish` | Forces the new document to be published immediately. |
+| `DontPublish` | Saves the document without publishing it. |
 
 ## Response
 
@@ -76,21 +108,27 @@ This format is compatible with the infoRouter HTML document editor and can be re
 POST /srv.asmx/CreateHtmlDocument HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1 Summary</h1><p>Results were positive.</p>&description=Q1 financial summary&sendMail=false
+authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1 Summary</h1><p>Results were positive.</p>&xmlParameters=<Parameters><Parameter Name="Description" Value="Q1 financial summary" /><Parameter Name="SendEmails" Value="false" /><Parameter Name="PublishOption" Value="Publish" /></Parameters>
 ```
 
 ### Request (GET)
 
 ```
-GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1</h1>&description=Summary&sendMail=false
+GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1</h1>&xmlParameters=<Parameters><Parameter Name="Description" Value="Summary" /></Parameters>
+```
+
+### Minimal Request (no xmlParameters)
+
+```
+GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1</h1>&xmlParameters=
 ```
 
 ## Notes
 
 - The `.htm` extension is appended to `name` automatically if the name has no HTML extension. For example, `Q1Summary` becomes `Q1Summary.htm`.
-- The publishing behaviour after creation follows the folder's configured publishing rule (`ServerDefault`).
+- Parameter names in `xmlParameters` are case-insensitive.
+- If `xmlParameters` is empty or omitted, server defaults apply for all options.
 - Special XML characters in `htmlContent` (such as `<`, `>`, `&`) are escaped automatically before storage.
-- To update an existing HTML document, use `UpdateURLDocument` is not applicable — use `UploadDocument` with the HTML bytes, or re-submit via the HTML editor workflow.
 
 ## Related APIs
 
