@@ -393,7 +393,9 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [RemoveAssociation](RemoveAssociation.md) - Remove an existing association between two items
 
 ### Tags
-- [GetTagDefintions](GetTagDefintions.md) - Get the list of all tag definitions configured in the system
+- [GetAppliedTags](GetAppliedTags.md) - Get all tags applied to a document, with version and workflow context
+- [GetTagDefinitions](GetTagDefinitions.md) - Get the list of all tag definitions configured in the system
+- [GetTagDefintions](GetTagDefintions.md) - **Obsolete** (typo in name) — use GetTagDefinitions instead
 - [RemoveTagFromDocument](RemoveTagFromDocument.md) - Remove a tag from a document
 - [SetTagToDocument](SetTagToDocument.md) - Apply a tag to the latest version of a document
 
