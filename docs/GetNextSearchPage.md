@@ -213,6 +213,18 @@ When the search produced zero matches, the response still has `success="true"` w
 
 
 
+### Document Element Attributes
+
+
+
+Each `<document>` element in the response contains the standard document attributes (see `GetDocument` for the full attribute reference), plus a `UserViewStatus` attribute:
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `UserViewStatus` | integer | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
+
+
+
 ### RankInfo Element (Full-Text Search Results)
 
 

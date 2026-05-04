@@ -83,3 +83,4 @@ authenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 - Use `startingRow=0` and `rowCount=0` to retrieve all authored documents (equivalent to calling [GetAuthoredDocuments](GetAuthoredDocuments.md)).
 - Results are returned in ascending order by document name.
 - The `totalcount` attribute on the root element reflects the total number of matching documents, regardless of paging parameters.
+- Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.

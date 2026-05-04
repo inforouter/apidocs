@@ -65,6 +65,8 @@ Returns a `<response>` element with `success="true"` containing zero or more `<d
 | `path` | string | Full parent path of the document. |
 | `domainid` | int | Internal ID of the library the document belongs to. |
 
+| `UserViewStatus` | int | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
+
 Additional standard document attributes are included based on document type and system configuration.
 
 ### Empty Result

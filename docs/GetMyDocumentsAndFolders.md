@@ -137,6 +137,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - Setting all flags to `false` gives the fastest response (metadata only).
 - Setting `withVersions=true` on large document sets may significantly increase response size and processing time.
 - For a user's favorite items, use `GetFavorites`. For checked-out documents, use `GetCheckedoutDocuments`.
+- Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.
 
 ---
 

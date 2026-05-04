@@ -172,7 +172,9 @@ Returns a `<response>` root element with `<document>` child elements -" one per 
 
             TemplateID="0"
 
-            VersionCount="3">
+            VersionCount="3"
+
+            UserViewStatus="2">
 
 
 
@@ -266,6 +268,7 @@ Returns a `<response>` root element with `<document>` child elements -" one per 
 | `RegisterById` | Integer user ID of the user who registered the document. |
 | `TemplateID` | Template ID used to create the document (`0` if not template-based). |
 | `VersionCount` | Total number of versions for this document. |
+| `UserViewStatus` | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
 
 
 

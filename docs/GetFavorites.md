@@ -233,7 +233,7 @@ Returns a `<root>` element with `<folder>` and `<document>` child elements -" fo
 
 
 
-See `GetFoldersAndDocuments` for the complete list of `<folder>` and `<document>` element attributes and their descriptions.
+See `GetFoldersAndDocuments` for the complete list of `<folder>` and `<document>` element attributes and their descriptions, including the `UserViewStatus` attribute (`0` = never viewed, `1` = viewed but changed, `2` = viewed current version).
 
 
 

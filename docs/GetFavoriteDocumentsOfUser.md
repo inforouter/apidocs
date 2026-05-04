@@ -85,3 +85,4 @@ AuthenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 - The `totalcount` attribute on the root element reflects the total number of favorite documents for the user, regardless of paging parameters.
 - To retrieve favorite **folders** for a user, use [GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md).
 - To retrieve the full favorites list (documents and folders combined) for the current user, use [GetFavorites](GetFavorites.md).
+- Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.

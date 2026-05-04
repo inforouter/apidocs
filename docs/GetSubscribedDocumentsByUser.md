@@ -69,6 +69,7 @@ Returns a paginated list of documents that the specified user is subscribed to. 
 | `version` | integer | Current version number |
 | `created` | datetime | Document creation date |
 | `modified` | datetime | Last modification date |
+| `UserViewStatus` | int | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
 
 ## Required Permissions
 

@@ -118,6 +118,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - An empty response (no child elements) after page 1 means there are no matching items.
 - For advanced filtering (by metadata, date ranges, or full-text content) and sorting, use `GetFoldersAndDocumentsByPage2`.
 - For full property details per item, use `GetFoldersAndDocuments`.
+- This paged API returns only `id`, `name`, and `versionid` per item. Extended attributes including `UserViewStatus` are not included. Use `GetFoldersAndDocuments` for the full attribute set.
 
 ---
 

@@ -94,6 +94,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - No filtering, sorting, or paging is supported. All accessible items at the path are returned.
 - For full property details (rules, property sets, security), use `GetFoldersAndDocuments` or `GetFoldersAndDocuments1`.
 - For filtering and paging, use `GetFoldersAndDocumentsByPage` or `GetFoldersAndDocumentsByPage2`.
+- This lightweight API returns only `id`, `name`, and `versionid` per item. Extended attributes including `UserViewStatus` are not included. Use `GetFoldersAndDocuments` for the full attribute set.
 
 ---
 

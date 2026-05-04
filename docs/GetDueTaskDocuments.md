@@ -73,6 +73,7 @@ Any authenticated user may call this API. Only tasks assigned to the calling use
 - Overdue tasks (past their due date), completed tasks, and tasks not yet started are excluded.
 - The list is sorted by **task due date ascending** (earliest due date first).
 - Each `<document>` element contains standard document properties. Rules, custom property sets, security details, and version history are not included in the response.
+- Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.
 - To retrieve full task details for a document, use [GetTask](GetTask.md) or [getTasks](getTasks.md).
 
 ## Related APIs

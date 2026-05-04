@@ -262,7 +262,9 @@ Folders appear first, followed by documents. All items are immediate children of
 
             TemplateID="0"
 
-            VersionCount="3">
+            VersionCount="3"
+
+            UserViewStatus="2">
 
 
 
@@ -381,6 +383,7 @@ Folders appear first, followed by documents. All items are immediate children of
 | `RegisterById` | Integer user ID of the user who registered the document. |
 | `TemplateID` | Template ID used to create the document (`0` if not template-created). |
 | `VersionCount` | Total number of versions for this document. |
+| `UserViewStatus` | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
 
 
 

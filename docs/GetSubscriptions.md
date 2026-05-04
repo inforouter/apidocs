@@ -237,7 +237,9 @@ Returns a `<root>` element with `success="true"` containing `<folder>` and `<doc
 
             DeclassifyOn=""
 
-            DowngradeOn="">
+            DowngradeOn=""
+
+            UserViewStatus="2">
 
 
 
@@ -426,6 +428,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - **Performance**: All five boolean flags add significant data to the response. Pass `false` for flags your application does not use.
 
 - **Document vs Folder Items**: Items are distinguished by element name: `<document>` for document subscriptions, `<folder>` for folder subscriptions.
+
+- **UserViewStatus**: Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version.
 
 
 

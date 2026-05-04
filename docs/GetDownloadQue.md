@@ -227,7 +227,7 @@ See `GetFoldersAndDocuments` for the full list of folder attributes and their de
 
 
 
-See `GetFoldersAndDocuments` for the full list of document attributes and their descriptions. The document element structure is identical.
+See `GetFoldersAndDocuments` for the full list of document attributes and their descriptions. The document element structure is identical, including the `UserViewStatus` attribute (`0` = never viewed, `1` = viewed but changed, `2` = viewed current version).
 
 
 

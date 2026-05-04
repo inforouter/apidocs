@@ -84,3 +84,4 @@ AuthenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 - Results are returned in ascending order by document name.
 - The `totalcount` attribute on the root element reflects the total number of checked out documents for the user, regardless of paging parameters.
 - To retrieve checked out documents for the currently authenticated user, use [GetCheckedoutDocuments](GetCheckedoutDocuments.md).
+- Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.

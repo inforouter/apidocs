@@ -170,7 +170,9 @@ Returns a `<root>` element containing `<document>` child elements. Documents are
 
             TemplateID="0"
 
-            VersionCount="3">
+            VersionCount="3"
+
+            UserViewStatus="2">
 
 
 

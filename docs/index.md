@@ -95,6 +95,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetFolders1](GetFolders1.md) - Get the list of direct subfolders in short form (no count limit)
 - [GetFolders2](GetFolders2.md) - Get the list of direct subfolders in short form with configured UI display limit
 - [GetFoldersByPage](GetFoldersByPage.md) - Get a paged list of direct subfolders with optional name filtering
+- [GetFoldersOwnedByUser](GetFoldersOwnedByUser.md) - Get a paged list of folders owned by a specified user
 - [GetParentFolderIDs](GetParentFolderIDs.md) - Get the chain of parent folder IDs from root to the specified folder
 - [GetSubFoldersCount](GetSubFoldersCount.md) - Get the count of direct subfolders in a folder
 - [Move](Move.md) - Move a document or folder to a new destination path
@@ -134,6 +135,8 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked out documents for a specified user
+- [GetDocumentExpirationDate](GetDocumentExpirationDate.md) - Get the expiration date set on a document
+- [GetDocumentsOwnedByUser](GetDocumentsOwnedByUser.md) - Get a paged list of documents owned by a specified user
 - [GetDocument](GetDocument.md) - Get the full properties of a document by path or short ID
 - [GetDocumentAbstract](GetDocumentAbstract.md) - Get the full-text abstract of a document version (obsolete; use GetDocumentAbstract1)
 - [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text abstract of a document version

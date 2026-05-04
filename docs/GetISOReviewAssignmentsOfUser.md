@@ -84,3 +84,4 @@ authenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 - Results are returned in ascending order by document name.
 - The `totalcount` attribute on the root element reflects the total number of ISO review assignments for the user, regardless of paging parameters.
 - This API was formerly named `GetISOReviewAssignments`. Callers using the old name must update to `GetISOReviewAssignmentsOfUser` and add the `startingRow` and `rowCount` parameters.
+- Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.
