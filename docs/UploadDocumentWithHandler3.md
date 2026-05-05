@@ -27,26 +27,26 @@ Finalizes a chunked file upload and creates a new document or a new version of a
 
 ## XML Parameters Format
 
-The `xmlParameters` is an XML string with key-value pairs (same format as `UploadDocument4`):
+The `xmlParameters` is an XML string with the same format as `UploadDocument4`. The root element is `<xmlparameters>` and each option is an `<item>` element with `NAME` and `VALUE` attributes:
 
 ```xml
-<parameters>
-  <parameter key="DESCRIPTION">Quarterly financial summary</parameter>
-  <parameter key="KEYWORDS">finance quarterly 2024</parameter>
-  <parameter key="VERSIONCOMMENT">Updated figures</parameter>
-  <parameter key="CHECKOUT">true</parameter>
-  <parameter key="PUBLISHOPTION">Publish</parameter>
-  <parameter key="SENDEMAILS">true</parameter>
-  <parameter key="TEXTONLYCONTENT">Plain text version of the document</parameter>
-  <parameter key="CREATIONDATE">2024-01-15</parameter>
-  <parameter key="MODIFICATIONDATE">2024-03-31</parameter>
-  <parameter key="MPVERSIONMAJOR">2</parameter>
-  <parameter key="MPVERSIONMINOR">0</parameter>
-  <parameter key="MPVERSIONREVISION">1</parameter>
-</parameters>
+<xmlparameters>
+  <item NAME="DESCRIPTION" VALUE="Quarterly financial summary"/>
+  <item NAME="KEYWORDS" VALUE="finance quarterly 2024"/>
+  <item NAME="VERSIONCOMMENT" VALUE="Updated figures"/>
+  <item NAME="CHECKOUT" VALUE="TRUE"/>
+  <item NAME="PUBLISHOPTION" VALUE="Publish"/>
+  <item NAME="SENDEMAILS" VALUE="true"/>
+  <item NAME="TEXTONLYCONTENT" VALUE="Plain text version of the document"/>
+  <item NAME="CREATIONDATE" VALUE="2024-01-15"/>
+  <item NAME="MODIFICATIONDATE" VALUE="2024-03-31"/>
+  <item NAME="MPVERSIONMAJOR" VALUE="2"/>
+  <item NAME="MPVERSIONMINOR" VALUE="0"/>
+  <item NAME="MPVERSIONREVISION" VALUE="1"/>
+</xmlparameters>
 ```
 
-See `UploadDocument4` for the full list of supported XML parameter keys and their valid values.
+See [UploadDocument4](UploadDocument4.md) for the full list of supported keys and valid values.
 
 ---
 
@@ -209,11 +209,11 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   const file = document.getElementById("fileInput").files[0];
 
   const xmlParameters = [
-    "<parameters>",
-    '  <parameter key="VERSIONCOMMENT">Uploaded via JS</parameter>',
-    '  <parameter key="PUBLISHOPTION">Publish</parameter>',
-    '  <parameter key="SENDEMAILS">true</parameter>',
-    "</parameters>"
+    "<xmlparameters>",
+    '  <item NAME="VERSIONCOMMENT" VALUE="Uploaded via JS"/>',
+    '  <item NAME="PUBLISHOPTION" VALUE="Publish"/>',
+    '  <item NAME="SENDEMAILS" VALUE="true"/>',
+    "</xmlparameters>"
   ].join("\n");
 
   try {
@@ -266,7 +266,7 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &path=/Finance/Reports/Q1-2024-Report.pdf
 &uploadHandler=a1b2c3d4-e5f6-7890-abcd-ef1234567890
-&xmlParameters=<parameters><parameter key="VERSIONCOMMENT">Revised figures</parameter><parameter key="PUBLISHOPTION">Publish</parameter></parameters>
+&xmlParameters=<xmlparameters><item NAME="VERSIONCOMMENT" VALUE="Revised figures"/><item NAME="PUBLISHOPTION" VALUE="Publish"/></xmlparameters>
 ```
 
 ---

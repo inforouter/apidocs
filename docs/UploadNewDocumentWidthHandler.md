@@ -40,17 +40,19 @@ Uploads a **new** document (never an existing-document version) to the specified
 
 ## XML Parameters Format
 
-Same format as `UploadDocument4`:
+The root element is `<xmlparameters>` and each option is an `<item>` element with `NAME` and `VALUE` attributes (same format as `UploadDocument4`):
 
 ```xml
-<parameters>
-  <parameter key="DESCRIPTION">Quarterly financial summary</parameter>
-  <parameter key="KEYWORDS">finance quarterly 2024</parameter>
-  <parameter key="VERSIONCOMMENT">Initial upload</parameter>
-  <parameter key="PUBLISHOPTION">Publish</parameter>
-  <parameter key="SENDEMAILS">true</parameter>
-</parameters>
+<xmlparameters>
+  <item NAME="DESCRIPTION" VALUE="Quarterly financial summary"/>
+  <item NAME="KEYWORDS" VALUE="finance quarterly 2024"/>
+  <item NAME="VERSIONCOMMENT" VALUE="Initial upload"/>
+  <item NAME="PUBLISHOPTION" VALUE="Publish"/>
+  <item NAME="SENDEMAILS" VALUE="true"/>
+</xmlparameters>
 ```
+
+See [UploadDocument4](UploadDocument4.md) for the full list of supported keys and valid values.
 
 ---
 
@@ -88,7 +90,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &folderPath=/Finance/Reports
 &documentName=Q1-2024-Report.pdf
 &uploadHandler=a1b2c3d4-e5f6-7890-abcd-ef1234567890
-&xmlParameters=<parameters><parameter key="VERSIONCOMMENT">Initial upload</parameter></parameters>
+&xmlParameters=<xmlparameters><item NAME="VERSIONCOMMENT" VALUE="Initial upload"/></xmlparameters>
 ```
 
 ---

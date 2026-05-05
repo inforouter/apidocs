@@ -26,37 +26,41 @@ Creates a new HTML document in the specified folder. The HTML content is stored 
 
 ## xmlParameters Format
 
-`xmlParameters` is an XML document with a root element containing `<Parameter>` child elements. Each element specifies a `Name` attribute (case-insensitive) and either a `Value` attribute or inner text.
+The `xmlParameters` value is an XML string. The root element is `<xmlparameters>` and each option is an `<item>` element with `NAME` and `VALUE` attributes:
 
 ```xml
-<Parameters>
-  <Parameter Name="Description" Value="Q1 financial summary" />
-  <Parameter Name="PublishOption" Value="Publish" />
-  <Parameter Name="SendEmails" Value="true" />
-  <Parameter Name="Keywords" Value="finance quarterly" />
-  <Parameter Name="VersionComment" Value="Initial draft" />
-  <Parameter Name="CreationDate" Value="2025-01-15T09:00:00" />
-  <Parameter Name="ModificationDate" Value="2025-01-15T09:00:00" />
-  <Parameter Name="MpVersionMajor" Value="1" />
-  <Parameter Name="MpVersionMinor" Value="0" />
-  <Parameter Name="MpVersionRevision" Value="0" />
-</Parameters>
+<xmlparameters>
+  <item NAME="DESCRIPTION" VALUE="Q1 financial summary"/>
+  <item NAME="KEYWORDS" VALUE="finance quarterly"/>
+  <item NAME="VERSIONCOMMENT" VALUE="Initial draft"/>
+  <item NAME="CHECKOUT" VALUE="TRUE"/>
+  <item NAME="PUBLISHOPTION" VALUE="Publish"/>
+  <item NAME="SENDEMAILS" VALUE="true"/>
+  <item NAME="CREATIONDATE" VALUE="2025-01-15"/>
+  <item NAME="MODIFICATIONDATE" VALUE="2025-01-15"/>
+  <item NAME="MPVERSIONMAJOR" VALUE="1"/>
+  <item NAME="MPVERSIONMINOR" VALUE="0"/>
+  <item NAME="MPVERSIONREVISION" VALUE="0"/>
+</xmlparameters>
 ```
+
+All `NAME` values are case-insensitive. If `VALUE` is omitted the element's inner text is used instead.
 
 ### Supported Parameter Names
 
 | Name | Type | Description |
 |------|------|-------------|
-| `Description` | string | Document description. |
-| `PublishOption` | string | Controls publishing after creation. Values: `ServerDefault`, `Publish`, `DontPublish`. Defaults to `ServerDefault`. |
-| `SendEmails` | bool | Whether to send subscription notification emails to folder subscribers. Values: `true`, `false`. |
-| `Keywords` | string | Space-separated user-defined keywords. |
-| `VersionComment` | string | Comment attached to the first document version. |
-| `CreationDate` | datetime | Override the document creation date. |
-| `ModificationDate` | datetime | Override the document modification date. |
-| `MpVersionMajor` | short | Manual version major number (1–2400). |
-| `MpVersionMinor` | short | Manual version minor number (1–999). |
-| `MpVersionRevision` | short | Manual version revision number (1–999). |
+| `DESCRIPTION` | string | Document description. |
+| `KEYWORDS` | string | Space- or comma-separated user-defined keywords. |
+| `VERSIONCOMMENT` | string | Comment attached to the first document version. |
+| `CHECKOUT` | bool (`true`/`false`) | Lock document immediately after creation. |
+| `PUBLISHOPTION` | enum | Controls publishing after creation. Values: `ServerDefault`, `Publish`, `DontPublish`. Defaults to `ServerDefault`. |
+| `SENDEMAILS` | bool (`true`/`false`) | Whether to send subscription notification emails to folder subscribers. Default: `true`. |
+| `CREATIONDATE` | DateTime | Override the document creation date (e.g. `2025-01-15`). |
+| `MODIFICATIONDATE` | DateTime | Override the document modification date (e.g. `2025-01-15`). |
+| `MPVERSIONMAJOR` | short | Manual version major number (1–2400). |
+| `MPVERSIONMINOR` | short | Manual version minor number (0–999). |
+| `MPVERSIONREVISION` | short | Manual version revision number (0–999). |
 
 ### PublishOption Values
 
@@ -108,13 +112,13 @@ This format is compatible with the infoRouter HTML document editor and can be re
 POST /srv.asmx/CreateHtmlDocument HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1 Summary</h1><p>Results were positive.</p>&xmlParameters=<Parameters><Parameter Name="Description" Value="Q1 financial summary" /><Parameter Name="SendEmails" Value="false" /><Parameter Name="PublishOption" Value="Publish" /></Parameters>
+authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1 Summary</h1><p>Results were positive.</p>&xmlParameters=<xmlparameters><item NAME="DESCRIPTION" VALUE="Q1 financial summary"/><item NAME="SENDEMAILS" VALUE="false"/><item NAME="PUBLISHOPTION" VALUE="Publish"/></xmlparameters>
 ```
 
 ### Request (GET)
 
 ```
-GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1</h1>&xmlParameters=<Parameters><Parameter Name="Description" Value="Summary" /></Parameters>
+GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1</h1>&xmlParameters=<xmlparameters><item NAME="DESCRIPTION" VALUE="Summary"/></xmlparameters>
 ```
 
 ### Minimal Request (no xmlParameters)

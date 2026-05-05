@@ -11,7 +11,7 @@ Uploads a new document or creates a new version of an existing document at the s
 ## Methods
 
 - **GET** `/srv.asmx/UploadDocument4?authenticationTicket=...&path=...&fileContent=...&xmlParameters=...`
-- **POST** `/srv.asmx/UploadDocument4` (form data -" recommended for binary content)
+- **POST** `/srv.asmx/UploadDocument4` (form data — recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadDocument4`
 
 ## Parameters
@@ -27,41 +27,43 @@ Uploads a new document or creates a new version of an existing document at the s
 
 ## XML Parameters Format
 
-The `xmlParameters` value is an XML string with key-value pairs. All keys are case-insensitive uppercase:
+The `xmlParameters` value is an XML string. The root element is `<xmlparameters>` and each option is an `<item>` element with `NAME` and `VALUE` attributes:
 
 ```xml
-<parameters>
-  <parameter key="DESCRIPTION">Quarterly financial summary</parameter>
-  <parameter key="KEYWORDS">finance quarterly 2024</parameter>
-  <parameter key="VERSIONCOMMENT">Updated figures</parameter>
-  <parameter key="CHECKOUT">true</parameter>
-  <parameter key="PUBLISHOPTION">Publish</parameter>
-  <parameter key="SENDEMAILS">true</parameter>
-  <parameter key="TEXTONLYCONTENT">Plain text version of the document</parameter>
-  <parameter key="CREATIONDATE">2024-01-15</parameter>
-  <parameter key="MODIFICATIONDATE">2024-03-31</parameter>
-  <parameter key="MPVERSIONMAJOR">2</parameter>
-  <parameter key="MPVERSIONMINOR">0</parameter>
-  <parameter key="MPVERSIONREVISION">1</parameter>
-</parameters>
+<xmlparameters>
+  <item NAME="TEXTONLYCONTENT" VALUE="lorem dolor sit amet.."/>
+  <item NAME="DESCRIPTION" VALUE="this is the sample description of this document"/>
+  <item NAME="VERSIONCOMMENT" VALUE="sample version comment from the author."/>
+  <item NAME="CHECKOUT" VALUE="TRUE"/>
+  <item NAME="MPVERSIONMAJOR" VALUE="1"/>
+  <item NAME="MPVERSIONMINOR" VALUE="0"/>
+  <item NAME="MPVERSIONREVISION" VALUE="0"/>
+  <item NAME="PUBLISHOPTION" VALUE="Publish"/>
+  <item NAME="KEYWORDS" VALUE="finance quarterly 2024"/>
+  <item NAME="SENDEMAILS" VALUE="true"/>
+  <item NAME="CREATIONDATE" VALUE="2024-01-15"/>
+  <item NAME="MODIFICATIONDATE" VALUE="2024-03-31"/>
+</xmlparameters>
 ```
+
+All `NAME` values are case-insensitive. If `VALUE` is omitted the element's inner text is used instead.
 
 ### Supported XML Parameter Keys
 
 | Key | Type | Description |
 |-----|------|-------------|
+| `TEXTONLYCONTENT` | string | Plain-text content for full-text indexing (useful for image-only documents). |
 | `DESCRIPTION` | string | Document description. |
 | `KEYWORDS` | string | Space- or comma-separated keywords. |
 | `VERSIONCOMMENT` | string | Version comment recorded in version history. |
 | `CHECKOUT` | bool (`true`/`false`) | Lock document immediately after upload. |
-| `PUBLISHOPTION` | enum | Publishing behavior: `ServerDefault`, `Publish`, `DoNotPublish`. |
+| `PUBLISHOPTION` | enum | Publishing behavior: `ServerDefault`, `Publish`, `DontPublish`. |
 | `SENDEMAILS` | bool (`true`/`false`) | Whether to send notification emails on upload. Default: `true`. |
-| `TEXTONLYCONTENT` | string | Plain-text content for full-text indexing. |
-| `CREATIONDATE` | DateTime | Override the document creation date (yyyy-MM-dd). |
-| `MODIFICATIONDATE` | DateTime | Override the document modification date (yyyy-MM-dd). |
-| `MPVERSIONMAJOR` | short | Major component of the manual version number (e.g. `2` for v2.0.1). |
-| `MPVERSIONMINOR` | short | Minor component of the manual version number (e.g. `0` for v2.0.1). |
-| `MPVERSIONREVISION` | short | Revision component of the manual version number (e.g. `1` for v2.0.1). |
+| `CREATIONDATE` | DateTime | Override the document creation date (e.g. `2024-01-15`). |
+| `MODIFICATIONDATE` | DateTime | Override the document modification date (e.g. `2024-03-31`). |
+| `MPVERSIONMAJOR` | short | Major component of the manual version number (e.g. `2` for v2.0.1). Range: 1–2400. |
+| `MPVERSIONMINOR` | short | Minor component of the manual version number (e.g. `0` for v2.0.1). Range: 0–999. |
+| `MPVERSIONREVISION` | short | Revision component of the manual version number (e.g. `1` for v2.0.1). Range: 0–999. |
 
 ---
 
@@ -111,7 +113,7 @@ Content-Type: application/octet-stream
 ------FormBoundary
 Content-Disposition: form-data; name="xmlParameters"
 
-<parameters><parameter key="VERSIONCOMMENT">Revised Q1 figures</parameter><parameter key="KEYWORDS">finance quarterly 2024</parameter><parameter key="PUBLISHOPTION">Publish</parameter></parameters>
+<xmlparameters><item NAME="VERSIONCOMMENT" VALUE="Revised Q1 figures"/><item NAME="KEYWORDS" VALUE="finance quarterly 2024"/><item NAME="PUBLISHOPTION" VALUE="Publish"/></xmlparameters>
 ------FormBoundary--
 ```
 
@@ -120,7 +122,7 @@ Content-Disposition: form-data; name="xmlParameters"
 ## Notes
 
 - Passing an empty string `""` for `xmlParameters` uses server defaults for all options.
-- `PUBLISHOPTION` values: `ServerDefault` (use the domain's publishing setting), `Publish` (publish immediately), `DoNotPublish` (do not publish).
+- `PUBLISHOPTION` values: `ServerDefault` (use the domain's publishing setting), `Publish` (publish immediately), `DontPublish` (do not publish).
 - Manual version numbers (`MPVERSIONMAJOR`, `MPVERSIONMINOR`, `MPVERSIONREVISION`) set the human-readable version label (e.g. `2.0.1`) independently of the internal version ID.
 - For large files, use the chunked handler approach with `UploadDocumentWithHandler3` which accepts the same XML parameters format.
 
