@@ -150,6 +150,7 @@ Each element uses three attributes:
 | `FAVORITESOF` | -" | infoRouter username | Returns items in the specified user's favorites list. |
 | `RECENTDOCUMENTS` | -" | -" | Returns the current user's recent documents. No `VALUE` attribute is required; the presence of this element is sufficient. |
 | `DOWNLOADQUEOF` | -" | infoRouter username | Returns items currently in the specified user's download queue. |
+| `TEMPLATEPATH` | -" | Full infoRouter document path of the template, or `~D<id>` short form. Use `~D999` for HTML documents. | Filters documents rendered from the specified template. Use `~D999` to find all HTML form documents. |
 | `PROPERTYSETNAME` | -" | Property set name (child elements define field criteria) | Filters by custom property set values. See **Property Set Criteria** below. |
 
 
@@ -509,6 +510,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - The `RECENTDOCUMENTS` criterion returns recent documents for the currently authenticated user only; no `VALUE` attribute is required.
 
 - Property set field names are case-insensitive, but the property set name must match an existing definition in the system.
+
+- The `TEMPLATEPATH` criterion accepts either a full infoRouter document path (e.g. `/Finance/Templates/mytemplate.htm`) or the short-form `~D<id>` notation (e.g. `~D42`). Use `~D999` as the reserved identifier for all HTML form documents — it matches any document whose template is the built-in HTML document type regardless of which specific template file was used.
 
 
 

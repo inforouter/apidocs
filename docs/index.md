@@ -83,6 +83,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 ### Folder Management
 - [CreateFolder](CreateFolder.md) - Create a folder from a single full path (intermediate folders created automatically)
 - [CreateFolder1](CreateFolder1.md) - Create a subfolder with optional description using separate parent path and name parameters
+- [CreateFormFromTemplate](CreateFormFromTemplate.md) - Return the rendered HTML form for a content template ready for display and submission
 - [CreateHtmlDocument](CreateHtmlDocument.md) - Create a new HTML document in a folder with raw HTML content
 - [DeleteFolder](DeleteFolder.md) - Delete a folder and all its contents
 - [FolderExists](FolderExists.md) - Check whether a folder exists at the specified path
