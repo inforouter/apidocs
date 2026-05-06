@@ -272,6 +272,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDocumentTasks](GetDocumentTasks.md) - Return all workflow tasks for a document with optional filtering by completion status, sorted by due date
 - [GetDocumentWorkflow](GetDocumentWorkflow.md) - Return the details of a specific running workflow instance on a document
 - [GetDocumentWorkflows](GetDocumentWorkflows.md) - Return all workflow instances (current and historical) for a document with optional filtering
+- [GetFormFromDocument](GetFormFromDocument.md) - Return the rendered HTML form for an existing HTML document pre-filled with its current values and check it out for editing
 - [GetDueTaskDocuments](GetDueTaskDocuments.md) - Return documents that have active (due) workflow tasks assigned to the authenticated user, sorted by due date
 - [GetFlowDef](GetFlowDef.md) - Return the complete definition of a workflow including all step and task definitions
 - [GetFolderFlows](GetFolderFlows.md) - Return workflow definitions active on a folder, optionally including inherited flows from parent folders
