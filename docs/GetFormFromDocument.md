@@ -215,3 +215,129 @@ function InfoRouterEditForm({ renderedHtml, authTicket, documentPath }) {
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
+
+## React Implementer Guide
+
+Production-ready patterns derived from the reference demo at `IRWebCore/wwwRoot/form-template-demo.html`. The helper functions (`parseInfoRouterFields`, `buildXmlContent`, `escapeXml`, `parseXml`) are defined in the `CreateFormFromTemplate` implementer guide and are shared across all three form APIs.
+
+### Step 1 — Fetch the pre-filled form
+
+```javascript
+async function loadDocumentForm(apiBase, ticket, documentPath) {
+  const body = new URLSearchParams({
+    authenticationTicket: ticket,
+    documentPath,
+    submitUrl: '',   // Pass '' — submit is intercepted via iframe onLoad
+  });
+  const res = await fetch(`${apiBase}/GetFormFromDocument`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
+  const r = parseXml(await res.text());
+  if (!r.ok) throw new Error(r.error);
+  return r.el.textContent;  // Raw pre-filled HTML extracted from CDATA
+}
+```
+
+The document is checked out the moment this call succeeds. If checkout fails the API returns `success="false"` — do not attempt to render the form in that case.
+
+### Step 2 — Render in React and intercept submit
+
+```jsx
+import { useState, useRef, useCallback } from 'react';
+
+function EditDocumentForm({ ticket, documentPath, apiBase, onSubmit }) {
+  const [renderedHtml, setRenderedHtml] = useState('');
+  const iframeRef = useRef(null);
+
+  async function handleLoadDocument() {
+    const html = await loadDocumentForm(apiBase, ticket, documentPath);
+    setRenderedHtml(html);
+  }
+
+  const handleIframeLoad = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !renderedHtml) return;
+    const doc = iframe.contentDocument;
+
+    // Inject live ticket — the rendered form always has InfoRouter_Ticket empty
+    const ticketField = doc.getElementById('InfoRouter_Ticket');
+    if (ticketField) ticketField.value = ticket;
+
+    const form = doc.querySelector('form');
+    if (!form) return;
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // InfoRouter_TemplateID identifies which template was used to create this document.
+      // Format it as ~D{id} for the TemplatePath parameter of CreateDocumentUsingTemplate.
+      const templateIdEl = doc.getElementById('InfoRouter_TemplateID');
+      const templatePath = templateIdEl?.value ? `~D${templateIdEl.value}` : '';
+
+      const fields = parseInfoRouterFields(doc, form);
+
+      // Pass the existing documentPath so CreateDocumentUsingTemplate creates a new version
+      onSubmit({ fields, templatePath, existingDocPath: documentPath });
+    });
+  }, [renderedHtml, ticket, documentPath]);
+
+  return (
+    <>
+      <button onClick={handleLoadDocument}>Load Document for Editing</button>
+      {renderedHtml && (
+        <iframe
+          ref={iframeRef}
+          srcDoc={renderedHtml}
+          onLoad={handleIframeLoad}
+          sandbox="allow-scripts allow-forms allow-same-origin"
+          style={{ width: '100%', height: 600, border: 'none' }}
+          title="Edit Document Form"
+        />
+      )}
+    </>
+  );
+}
+```
+
+### Step 3 — Save the updated document
+
+Pass the original `documentPath` as `Path` to `CreateDocumentUsingTemplate`. Because the path already exists, the API creates a new version and checks the document back in automatically.
+
+```javascript
+async function saveDocumentUpdate({ apiBase, ticket, fields, templatePath, existingDocPath }) {
+  const xmlContent = buildXmlContent(fields);
+  const body = new URLSearchParams({
+    AuthenticationTicket: ticket,
+    Path:         existingDocPath,  // Existing path → new version, not a new document
+    TemplatePath: templatePath,     // ~D{id} read from InfoRouter_TemplateID
+    xmlContent,
+  });
+  const res = await fetch(`${apiBase}/CreateDocumentUsingTemplate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
+  const doc = new DOMParser().parseFromString(await res.text(), 'text/xml');
+  const root = doc.querySelector('root') ?? doc.querySelector('response');
+  if (root?.getAttribute('success') !== 'true') {
+    throw new Error(root?.getAttribute('error') ?? 'Update failed');
+  }
+  // New-version response is <root success="true"/> — no DocumentID or DocumentName attributes
+}
+```
+
+### Critical rules
+
+| Rule | Reason |
+|---|---|
+| Check for `success="false"` before rendering the form | The document is checked out during the API call; a failure means it is still checked in |
+| Read `InfoRouter_TemplateID` from the iframe, not from application state | The server injects the correct template ID into the rendered HTML |
+| Format `InfoRouter_TemplateID` as `~D{id}` for `TemplatePath` | The `~D` notation is required; a bare integer will not resolve to a template |
+| Pass `existingDocPath` (not a new path) as `Path` | Reusing the existing path triggers the new-version code path in `CreateDocumentUsingTemplate` |
+| The new-version response has no `DocumentID` attribute | Response element is `<root>` rather than `<response>` — check both with a fallback selector |
+| `sandbox="allow-scripts allow-forms allow-same-origin"` on the iframe | Form scripts must execute; `contentDocument` access must be permitted |
+
+---
