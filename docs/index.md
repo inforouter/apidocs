@@ -115,6 +115,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [CreateDiskMountURL](CreateDiskMountURL.md) - Create a time-limited WebDAV root mount URL for the current user
 - [CreateDocumentShortcut](CreateDocumentShortcut.md) - Create a shortcut (.lnk) document pointing to an existing document
 - [CreateDocumentTypeDef](CreateDocumentTypeDef.md) - Create a new document type definition (admin only)
+- [CreateDocumentTypeDef1](CreateDocumentTypeDef1.md) - Create a new document type definition with an optional default retention and disposition schedule
 - [CreateDocumentUsingTemplate](CreateDocumentUsingTemplate.md) - Create a new HTML document or new version using a template and XML field data
 - [CreateEditDocumentURL](CreateEditDocumentURL.md) - Create a time-limited WebDAV URL for opening and editing a specific document
 - [CreateURL](CreateURL.md) - Create or update a URL document that stores a hyperlink
@@ -195,6 +196,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UpdateDocumentThumbnail](UpdateDocumentThumbnail.md) - Upload or replace the thumbnail image for a document
 - [UpdateDocumentType](UpdateDocumentType.md) - Change the document type assigned to a document
 - [UpdateDocumentTypeDef](UpdateDocumentTypeDef.md) - Rename a document type definition and change its required property set
+- [UpdateDocumentTypeDef1](UpdateDocumentTypeDef1.md) - Update a document type definition including its default retention and disposition schedule
 - [UpdateHtmlDocument](UpdateHtmlDocument.md) - Update the HTML content and description of an existing HTML document
 - [UpdateURLDocument](UpdateURLDocument.md) - Update the hyperlink address of an existing URL shortcut document
 - [UpdateVersionComment](UpdateVersionComment.md) - Update the author comment on a specific document version
