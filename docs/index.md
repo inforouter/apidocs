@@ -83,7 +83,6 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 ### Folder Management
 - [CreateFolder](CreateFolder.md) - Create a folder from a single full path (intermediate folders created automatically)
 - [CreateFolder1](CreateFolder1.md) - Create a subfolder with optional description using separate parent path and name parameters
-- [CreateFormFromTemplate](CreateFormFromTemplate.md) - Return the rendered HTML form for a content template ready for display and submission
 - [CreateHtmlDocument](CreateHtmlDocument.md) - Create a new HTML document in a folder with raw HTML content
 - [DeleteFolder](DeleteFolder.md) - Delete a folder and all its contents
 - [FolderExists](FolderExists.md) - Check whether a folder exists at the specified path
@@ -116,7 +115,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [CreateDocumentShortcut](CreateDocumentShortcut.md) - Create a shortcut (.lnk) document pointing to an existing document
 - [CreateDocumentTypeDef](CreateDocumentTypeDef.md) - Create a new document type definition (admin only)
 - [CreateDocumentTypeDef1](CreateDocumentTypeDef1.md) - Create a new document type definition with an optional default retention and disposition schedule
-- [CreateDocumentUsingTemplate](CreateDocumentUsingTemplate.md) - Create a new HTML document or new version using a template and XML field data
+- [CreateDocumentUsingTemplate](CreateDocumentUsingTemplate.md) - **[Obsolete]** Create a new HTML document or new version using a template and XML field data — use SaveFilledForm instead
 - [CreateEditDocumentURL](CreateEditDocumentURL.md) - Create a time-limited WebDAV URL for opening and editing a specific document
 - [CreateURL](CreateURL.md) - Create or update a URL document that stores a hyperlink
 - [CreateUploadHandler](CreateUploadHandler.md) - Create a server-side upload handler for chunked large file uploads
@@ -134,6 +133,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [DownloadFileChunk](DownloadFileChunk.md) - Download a single chunk of a staged file using a download handler
 - [DownloadZip](DownloadZip.md) - Zip and download specified documents and folders as a raw byte array
 - [DownloadZipWithHandler](DownloadZipWithHandler.md) - Stage a zip archive server-side and return a handler GUID for chunked retrieval
+- [EditFilledForm](EditFilledForm.md) - Return the rendered HTML form for an existing HTML document pre-filled with its current values and check it out for editing
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked out documents for a specified user
@@ -177,6 +177,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [RemoveFromDownloadQueue](RemoveFromDownloadQueue.md) - Remove a document or folder from the current user's download queue
 - [RemoveExpirationDate](RemoveExpirationDate.md) - Remove the expiration date from a document, returning it to a non-expiring state
 - [RemoveFromFavorites](RemoveFromFavorites.md) - Remove a document or folder from the current user's favorites list
+- [SaveFilledForm](SaveFilledForm.md) - Save filled form data as a new HTML document or new version of an existing document
 - [ServerSideImport](ServerSideImport.md) - **[Obsolete]** Server-side file system import -" always returns an error, do not use
 - [SetClassificationLevel](SetClassificationLevel.md) - Set the classification level (NoMarkings/Declassified/Confidential/Secret/TopSecret) of a document or folder
 - [SetDocumentCompletionStatus](SetDocumentCompletionStatus.md) - Set the completion status (PercentComplete and CompletionDate) of a document
@@ -215,6 +216,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UploadNewDocumentWidthHandler](UploadNewDocumentWidthHandler.md) - Upload a new document to a folder using a chunked handler and XML parameters
 - [UploadTiffAsPDF](UploadTiffAsPDF.md) - Upload a TIFF image and store it as a PDF document
 - [UploadTiffAsPDFWithHandler](UploadTiffAsPDFWithHandler.md) - Upload a large TIFF image using chunked handler and store as PDF
+- [UseFormTemplate](UseFormTemplate.md) - Return the rendered HTML form for a content template ready for display and submission
 - [VerifyVersionHash](VerifyVersionHash.md) - Verify the integrity of a document version by comparing its stored content hash
 
 ### Security & Access Control
@@ -274,7 +276,6 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDocumentTasks](GetDocumentTasks.md) - Return all workflow tasks for a document with optional filtering by completion status, sorted by due date
 - [GetDocumentWorkflow](GetDocumentWorkflow.md) - Return the details of a specific running workflow instance on a document
 - [GetDocumentWorkflows](GetDocumentWorkflows.md) - Return all workflow instances (current and historical) for a document with optional filtering
-- [GetFormFromDocument](GetFormFromDocument.md) - Return the rendered HTML form for an existing HTML document pre-filled with its current values and check it out for editing
 - [GetDueTaskDocuments](GetDueTaskDocuments.md) - Return documents that have active (due) workflow tasks assigned to the authenticated user, sorted by due date
 - [GetFlowDef](GetFlowDef.md) - Return the complete definition of a workflow including all step and task definitions
 - [GetFolderFlows](GetFolderFlows.md) - Return workflow definitions active on a folder, optionally including inherited flows from parent folders

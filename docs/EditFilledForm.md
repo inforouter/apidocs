@@ -1,18 +1,18 @@
-# GetFormFromDocument API
+# EditFilledForm API
 
-Returns the rendered HTML form for an existing HTML document, pre-filled with its current saved values, and automatically checks the document out for editing. This is the edit counterpart to `CreateFormFromTemplate`.
+Returns the rendered HTML form for an existing HTML document, pre-filled with its current saved values, and automatically checks the document out for editing. This is the edit counterpart to `UseFormTemplate`.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetFormFromDocument
+/srv.asmx/EditFilledForm
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetFormFromDocument?authenticationTicket=...&documentPath=...&submitUrl=...`
-- **POST** `/srv.asmx/GetFormFromDocument` (form data)
-- **SOAP** Action: `http://tempuri.org/GetFormFromDocument`
+- **GET** `/srv.asmx/EditFilledForm?authenticationTicket=...&documentPath=...&submitUrl=...`
+- **POST** `/srv.asmx/EditFilledForm` (form data)
+- **SOAP** Action: `http://tempuri.org/EditFilledForm`
 
 ## Parameters
 
@@ -71,7 +71,7 @@ After editing, submit the updated form values to `CreateDocumentUsingTemplate` t
 ### POST Request
 
 ```
-POST /srv.asmx/GetFormFromDocument HTTP/1.1
+POST /srv.asmx/EditFilledForm HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -106,7 +106,7 @@ The rendered HTML has `InfoRouter_Ticket` set to an empty string. The React app 
 
 ```javascript
 const res = await fetch(
-  `/srv.asmx/GetFormFromDocument?authenticationTicket=${ticket}` +
+  `/srv.asmx/EditFilledForm?authenticationTicket=${ticket}` +
   `&documentPath=${encodeURIComponent(documentPath)}`
 );
 const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
@@ -197,7 +197,7 @@ function InfoRouterEditForm({ renderedHtml, authTicket, documentPath }) {
 
 ## Related APIs
 
-- [CreateFormFromTemplate](CreateFormFromTemplate.md) — Return a blank form from a template for creating a new document.
+- [UseFormTemplate](UseFormTemplate.md) — Return a blank form from a template for creating a new document.
 - [CreateDocumentUsingTemplate](CreateDocumentUsingTemplate.md) — Save the submitted form values as a new or updated HTML document.
 
 ---
@@ -218,7 +218,7 @@ function InfoRouterEditForm({ renderedHtml, authTicket, documentPath }) {
 
 ## React Implementer Guide
 
-Production-ready patterns derived from the reference demo at `IRWebCore/wwwRoot/form-template-demo.html`. The helper functions (`parseInfoRouterFields`, `buildXmlContent`, `escapeXml`, `parseXml`) are defined in the `CreateFormFromTemplate` implementer guide and are shared across all three form APIs.
+Production-ready patterns derived from the reference demo at `IRWebCore/wwwRoot/form-template-demo.html`. The helper functions (`parseInfoRouterFields`, `buildXmlContent`, `escapeXml`, `parseXml`) are defined in the `UseFormTemplate` implementer guide and are shared across all three form APIs.
 
 ### Step 1 — Fetch the pre-filled form
 
@@ -229,7 +229,7 @@ async function loadDocumentForm(apiBase, ticket, documentPath) {
     documentPath,
     submitUrl: '',   // Pass '' — submit is intercepted via iframe onLoad
   });
-  const res = await fetch(`${apiBase}/GetFormFromDocument`, {
+  const res = await fetch(`${apiBase}/EditFilledForm`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),

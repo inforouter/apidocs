@@ -1,18 +1,18 @@
-# CreateFormFromTemplate API
+# UseFormTemplate API
 
 Returns the rendered HTML form for a content template. The response is the complete HTML that the user's browser can display and submit to create a new document in the specified destination folder.
 
 ## Endpoint
 
 ```
-/srv.asmx/CreateFormFromTemplate
+/srv.asmx/UseFormTemplate
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/CreateFormFromTemplate?authenticationTicket=...&targetFolderPath=...&templatePath=...&submitUrl=...`
-- **POST** `/srv.asmx/CreateFormFromTemplate` (form data)
-- **SOAP** Action: `http://tempuri.org/CreateFormFromTemplate`
+- **GET** `/srv.asmx/UseFormTemplate?authenticationTicket=...&targetFolderPath=...&templatePath=...&submitUrl=...`
+- **POST** `/srv.asmx/UseFormTemplate` (form data)
+- **SOAP** Action: `http://tempuri.org/UseFormTemplate`
 
 ## Parameters
 
@@ -60,7 +60,7 @@ The element content is the complete rendered HTML form wrapped in a CDATA sectio
 ### POST Request
 
 ```
-POST /srv.asmx/CreateFormFromTemplate HTTP/1.1
+POST /srv.asmx/UseFormTemplate HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -74,7 +74,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 To render the built-in HTML document form (not tied to a specific template file):
 
 ```
-POST /srv.asmx/CreateFormFromTemplate HTTP/1.1
+POST /srv.asmx/UseFormTemplate HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -110,7 +110,7 @@ The rendered HTML has `InfoRouter_Ticket` set to an empty string. The React app 
 
 ```javascript
 const res = await fetch(
-  `/srv.asmx/CreateFormFromTemplate?authenticationTicket=${ticket}` +
+  `/srv.asmx/UseFormTemplate?authenticationTicket=${ticket}` +
   `&targetFolderPath=${encodeURIComponent(targetFolderPath)}` +
   `&templatePath=${encodeURIComponent(templatePath)}` +
   `&submitUrl=`
@@ -251,7 +251,7 @@ Production-ready patterns derived from the reference demo at `IRWebCore/wwwRoot/
 
 ### Shared helper functions
 
-These functions are used across all three form APIs (`CreateFormFromTemplate`, `GetFormFromDocument`, `CreateDocumentUsingTemplate`). Define them once in a shared module.
+These functions are used across all three form APIs (`UseFormTemplate`, `GetFormFromDocument`, `CreateDocumentUsingTemplate`). Define them once in a shared module.
 
 ```javascript
 // XML-escape a value before placing it inside a <Prompt> element
@@ -312,7 +312,7 @@ async function loadForm(apiBase, ticket, targetFolderPath, templatePath) {
     templatePath,
     submitUrl: '',   // Always include; pass '' when using iframe submit interception
   });
-  const res = await fetch(`${apiBase}/CreateFormFromTemplate`, {
+  const res = await fetch(`${apiBase}/UseFormTemplate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
@@ -389,6 +389,6 @@ function CreateDocumentForm({ ticket, targetFolderPath, templatePath, apiBase, o
 | `e.preventDefault()` + `e.stopPropagation()` | Prevents the browser from navigating away on submit |
 | Inject `InfoRouter_Ticket` in `onLoad` | The rendered HTML always has this field empty by design |
 | List `[renderedHtml, ticket, templatePath]` in `useCallback` deps | Prevents the submit handler from capturing stale values when inputs change |
-| Call `CreateDocumentUsingTemplate` from the `onSubmit` handler | `CreateFormFromTemplate` only renders the form; the actual save is a separate call |
+| Call `CreateDocumentUsingTemplate` from the `onSubmit` handler | `UseFormTemplate` only renders the form; the actual save is a separate call |
 
 ---
