@@ -45,6 +45,8 @@ The XML must have a root element (element name is not significant) with the foll
 | `DispositionPeriodDays` | int | -" | No | Additional days. |
 | `TransferAgency` | string | 100 | Yes if DispositionType=2 | Agency name for the transfer destination. |
 | `MoveFolderId` | int | -" | No | Folder ID for transfer destination folder. |
+| `CreateTask` | boolean | -" | No | `true` to create a workflow task when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
+| `SendEmail` | boolean | -" | No | `true` to send an email notification when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
 
 **Example XML:**
 ```xml
@@ -65,6 +67,8 @@ The XML must have a root element (element name is not significant) with the foll
   DispositionPeriodDays="0"
   TransferAgency=""
   MoveFolderId="0"
+  CreateTask="true"
+  SendEmail="true"
 />
 ```
 
@@ -116,6 +120,8 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDDefXML=<RDSchedule N
 
 - When `RetentionType = 1` (Permanent), all period values are automatically reset to 0 and `RetentionTrigger` is set to `On Create`.
 - When `RetentionType = 2` (Temporary), at least one of `RetentionPeriodYears`, `RetentionPeriodMonths`, or `RetentionPeriodDays` must be greater than 0.
+- `CreateTask` and `SendEmail` are only meaningful when `DispositionType > 0`. When `DispositionType = 0` (None), both are automatically forced to `false` regardless of the values supplied.
+- If `CreateTask` or `SendEmail` are omitted from the XML, they default to `true` (and will then be subject to the DispositionType rule above).
 - The returned `DefId` is needed for [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md), [SetFolderRandDSchedule](SetFolderRandDSchedule.md), [GetRandDScheduleInfo](GetRandDScheduleInfo.md), [UpdateRandDSchedule](UpdateRandDSchedule.md), and [DeleteRandDSchedule](DeleteRandDSchedule.md).
 
 ## Related APIs

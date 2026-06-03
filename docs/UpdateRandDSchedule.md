@@ -47,6 +47,8 @@ The XML must have a root element (element name is not significant) with the foll
 | `DispositionPeriodDays` | int | -" | No | Additional days. |
 | `TransferAgency` | string | 100 | Yes if DispositionType=2 | Agency name for transfer destination. |
 | `MoveFolderId` | int | -" | No | Target folder ID for transfer. |
+| `CreateTask` | boolean | -" | No | `true` to create a workflow task when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
+| `SendEmail` | boolean | -" | No | `true` to send an email notification when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
 
 ## Response
 
@@ -87,7 +89,7 @@ POST /srv.asmx/UpdateRandDSchedule HTTP/1.1
 Host: yourserver
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDdefId=47&ApplyToExistingDocumentFolders=true&NewRDDefXML=<RDSchedule Name="10-Year Finance" Description="Updated to 10yr" RetentionType="2" RetentionTrigger="1" RetentionPeriodYears="10" RetentionPeriodMonths="0" RetentionPeriodDays="0" DispositionType="1" DispositionTrigger="3" DispositionPeriodYears="0" DispositionPeriodMonths="0" DispositionPeriodDays="0"/>
+authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDdefId=47&ApplyToExistingDocumentFolders=true&NewRDDefXML=<RDSchedule Name="10-Year Finance" Description="Updated to 10yr" RetentionType="2" RetentionTrigger="1" RetentionPeriodYears="10" RetentionPeriodMonths="0" RetentionPeriodDays="0" DispositionType="1" DispositionTrigger="3" DispositionPeriodYears="0" DispositionPeriodMonths="0" DispositionPeriodDays="0" CreateTask="true" SendEmail="true"/>
 ```
 
 ## Notes
@@ -95,6 +97,8 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDdefId=47&ApplyToExis
 - When `ApplyToExistingDocumentFolders = true`, all documents and folders currently assigned this schedule have their retention end dates and disposition dates recalculated immediately. For large organizations with many affected objects this operation may take some time.
 - When `ApplyToExistingDocumentFolders = false`, existing dates are left unchanged; only the schedule definition itself is updated.
 - Changes that trigger recalculation include: RetentionType, RetentionTrigger, any RetentionPeriod values, DispositionType, DispositionTrigger, any DispositionPeriod values, and MoveFolderId.
+- `CreateTask` and `SendEmail` are only meaningful when `DispositionType > 0`. When `DispositionType = 0` (None), both are automatically forced to `false` regardless of the values supplied.
+- If `CreateTask` or `SendEmail` are omitted from the XML, they default to `true` (and will then be subject to the DispositionType rule above).
 - To get the schedule ID, call [GetRandDSchedules](GetRandDSchedules.md).
 - To view the full schedule definition before updating, call [GetRandDScheduleInfo](GetRandDScheduleInfo.md).
 

@@ -52,6 +52,8 @@ Returns the full definition of a specific Retention and Disposition (R&D) schedu
     TransferAgency=""
     MoveFolderId="0"
     MoveFolderPath=""
+    CreateTask="true"
+    SendEmail="false"
     CreatedById="1"
     CreatedByName="Admin"
     CreationDate="2024-01-15T09:30:00"
@@ -93,6 +95,8 @@ Returns the full definition of a specific Retention and Disposition (R&D) schedu
 | `TransferAgency` | Agency name for external transfer (when DispositionType=2). |
 | `MoveFolderId` | Target folder ID for transfer. `0` if not set. |
 | `MoveFolderPath` | Target folder path for transfer. |
+| `CreateTask` | `true` if a workflow task is created when disposition is triggered; `false` otherwise. Always `false` when `DispositionType=0`. |
+| `SendEmail` | `true` if an email notification is sent when disposition is triggered; `false` otherwise. Always `false` when `DispositionType=0`. |
 | `CreatedById` | User ID of the creator. |
 | `CreatedByName` | Username of the creator. |
 | `CreationDate` | Date and time the schedule was created. |
