@@ -1,6 +1,11 @@
 # SetDocumentSummary API
 
-Stores (inserts or updates) the summary for a specified version of a document in the `DOCSUMMARY` table. This is typically called after the infoRouter Connect summarization/categorization service produces a summary for a document version. Calling it again for the same document version overwrites the previously stored summary. Retrieve the stored value with [`GetDocumentSummary`](GetDocumentSummary.md).
+Stores (inserts or updates) the summary for a specified version of a document in the `DOCSUMMARY` table. This is the **explicit** counterpart to [`GetDocumentSummary`](GetDocumentSummary.md): it writes the summary text you provide directly to the database and does **not** call the infoRouter Connect service. Calling it again for the same document version overwrites the previously stored summary.
+
+Typical uses:
+- Persist a summary produced by your own pipeline or an external Connect call.
+- Correct or replace an auto-generated summary.
+- Pre-seed a summary so that [`GetDocumentSummary`](GetDocumentSummary.md) serves it without triggering generation.
 
 ## Endpoint
 
@@ -23,11 +28,19 @@ Stores (inserts or updates) the summary for a specified version of a document in
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 | `versionNumber` | int | Yes | Version number to store the summary for. Pass `0` for the latest published version. Must be `0` or a modern-format version number (>= 1,000,000). Values between `1` and `999,999` are rejected. |
-| `summary` | string | Yes | The summary text to store. Trimmed to the maximum database string length. An empty string clears the stored summary text (the row is kept). |
+| `summary` | string | Yes | The summary text to store. Trimmed to the maximum database string length. An empty string clears the stored summary text (the row is kept; [`GetDocumentSummary`](GetDocumentSummary.md) will then report `-`). |
 
 ### Version Number Format
 
 infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to always target the latest published version.
+
+## Behavior
+
+1. **Version resolution** - `versionNumber=0` resolves to the latest published version. If the document has no published version, an error is returned.
+2. **Shortcut / URL documents** - rejected with an error (they cannot hold a summary).
+3. **Write security** - the caller must have `'Add/Change Meta data'` access (see [Required Permissions](#required-permissions)).
+4. **Offline documents** - rejected with an error (content temporarily inaccessible).
+5. **Upsert** - the summary is inserted if none exists for the version, or updated (overwritten) if one does.
 
 ## Response
 
@@ -50,7 +63,7 @@ infoRouter uses a large-integer version numbering scheme where version 1 = `1000
 
 ## Required Permissions
 
-The calling user must have **'Add/Change Meta data'** access (`IrAction.MetaDataAddChange`) to the document — the same privilege required to modify other document metadata. Read-only users cannot store a summary.
+The calling user must have **'Add/Change Meta data'** access (`IrAction.MetaDataAddChange`) to the document - the same privilege required to modify other document metadata. Read-only users cannot store a summary.
 
 ## Example
 
@@ -81,11 +94,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 ## Notes
 
 - Insert-or-update semantics: the first call for a document version inserts a row; subsequent calls overwrite it.
+- Storing a value here also prevents [`GetDocumentSummary`](GetDocumentSummary.md) from generating one, since it serves the stored value.
 - `versionNumber=0` targets the **latest published version**.
 - Version numbers between `1` and `999,999` are rejected. Use `0` or the modern format (e.g. `1000000` for version 1).
 - Both full infoRouter paths and short document ID paths (`~D{id}` / `~D{id}.ext`) are accepted.
 - Summaries cannot be stored on shortcut or URL documents.
 - The summary text is trimmed to the maximum database string length before storage.
+- This API does not call the Connect service; it only writes to the database.
 
 ## Error Codes
 
@@ -101,6 +116,6 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 
 ## Related APIs
 
-- [GetDocumentSummary](GetDocumentSummary.md) - Retrieve the stored summary for a document version
-- [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text index abstract (auto-generated)
+- [GetDocumentSummary](GetDocumentSummary.md) - Retrieve (or generate-on-read) the summary for a document version
+- [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text index abstract (auto-generated from the search index)
 - [GetDocument](GetDocument.md) - Get full document metadata and properties

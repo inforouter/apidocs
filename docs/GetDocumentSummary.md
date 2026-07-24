@@ -1,6 +1,8 @@
 # GetDocumentSummary API
 
-Returns the stored AI-generated summary for a specified version of a document. The summary is produced by the infoRouter Connect summarization/categorization service and persisted in the `DOCSUMMARY` table. Unlike [`GetDocumentAbstract1`](GetDocumentAbstract1.md) (which extracts text from the full-text index and back-fills on demand), this API only returns a summary that has already been stored via [`SetDocumentSummary`](SetDocumentSummary.md); it does not generate one.
+Returns the AI-generated summary for a specified version of a document. Summaries are stored in the `DOCSUMMARY` table and produced by the local **infoRouter Connect** summarization service.
+
+This API is **generate-on-read**: if a summary has already been stored (by a previous call or by [`SetDocumentSummary`](SetDocumentSummary.md)), it is returned directly. If none exists yet, the service attempts to generate one on the spot from the document's content, stores it, and returns it. When a summary cannot be produced (service not configured, unsupported content, etc.), the API returns the placeholder `-` rather than an error.
 
 ## Endpoint
 
@@ -26,6 +28,27 @@ Returns the stored AI-generated summary for a specified version of a document. T
 
 infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to always target the latest published version.
 
+## Behavior
+
+On each call the API evaluates the following, in order:
+
+1. **Version resolution** - `versionNumber=0` resolves to the latest published version. If the document has no published version, `-` is returned.
+2. **Shortcut / URL documents** - always return `-` (they have no content to summarize).
+3. **Read security** - the caller must have read access to the document/version (see [Required Permissions](#required-permissions)).
+4. **Offline documents** - return an error (content temporarily inaccessible).
+5. **Stored summary** - if a summary already exists for the version, it is returned immediately (this is the normal, fast path).
+6. **Generate-on-read** - if no summary is stored, the service tries to create one:
+   - The requested version must exist in the warehouse, otherwise `-` is returned.
+   - The local Connect service must be configured (`IRConnect` settings). If not, `-` is returned.
+   - If the version has extracted OCR text, that text is sent to the Connect service. Otherwise, if the document's extension is a supported type (see below), the original file bytes are sent. If neither applies, `-` is returned.
+   - The Connect service summarizes the content; the result is **stored in `DOCSUMMARY`** and returned.
+
+### Supported file types for generation
+
+`pdf`, `docx`, `xlsx`, `pptx`, `html`, `htm`, `txt`, `md`, `csv` (configurable via `IRConnect.SummaryExtensions`). A document whose version has no OCR text and whose extension is not in this list will not be summarized on read and returns `-`.
+
+> **Note on first read.** The first read of an un-summarized document triggers content extraction and a call to the local Connect service, so it is slower than subsequent reads and has a side effect (the generated summary is persisted). Later reads return the stored value directly.
+
 ## Response
 
 ### Success Response
@@ -42,7 +65,7 @@ On success, the summary text is returned inside a `<Value>` child element:
 |--------------------|-------------|
 | `success` | `"true"` on success. |
 | `error` | Empty string on success. |
-| `<Value>` | Child element containing the stored summary for the requested document version. Contains `-` when no summary has been stored yet. |
+| `<Value>` | The stored or freshly generated summary. Contains `-` when no summary exists and none could be generated. |
 
 ### Error Response
 
@@ -52,7 +75,9 @@ On success, the summary text is returned inside a `<Value>` child element:
 
 ## Required Permissions
 
-The calling user must have at least **read access** to the document (same check as [`GetDocumentAbstract1`](GetDocumentAbstract1.md)). If the document has no stored summary, `<Value>` returns `-` rather than an error.
+The calling user must have at least **read access** to the document (same check as [`GetDocumentAbstract1`](GetDocumentAbstract1.md)).
+
+> Because reads can trigger generation, a read-access user may cause a one-time summary to be generated and persisted for the document. Generation only happens once per version; thereafter the stored value is served.
 
 ## Example
 
@@ -90,8 +115,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 - `versionNumber=0` targets the **latest published version**.
 - Version numbers between `1` and `999,999` are rejected. Use `0` or the modern format (e.g. `1000000` for version 1).
 - Both full infoRouter paths and short document ID paths (`~D{id}` / `~D{id}.ext`) are accepted.
-- Shortcut and URL documents have no summary; `<Value>` returns `-`.
-- Store or update the summary with [`SetDocumentSummary`](SetDocumentSummary.md).
+- Generation requires the local Connect service to be configured via the `IRConnect` application settings (`BaseUrl`, `ApiKey`, `SummaryExtensions`). When it is not configured, the API still works but only returns already-stored summaries (or `-`).
+- To store or overwrite a summary explicitly (without invoking the Connect service), use [`SetDocumentSummary`](SetDocumentSummary.md).
 
 ## Error Codes
 
@@ -102,9 +127,10 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 | Document not found | The specified path does not resolve to an existing document. |
 | Invalid argument exception. Version numbers cannot be less than 1000000... | `versionNumber` is between 1 and 999,999 (must be 0 or >= 1,000,000). |
 | This document is marked as 'offline'... | The document is offline and its properties are temporarily inaccessible. |
+| Summarize service returned no payload. | The Connect service was called during generation but returned no response. |
 
 ## Related APIs
 
-- [SetDocumentSummary](SetDocumentSummary.md) - Store or update the summary for a document version
-- [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text index abstract (auto-generated)
+- [SetDocumentSummary](SetDocumentSummary.md) - Store or overwrite the summary for a document version
+- [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text index abstract (auto-generated from the search index)
 - [GetDocument](GetDocument.md) - Get full document metadata and properties
