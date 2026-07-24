@@ -144,6 +144,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text abstract of a document version
 - [GetDocumentComments](GetDocumentComments.md) - Get all comments attached to a document
 - [GetDocumentKeywords](GetDocumentKeywords.md) - Get user-defined keywords assigned to a document
+- [GetDocumentSummary](GetDocumentSummary.md) - Get the stored AI-generated summary of a document version
 - [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md) - Get the stored plain-text alternative content of the latest published version of a document
 - [GetDocumentThumbnail](GetDocumentThumbnail.md) - Retrieve the thumbnail image bytes for a document
 - [GetDocumentTypes](GetDocumentTypes.md) - Get all document type definitions configured in the system
@@ -185,6 +186,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [SetDocumentImportance](SetDocumentImportance.md) - Set the importance level (NoMarkings/Low/Normal/High/Vital) of a document
 - [SetDocumentPublishingRule](SetDocumentPublishingRule.md) - Set the publishing rule on a document (LATEST, LASTAPPROVED, TAGGED, SPESIFICVERSION, UNPUBLISHED)
 - [SetDocumentRetention](SetDocumentRetention.md) - **[Obsolete since 8.1.155]** Disabled -" always returns an error, use SetDocumentRandDSchedule instead
+- [SetDocumentSummary](SetDocumentSummary.md) - Store or update the AI-generated summary of a document version
 - [SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md) - Update the stored plain-text alternative content of the latest document version
 - [SetExpirationDate](SetExpirationDate.md) - Set the expiration date and pre-expiration notification on a document
 - [SetVersionTextOnlyContent](SetVersionTextOnlyContent.md) - Update the stored plain-text alternative content of a specific document version
