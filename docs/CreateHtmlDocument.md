@@ -51,7 +51,7 @@ All `NAME` values are case-insensitive. If `VALUE` is omitted the element's inne
 | Name | Type | Description |
 |------|------|-------------|
 | `DESCRIPTION` | string | Document description. |
-| `KEYWORDS` | string | Space- or comma-separated user-defined keywords. |
+| `KEYWORDS` | string | Comma-separated user-defined keywords. A keyword may be a phrase ("acceptance letter"); spaces do not separate keywords. |
 | `VERSIONCOMMENT` | string | Comment attached to the first document version. |
 | `CHECKOUT` | bool (`true`/`false`) | Lock document immediately after creation. |
 | `PUBLISHOPTION` | enum | Controls publishing after creation. Values: `ServerDefault`, `Publish`, `DontPublish`. Defaults to `ServerDefault`. |

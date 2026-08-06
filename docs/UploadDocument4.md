@@ -54,7 +54,7 @@ All `NAME` values are case-insensitive. If `VALUE` is omitted the element's inne
 |-----|------|-------------|
 | `TEXTONLYCONTENT` | string | Plain-text content for full-text indexing (useful for image-only documents). |
 | `DESCRIPTION` | string | Document description. |
-| `KEYWORDS` | string | Space- or comma-separated keywords. |
+| `KEYWORDS` | string | Comma-separated keywords. A keyword may be a phrase ("acceptance letter"); spaces do not separate keywords. |
 | `VERSIONCOMMENT` | string | Version comment recorded in version history. |
 | `CHECKOUT` | bool (`true`/`false`) | Lock document immediately after upload. |
 | `PUBLISHOPTION` | enum | Publishing behavior: `ServerDefault`, `Publish`, `DontPublish`. |

@@ -20,7 +20,15 @@ Updates the user-defined keywords of the specified document. Keywords are free-t
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}`). |
-| `keywords` | string | Yes | Space-separated or comma-separated keywords to assign to the document. Replaces any previously stored keywords. Pass an empty string to clear all keywords. |
+| `keywords` | string | Yes | Comma-separated keywords to assign to the document. Replaces any previously stored keywords. Pass an empty string to clear all keywords. |
+
+### Separators
+
+Keywords are separated by a comma. Semicolon, pipe, tab and new line are accepted as separators as well.
+
+A space does **not** separate keywords, so a keyword may be a phrase: `acceptance letter, invoice` stores two keywords, `acceptance letter` and `invoice`. Whitespace inside a keyword is collapsed to single spaces, and each keyword is capped at 128 characters.
+
+> **Changed in 9.0.** Earlier versions also split on spaces, so `finance quarterly 2024` stored three keywords. It now stores one. Send `finance, quarterly, 2024` to keep the previous result.
 
 ---
 
@@ -54,7 +62,7 @@ The calling user must have **write** (modify) permission on the document or its 
 GET /srv.asmx/UpdateDocumentKeywords
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &path=/Finance/Reports/Q1-2024-Report.pdf
-  &keywords=finance+quarterly+2024+revenue
+  &keywords=finance,quarterly,2024,acceptance+letter
 HTTP/1.1
 ```
 
@@ -66,7 +74,7 @@ Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &path=/Finance/Reports/Q1-2024-Report.pdf
-&keywords=finance quarterly 2024 revenue
+&keywords=finance,quarterly,2024,acceptance letter
 ```
 
 ### SOAP Request
@@ -78,7 +86,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
     <tns:UpdateDocumentKeywords>
       <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
       <tns:path>/Finance/Reports/Q1-2024-Report.pdf</tns:path>
-      <tns:keywords>finance quarterly 2024 revenue</tns:keywords>
+      <tns:keywords>finance,quarterly,2024,acceptance letter</tns:keywords>
     </tns:UpdateDocumentKeywords>
   </soap:Body>
 </soap:Envelope>
@@ -90,7 +98,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - This API **replaces** the entire keyword set. To append, read current keywords with `GetDocumentKeywords` first.
 - Passing an empty string clears all keywords from the document.
-- Keywords are stored as a single string field and are included in full-text search.
+- Keywords are stored one row per keyword and are included in full-text search.
+- A keyword may be a phrase of several words; only the separators listed above break a keyword list apart.
 
 ---
 
