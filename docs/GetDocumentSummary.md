@@ -2,7 +2,9 @@
 
 Returns the AI-generated summary for a specified version of a document. Summaries are stored in the `DOCSUMMARY` table and produced by the local **infoRouter Connect** summarization service.
 
-This API is **generate-on-read**: if a summary has already been stored (by a previous call or by [`SetDocumentSummary`](SetDocumentSummary.md)), it is returned directly. If none exists yet, the service attempts to generate one on the spot from the document's content, stores it, and returns it. When a summary cannot be produced (service not configured, unsupported content, etc.), the API returns the placeholder `-` rather than an error.
+This API **never calls the Connect service itself**. Producing a summary takes as long as a language model takes to answer, which is far too long to hold a web request open, so the work is queued and a background worker runs it. A call either returns a stored summary or tells you the work is queued and you should ask again shortly. Asking twice does not queue the work twice, and a request from a user is placed ahead of everything queued automatically when documents were uploaded.
+
+> **Changed in 9.0.** Earlier builds generated the summary during the call and returned it in the same response. Clients must now read the `status` attribute and come back for anything other than `Ready`.
 
 ## Endpoint
 
@@ -28,56 +30,84 @@ This API is **generate-on-read**: if a summary has already been stored (by a pre
 
 infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to always target the latest published version.
 
-## Behavior
-
-On each call the API evaluates the following, in order:
-
-1. **Version resolution** - `versionNumber=0` resolves to the latest published version. If the document has no published version, `-` is returned.
-2. **Shortcut / URL documents** - always return `-` (they have no content to summarize).
-3. **Read security** - the caller must have read access to the document/version (see [Required Permissions](#required-permissions)).
-4. **Offline documents** - return an error (content temporarily inaccessible).
-5. **Stored summary** - if a summary already exists for the version, it is returned immediately (this is the normal, fast path).
-6. **Generate-on-read** - if no summary is stored, the service tries to create one:
-   - The requested version must exist in the warehouse, otherwise `-` is returned.
-   - The local Connect service must be configured (`IRConnect` settings). If not, `-` is returned.
-   - If the version has extracted OCR text, that text is sent to the Connect service. Otherwise, if the document's extension is a supported type (see below), the original file bytes are sent. If neither applies, `-` is returned.
-   - The Connect service summarizes the content; the result is **stored in `DOCSUMMARY`** and returned.
-
-### Supported file types for generation
-
-`pdf`, `docx`, `xlsx`, `pptx`, `html`, `htm`, `txt`, `md`, `csv` (configurable via `IRConnect.SummaryExtensions`). A document whose version has no OCR text and whose extension is not in this list will not be summarized on read and returns `-`.
-
-> **Note on first read.** The first read of an un-summarized document triggers content extraction and a call to the local Connect service, so it is slower than subsequent reads and has a side effect (the generated summary is persisted). Later reads return the stored value directly.
-
 ## Response
 
-### Success Response
+Every successful call carries a `status` attribute saying whether the summary is there yet.
 
-On success, the summary text is returned inside a `<Value>` child element:
+### Ready
+
+The summary is stored and returned in the `<Value>` element, which is present only in this state.
 
 ```xml
-<response success="true" error="">
+<response success="true" status="Ready" error="">
   <Value>This document is a Q1 2024 financial report covering revenue, expenses, and year-over-year comparisons for the North America region.</Value>
 </response>
 ```
 
-| Element / Attribute | Description |
-|--------------------|-------------|
-| `success` | `"true"` on success. |
-| `error` | Empty string on success. |
-| `<Value>` | The stored or freshly generated summary. Contains `-` when no summary exists and none could be generated. |
+### Queued
 
-### Error Response
+No summary is stored, and the work has been placed in the queue for the background worker. Ask again in a few seconds.
 
 ```xml
-<response success="false" error="[901] Session expired or Invalid ticket" />
+<response success="true" status="Queued" error="" />
 ```
+
+### Processing
+
+The worker has picked the job up and is waiting on the Connect service. Ask again shortly; a model call can take up to the configured timeout, 300 seconds by default.
+
+```xml
+<response success="true" status="Processing" error="" />
+```
+
+### Failed
+
+Connect could not produce the summary and the job has used up its attempts (three by default). The `error` attribute carries the last error the worker saw. The job stays in the queue in a failed state until an administrator requeues it; calling again will not restart it.
+
+```xml
+<response success="false" status="Failed" errorcode="5030" error="Connect service is unreachable." />
+```
+
+### Status values
+
+| `status` | `success` | `<Value>` | What a client should do |
+|----------|-----------|-----------|-------------------------|
+| `Ready` | `true` | present | use the summary |
+| `Queued` | `true` | absent | ask again in a few seconds |
+| `Processing` | `true` | absent | ask again in a few seconds |
+| `Failed` | `false` | absent | report the error; retrying will not help |
+
+## Behavior
+
+On each call the API evaluates the following, in order:
+
+1. **Version resolution** - `versionNumber=0` resolves to the latest published version. If the document has no published version, `Ready` with `-` is returned.
+2. **Shortcut / URL documents** - always `Ready` with `-`; they have no content to summarize.
+3. **Read security** - the caller must have read access to the document/version.
+4. **Offline documents** - an error with `status` absent: the content is temporarily inaccessible.
+5. **Stored summary** - if one exists for the version it is returned as `Ready`. This is the normal, fast path.
+6. **Nothing to produce** - `Ready` with `-` when the version is missing from the warehouse, when the Connect service is not configured, or when the document's extension is not a supported type. These will never produce a summary, so no work is queued.
+7. **Queue** - otherwise the summarize operation is queued for this document version at user priority and `Queued` is returned. If a job is already there, its state is reported instead, and a job that was queued automatically is moved to the front because somebody is now waiting for it.
+
+### Supported file types
+
+`pdf`, `docx`, `xlsx`, `pptx`, `html`, `htm`, `txt`, `md`, `csv` (configurable via `IRConnect.SummaryExtensions`).
+
+### A dash is not an error
+
+`Ready` with a `-` in `<Value>` means there will never be a summary for this version - an unsupported file type, no configured Connect service, or nothing published. It is a final answer, not a state to poll.
+
+## Polling
+
+A reasonable client asks once, and if the answer is `Queued` or `Processing` asks again every few seconds. The background worker polls the queue every 5 seconds by default (`IRConnect.QueuePollSeconds`) and runs one job at a time, so a busy server may leave a job queued for a while behind other work.
+
+There is no callback or notification; polling is the only way to learn that a summary has arrived.
 
 ## Required Permissions
 
-The calling user must have at least **read access** to the document (same check as [`GetDocumentAbstract1`](GetDocumentAbstract1.md)).
+The calling user must have at least **read access** to the document.
 
-> Because reads can trigger generation, a read-access user may cause a one-time summary to be generated and persisted for the document. Generation only happens once per version; thereafter the stored value is served.
+> A read-access user can cause summarization work to be queued for a document, which consumes infoRouter Connect capacity. The work is only ever queued once per document version.
 
 ## Example
 
@@ -115,22 +145,26 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 - `versionNumber=0` targets the **latest published version**.
 - Version numbers between `1` and `999,999` are rejected. Use `0` or the modern format (e.g. `1000000` for version 1).
 - Both full infoRouter paths and short document ID paths (`~D{id}` / `~D{id}.ext`) are accepted.
-- Generation requires the local Connect service to be configured via the `IRConnect` application settings (`BaseUrl`, `ApiKey`, `SummaryExtensions`). When it is not configured, the API still works but only returns already-stored summaries (or `-`).
-- To store or overwrite a summary explicitly (without invoking the Connect service), use [`SetDocumentSummary`](SetDocumentSummary.md).
+- A summary a user wrote with [`SetDocumentSummary`](SetDocumentSummary.md) is never overwritten by generated content. Only a summary the system produced is replaced when it is regenerated.
+- Folders can have summarization done automatically on upload; see [SetFolderAIPreferences](SetFolderAIPreferences.md).
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Document not found | The specified path does not resolve to an existing document. |
-| Invalid argument exception. Version numbers cannot be less than 1000000... | `versionNumber` is between 1 and 999,999 (must be 0 or >= 1,000,000). |
-| This document is marked as 'offline'... | The document is offline and its properties are temporarily inaccessible. |
-| Summarize service returned no payload. | The Connect service was called during generation but returned no response. |
+Errors carry an `errorcode` attribute alongside the message. The code is the HTTP status multiplied by ten, so `4041` is 404 and `5030` is 503.
+
+| Error | `errorcode` | Description |
+|-------|-------------|-------------|
+| `[900] Authentication failed` | `4010` | Invalid or missing authentication ticket. |
+| `[901] Session expired or Invalid ticket` | `4010` | The ticket has expired or does not exist. |
+| Document not found | `4041` | The specified path does not resolve to an existing document. |
+| Access denied | `4030` | The caller does not have read access to the document. |
+| Invalid argument exception. Version numbers cannot be less than 1000000... | `4000` | `versionNumber` is between 1 and 999,999. |
+| This document is marked as 'offline'... | `4230` | The document is offline; try again later. |
+| (any `status="Failed"` message) | `5030` | Connect could not produce the summary and the job is parked. |
 
 ## Related APIs
 
 - [SetDocumentSummary](SetDocumentSummary.md) - Store or overwrite the summary for a document version
-- [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text index abstract (auto-generated from the search index)
+- [SetFolderAIPreferences](SetFolderAIPreferences.md) - Have summaries produced automatically for documents added to a folder
+- [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text index abstract, which is produced locally and not by Connect
 - [GetDocument](GetDocument.md) - Get full document metadata and properties
