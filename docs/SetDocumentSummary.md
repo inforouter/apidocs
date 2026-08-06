@@ -5,7 +5,15 @@ Stores (inserts or updates) the summary for a specified version of a document in
 Typical uses:
 - Persist a summary produced by your own pipeline or an external Connect call.
 - Correct or replace an auto-generated summary.
-- Pre-seed a summary so that [`GetDocumentSummary`](GetDocumentSummary.md) serves it without triggering generation.
+- Pre-seed a summary so that [`GetDocumentSummary`](GetDocumentSummary.md) serves it without queueing any work.
+
+## Writing a summary protects it
+
+Every stored summary records who wrote it. A summary written through this API is stamped with the calling user, and **the server never overwrites it**: regeneration only ever replaces a summary the system produced itself.
+
+That matters when a folder has automatic summarization switched on, or when a new version is published. A summary the system generated is replaced freely; one a person wrote through this API stays as it is until a person changes it again.
+
+The same applies to a summary stored before 9.0, when nothing recorded an author. Those carry no stamp, and an unstamped summary is left alone rather than assumed to be regenerable.
 
 ## Endpoint
 
