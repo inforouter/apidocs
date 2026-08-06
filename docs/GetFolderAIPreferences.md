@@ -62,14 +62,34 @@ A folder that has no preferences of its own inherits them from the nearest paren
 
 | Preference Name | Possible Values | Description |
 |-----------------|-----------------|-------------|
-| `AutoSummarize` | `"on"` / `"off"` | Summarize new document versions automatically. |
-| `AutoClassify` | `"on"` / `"off"` | Classify new document versions against the configured taxonomy automatically. |
-| `AutoExtractKeywords` | `"on"` / `"off"` | Extract keywords (tags) from new document versions automatically. |
-| `AutoExtractData` | `"on"` / `"off"` | Run structured data extraction on new document versions automatically. |
-| `AutoProfile` | `"on"` / `"off"` | Fill the applied property sets of new document versions automatically. |
-| `AutoOCR` | `"on"` / `"off"` | OCR scanned documents automatically. |
+| `AutoProfile` | `"on"` / `"off"` | Describe the document in one call: description, abstract, summary and keywords together, plus the OCR text of a scan. |
+| `AutoSummarize` | `"on"` / `"off"` | Summarize new document versions. |
+| `AutoExtractKeywords` | `"on"` / `"off"` | Produce keywords for new document versions. |
+| `AutoOCR` | `"on"` / `"off"` | Read the text out of scanned documents so they become searchable. |
+| `AutoClassify` | `"on"` / `"off"` | Stored but **not yet performed by the server**. |
+| `AutoExtractData` | `"on"` / `"off"` | Stored but **not yet performed by the server**. |
 | `ScrubPII` | `"on"` / `"off"` | Scrub PII before document text is handed to the AI provider. |
 | `ApplyToSubfolders` | `"on"` / `"off"` | The preferences also govern the subfolder tree, including subfolders created later. |
+
+### What actually runs when a document arrives
+
+Switching a preference on does not queue work by itself. Work is queued when a document is **uploaded, checked in as a new version, or imported** into the folder, and only for the operations this server can carry out.
+
+**`AutoProfile` replaces the other three rather than adding to them.** One profile call answers with the description, abstract, summary and keywords together, and carries back the OCR text of a scan with them. So when `AutoProfile` is on, `AutoSummarize`, `AutoExtractKeywords` and `AutoOCR` are **not** queued alongside it - they would each spend another model call to produce what the profile already returned.
+
+| Preferences switched on | Queued for a PDF |
+|-------------------------|------------------|
+| `AutoProfile` (with or without the others) | one profile |
+| `AutoSummarize` + `AutoExtractKeywords` + `AutoOCR` | OCR, then summary, then keywords |
+| `AutoSummarize` only | one summary |
+
+Some documents are skipped entirely:
+
+- **Shortcuts and URL documents** have no content to read, so nothing is queued for them.
+- **File types infoRouter Connect cannot read** are skipped, except for OCR - OCR is what produces the text in the first place, and the scans that need it most are exactly the types the readable list leaves out.
+- **`AutoClassify` and `AutoExtractData` are never queued**, because the server has no implementation for them yet. Switching them on is recorded and has no other effect.
+
+Automatic work is queued behind anything a user is waiting for. If somebody asks for a document's summary through [GetDocumentSummary](GetDocumentSummary.md) while it is still queued, that job moves to the front.
 
 ---
 

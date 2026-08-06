@@ -30,14 +30,20 @@ Names are case-insensitive.
 
 | Preference Name | Description |
 |-----------------|-------------|
-| `AutoSummarize` | Summarize new document versions automatically. |
-| `AutoClassify` | Classify new document versions against the configured taxonomy automatically. |
-| `AutoExtractKeywords` | Extract keywords (tags) from new document versions automatically. |
-| `AutoExtractData` | Run structured data extraction on new document versions automatically. |
-| `AutoProfile` | Fill the applied property sets of new document versions automatically. |
-| `AutoOCR` | OCR scanned documents automatically. |
+| `AutoProfile` | Describe the document in one call: description, abstract, summary and keywords together, plus the OCR text of a scan. Replaces the three below rather than adding to them. |
+| `AutoSummarize` | Summarize new document versions. |
+| `AutoExtractKeywords` | Produce keywords for new document versions. |
+| `AutoOCR` | Read the text out of scanned documents so they become searchable. |
+| `AutoClassify` | Stored but **not yet performed by the server**. |
+| `AutoExtractData` | Stored but **not yet performed by the server**. |
 | `ScrubPII` | Scrub PII before document text is handed to the AI provider. |
 | `ApplyToSubfolders` | Apply the preferences to the subfolder tree as well (see Notes). |
+
+> **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in or imported afterwards. To produce content for a document already there, ask for it directly with [GetDocumentSummary](GetDocumentSummary.md) or [ExtractDocumentKeywords](ExtractDocumentKeywords.md).
+
+> **`AutoProfile` covers `AutoSummarize`, `AutoExtractKeywords` and `AutoOCR`.** One profile call returns all of it, so switching `AutoProfile` on means the other three are not run alongside it - switching them on as well costs nothing and changes nothing. See [GetFolderAIPreferences](GetFolderAIPreferences.md) for exactly what gets queued.
+
+> **`AutoClassify` and `AutoExtractData` are accepted and stored, but the server does not act on them yet.** They are recorded so a folder's intent survives, and will start working when the operations are implemented.
 
 ### Supported Values
 
