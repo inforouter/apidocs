@@ -68,7 +68,9 @@ Returns a `<response>` root element containing a `<DocumentTypes>` child with on
 
                   PropertySetID="5"
 
-                  PropertySetName="Contract Details" />
+                  PropertySetName="Contract Details"
+
+                  Description="An agreement between two parties setting out terms" />
 
     <DocumentType TypeID="2"
 
@@ -76,7 +78,9 @@ Returns a `<response>` root element containing a `<DocumentTypes>` child with on
 
                   PropertySetID="8"
 
-                  PropertySetName="Invoice Metadata" />
+                  PropertySetName="Invoice Metadata"
+
+                  Description="A supplier's request for payment" />
 
     <DocumentType TypeID="3"
 
@@ -84,7 +88,9 @@ Returns a `<response>` root element containing a `<DocumentTypes>` child with on
 
                   PropertySetID="0"
 
-                  PropertySetName="" />
+                  PropertySetName=""
+
+                  Description="" />
 
   </DocumentTypes>
 
@@ -104,6 +110,8 @@ Returns a `<response>` root element containing a `<DocumentTypes>` child with on
 | `TypeName` | Display name of the document type. |
 | `PropertySetID` | Integer ID of the custom property set associated with this document type. `0` if no property set is linked. |
 | `PropertySetName` | Name of the associated property set. Empty string if no property set is linked. |
+
+| `Description` | What the document type means, in a sentence. Empty string when no description has been set. |
 
 
 
@@ -230,6 +238,10 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - All document types defined in the system are returned; there is no filtering or pagination.
 
 - `PropertySetID="0"` and `PropertySetName=""` indicate the document type has no associated property set requirement.
+
+- `Description` is new in version 9. It is returned as an additional attribute, so a client written against an earlier response simply ignores it. Set it with `CreateDocumentTypeDef1` or `UpdateDocumentTypeDef1`.
+
+- `Description` is what infoRouter tells infoRouter Connect the type is; a described type is recognised in a document noticeably better than one identified by its name alone.
 
 - To create, update, or delete document type definitions, use `CreateDocumentTypeDef`, `UpdateDocumentTypeDef`, or `DeleteDocumentTypeDef`.
 

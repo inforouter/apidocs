@@ -1,6 +1,6 @@
-# CreateDocumentTypeDef1 API
+﻿# CreateDocumentTypeDef1 API
 
-Creates a new document type definition with an optional required property set and an optional default retention and disposition schedule. When a document is assigned this type, the configured schedule is automatically applied.
+Creates a new document type definition with an optional description, an optional required property set and an optional default retention and disposition schedule. When a document is assigned this type, the configured schedule is automatically applied.
 
 ## Endpoint
 
@@ -10,7 +10,7 @@ Creates a new document type definition with an optional required property set an
 
 ## Methods
 
-- **GET** `/srv.asmx/CreateDocumentTypeDef1?authenticationTicket=...&DocumentTypeName=...&RequiredPropertySetName=...&RandDScheduleName=...`
+- **GET** `/srv.asmx/CreateDocumentTypeDef1?authenticationTicket=...&DocumentTypeName=...&RequiredPropertySetName=...&RandDScheduleName=...&Description=...`
 - **POST** `/srv.asmx/CreateDocumentTypeDef1` (form data)
 - **SOAP** Action: `http://tempuri.org/CreateDocumentTypeDef1`
 
@@ -22,6 +22,7 @@ Creates a new document type definition with an optional required property set an
 | `DocumentTypeName` | string | Yes | Name for the new document type. Maximum 30 characters. May contain only letters, digits, spaces, and underscores. The name `GENERIC` is reserved and cannot be used. |
 | `RequiredPropertySetName` | string | No | Name of an existing global property set to associate with this document type. The property set must be global and applicable to documents. Pass an empty string or omit for no required property set. |
 | `RandDScheduleName` | string | No | Name of an existing retention and disposition schedule to automatically assign when this document type is applied to a document. Pass an empty string or omit for no default schedule. |
+| `Description` | string | No | What the document type means, in a sentence. Maximum 255 characters, single line. Sent to infoRouter Connect as the description of the type. Pass an empty string or omit for no description. |
 
 ## Response
 
@@ -60,6 +61,7 @@ GET /srv.asmx/CreateDocumentTypeDef1
   &DocumentTypeName=Financial+Record
   &RequiredPropertySetName=FinanceMetadata
   &RandDScheduleName=Finance+Records+-+7+Years
+  &Description=A+statement+of+account+activity+for+a+reporting+period
 HTTP/1.1
 ```
 
@@ -84,6 +86,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &DocumentTypeName=Financial+Record
 &RequiredPropertySetName=FinanceMetadata
 &RandDScheduleName=Finance+Records+-+7+Years
+&Description=A+statement+of+account+activity+for+a+reporting+period
 ```
 
 ### SOAP Request
@@ -97,6 +100,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
       <tns:DocumentTypeName>Financial Record</tns:DocumentTypeName>
       <tns:RequiredPropertySetName>FinanceMetadata</tns:RequiredPropertySetName>
       <tns:RandDScheduleName>Finance Records - 7 Years</tns:RandDScheduleName>
+      <tns:Description>A statement of account activity for a reporting period</tns:Description>
     </tns:CreateDocumentTypeDef1>
   </soap:Body>
 </soap:Envelope>
@@ -111,6 +115,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - If `RequiredPropertySetName` is provided, the property set must already exist, be global (system-wide), and be configured to apply to documents.
 - If `RandDScheduleName` is provided, the schedule must already exist. The name is looked up by exact match (case-insensitive).
 - The retention schedule is applied automatically when the document type is later assigned to a document via `UpdateDocumentType`. It does not affect documents that were assigned the type before this definition was created.
+- `Description` is what infoRouter tells infoRouter Connect the type is. Connect recognises a described type in a document noticeably better than one identified by its name alone, so it is worth writing even though it is optional. It is returned by `GetDocumentTypes`.
+- `Description` is limited to 255 characters and must be a single line — no tab or newline characters, no leading or trailing space.
 - The returned `DocumentTypeId` can be used with `UpdateDocumentTypeDef1` and `DeleteDocumentTypeDef`.
 
 ---
@@ -138,3 +144,4 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `Specified custom propertyset is not a public property set.` | The named property set is not a global property set. |
 | `Property set not found` | The value in `RequiredPropertySetName` does not match any existing property set. |
 | `The selected retention and disposition schedule cannot be found.` | The value in `RandDScheduleName` does not match any existing schedule. |
+| `Maximum allowable character length exceeded` | `Description` is longer than 255 characters. |

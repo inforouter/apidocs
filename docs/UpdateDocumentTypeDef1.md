@@ -1,4 +1,4 @@
-# UpdateDocumentTypeDef1 API
+﻿# UpdateDocumentTypeDef1 API
 
 Updates an existing document type definition. Allows renaming the document type, changing its required property set, and setting or clearing its default retention and disposition schedule.
 
@@ -10,7 +10,7 @@ Updates an existing document type definition. Allows renaming the document type,
 
 ## Methods
 
-- **GET** `/srv.asmx/UpdateDocumentTypeDef1?authenticationTicket=...&DocumentTypeId=...&NewDocumentTypeName=...&NewRequiredPropertySetName=...&RandDScheduleName=...`
+- **GET** `/srv.asmx/UpdateDocumentTypeDef1?authenticationTicket=...&DocumentTypeId=...&NewDocumentTypeName=...&NewRequiredPropertySetName=...&RandDScheduleName=...&Description=...`
 - **POST** `/srv.asmx/UpdateDocumentTypeDef1` (form data)
 - **SOAP** Action: `http://tempuri.org/UpdateDocumentTypeDef1`
 
@@ -23,6 +23,7 @@ Updates an existing document type definition. Allows renaming the document type,
 | `NewDocumentTypeName` | string | Yes | New name for the document type. Must be unique system-wide. |
 | `NewRequiredPropertySetName` | string | No | Name of the property set to require for documents of this type. Pass an empty string to remove the current required property set. |
 | `RandDScheduleName` | string | No | Name of an existing retention and disposition schedule to set as the default for this type. Pass an empty string to remove the current schedule. Omit (pass `null`) to leave the existing schedule unchanged. |
+| `Description` | string | No | What the document type means, in a sentence. Maximum 255 characters, single line. Pass an empty string to clear the current description. Omit (pass `null`) to leave it unchanged. |
 
 ## Response
 
@@ -57,6 +58,7 @@ GET /srv.asmx/UpdateDocumentTypeDef1
   &NewDocumentTypeName=Financial+Report
   &NewRequiredPropertySetName=FinanceProperties
   &RandDScheduleName=Finance+Records+-+7+Years
+  &Description=A+statement+of+account+activity+for+a+reporting+period
 HTTP/1.1
 ```
 
@@ -83,6 +85,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &NewDocumentTypeName=Financial+Report
 &NewRequiredPropertySetName=FinanceProperties
 &RandDScheduleName=Finance+Records+-+7+Years
+&Description=A+statement+of+account+activity+for+a+reporting+period
 ```
 
 ### SOAP Request
@@ -97,6 +100,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
       <tns:NewDocumentTypeName>Financial Report</tns:NewDocumentTypeName>
       <tns:NewRequiredPropertySetName>FinanceProperties</tns:NewRequiredPropertySetName>
       <tns:RandDScheduleName>Finance Records - 7 Years</tns:RandDScheduleName>
+      <tns:Description>A statement of account activity for a reporting period</tns:Description>
     </tns:UpdateDocumentTypeDef1>
   </soap:Body>
 </soap:Envelope>
@@ -112,6 +116,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   - **Omitted / null** — the existing schedule is preserved unchanged.
   - **Empty string** — the current default schedule is removed (sets `DefaultRDDefID` to 0).
   - **A schedule name** — the named schedule becomes the new default. The schedule must already exist.
+- `Description` behavior:
+  - **Omitted / null** — the existing description is preserved unchanged.
+  - **Empty string** — the current description is cleared.
+  - **A sentence** — becomes the new description. Maximum 255 characters, single line.
+- `Description` is what infoRouter tells infoRouter Connect the type is, and Connect recognises a described type in a document noticeably better than one identified by its name alone. It is returned by `GetDocumentTypes`.
 - Changes to the default retention schedule only affect documents assigned this type **after** the update. Existing documents are not retroactively updated.
 - Use `GetDocumentTypes` to retrieve document type IDs and current configuration.
 
@@ -138,4 +147,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `Specified custom propertyset not applicable to the documents.` | The named property set is not configured to apply to documents. |
 | `Specified custom propertyset is not a public property set.` | The named property set is not a global property set. |
 | `The selected retention and disposition schedule cannot be found.` | The value in `RandDScheduleName` does not match any existing schedule. |
+| `Maximum allowable character length exceeded` | `Description` is longer than 255 characters. |
 | `SystemError:...` | An unexpected server-side error occurred. |
