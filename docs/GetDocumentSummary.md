@@ -2,9 +2,11 @@
 
 Returns the AI-generated summary for a specified version of a document. Summaries are stored in the `DOCSUMMARY` table and produced by the local **infoRouter Connect** summarization service.
 
-This API **never calls the Connect service itself**. Producing a summary takes as long as a language model takes to answer, which is far too long to hold a web request open, so the work is queued and a background worker runs it. A call either returns a stored summary or tells you the work is queued and you should ask again shortly. Asking twice does not queue the work twice, and a request from a user is placed ahead of everything queued automatically when documents were uploaded.
+This API **only reads**. It never calls the Connect service, and it never queues work: a version with no stored summary answers with a dash, not with a job. Producing a summary is a separate, deliberate act - either a folder preference that summarizes documents as they are uploaded, or an explicit request to produce one - and only that act spends the instance's AI budget.
 
-> **Changed in 9.0.** Earlier builds generated the summary during the call and returned it in the same response. Clients must now read the `status` attribute and come back for anything other than `Ready`.
+> **Changed in 9.0.** Earlier builds generated the summary during the call and returned it in the same response.
+>
+> **Changed again in 9.2.** Between those releases this API queued the work itself and answered `Queued` or `Processing` while it ran, so opening a document could spend money. It no longer does. A summary appears here once something else has produced one; until then the answer is `Ready` with `-`. Clients written for the queueing behaviour keep working - they simply never see a status other than `Ready`.
 
 ## Endpoint
 
@@ -32,11 +34,9 @@ infoRouter uses a large-integer version numbering scheme where version 1 = `1000
 
 ## Response
 
-Every successful call carries a `status` attribute saying whether the summary is there yet.
+A successful call always carries `status="Ready"`. The attribute is kept for the clients written when this API queued work, and for the other AI responses that still use it.
 
-### Ready
-
-The summary is stored and returned in the `<Value>` element, which is present only in this state.
+### Ready — with a summary
 
 ```xml
 <response success="true" status="Ready" error="">
@@ -44,38 +44,25 @@ The summary is stored and returned in the `<Value>` element, which is present on
 </response>
 ```
 
-### Queued
+### Ready — with no summary
 
-No summary is stored, and the work has been placed in the queue for the background worker. Ask again in a few seconds.
-
-```xml
-<response success="true" status="Queued" error="" />
-```
-
-### Processing
-
-The worker has picked the job up and is waiting on the Connect service. Ask again shortly; a model call can take up to the configured timeout, 300 seconds by default.
+Nothing has produced one for this version. `<Value>` carries a dash.
 
 ```xml
-<response success="true" status="Processing" error="" />
+<response success="true" status="Ready" error="">
+  <Value>-</Value>
+</response>
 ```
 
-### Failed
-
-Connect could not produce the summary and the job has used up its attempts (three by default). The `error` attribute carries the last error the worker saw. The job stays in the queue in a failed state until an administrator requeues it; calling again will not restart it.
-
-```xml
-<response success="false" status="Failed" errorcode="5030" error="Connect service is unreachable." />
-```
+This is a final answer, not a state to poll. To have a summary produced, see *Producing a summary* below.
 
 ### Status values
 
 | `status` | `success` | `<Value>` | What a client should do |
 |----------|-----------|-----------|-------------------------|
-| `Ready` | `true` | present | use the summary |
-| `Queued` | `true` | absent | ask again in a few seconds |
-| `Processing` | `true` | absent | ask again in a few seconds |
-| `Failed` | `false` | absent | report the error; retrying will not help |
+| `Ready` | `true` | present, may be `-` | use the summary, or treat `-` as "none" |
+
+Failures are ordinary errors - a bad ticket, a path that resolves to nothing, an offline document - and carry `success="false"` with an `errorcode`, as listed at the end.
 
 ## Behavior
 
@@ -84,30 +71,29 @@ On each call the API evaluates the following, in order:
 1. **Version resolution** - `versionNumber=0` resolves to the latest published version. If the document has no published version, `Ready` with `-` is returned.
 2. **Shortcut / URL documents** - always `Ready` with `-`; they have no content to summarize.
 3. **Read security** - the caller must have read access to the document/version.
-4. **Offline documents** - an error with `status` absent: the content is temporarily inaccessible.
-5. **Stored summary** - if one exists for the version it is returned as `Ready`. This is the normal, fast path.
-6. **Nothing to produce** - `Ready` with `-` when the version is missing from the warehouse, when the Connect service is not configured, or when the document's extension is not a supported type. These will never produce a summary, so no work is queued.
-7. **Queue** - otherwise the summarize operation is queued for this document version at user priority and `Queued` is returned. If a job is already there, its state is reported instead, and a job that was queued automatically is moved to the front because somebody is now waiting for it.
+4. **Offline documents** - an error: the content is temporarily inaccessible.
+5. **Stored summary** - returned as `Ready` if there is one, `Ready` with `-` if there is not.
 
-### Supported file types
-
-`pdf`, `docx`, `xlsx`, `pptx`, `html`, `htm`, `txt`, `md`, `csv` (configurable via `IRConnect.SupportedExtensions`).
+That is the whole of it. Nothing here consults the warehouse, the Connect service or the work queue, so the answer costs one indexed row read.
 
 ### A dash is not an error
 
-`Ready` with a `-` in `<Value>` means there will never be a summary for this version - an unsupported file type, no configured Connect service, or nothing published. It is a final answer, not a state to poll.
+`Ready` with `-` means no summary is stored for this version. It may be that nothing has produced one yet, or that nothing ever will - an unsupported file type, or no Connect service configured. This API does not distinguish the two, because it does not ask.
 
-## Polling
+## Producing a summary
 
-A reasonable client asks once, and if the answer is `Queued` or `Processing` asks again every few seconds. The background worker polls the queue every 5 seconds by default (`IRConnect.QueuePollSeconds`) and runs one job at a time, so a busy server may leave a job queued for a while behind other work.
+Two things produce summaries, and neither of them is this API:
 
-There is no callback or notification; polling is the only way to learn that a summary has arrived.
+- **Automatically on upload** - a folder with `AutoSummarize` or `AutoProfile` set queues the work for every version added to it. See [SetFolderAIPreferences](SetFolderAIPreferences.md).
+- **On request** - an extract call queues the work at user priority, ahead of anything queued automatically, and reports its progress while it runs. That call is where `Queued` and `Processing` live now.
+
+Either way the result lands in `DOCSUMMARY`, and this API returns it from that point on.
 
 ## Required Permissions
 
 The calling user must have at least **read access** to the document.
 
-> A read-access user can cause summarization work to be queued for a document, which consumes infoRouter Connect capacity. The work is only ever queued once per document version.
+> Reading a summary costs nothing and queues nothing. Until 9.2 a read-access user could cause summarization work to be queued simply by opening a document; that is no longer the case.
 
 ## Example
 
@@ -147,6 +133,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 - Both full infoRouter paths and short document ID paths (`~D{id}` / `~D{id}.ext`) are accepted.
 - A summary a user wrote with [`SetDocumentSummary`](SetDocumentSummary.md) is never overwritten by generated content. Only a summary the system produced is replaced when it is regenerated.
 - Folders can have summarization done automatically on upload; see [SetFolderAIPreferences](SetFolderAIPreferences.md).
+- The summary is per **version**. A new version starts with no summary of its own until something produces one.
 
 ## Error Codes
 
@@ -160,7 +147,6 @@ Errors carry an `errorcode` attribute alongside the message. The code is the HTT
 | Access denied | `4030` | The caller does not have read access to the document. |
 | Invalid argument exception. Version numbers cannot be less than 1000000... | `4000` | `versionNumber` is between 1 and 999,999. |
 | This document is marked as 'offline'... | `4230` | The document is offline; try again later. |
-| (any `status="Failed"` message) | `5030` | Connect could not produce the summary and the job is parked. |
 
 ## Related APIs
 
