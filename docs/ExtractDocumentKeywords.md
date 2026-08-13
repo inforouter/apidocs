@@ -1,8 +1,10 @@
-# ExtractDocumentKeywords API
+﻿# ExtractDocumentKeywords API
 
 Has the local **infoRouter Connect** service read a document version and produce keywords for it. The keywords it returns are stored as the document's *generated* keywords, a separate kind from the ones a user curated.
 
 This API **never calls the Connect service itself**. Producing keywords takes as long as a language model takes to answer, which is far too long to hold a web request open, so the work is queued and a background worker runs it. A call either returns the keywords already on the document or tells you the work is queued and you should ask again shortly. Asking twice does not queue the work twice, and a request from a user is placed ahead of everything queued automatically when documents were uploaded.
+
+> **This is the one-switch form of [ExtractDocumentContent](ExtractDocumentContent.md)**, which serves it, and which can ask for a summary, a description, the text of a scan and the document type in the same request. Asking for several things there usually costs *fewer* AI calls than asking for them one at a time — a description, a summary and keywords are one call between them. Use this API when keywords are genuinely all you want, or when `ReplaceExisting` clearing the user's own keywords is the behaviour you need: the general form deliberately does not delete anybody's own content.
 
 ## Endpoint
 
@@ -85,7 +87,7 @@ Connect could not produce keywords and the job has used up its attempts. The job
 1. **Version resolution** - `VersionNumber=0` resolves to the latest published version. A document with no published version is an error.
 2. **Shortcut and URL documents** - an error; they have no content to read.
 3. **Offline documents** - an error; the content is temporarily inaccessible.
-4. **Connect not configured** - an error, since nothing can produce keywords.
+4. **Connect not configured, switched off, or an unreadable file type** - a failure carrying the reason, reported immediately rather than by queueing work that would fail three times.
 5. **`ReplaceExisting=true`** - the user's own keywords are cleared now.
 6. **Already generated** - if the document already has generated keywords they are returned as `Ready`, and no new work is queued. To have them produced again, remove them first.
 7. **Queue** - otherwise the work is queued at user priority and `Queued` is returned. If a job is already there its state is reported instead, and a job queued automatically is moved to the front because somebody is now waiting for it.
@@ -160,12 +162,14 @@ Errors carry an `errorcode` attribute alongside the message. The code is the HTT
 | Access denied | `4030` | The caller may not change the document's properties. |
 | URL and shortcut files do not have text content. | `4000` | The document has no content to read. |
 | This document is marked as 'offline'... | `4230` | The document is offline; try again later. |
-| No keywords could be extracted from this document. | `4000` | Connect is not configured, or it read the document and found nothing to tag. |
+| No keywords could be extracted from this document. | `4000` | Connect read the document and found nothing to tag. |
+| Not available | `5030` | Keywords will never be produced for this document: the operation is switched off on this instance, this server cannot carry it out, Connect is not configured, or the file is a type Connect cannot read. Reported immediately rather than after three failed attempts. |
 | (any `status="Failed"` message) | `5030` | Connect could not produce keywords and the job is parked. |
 
 ## Related APIs
 
 - [GetDocumentKeywords](GetDocumentKeywords.md) - Read every keyword on a document
 - [UpdateDocumentKeywords](UpdateDocumentKeywords.md) - Set the keywords a user curated
-- [GetDocumentSummary](GetDocumentSummary.md) - The same queue and status model, for summaries
+- [ExtractDocumentContent](ExtractDocumentContent.md) - Ask for a summary, description, keywords, OCR text and document type together, usually for fewer AI calls
+- [GetDocumentSummary](GetDocumentSummary.md) - Read a stored summary; it never produces one
 - [SetFolderAIPreferences](SetFolderAIPreferences.md) - Have keywords produced automatically on upload

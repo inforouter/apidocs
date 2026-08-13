@@ -1,4 +1,4 @@
-# infoRouter Web API Documentation
+﻿# infoRouter Web API Documentation
 
 Welcome to the comprehensive documentation for the infoRouter Web Services API.
 
@@ -136,6 +136,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [DownloadZip](DownloadZip.md) - Zip and download specified documents and folders as a raw byte array
 - [DownloadZipWithHandler](DownloadZipWithHandler.md) - Stage a zip archive server-side and return a handler GUID for chunked retrieval
 - [EditFilledForm](EditFilledForm.md) - Return the rendered HTML form for an existing HTML document pre-filled with its current values and check it out for editing
+- [ExtractDocumentContent](ExtractDocumentContent.md) - Have infoRouter Connect produce a summary, description, keywords, OCR text or document type for a document version
 - [ExtractDocumentKeywords](ExtractDocumentKeywords.md) - Have infoRouter Connect produce keywords for a document version, or queue the work
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
