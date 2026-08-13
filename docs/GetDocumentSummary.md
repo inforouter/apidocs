@@ -1,4 +1,4 @@
-# GetDocumentSummary API
+﻿# GetDocumentSummary API
 
 Returns the AI-generated summary for a specified version of a document. Summaries are stored in the `DOCSUMMARY` table and produced by the local **infoRouter Connect** summarization service.
 
@@ -91,7 +91,7 @@ On each call the API evaluates the following, in order:
 
 ### Supported file types
 
-`pdf`, `docx`, `xlsx`, `pptx`, `html`, `htm`, `txt`, `md`, `csv` (configurable via `IRConnect.SummaryExtensions`).
+`pdf`, `docx`, `xlsx`, `pptx`, `html`, `htm`, `txt`, `md`, `csv` (configurable via `IRConnect.SupportedExtensions`).
 
 ### A dash is not an error
 
