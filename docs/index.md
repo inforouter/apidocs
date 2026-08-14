@@ -136,11 +136,11 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [DownloadZip](DownloadZip.md) - Zip and download specified documents and folders as a raw byte array
 - [DownloadZipWithHandler](DownloadZipWithHandler.md) - Stage a zip archive server-side and return a handler GUID for chunked retrieval
 - [EditFilledForm](EditFilledForm.md) - Return the rendered HTML form for an existing HTML document pre-filled with its current values and check it out for editing
-- [ExtractDocumentContent](ExtractDocumentContent.md) - Have infoRouter Connect produce a summary, description, keywords, OCR text or document type for a document version
 - [ExtractDocumentKeywords](ExtractDocumentKeywords.md) - Have infoRouter Connect produce keywords for a document version, or queue the work
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked out documents for a specified user
+- [GetConnectProfile](GetConnectProfile.md) - Have infoRouter Connect profile a document version - summary, description, abstract, keywords, document type, OCR text or property set values
 - [GetDocumentExpirationDate](GetDocumentExpirationDate.md) - Get the expiration date set on a document
 - [GetDocumentsOwnedByUser](GetDocumentsOwnedByUser.md) - Get a paged list of documents owned by a specified user
 - [GetDocument](GetDocument.md) - Get the full properties of a document by path or short ID
@@ -148,7 +148,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text abstract of a document version
 - [GetDocumentComments](GetDocumentComments.md) - Get all comments attached to a document
 - [GetDocumentKeywords](GetDocumentKeywords.md) - Get every keyword assigned to a document, curated and generated
-- [GetDocumentSummary](GetDocumentSummary.md) - Get the AI-generated summary of a document version, or queue its production
+- [GetDocumentSummary](GetDocumentSummary.md) - Read the AI-generated summary of a document version; it never produces one
 - [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md) - Get the stored plain-text alternative content of the latest published version of a document
 - [GetDocumentThumbnail](GetDocumentThumbnail.md) - Retrieve the thumbnail image bytes for a document
 - [GetDocumentTypes](GetDocumentTypes.md) - Get all document type definitions configured in the system

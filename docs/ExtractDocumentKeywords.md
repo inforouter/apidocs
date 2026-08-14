@@ -4,7 +4,7 @@ Has the local **infoRouter Connect** service read a document version and produce
 
 This API **never calls the Connect service itself**. Producing keywords takes as long as a language model takes to answer, which is far too long to hold a web request open, so the work is queued and a background worker runs it. A call either returns the keywords already on the document or tells you the work is queued and you should ask again shortly. Asking twice does not queue the work twice, and a request from a user is placed ahead of everything queued automatically when documents were uploaded.
 
-> **This is the one-switch form of [ExtractDocumentContent](ExtractDocumentContent.md)**, which serves it, and which can ask for a summary, a description, the text of a scan and the document type in the same request. Asking for several things there usually costs *fewer* AI calls than asking for them one at a time — a description, a summary and keywords are one call between them. Use this API when keywords are genuinely all you want, or when `ReplaceExisting` clearing the user's own keywords is the behaviour you need: the general form deliberately does not delete anybody's own content.
+> **This is the one-switch form of [GetConnectProfile](GetConnectProfile.md)**, which serves it, and which can ask for a summary, a description, an abstract, the text of a scan, the document type and the values of a property set in the same request. Asking for several things there usually costs *fewer* AI calls than asking for them one at a time — a description, a summary and keywords are one call between them. Use this API when keywords are genuinely all you want, or when `ReplaceExisting` clearing the user's own keywords is the behaviour you need: the general form deliberately does not delete anybody's own content.
 
 ## Endpoint
 
@@ -170,6 +170,6 @@ Errors carry an `errorcode` attribute alongside the message. The code is the HTT
 
 - [GetDocumentKeywords](GetDocumentKeywords.md) - Read every keyword on a document
 - [UpdateDocumentKeywords](UpdateDocumentKeywords.md) - Set the keywords a user curated
-- [ExtractDocumentContent](ExtractDocumentContent.md) - Ask for a summary, description, keywords, OCR text and document type together, usually for fewer AI calls
+- [GetConnectProfile](GetConnectProfile.md) - Ask for a summary, description, abstract, keywords, OCR text, document type and property set values together, usually for fewer AI calls
 - [GetDocumentSummary](GetDocumentSummary.md) - Read a stored summary; it never produces one
 - [SetFolderAIPreferences](SetFolderAIPreferences.md) - Have keywords produced automatically on upload
