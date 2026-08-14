@@ -1,4 +1,4 @@
-# GetLogs API
+﻿# GetLogs API
 
 Returns the server log entries for a specified log type and date.
 
@@ -30,6 +30,45 @@ Returns the server log entries for a specified log type and date.
 | `LoginAttempts` | Failed login attempt logs |
 | `Logins` | Successful login logs |
 | `Notifications` | Email notification logs |
+| `Information` | Informational entries |
+| `Warning` | Warnings |
+| `Upgrade` | What an upgrade did |
+| `Maintenance` | What the daily maintenance jobs did |
+| `IRConnect` | One record per infoRouter Connect call — see below |
+
+> **New in 9.2.** `Information`, `Warning`, `Upgrade` and `Maintenance` have always been written by
+> the server but could not be read back through this API until 9.2. `IRConnect` is new.
+
+### The `IRConnect` log
+
+One record per call to the infoRouter Connect AI service, written when the call finishes — success
+or failure — and **only when the instance has switched it on**. It is off by default, so an
+instance that has not configured `IRConnect.CallLogging` will find no records here at all.
+
+Each record carries which document, which operation, how long the call waited and took, what it
+returned in sizes and counts, and the token counts it was charged for. At the `Full` level it also
+carries the text sent and the content returned, which means document content on disk; see the
+`IRConnect.CallLogging` setting.
+
+### Turning the `IRConnect` log on
+
+It is off by default and is set with `IRConnect.CallLogging` in the application settings, to one of
+three levels:
+
+| Level | What each record holds |
+|-------|------------------------|
+| `Off` | Nothing is logged. The default. |
+| `Simple` | Everything about a call except what the document says: which document and version, its path, the options the call was made with, how long it waited and how long it took, the size or count of each thing that came back, and the tokens it was charged. |
+| `Full` | `Simple`, plus the text sent to Connect and the content it returned. |
+
+> **`Full` writes document text to disk in clear**, into these daily log files, where the ordinary
+> log retention and the ordinary backup will pick it up. It is for working out why a model answered
+> the way it did — a developer's machine, or a customer's for a bounded period and with their
+> agreement. It should not be the resting state of a production instance.
+
+`IRConnect.KeepCallLogsFor` is how many days of these are kept; the daily maintenance deletes the
+rest. It defaults to 30 and is separate from `KeepErrorLogsFor`, because this log is written once
+per call rather than once per failure and fills far faster.
 
 ## Response
 

@@ -1,4 +1,4 @@
-# GetLogStatistics1 API
+﻿# GetLogStatistics1 API
 
 Returns log dates and entry counts for a specified log type over a caller-supplied lookback window. Returns one entry per day in the window, including days with zero entries. Use this API to discover which dates have log data before calling `GetLogs` to retrieve the actual entries.
 
@@ -32,6 +32,25 @@ For a fixed 365-day window, use [`GetLogStatistics`](GetLogStatistics.md).
 | `LoginAttempts` | Failed login attempt logs |
 | `Logins` | Successful login logs |
 | `Notifications` | Email notification logs |
+| `Information` | Informational entries |
+| `Warning` | Warnings |
+| `Upgrade` | What an upgrade did |
+| `Maintenance` | What the daily maintenance jobs did |
+| `IRConnect` | One record per infoRouter Connect call — see below |
+
+> **New in 9.2.** `Information`, `Warning`, `Upgrade` and `Maintenance` have always been written by
+> the server but could not be read back through this API until 9.2. `IRConnect` is new.
+
+### The `IRConnect` log
+
+One record per call to the infoRouter Connect AI service, written when the call finishes — success
+or failure — and **only when the instance has switched it on**. It is off by default, so an
+instance that has not configured `IRConnect.CallLogging` will find no records here at all.
+
+Each record carries which document, which operation, how long the call waited and took, what it
+returned in sizes and counts, and the token counts it was charged for. At the `Full` level it also
+carries the text sent and the content returned, which means document content on disk; see the
+`IRConnect.CallLogging` setting.
 
 The `logType` parameter is case-insensitive.
 
