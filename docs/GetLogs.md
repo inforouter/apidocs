@@ -156,6 +156,59 @@ The response XML varies depending on the `logType` requested. The log entries ar
 </root>
 ```
 
+#### IRConnect
+
+One `<ConnectCall>` per call made to the infoRouter Connect AI service, written when the call
+finished. `<ReturnedContent>` holds one element per thing the call produced, with its `length` —
+characters for text, a count for a list. At the `Simple` level those elements are empty; at `Full`
+each holds what came back.
+
+```xml
+<root success="true">
+  <Value>
+    <ConnectCall>
+      <LogDate>2026-08-14T10:55:12.870Z</LogDate>
+      <Server>YODA</Server>
+      <Operation>profile</Operation>
+      <DocumentId>1491</DocumentId>
+      <VersionNumber>1000000</VersionNumber>
+      <Path>/Public/Configuring-InfoRouter-Content-Search.pdf</Path>
+      <RequestedBy>System Administrator</RequestedBy>
+      <Priority>UserRequested</Priority>
+      <Options ScrubPii="true" ProviderId="" MaxTags="10" SentAs="file" />
+      <Timing QueuedSeconds="3.56" ElapsedSeconds="8.91" />
+      <Status>Success</Status>
+      <Model>claude-sonnet-4-5</Model>
+      <Provider>anthropic</Provider>
+      <Usage PromptTokens="1638" CompletionTokens="300" />
+      <ReturnedContent>
+        <Summary length="655" />
+        <Description length="141" />
+        <Abstract length="286" />
+        <Tags length="10" />
+        <Types length="0" version="393781196" />
+        <ExtractedFields length="0" />
+      </ReturnedContent>
+    </ConnectCall>
+    <!-- Additional ConnectCall entries -->
+  </Value>
+</root>
+```
+
+| Element | Description |
+|---------|-------------|
+| `Operation` | `summarize`, `keywords`, `ocr`, `profile`, or `status` / `document-types` for the two calls that keep the document type list in step |
+| `Path` | The document's full path, in the form the APIs take |
+| `RequestedBy` / `Priority` | Who the work was queued for, and whether anyone was waiting: `UserRequested` or `Automatic` |
+| `Timing` | Seconds the job waited in the queue, and seconds the call itself took |
+| `Status` | `Success`, `NoText` (Connect read the document and found nothing to work with) or `Failed`, which adds an `<Error>` element |
+| `Usage` | The tokens the call was charged. Absent on `ocr`, `status` and `document-types`, which call no model |
+| `ReturnedContent` | One element per thing produced; absent entirely for a call that produced nothing |
+| `SentText` | At `Full` only: the text Connect was given, or a note that the document file itself was uploaded |
+
+A document with no matching type reads as `<Types length="0" />`. The `version` attribute is the
+document type list version the match was made against.
+
 ### Error Response
 
 ```xml
