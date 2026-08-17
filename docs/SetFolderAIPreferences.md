@@ -1,4 +1,4 @@
-# SetFolderAIPreferences API
+﻿# SetFolderAIPreferences API
 
 Sets the infoRouter Connect (AI) preferences of the specified folder from an XML preferences definition. Only the preferences listed in the XML are changed; the ones that are not listed keep their current value.
 
@@ -39,7 +39,7 @@ Names are case-insensitive.
 | `ScrubPII` | Scrub PII before document text is handed to the AI provider. |
 | `ApplyToSubfolders` | Apply the preferences to the subfolder tree as well (see Notes). |
 
-> **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in or imported afterwards. To produce content for a document already there, ask for it directly with [GetDocumentSummary](GetDocumentSummary.md) or [ExtractDocumentKeywords](ExtractDocumentKeywords.md).
+> **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in or imported afterwards. To produce content for a document already there, ask for it directly with [GetConnectProfile](GetConnectProfile.md).
 
 > **`AutoProfile` covers `AutoSummarize`, `AutoExtractKeywords` and `AutoOCR`.** One profile call returns all of it, so switching `AutoProfile` on means the other three are not run alongside it - switching them on as well costs nothing and changes nothing. See [GetFolderAIPreferences](GetFolderAIPreferences.md) for exactly what gets queued.
 

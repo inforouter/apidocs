@@ -233,7 +233,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
-- The list holds both kinds of keyword and does not say which is which. Use [`UpdateDocumentKeywords`](UpdateDocumentKeywords.md) to set the user's own, and [`ExtractDocumentKeywords`](ExtractDocumentKeywords.md) to have generated ones produced.
+- The list holds both kinds of keyword and does not say which is which. Use [`UpdateDocumentKeywords`](UpdateDocumentKeywords.md) to set the user's own, and [`GetConnectProfile`](GetConnectProfile.md) with `IncludeKeywords=true` to have generated ones produced.
 
 
 

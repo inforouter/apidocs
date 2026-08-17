@@ -267,8 +267,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ## Notes
 
 - Folders can have any of this produced automatically for documents added to them; see [SetFolderAIPreferences](SetFolderAIPreferences.md). A folder that asks for profiling gets the description, abstract, summary, keywords and document type from one call, the same way this API does. A folder cannot ask for a named property set — that is a per-request decision.
-- Generated keywords are a separate kind from the ones a user curated, so this API never destroys a keyword somebody entered. Unlike [ExtractDocumentKeywords](ExtractDocumentKeywords.md), `ForceRefresh` here does **not** clear the user's own keywords.
-- [ExtractDocumentKeywords](ExtractDocumentKeywords.md) is the one-switch form of this API and is served by the same implementation.
+- Generated keywords are a separate kind from the ones a user curated, so this API never destroys a keyword somebody entered — `ForceRefresh` replaces the generated ones and leaves the user's own alone. To clear those, set them with [UpdateDocumentKeywords](UpdateDocumentKeywords.md) first.
 - Every call this API queues can be recorded in the daily `IRConnect` log — what was asked for, what came back, how long it took, and what it cost. See `IRConnect.CallLogging` and [GetLogs](GetLogs.md).
 - Generation requires infoRouter Connect to be configured through the `IRConnect` application settings.
 
@@ -293,7 +292,6 @@ Errors carry an `errorcode` attribute alongside the message. The code is the HTT
 
 ## Related APIs
 
-- [ExtractDocumentKeywords](ExtractDocumentKeywords.md) - The one-switch form, for keywords only
 - [GetDocumentSummary](GetDocumentSummary.md) - Read a stored summary; it never produces one
 - [GetDocumentAbstract](GetDocumentAbstract.md) - Read a stored abstract
 - [GetDocumentKeywords](GetDocumentKeywords.md) - Read every keyword on a document
