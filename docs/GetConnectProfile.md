@@ -1,4 +1,4 @@
-# GetConnectProfile API
+﻿# GetConnectProfile API
 
 Has the local **infoRouter Connect** service profile a document version — a summary, a description, an abstract, keywords, the document type, the text of a scan, the values of a property set — and reports where each of the things you asked for has got to.
 
@@ -86,7 +86,7 @@ Anything else is an argument error. It is not read as the default on purpose: th
 
 It does **not** override the rule that a summary or description **a person wrote** is never replaced by generated content. That rule is enforced where the answer is written, so a request with `ForceRefresh=true` on a document whose summary was written by hand will spend the AI call and then decline to overwrite. If you want the generated content back, remove the hand-written content first.
 
-`IncludeExtractData` ignores `ForceRefresh` and always makes its call: the values live in the property set's own table, where a field left empty cannot be told from a field nobody asked about, so there is nothing to read back as "already done". The write rules above are what keep it from overwriting an answer somebody gave.
+`IncludeExtractData` reads what the named property set already holds on the document first, and answers `Ready` with it when there is anything there — so a client polling for the result of an extraction is answered from the document rather than charged for another call. `ForceRefresh=true` reads the document again; the write rules above still apply, so a field somebody answered keeps their answer.
 
 ## Response
 
@@ -123,7 +123,9 @@ Every successful call carries the aggregate `status`, the `plannedCalls` count, 
 | `status` | `Ready`, `Queued`, `Processing`, `Failed` or `Disabled`. |
 | `error` | Why, on `Failed` and `Disabled`. Absent otherwise. |
 
-`<Content>` is present only on a `Ready` row that has something to carry. **`OcrText` never carries content** even when ready: it runs to megabytes, and a response you are polling every few seconds is the wrong place for it. Read it with [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md). **`ExtractedData` carries none either** — the values are on the document, read them with [GetDocument](GetDocument.md).
+`<Content>` is present only on a `Ready` row that has something to carry. **`OcrText` never carries content** even when ready: it runs to megabytes, and a response you are polling every few seconds is the wrong place for it. Read it with [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md).
+
+An `ExtractedData` row carries the values that were read, one `FIELDNAME: value` per line, in a form that does not change with the server's locale — dates as `yyyy-MM-dd` and numbers with a dot. They are on the document too; read them in full with [GetDocument](GetDocument.md).
 
 ### Status values
 
