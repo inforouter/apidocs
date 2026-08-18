@@ -139,6 +139,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked out documents for a specified user
+- [GetConnectSettings](GetConnectSettings.md) - Read what the infoRouter Connect AI service can do here, and which capabilities are usable
 - [GetConnectProfile](GetConnectProfile.md) - Have infoRouter Connect profile a document version - summary, description, abstract, keywords, document type, OCR text or property set values
 - [GetDocumentExpirationDate](GetDocumentExpirationDate.md) - Get the expiration date set on a document
 - [GetDocumentsOwnedByUser](GetDocumentsOwnedByUser.md) - Get a paged list of documents owned by a specified user
