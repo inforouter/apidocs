@@ -2,6 +2,7 @@
 
 Has the local **infoRouter Connect** service profile a document version — a summary, a description, an abstract, keywords, the document type, the text of a scan, the values of a property set — and reports where each of the things you asked for has got to.
 
+
 This API **never calls the Connect service itself**. Producing any of this takes as long as a language model takes to answer, which is far too long to hold a web request open, so the work is queued and a background worker runs it. A call returns whatever is already stored, queues the rest, and tells you which is which. Asking twice does not queue the work twice, and a request from a user is placed ahead of everything queued automatically when documents were uploaded.
 
 > **Ask for everything you want in one call.** It is not merely convenient — it is usually cheaper. A description, an abstract, a summary, keywords and a document type are **one** AI call between them, where five separate requests would be five. The `plannedCalls` attribute on the response tells you the cost before any of it is spent.
