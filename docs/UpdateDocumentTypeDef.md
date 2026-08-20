@@ -1,4 +1,4 @@
-# UpdateDocumentTypeDef API
+﻿# UpdateDocumentTypeDef API
 
 Updates the definition of an existing document type. Allows renaming the document type and optionally changing its required property set. Document type definitions are system-wide and affect all documents assigned to that type.
 
@@ -21,7 +21,7 @@ Updates the definition of an existing document type. Allows renaming the documen
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentTypeId` | int | Yes | The numeric ID of the document type definition to update. Use `GetDocumentTypes` to retrieve IDs. |
 | `newDocumentTypeName` | string | Yes | The new name for the document type. Must be unique system-wide. |
-| `newRequiredPropertySetName` | string | No | The name of the property set to require for documents of this type. Pass `null` or empty string to remove the required property set. |
+| `newRequiredPropertySetName` | string | No | The name of the property set to require for documents of this type. `null` — which is what omitting it means — leaves the current one in place. An empty string removes it **over SOAP only**; an empty value in a REST call arrives as nothing sent, and the property set stays. |
 
 ---
 
