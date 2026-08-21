@@ -39,9 +39,9 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
     </Service>
     <Capabilities>
       <Capability key="summarize" usable="true" enabledOnService="true"
-                  enabledInInfoRouter="true" ready="true" operation="Summarize" />
+                  ready="true" operation="Analyze" />
       <Capability key="translate" usable="true" enabledOnService="true"
-                  enabledInInfoRouter="true" ready="true" />
+                  ready="true" />
     </Capabilities>
   </ConnectSettings>
 </response>
@@ -86,9 +86,8 @@ One row per thing the service knows how to do. **Read `usable` to decide whether
 | Attribute | Description |
 |-----------|-------------|
 | `key` | The service's own name: `summarize`, `document_type`, `keywords`, `profile`, `extract_data`, `translate`, `extract_text`, `redaction`. |
-| `usable` | True only when all three below are true. |
+| `usable` | True only when both of the below are true. |
 | `enabledOnService` | An administrator has left it switched on at the Connect service. |
-| `enabledInInfoRouter` | This instance allows it (`IRConnect:Operations`). True for a capability infoRouter never asks for. |
 | `ready` | The service has a usable model behind it. True for capabilities that call no model. |
 | `operation` | The operation infoRouter queues for it. Absent where infoRouter has none. |
 
