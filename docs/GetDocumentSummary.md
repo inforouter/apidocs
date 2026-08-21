@@ -40,9 +40,26 @@ A successful call always carries `status="Ready"`. The attribute is kept for the
 
 ```xml
 <response success="true" status="Ready" error="">
-  <Value>This document is a Q1 2024 financial report covering revenue, expenses, and year-over-year comparisons for the North America region.</Value>
+  <Value AppliedById="1042" AppliedBy="jsmith" DateApplied="2024-03-15T14:32:07.000Z">This document is a Q1 2024 financial report covering revenue, expenses, and year-over-year comparisons for the North America region.</Value>
 </response>
 ```
+
+### Who wrote the summary
+
+`<Value>` carries the author of the summary, in the same three attributes
+[GetPropertySets](GetPropertySets.md) uses on its `<Log>` node.
+
+| Attribute | Meaning |
+|-----------|---------|
+| `AppliedById` | ID of the user who last wrote the summary. Use this to identify them - a username is a label, not a key. |
+| `AppliedBy` | Their display name. |
+| `DateApplied` | When the summary was written, in universal format. |
+
+A summary infoRouter Connect produced is attributed to the system account, so this is also how a
+client tells a summary a person wrote from one a model suggested.
+
+**All three are absent** when nothing was recorded — on a summary written before this was kept, and
+on a `<Value>` of `-`. Read them as optional rather than assuming every summary has an author.
 
 ### Ready — with no summary
 
