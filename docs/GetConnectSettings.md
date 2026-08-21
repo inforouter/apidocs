@@ -27,7 +27,7 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 ```xml
 <response success="true" error="">
   <ConnectSettings configured="true" reachable="true" provisioned="true" scrubPii="true"
-                   maxKeywordCount="10" storeOcrText="true" autoApplyDocumentType="true"
+                   maxKeywordCount="10" storeOcrText="true"
                    documentTypeMinConfidence="0.75" extractedFieldMinConfidence="0.5">
     <SupportedExtensions>pdf,docx,xlsx,pptx,html,htm,txt,md,csv</SupportedExtensions>
     <Service aiReady="true" scrubbingReady="true" ocrAvailable="true"
@@ -57,8 +57,7 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 | `scrubPii` | Whether documents are scrubbed of personal data on the way out by default. |
 | `maxKeywordCount` | How many keywords are asked for when a request does not say. |
 | `storeOcrText` | Whether text read out of a scan is kept on the document. |
-| `autoApplyDocumentType` | Whether a matched document type is written onto the document by itself. |
-| `documentTypeMinConfidence` | How sure the service must be before a type match is applied. |
+| `documentTypeMinConfidence` | How sure the service must be before a type match is applied. A matched type is written onto a document that has none; a type somebody chose is never replaced. |
 | `extractedFieldMinConfidence` | How sure it must be before an extracted value is written. |
 | `error` | Present only when something could not be read. |
 
