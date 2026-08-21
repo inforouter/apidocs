@@ -116,7 +116,7 @@ On success, the abstract text is returned inside an `<abstract>` child element:
 <response success="true" error="">
 
 
-  <abstract>This document covers the Q1 2024 financial results including
+  <abstract AppliedById="3" AppliedBy="SYSTEM" DateApplied="2024-03-15T14:32:07.000Z">This document covers the Q1 2024 financial results including
 
 
 revenue figures, expense breakdowns, and year-over-year comparisons...</abstract>
@@ -135,7 +135,25 @@ revenue figures, expense breakdowns, and year-over-year comparisons...</abstract
 |--------------------|-------------|
 | `success` | `"true"` on success. |
 | `error` | Empty string on success. |
-| `<abstract>` | Child element containing the full-text abstract (indexed content) of the requested document version. |
+| `<abstract>` | Child element containing the full-text abstract (indexed content) of the requested document version. Carries the author as attributes - see below. |
+
+### Who wrote the abstract
+
+The element carries the author, in the same three attributes
+[GetPropertySets](GetPropertySets.md) uses on its `<Log>` node and
+[GetDocumentSummary](GetDocumentSummary.md) uses on its `<Value>`.
+
+| Attribute | Meaning |
+|-----------|---------|
+| `AppliedById` | ID of the user recorded against the abstract. Use this to identify them - a username is a label, not a key. |
+| `AppliedBy` | Their display name. |
+| `DateApplied` | When the abstract was written, in universal format. |
+
+An abstract is always produced by the server - from the email parser or the content index, never
+typed - so in practice this is the system account. It is read from the stored row rather than
+assumed, which is why **all three are absent** on an abstract written before the author was
+recorded, and on a `-` where there is none.
+
 
 
 
