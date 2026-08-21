@@ -43,6 +43,7 @@ Retrieves the application license information including company details, license
     <MaxLibraryCount>0</MaxLibraryCount>
     <AnonymousAccess>true</AnonymousAccess>
     <Workflow>true</Workflow>
+    <ComplianceModule>true</ComplianceModule>
     <TrialCopy>false</TrialCopy>
     <ExpirationDate>2027-12-31T00:00:00</ExpirationDate>
     <SubscriptionStartDate>2025-01-01T00:00:00</SubscriptionStartDate>
@@ -77,6 +78,7 @@ Retrieves the application license information including company details, license
 | `MaxLibraryCount` | integer | Maximum number of libraries allowed (0 = unlimited) |
 | `AnonymousAccess` | boolean | Whether anonymous (guest) access is licensed |
 | `Workflow` | boolean | Whether workflow features are licensed |
+| `ComplianceModule` | boolean | Whether the compliance module is licensed. Currently reports `true` on every instance; it will be read from the license, so read it rather than assuming. |
 | `TrialCopy` | boolean | Whether this is a trial license |
 | `ExpirationDate` | DateTime | License expiration date (ISO 8601) |
 | `SubscriptionStartDate` | DateTime | Subscription start date (ISO 8601) |
@@ -162,6 +164,7 @@ async function getLicenseInfo() {
             disabledUserCount: parseInt(info.querySelector("DisabledUserCount").textContent),
             isConcurrent: info.querySelector("IsConcurrent").textContent === "true",
             workflow: info.querySelector("Workflow").textContent === "true",
+            complianceModule: info.querySelector("ComplianceModule").textContent === "true",
             trialCopy: info.querySelector("TrialCopy").textContent === "true",
             expirationDate: info.querySelector("ExpirationDate").textContent,
             subscriptionEndDate: info.querySelector("SubscriptionEndDate").textContent
@@ -210,6 +213,7 @@ using (var client = new SrvSoapClient())
                 DisabledUserCount = int.Parse(info.Element("DisabledUserCount")?.Value ?? "0"),
                 IsConcurrent = info.Element("IsConcurrent")?.Value == "true",
                 Workflow = info.Element("Workflow")?.Value == "true",
+                ComplianceModule = info.Element("ComplianceModule")?.Value == "true",
                 TrialCopy = info.Element("TrialCopy")?.Value == "true",
                 SubscriptionEndDate = info.Element("SubscriptionEndDate")?.Value ?? ""
             };
@@ -237,7 +241,8 @@ using (var client = new SrvSoapClient())
 - **ActiveUserCount** is the sum of author users and readonly users.
 - **MaxDocumentCount** and **MaxLibraryCount** of 0 means unlimited.
 - **ExpirationDate**, **SubscriptionStartDate**, and **SubscriptionEndDate** are returned in ISO 8601 format.
-- Boolean values (`IsConcurrent`, `AnonymousAccess`, `Workflow`, `TrialCopy`) are returned as lowercase strings ("true"/"false").
+- Boolean values (`IsConcurrent`, `AnonymousAccess`, `Workflow`, `ComplianceModule`, `TrialCopy`) are returned as lowercase strings ("true"/"false").
+- `AnonymousAccess`, `Workflow` and `ComplianceModule` are also reported by [ServerInfo](ServerInfo.md), which needs no ticket - use that one when the answer is needed before anybody has signed in.
 - License data is read from a `license.lic` file in the application configuration path.
 
 ## Error Codes
