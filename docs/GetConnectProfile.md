@@ -15,7 +15,7 @@ This API **never calls the Connect service itself**. Producing any of this takes
 
 ## Methods
 
-- **GET** `/srv.asmx/GetConnectProfile?AuthenticationTicket=...&Path=...&VersionNumber=0&ForceRefresh=false&IncludeSummary=true&IncludeDescription=true&IncludeAbstract=false&IncludeKeywords=true&IncludeDocumentType=false&IncludeOcrText=false&IncludeExtractData=&MaxKeywordCount=0&ScrubPii=`
+- **GET** `/srv.asmx/GetConnectProfile?AuthenticationTicket=...&Path=...&VersionNumber=0&ForceRefresh=false&IncludeSummary=true&IncludeDescription=true&IncludeAbstract=false&IncludeKeywords=true&IncludeDocumentType=false&IncludeOcrText=false&IncludeMarkdown=false&IncludeRedactedText=false&IncludeExtractData=&MaxKeywordCount=0&ScrubPii=`
 - **POST** `/srv.asmx/GetConnectProfile` (form data)
 - **SOAP** Action: `http://tempuri.org/GetConnectProfile`
 
@@ -33,6 +33,8 @@ This API **never calls the Connect service itself**. Producing any of this takes
 | `IncludeKeywords` | bool | Yes | Ask for keywords, stored as the document's *generated* keywords rather than the user's own. |
 | `IncludeDocumentType` | bool | Yes | Ask which document type the document looks like, and for the values of the property set that type requires. |
 | `IncludeOcrText` | bool | Yes | Ask for the text of a scan, written back so the document becomes searchable. |
+| `IncludeMarkdown` | bool | Yes | Ask for the document as structured markdown — real headings and real tables, which flat text extraction loses. Costs no AI call. |
+| `IncludeRedactedText` | bool | Yes | Ask for the document's text with personal data replaced by `[REDACTED]`. One way — nothing stored can be turned back into the names it replaced. Costs no AI call. |
 | `IncludeExtractData` | string | No | Name of a property set to read out of the document. Empty asks for none. |
 | `MaxKeywordCount` | int | No | How many keywords to ask for. `0` uses the number this instance is configured for (`IRConnect.MaxTags`). |
 | `ScrubPii` | string | No | `yes`, `no`, or empty for whatever this instance is configured to do. |
@@ -49,7 +51,11 @@ This API **never calls the Connect service itself**. Producing any of this takes
 | `IncludeKeywords` | Generated keywords | [GetDocumentKeywords](GetDocumentKeywords.md) |
 | `IncludeDocumentType` | The document type, and the values of its required property set | [GetDocument](GetDocument.md) |
 | `IncludeOcrText` | The text of a scan, in the warehouse | [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md) |
+| `IncludeMarkdown` | Structured markdown, in the warehouse | [GetVersionRendition](GetVersionRendition.md) |
+| `IncludeRedactedText` | Redacted text, in the warehouse | [GetVersionRendition](GetVersionRendition.md) |
 | `IncludeExtractData` | The values of the property set you named | [GetDocument](GetDocument.md) |
+
+`IncludeMarkdown` and `IncludeRedactedText` cost no AI call at all, so they can ride along with anything else at no extra charge. Both need a file type Connect can read, and the redaction covers the **whole** document even where the AI answers saw only its beginning.
 
 `IncludeDocumentType` covers the type match **and** the property set extraction that rides with it. They arrive from the same call and there is no way to ask for one without the other.
 

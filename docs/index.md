@@ -169,6 +169,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md) - Get a paged list of documents assigned to a specified user for ISO review
 - [GetPublishingRequirements](GetPublishingRequirements.md) - Get the publishing requirements configured for a domain/library
 - [GetRecentDocuments](GetRecentDocuments.md) - Get the list of documents recently accessed by the current authenticated user
+- [GetVersionRendition](GetVersionRendition.md) - Get a derived rendition of a version - its structured markdown or its redacted text
 - [GetVersionTextOnlyContent](GetVersionTextOnlyContent.md) - Get the plain-text alternative content stored for a specific version of a document
 - [IsLockPossible](IsLockPossible.md) - Check whether the current user can lock (check out) the document at the specified path
 - [Lock](Lock.md) - Lock (check out) the document or all documents in a folder at the specified path

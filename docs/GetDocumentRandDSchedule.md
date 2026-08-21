@@ -144,3 +144,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports/
 | `[900]` | Authentication failed -" invalid credentials. |
 | `[901]` | Session expired or invalid authentication ticket. |
 | Document not found | No document was found at the specified `Path`. |
+
+## What this does not return
+
+The **schedule**, not the document's own dates. The retention period and disposition action come
+back here; when the clock started for this particular document, and where it lands, are the
+`CutoffDate`, `RetentionDate` and `DispositionDate` attributes of [GetDocument](GetDocument.md).
+
+A document with no schedule (`RDDefId` of `0` on [GetDocument](GetDocument.md)) gets a successful but
+empty response from this API rather than an error.

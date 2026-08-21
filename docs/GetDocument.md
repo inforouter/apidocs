@@ -125,6 +125,10 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             DispositionDate=""
 
+            CutoffDate=""
+
+            RDDefId="0"
+
             ExpirationDate=""
 
             RegisterDate="2024-03-01"
@@ -252,6 +256,8 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `Importance` | Importance level (integer). |
 | `RetentionDate` | Calculated retain-until date, or empty if not set. |
 | `DispositionDate` | Scheduled disposition date, or empty if not set. |
+| `CutoffDate` | The date the retention clock is measured from, or empty if not set. `RetentionDate` and `DispositionDate` are calculated from it. Set with [SetDocumentCutoffDate](SetDocumentCutoffDate.md) and cleared with [RemoveDocumentCutoffDate](RemoveDocumentCutoffDate.md). |
+| `RDDefId` | The retention and disposition schedule applied to this document, or `0` when none is. Pass it to [GetRandDScheduleInfo](GetRandDScheduleInfo.md) for the schedule itself. |
 | `ExpirationDate` | Document expiration date, or empty if not set. |
 | `RegisterDate` | Date the document was registered / first uploaded. |
 | `RegisteredBy` | Login name of the user who registered the document. |

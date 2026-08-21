@@ -232,4 +232,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## Reading it back
 
+[GetDocument](GetDocument.md) returns the date as the `CutoffDate` attribute, beside the
+`RetentionDate` and `DispositionDate` calculated from it. Clear it with
+[RemoveDocumentCutoffDate](RemoveDocumentCutoffDate.md).
