@@ -205,6 +205,12 @@ Returns a `<response>` root element with a single `<document>` child element con
 
 
 
+    <!-- Included only when the description has a recorded author -->
+
+    <DescriptionLog AppliedById="4" AppliedBy="System Administrator" DateApplied="2024-03-01T09:14:22.000Z" />
+
+
+
     <!-- Included only when withSecurity=true -->
 
     <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
@@ -242,7 +248,7 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `DocumentID` | Unique integer ID of the document. |
 | `Name` | Document file name. |
 | `Path` | Backslash-separated infoRouter path to the containing folder. |
-| `Description` | Document description text. |
+| `Description` | Document description text. Who wrote it is in the `<DescriptionLog>` child element. |
 | `UpdateInstructions` | Instructions for the next person checking in an update. |
 | `CreationDate` | Date the document was created (`yyyy-MM-dd` format). |
 | `ModificationDate` | Date the document was last modified. |
@@ -301,12 +307,34 @@ Returns a `<response>` root element with a single `<document>` child element con
 
 | Element | Enabled by | Description |
 |---------|------------|-------------|
+| `<DescriptionLog>` | always, where there is an author | Who last wrote the `Description`, and when. See below. |
 | `<PropertySets>` | `withPropertySets=true` | Custom property set fields and values applied to the document. |
 | `<AccessList>` | `withSecurity=true` | Access control list (users, groups, rights) for the document. |
 | `<User>` | `withOwner=true` | Owner user details. |
 | `<Versions>` | `withVersions=true` | Full version history list for the document. |
 
 
+
+### `<DescriptionLog>`
+
+A description can be typed by a person or produced by infoRouter Connect, and this is how a client
+tells them apart - a Connect-written description is attributed to the system account. The same three
+attributes [GetPropertySets](GetPropertySets.md), [GetDocumentSummary](GetDocumentSummary.md) and
+[GetDocumentAbstract](GetDocumentAbstract.md) use.
+
+| Attribute | Meaning |
+|-----------|---------|
+| `AppliedById` | ID of the user who last wrote the description. Use this to identify them - a username is a label, not a key. |
+| `AppliedBy` | Their display name. |
+| `DateApplied` | When the description was written, in universal format. |
+
+The element is **absent** where there is no author to report: a document with no description, one
+whose description was written before the author was recorded, and a document old enough that its
+description is still kept in the warehouse rather than the database. Saying nothing is deliberate -
+it beats reporting user `0`.
+
+It sits beside the description rather than on it because `Description` is an attribute, and an XML
+attribute cannot carry attributes of its own.
 
 ### Error Response
 
