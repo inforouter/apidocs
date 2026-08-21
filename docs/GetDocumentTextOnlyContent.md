@@ -2,7 +2,7 @@
 
 
 
-Returns the plain-text alternative content stored alongside the latest published version of a document. This text-only content is a separately stored artifact in the document warehouse -" it is only present if it has been explicitly set (for example, by a conversion process or via `SetDocumentTextOnlyContent`). If the document has no published version, is offline, or is a shortcut or URL type, an error is returned.
+Returns the plain-text alternative content stored alongside the published version of a document, or alongside its latest version when the document has never been published. This text-only content is a separately stored artifact in the document warehouse -" it is only present if it has been explicitly set (for example, by a conversion process or via `SetDocumentTextOnlyContent`). If the document has no versions at all, is offline, or is a shortcut or URL type, an error is returned.
 
 
 
@@ -41,7 +41,7 @@ Returns the plain-text alternative content stored alongside the latest published
 
 
 
-> **Note:** This API always retrieves the text-only content for the **latest published version** of the document. There is no version number parameter.
+> **Note:** This API always retrieves the text-only content for the **published version** of the document - or its **latest version**, when the document has never been published. There is no version number parameter.
 
 
 
@@ -77,7 +77,7 @@ alternative stored in the document warehouse.</response>
 |-----------|-------------|
 | `success` | `"true"` on success. |
 | `error` | Empty string on success. |
-| *(element body)* | The plain text content of the latest published version. May be an empty string if text-only content has never been set for this document. |
+| *(element body)* | The plain text content of the resolved version. May be an empty string if text-only content has never been set for this document. |
 
 
 
@@ -87,7 +87,7 @@ alternative stored in the document warehouse.</response>
 
 ```xml
 
-<response success="false" error="There is no published version for this document." />
+<response success="false" error="No version number was given, and this document has no published version to process." />
 
 ```
 
@@ -209,7 +209,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - This API retrieves a **separately stored** plain-text artifact from the document warehouse. It is distinct from the full-text search index abstract returned by `GetDocumentAbstract1`. The content is only present if it was previously written (e.g. by a document conversion process or via `SetDocumentTextOnlyContent`).
 
-- Only the **latest published version** is accessible through this API. Documents with no published version return an error.
+- Only the **published version** is accessible through this API - or the **latest version**, when the document has never been published. Reading an unpublished version still requires the caller to be the document's owner, an author of one of its versions, an active task assignee, or a domain manager. Documents with no versions at all return an error.
 
 - Offline documents, URL documents, and shortcut documents do not have text-only content and will return an error.
 
@@ -246,7 +246,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | Document not found | The specified path does not resolve to an existing document. |
-| No published version | The document has no published version. |
+| No version number was given, and this document has no published version to process. | The document has no versions at all. |
 | Document is offline | The document is marked as offline and its content is unavailable. |
 | URL or shortcut | URL documents and shortcuts do not have text-only content. |
 | Access denied | The user does not have read access to the document or its published version. |

@@ -56,7 +56,7 @@ Returns the full-text abstract (indexed text content) of a specified version of 
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
-| `versionNumber` | int | Yes | Version number to retrieve the abstract for. Pass `0` to retrieve the abstract for the latest published version. Must be `0` or a version number in the modern format (--- 1,000,000). Values between `1` and `999,999` are rejected with an error. |
+| `versionNumber` | int | Yes | Version number to retrieve the abstract for. Pass `0` for the published version, or for the latest version when the document has never been published. Must be `0` or a version number in the modern format (--- 1,000,000). Values between `1` and `999,999` are rejected with an error. |
 
 
 
@@ -68,7 +68,7 @@ Returns the full-text abstract (indexed text content) of a specified version of 
 
 
 
-infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to always get the latest published version's abstract.
+infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to get the published version's abstract, or the latest version's when the document has never been published.
 
 
 
@@ -351,7 +351,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
-- `versionNumber=0` retrieves the abstract for the **latest published version** of the document.
+- `versionNumber=0` retrieves the abstract for the **published version** of the document, or for its **latest version** when it has never been published.
 
 
 - Version numbers between `1` and `999,999` are rejected with an error. Use `0` or the modern format (e.g. `1000000` for version 1, `2000000` for version 2).

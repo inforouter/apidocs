@@ -25,7 +25,7 @@ This API **never calls the Connect service itself**. Producing any of this takes
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the document, or a short document ID path (`~D{id}` or `~D{id}.ext`). |
-| `VersionNumber` | int | Yes | Version to read. Pass `0` for the latest published version. Must be `0` or a modern-format version number (>= 1,000,000). |
+| `VersionNumber` | int | Yes | Version to read. Pass `0` for the published version, or for the latest version when the document has never been published. Must be `0` or a modern-format version number (>= 1,000,000). |
 | `ForceRefresh` | bool | Yes | `true` produces the requested items again even where they are already stored. See *ForceRefresh* below. |
 | `IncludeSummary` | bool | Yes | Ask for a summary of the document. |
 | `IncludeDescription` | bool | Yes | Ask for a one line description of the document. |
@@ -179,7 +179,7 @@ The server works out the cheapest set of calls that answers what you asked for. 
 ## Behavior
 
 1. **Nothing asked for** - an error; at least one switch must be `true`, or `IncludeExtractData` must name a property set.
-2. **Version resolution** - `VersionNumber=0` resolves to the latest published version. A document with no published version is an error.
+2. **Version resolution** - `VersionNumber=0` resolves to the published version, or to the latest version when the document has never been published. Only a document with no versions at all is an error.
 3. **Shortcut and URL documents** - an error; they have no content to read.
 4. **Offline documents** - an error; the content is temporarily inaccessible.
 5. **Permission** - the caller must be able to change the document's properties. The answers are written onto the document, so this is a write however it looks from the caller's side.
@@ -294,6 +294,7 @@ Errors carry an `errorcode` attribute alongside the message. The code is the HTT
 | URL and shortcut files do not have text content. | `4000` | The document has no content to read. |
 | This document is marked as 'offline'... | `4230` | The document is offline; try again later. |
 | Invalid argument exception. Version numbers cannot be less than 1000000... | `4000` | `VersionNumber` is between 1 and 999,999. |
+| No version number was given, and this document has no published version to process. | `4000` | `VersionNumber` was 0 and the document has no versions at all, so there is nothing to send. |
 | Custom property not found | `4041` | Reported on the `ExtractedData` row: `IncludeExtractData` named a property set this instance does not have. |
 | (any aggregate `status="Failed"` message) | `5030` | Every requested item failed; the message is the first failure. |
 

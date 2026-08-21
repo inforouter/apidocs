@@ -22,7 +22,7 @@ A rendition is derived from the version rather than uploaded with it — every o
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket |
 | `Path` | string | Yes | Full infoRouter path to the document, or a short document ID path (`~D{id}` or `~D{id}.ext`) |
-| `VersionNumber` | int | Yes | Version to read. Pass `0` for the published version. |
+| `VersionNumber` | int | Yes | Version to read. Pass `0` for the published version, or for the latest version when the document has never been published. |
 | `Rendition` | string | Yes | `Markdown`, `RedactedText`, or `Text` for the plain text. Case-insensitive. |
 
 ## Renditions

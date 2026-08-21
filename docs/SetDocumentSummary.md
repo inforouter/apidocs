@@ -35,16 +35,16 @@ The same applies to a summary stored before 9.0, when nothing recorded an author
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
-| `versionNumber` | int | Yes | Version number to store the summary for. Pass `0` for the latest published version. Must be `0` or a modern-format version number (>= 1,000,000). Values between `1` and `999,999` are rejected. |
+| `versionNumber` | int | Yes | Version number to store the summary for. Pass `0` for the published version, or for the latest version when the document has never been published. Must be `0` or a modern-format version number (>= 1,000,000). Values between `1` and `999,999` are rejected. |
 | `summary` | string | Yes | The summary text to store. Trimmed to the maximum database string length. An empty string clears the stored summary text (the row is kept; [`GetDocumentSummary`](GetDocumentSummary.md) will then report `-`). |
 
 ### Version Number Format
 
-infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to always target the latest published version.
+infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to target the published version, or the latest version when the document has never been published.
 
 ## Behavior
 
-1. **Version resolution** - `versionNumber=0` resolves to the latest published version. If the document has no published version, an error is returned.
+1. **Version resolution** - `versionNumber=0` resolves to the published version, or to the latest version when the document has never been published. Only a document with no versions at all is an error.
 2. **Shortcut / URL documents** - rejected with an error (they cannot hold a summary).
 3. **Write security** - the caller must have `'Add/Change Meta data'` access (see [Required Permissions](#required-permissions)).
 4. **Offline documents** - rejected with an error (content temporarily inaccessible).
@@ -103,7 +103,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 
 - Insert-or-update semantics: the first call for a document version inserts a row; subsequent calls overwrite it.
 - Storing a value here also prevents [`GetDocumentSummary`](GetDocumentSummary.md) from generating one, since it serves the stored value.
-- `versionNumber=0` targets the **latest published version**.
+- `versionNumber=0` targets the **published version**, or the **latest version** when the document has never been published.
 - Version numbers between `1` and `999,999` are rejected. Use `0` or the modern format (e.g. `1000000` for version 1).
 - Both full infoRouter paths and short document ID paths (`~D{id}` / `~D{id}.ext`) are accepted.
 - Summaries cannot be stored on shortcut or URL documents.
@@ -119,6 +119,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 | Access denied | The user lacks 'Add/Change Meta data' access to the document. |
 | Document not found | The specified path does not resolve to an existing document. |
 | Invalid argument exception. Version numbers cannot be less than 1000000... | `versionNumber` is between 1 and 999,999 (must be 0 or >= 1,000,000). |
+| No version number was given, and this document has no published version to process. | `versionNumber` was 0 and the document has no versions at all, so there is nothing to store the summary against. |
 | URL and shortcut files do not have text content. | The target is a shortcut or URL document, which cannot hold a summary. |
 | This document is marked as 'offline'... | The document is offline and its properties are temporarily inaccessible. |
 

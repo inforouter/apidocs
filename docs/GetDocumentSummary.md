@@ -26,11 +26,11 @@ This API **only reads**. It never calls the Connect service, and it never queues
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
-| `versionNumber` | int | Yes | Version number to retrieve the summary for. Pass `0` for the latest published version. Must be `0` or a modern-format version number (>= 1,000,000). Values between `1` and `999,999` are rejected. |
+| `versionNumber` | int | Yes | Version number to retrieve the summary for. Pass `0` for the published version, or for the latest version when the document has never been published. Must be `0` or a modern-format version number (>= 1,000,000). Values between `1` and `999,999` are rejected. |
 
 ### Version Number Format
 
-infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to always target the latest published version.
+infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to target the published version, or the latest version when the document has never been published.
 
 ## Response
 
@@ -85,7 +85,7 @@ Failures are ordinary errors - a bad ticket, a path that resolves to nothing, an
 
 On each call the API evaluates the following, in order:
 
-1. **Version resolution** - `versionNumber=0` resolves to the latest published version. If the document has no published version, `Ready` with `-` is returned.
+1. **Version resolution** - `versionNumber=0` resolves to the published version, or to the latest version when the document has never been published. Only a document with no versions at all returns `Ready` with `-` on this ground.
 2. **Shortcut / URL documents** - always `Ready` with `-`; they have no content to summarize.
 3. **Read security** - the caller must have read access to the document/version.
 4. **Offline documents** - an error: the content is temporarily inaccessible.
@@ -145,7 +145,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 
 ## Notes
 
-- `versionNumber=0` targets the **latest published version**.
+- `versionNumber=0` targets the **published version**, or the **latest version** when the document has never been published.
 - Version numbers between `1` and `999,999` are rejected. Use `0` or the modern format (e.g. `1000000` for version 1).
 - Both full infoRouter paths and short document ID paths (`~D{id}` / `~D{id}.ext`) are accepted.
 - A summary a user wrote with [`SetDocumentSummary`](SetDocumentSummary.md) is never overwritten by generated content. Only a summary the system produced is replaced when it is regenerated.
