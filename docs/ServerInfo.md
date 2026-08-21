@@ -35,7 +35,9 @@ This API does not require any parameters.
     ServerName="IRSERVER01"
     LicenseCount="100"
     SubscriptionEndDate="2024-12-31T23:59:59Z"
-    WindowsAuthenticationIsOn="true" />
+    WindowsAuthenticationIsOn="true"
+    WorkflowIsOn="true"
+    AnonymousAccessIsOn="false" />
 ```
 
 ### Error
@@ -58,6 +60,8 @@ This API does not require any parameters.
 | `LicenseCount` | integer | Number of licensed users |
 | `SubscriptionEndDate` | datetime | License subscription end date in universal format |
 | `WindowsAuthenticationIsOn` | boolean | Whether Windows Authentication is enabled ("true"/"false") |
+| `WorkflowIsOn` | boolean | Whether this server may run workflows ("true"/"false"). Hide workflow actions when it is false - they will be refused. |
+| `AnonymousAccessIsOn` | boolean | Whether this server allows anonymous access ("true"/"false"). A sign-in page can read this before anybody has signed in, which is the point of it being on an unauthenticated call. |
 
 ## Required Permissions
 
@@ -104,7 +108,9 @@ SOAPAction: "http://tempuri.org/ServerInfo"
             ServerName="IRSERVER01"
             LicenseCount="100"
             SubscriptionEndDate="2024-12-31T23:59:59Z"
-            WindowsAuthenticationIsOn="true" />
+            WindowsAuthenticationIsOn="true"
+            WorkflowIsOn="true"
+            AnonymousAccessIsOn="false" />
       </ServerInfoResult>
     </ServerInfoResponse>
   </soap:Body>
@@ -214,7 +220,9 @@ public class ServerInfoClient
             ServerName = xml.Attribute("ServerName")?.Value,
             LicenseCount = int.Parse(xml.Attribute("LicenseCount")?.Value ?? "0"),
             SubscriptionEndDate = DateTime.Parse(xml.Attribute("SubscriptionEndDate")?.Value ?? ""),
-            WindowsAuthenticationEnabled = xml.Attribute("WindowsAuthenticationIsOn")?.Value == "true"
+            WindowsAuthenticationEnabled = xml.Attribute("WindowsAuthenticationIsOn")?.Value == "true",
+            WorkflowEnabled = xml.Attribute("WorkflowIsOn")?.Value == "true",
+            AnonymousAccessEnabled = xml.Attribute("AnonymousAccessIsOn")?.Value == "true"
         };
     }
 }
@@ -231,6 +239,8 @@ public class ServerInformation
     public int LicenseCount { get; set; }
     public DateTime SubscriptionEndDate { get; set; }
     public bool WindowsAuthenticationEnabled { get; set; }
+    public bool WorkflowEnabled { get; set; }
+    public bool AnonymousAccessEnabled { get; set; }
 }
 
 // Usage
@@ -262,7 +272,9 @@ async function getServerInfo() {
         serverName: root.getAttribute('ServerName'),
         licenseCount: parseInt(root.getAttribute('LicenseCount')),
         subscriptionEndDate: new Date(root.getAttribute('SubscriptionEndDate')),
-        windowsAuthEnabled: root.getAttribute('WindowsAuthenticationIsOn') === 'true'
+        windowsAuthEnabled: root.getAttribute('WindowsAuthenticationIsOn') === 'true',
+        workflowEnabled: root.getAttribute('WorkflowIsOn') === 'true',
+        anonymousAccessEnabled: root.getAttribute('AnonymousAccessIsOn') === 'true'
     };
 }
 
@@ -296,7 +308,9 @@ def get_server_info(base_url):
         'server_name': root.get('ServerName'),
         'license_count': int(root.get('LicenseCount')),
         'subscription_end_date': datetime.fromisoformat(root.get('SubscriptionEndDate').replace('Z', '+00:00')),
-        'windows_auth_enabled': root.get('WindowsAuthenticationIsOn') == 'true'
+        'windows_auth_enabled': root.get('WindowsAuthenticationIsOn') == 'true',
+        'workflow_enabled': root.get('WorkflowIsOn') == 'true',
+        'anonymous_access_enabled': root.get('AnonymousAccessIsOn') == 'true'
     }
 
 # Usage
