@@ -33,20 +33,20 @@ Returns all property set rows that have been applied to a document or folder ide
                    PROJECT_CODE="PRJ-2024-001"
                    STATUS="Active"
                    NOTES="Initial entry">
-        <Log AppliedBy="jsmith" DateApplied="2024-03-15 14:32" />
+        <Log AppliedById="1042" AppliedBy="jsmith" DateApplied="2024-03-15 14:32" />
       </propertyrow>
       <propertyrow RowNbr="2"
                    PROJECT_CODE="PRJ-2024-002"
                    STATUS="Draft"
                    NOTES="">
-        <Log AppliedBy="admin" DateApplied="2024-03-16 09:10" />
+        <Log AppliedById="4" AppliedBy="admin" DateApplied="2024-03-16 09:10" />
       </propertyrow>
     </propertyset>
     <propertyset Name="AUDITINFO">
       <propertyrow RowNbr="1"
                    AUDITOR="bjones"
                    AUDIT_DATE="2024-01-01">
-        <Log AppliedBy="admin" DateApplied="2024-01-05 08:00" />
+        <Log AppliedById="4" AppliedBy="admin" DateApplied="2024-01-05 08:00" />
       </propertyrow>
     </propertyset>
   </Propertysets>
@@ -88,6 +88,7 @@ Container element listing all property sets applied to the object.
 ### `<Log>` (child of `<propertyrow>`)
 | Attribute | Description |
 |-----------|-------------|
+| `AppliedById` | ID of the user who last saved this row. Use this to identify the user - a username is a label, not a key, and `0` where the row predates this being recorded. |
 | `AppliedBy` | Username of the user who last saved this row. |
 | `DateApplied` | Date and time the row was last saved, in `YYYY-MM-DD HH:mm` UTC format. |
 
