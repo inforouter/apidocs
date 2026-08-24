@@ -1,6 +1,6 @@
-# GetFolderAIPreferences API
+﻿# GetFolderAIPreferences API
 
-Returns the infoRouter Connect (AI) preferences in effect for the specified folder. These preferences control which operations — summarization, classification, keyword extraction, data extraction, profiling, OCR — are performed automatically on the documents of the folder, and whether PII is scrubbed before document text is handed to the AI provider.
+Returns the infoRouter Connect (AI) preferences in effect for the specified folder. These preferences control which operations — summarization, description, abstract, classification, keyword extraction, data extraction, OCR — are performed automatically on the documents of the folder, and whether PII is scrubbed before document text is handed to the AI provider. There is one switch per answer: each asks for that answer and nothing else.
 
 A folder that has no preferences of its own inherits them from the nearest parent folder whose `ApplyToSubfolders` preference is on. When there is no such parent folder, every option is off.
 
@@ -36,7 +36,8 @@ A folder that has no preferences of its own inherits them from the nearest paren
     <Preference Name="AutoClassify" Value="off" />
     <Preference Name="AutoExtractKeywords" Value="on" />
     <Preference Name="AutoExtractData" Value="off" />
-    <Preference Name="AutoProfile" Value="off" />
+    <Preference Name="AutoDescribe" Value="on" />
+    <Preference Name="AutoAbstract" Value="off" />
     <Preference Name="AutoOCR" Value="on" />
     <Preference Name="ScrubPII" Value="on" />
     <Preference Name="ApplyToSubfolders" Value="off" />
@@ -62,8 +63,9 @@ A folder that has no preferences of its own inherits them from the nearest paren
 
 | Preference Name | Possible Values | Description |
 |-----------------|-----------------|-------------|
-| `AutoProfile` | `"on"` / `"off"` | Describe the document in one call: description, abstract, summary and keywords together, plus the OCR text of a scan. |
 | `AutoSummarize` | `"on"` / `"off"` | Summarize new document versions. |
+| `AutoDescribe` | `"on"` / `"off"` | Write the one line description of new document versions. |
+| `AutoAbstract` | `"on"` / `"off"` | Write the longer abstract of new document versions. |
 | `AutoExtractKeywords` | `"on"` / `"off"` | Produce keywords for new document versions. |
 | `AutoOCR` | `"on"` / `"off"` | Read the text out of scanned documents so they become searchable. |
 | `AutoClassify` | `"on"` / `"off"` | Stored but **not yet performed by the server**. |
@@ -75,13 +77,13 @@ A folder that has no preferences of its own inherits them from the nearest paren
 
 Switching a preference on does not queue work by itself. Work is queued when a document is **uploaded, checked in as a new version, or imported** into the folder, and only for the operations this server can carry out.
 
-**`AutoProfile` replaces the other three rather than adding to them.** One profile call answers with the description, abstract, summary and keywords together, and carries back the OCR text of a scan with them. So when `AutoProfile` is on, `AutoSummarize`, `AutoExtractKeywords` and `AutoOCR` are **not** queued alongside it - they would each spend another model call to produce what the profile already returned.
+**Each switch asks for its own answer, and however many are on it is still one job and one call.** One call answers all of them, and it answers only what was asked for - so a folder that switches on `AutoDescribe` alone is written a description, and does not quietly acquire a summary, keywords and a document type with it.
 
 | Preferences switched on | Queued for a PDF |
 |-------------------------|------------------|
-| `AutoProfile` (with or without the others) | one profile |
-| `AutoSummarize` + `AutoExtractKeywords` + `AutoOCR` | OCR, then summary, then keywords |
-| `AutoSummarize` only | one summary |
+| `AutoDescribe` only | one job, answering the description |
+| `AutoSummarize` + `AutoExtractKeywords` + `AutoOCR` | one job, answering the summary, the keywords and the OCR text |
+| `AutoSummarize` + `AutoDescribe` + `AutoExtractKeywords` + `AutoClassify` | one job, answering all four |
 
 Some documents are skipped entirely:
 

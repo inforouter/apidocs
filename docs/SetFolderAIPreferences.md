@@ -30,8 +30,9 @@ Names are case-insensitive.
 
 | Preference Name | Description |
 |-----------------|-------------|
-| `AutoProfile` | Describe the document in one call: description, abstract, summary and keywords together, plus the OCR text of a scan. Replaces the three below rather than adding to them. |
 | `AutoSummarize` | Summarize new document versions. |
+| `AutoDescribe` | Write the one line description of new document versions. |
+| `AutoAbstract` | Write the longer abstract of new document versions. |
 | `AutoExtractKeywords` | Produce keywords for new document versions. |
 | `AutoOCR` | Read the text out of scanned documents so they become searchable. |
 | `AutoClassify` | Stored but **not yet performed by the server**. |
@@ -41,7 +42,9 @@ Names are case-insensitive.
 
 > **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in or imported afterwards. To produce content for a document already there, ask for it directly with [GetConnectProfile](GetConnectProfile.md).
 
-> **`AutoProfile` covers `AutoSummarize`, `AutoExtractKeywords` and `AutoOCR`.** One profile call returns all of it, so switching `AutoProfile` on means the other three are not run alongside it - switching them on as well costs nothing and changes nothing. See [GetFolderAIPreferences](GetFolderAIPreferences.md) for exactly what gets queued.
+> **Every answer is its own switch, and asks for nothing else.** A folder that switches on `AutoDescribe` alone gets a description - not a summary, keywords or a document type along with it. Switching several on still costs one call, because one call answers all of them; see [GetFolderAIPreferences](GetFolderAIPreferences.md) for exactly what gets queued.
+
+> **There is no `AutoProfile`.** Pre-release builds carried one preference standing for `AutoDescribe`, `AutoSummarize`, `AutoExtractKeywords` and `AutoClassify` together; name the ones you want instead. `AutoProfile` is an unknown preference name now and is ignored like any other.
 
 > **`AutoClassify` and `AutoExtractData` are accepted and stored, but the server does not act on them yet.** They are recorded so a folder's intent survives, and will start working when the operations are implemented.
 
@@ -54,6 +57,8 @@ Names are case-insensitive.
 ```xml
 <AIPreferences>
   <Preference Name="AutoSummarize" Value="on" />
+  <Preference Name="AutoDescribe" Value="on" />
+  <Preference Name="AutoAbstract" Value="off" />
   <Preference Name="AutoExtractKeywords" Value="on" />
   <Preference Name="ScrubPII" Value="on" />
   <Preference Name="ApplyToSubfolders" Value="on" />

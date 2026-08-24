@@ -101,7 +101,7 @@ That is the whole of it. Nothing here consults the warehouse, the Connect servic
 
 Two things produce summaries, and neither of them is this API:
 
-- **Automatically on upload** - a folder with `AutoSummarize` or `AutoProfile` set queues the work for every version added to it. See [SetFolderAIPreferences](SetFolderAIPreferences.md).
+- **Automatically on upload** - a folder with `AutoSummarize` set queues the work for every version added to it. See [SetFolderAIPreferences](SetFolderAIPreferences.md).
 - **On request** - an extract call queues the work at user priority, ahead of anything queued automatically, and reports its progress while it runs. That call is where `Queued` and `Processing` live now.
 
 Either way the result lands in `DOCSUMMARY`, and this API returns it from that point on.
