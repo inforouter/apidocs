@@ -476,6 +476,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [UserExists](UserExists.md) - Check if a username exists
 
 ### User Interface Settings
+- [GetCustomMenus](GetCustomMenus.md) - Get the custom document list menus defined for this installation
 - [GetUserFolderColumns](GetUserFolderColumns.md) - Get the column layout and property set preference for the authenticated user on a folder
 - [SetUserFolderColumns](SetUserFolderColumns.md) - Save the column layout and property set preference for the authenticated user on a folder
 
