@@ -65,123 +65,125 @@ The root element carries pagination metadata as attributes, with one child eleme
 
 
 
+> **The root element is `<response>`, not `<root>`.** The `<folder>` and `<document>` elements are
+> the same ones [GetFolder](GetFolder.md) and [GetDocument](GetDocument.md) return, with the same
+> attribute names - `Name` rather than `DocumentName`, `Size` rather than `DocumentSize`, `Type`
+> rather than `MimeTypeDescription`, `VersionNumber` rather than `LastVersionNumber`. The example
+> below shows a representative subset; [GetDocument](GetDocument.md) has the full attribute table.
+
 ```xml
-
-<root success="true" FirstPage="true" LastPage="false" from="1" to="20">
-
-
+<response success="true" error="" FirstPage="true" from="1" to="20" LastPage="false">
 
   <!-- Folder result -->
+  <folder FolderID="1329"
+          ParentID="1001"
+          Name="ApiTests"
+          Path="\Public\ApiTests"
+          Description=""
+          CreationDate="2026-08-19T15:34:41.250Z"
+          OwnerName="System Administrator"
+          DomainId="1001"
+          ClassificationLevel="NoMarkings"
+          ClassificationLevelId="0"
+          DeclassifyOn=""
+          DowngradeOn=""
+          RDDefId="0"
+          RetentionDate=""
+          DispositionDate=""
+          CutoffDate="">
 
-  <folder FolderID="42" FolderName="Annual Reports" ParentFolderID="10"
-
-          Path="/Finance/Annual Reports" CreationDate="2023-01-15"
-
-          ModificationDate="2024-06-01" OwnerID="7" OwnerName="jsmith"
-
-          Description="..." ... >
+    <!-- Included only when withOwner=true -->
+    <User exists="true" UserID="4" FirstName="System" LastName="Administrator"
+          Email="admin@example.com" MobileNumber="" Enabled="TRUE" UserName="sysadmin" />
 
     <!-- Included only when withrules=true -->
-
     <Rules>
-
       <Rule Name="AllowableFileTypes" Value="*" />
-
-      <Rule Name="Checkins"           Value="allows" />
-
-      <Rule Name="Checkouts"          Value="allows" />
-
-      <Rule Name="DocumentDeletes"    Value="allows" />
-
-      <Rule Name="FolderDeletes"      Value="allows" />
-
-      <Rule Name="NewDocuments"       Value="allows" />
-
-      <Rule Name="NewFolders"         Value="allows" />
-
+      <Rule Name="Checkins" Value="allows" />
+      <Rule Name="Checkouts" Value="allows" />
+      <Rule Name="DocumentDeletes" Value="allows" />
+      <Rule Name="FolderDeletes" Value="allows" />
+      <Rule Name="NewDocuments" Value="allows" />
+      <Rule Name="NewFolders" Value="allows" />
       <Rule Name="ClassifiedDocuments" Value="disallows" />
-
     </Rules>
 
     <!-- Included only when withPropertySets=true -->
-
-    <PropertySets> ... </PropertySets>
+    <Propertysets />
 
     <!-- Included only when withSecurity=true -->
-
-    <AccessList DateApplied="2023-01-15" AppliedBy="admin" InheritedSecurity="false">
-
-      <DomainMembers Right="4" Description="(Add &amp; Read)" />
-
-      <UserGroup DomainName="Finance" GroupName="Managers" Right="6" Description="(Full Control)" />
-
-      <User DomainName="Finance" UserName="jsmith" Right="6" Description="(Full Control)" />
-
+    <AccessList DateApplied="" AppliedBy="" InheritedSecurity="true">
+      <Anonymous Right="2" Description="(Read)" />
     </AccessList>
-
-    <!-- Included only when withOwner=true -->
-
-    <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
 
   </folder>
 
+  <!-- Document result. The full <document> element - see GetDocument for every attribute. -->
+  <document DocumentID="1494"
+            Name="Q1-2024-Report.pdf"
+            Path="\Finance\Annual Reports"
+            Description=""
+            Size="204800"
+            Type="PDF Document"
+            CreationDate="2026-08-19T15:34:41.527Z"
+            ModificationDate="2026-08-19T15:34:41.527Z"
+            VersionNumber="3000000"
+            PublishedVersionNumber="3000000"
+            DocTypeID="0"
+            DocTypeName=""
+            AIEnhanced="17"
+            AIEnhancedAttributes="Summary, DocumentType"
+            OwnerId="4"
+            OwnerName="System Administrator"
+            FolderId="1329"
+            Foldername="Annual Reports"
+            DomainId="1001"
+            DomainName="Finance"
+            UserViewStatus="2">
 
+    <!-- Present whenever the description carries an author stamp -->
+    <DescriptionLog AppliedById="4" AppliedBy="System Administrator"
+                    DateApplied="2026-09-02T13:02:48.250Z" />
 
-  <!-- Document result -->
-
-  <document DocumentID="1051" DocumentName="Q1-2024-Report.pdf"
-
-            FolderID="42" FolderName="Annual Reports" Path="/Finance/Annual Reports/Q1-2024-Report.pdf"
-
-            MimeType="application/pdf" MimeTypeDescription="PDF Document"
-
-            DocumentSize="204800" LastVersionNumber="3"
-
-            CreationDate="2024-03-01" ModificationDate="2024-06-15"
-
-            OwnerID="7" OwnerName="jsmith" StatusCode="2" ... >
-
-    <!-- Included only when full-text KEYWORDS search was used (ranksorted or ranked result) -->
-
+    <!-- Included only when a full-text KEYWORDS search ranked this result -->
     <RankInfo Rank="95"
-
               FoundInPropertiesOrComments="FALSE"
-
               FoundInAttachments="FALSE"
-
               FoundInWorkflowHistory="FALSE"
-
-              FoundInVersionNumber="3"
-
+              FoundInVersionNumber="3000000"
               FoundInPublishedVersion="TRUE" />
 
-    <!-- Included only when withPropertySets=true -->
+    <!-- Included only when withOwner=true -->
+    <User exists="true" UserID="4" FirstName="System" LastName="Administrator"
+          Email="admin@example.com" MobileNumber="" Enabled="TRUE" UserName="sysadmin" />
 
-    <PropertySets> ... </PropertySets>
+    <!-- Included only when withPropertySets=true -->
+    <Propertysets />
 
     <!-- Included only when withSecurity=true -->
+    <AccessList DateApplied="" AppliedBy="" InheritedSecurity="true"> ... </AccessList>
 
-    <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
-
-    <!-- Included only when withOwner=true -->
-
-    <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
-
-    <!-- Included only when withVersions=true -->
-
-    <Versions> ... </Versions>
+    <!-- Included only when withVersions=true. Child elements, not attributes. -->
+    <Versions>
+      <Version Number="3000000">
+        <VersionAuthor>System Administrator</VersionAuthor>
+        <VersionAuthorId>4</VersionAuthorId>
+        <VersionSize>204800</VersionSize>
+        <CheckSum>BFDB77A6</CheckSum>
+        <DateCreated>2026-08-19T15:34:41.527Z</DateCreated>
+        <DatePublished>2026-08-19T15:34:41.773Z</DatePublished>
+        <Comment />
+        <ApprovalStatus>NoResult</ApprovalStatus>
+        <ApprovalDate />
+      </Version>
+    </Versions>
 
   </document>
 
-
-
   <!-- ... additional result items ... -->
 
-</root>
-
+</response>
 ```
-
-
 
 ### Root Element Attributes
 
@@ -190,6 +192,7 @@ The root element carries pagination metadata as attributes, with one child eleme
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `success` | string | `true` if the page was retrieved successfully. |
+| `error` | string | Error message when `success` is `false`; otherwise empty. |
 | `FirstPage` | string | `true` if this is the first page of results. |
 | `LastPage` | string | `true` if this is the last page of results (no more items). |
 | `from` | string | 1-based index of the first item on this page (e.g. `1`, `21`, `41`). |
@@ -207,7 +210,7 @@ When the search produced zero matches, the response still has `success="true"` w
 
 ```xml
 
-<root success="true" FirstPage="true" LastPage="true" from="0" to="0" />
+<response success="true" error="" FirstPage="true" LastPage="true" from="0" to="0" />
 
 ```
 
@@ -255,7 +258,7 @@ that a bit is cleared once a person writes that attribute themselves.
 
 ```xml
 
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="[ErrorCode] Error message" errorcode="4000" />
 
 ```
 
