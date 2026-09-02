@@ -208,6 +208,10 @@ Folders appear first, followed by documents. All items are immediate children of
 
             DocTypeName=""
 
+            AIEnhanced="17"
+
+            AIEnhancedAttributes="Summary, DocumentType"
+
             VersionNumber="3"
 
             PublishedVersionNumber="3"
@@ -355,6 +359,8 @@ Folders appear first, followed by documents. All items are immediate children of
 | `RegisteredBy` | Name of the user who registered the document. |
 | `DocTypeID` | Document type integer ID (`0` if no type assigned). |
 | `DocTypeName` | Document type name, or empty if none. |
+| `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced). |
+| `AIEnhancedAttributes` | The same thing named, e.g. `Summary, DocumentType`. Empty when `AIEnhanced` is `0`. |
 | `VersionNumber` | Latest version number. |
 | `PublishedVersionNumber` | Published version number (`0` if no version is published). |
 | `PublishingRule` | Publishing rule name (`PublishingNotRequired`, `PublishingRequired`, etc.). |

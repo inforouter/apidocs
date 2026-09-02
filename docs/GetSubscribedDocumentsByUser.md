@@ -1,4 +1,4 @@
-# GetSubscribedDocumentsByUser API
+﻿# GetSubscribedDocumentsByUser API
 
 Returns a paginated list of documents that the specified user is subscribed to. This API is similar to `GetSubscriptions` but targets a specific user and supports pagination.
 
@@ -41,6 +41,11 @@ Returns a paginated list of documents that the specified user is subscribed to. 
 ```xml
 <response success="true" recordCount="0" startingRow="0" rowCount="0" />
 ```
+
+Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
+`AIEnhancedAttributes`, saying which of the document's attributes infoRouter Connect produced -
+`0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values and for the rule
+that a bit is cleared once a person writes that attribute themselves.
 
 ### Error Response
 

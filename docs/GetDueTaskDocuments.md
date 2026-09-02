@@ -1,4 +1,4 @@
-# GetDueTaskDocuments API
+﻿# GetDueTaskDocuments API
 
 Returns the list of documents that have active (due) workflow tasks currently assigned to the authenticated user. Results are sorted by task due date in ascending order.
 
@@ -56,6 +56,11 @@ An empty result set (no due tasks) returns:
 ```xml
 <root success="true" />
 ```
+
+Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
+`AIEnhancedAttributes`, saying which of the document's attributes infoRouter Connect produced -
+`0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values and for the rule
+that a bit is cleared once a person writes that attribute themselves.
 
 ### Error Response
 

@@ -307,6 +307,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Path=/Finance/Reports
 
 - Folder items use the abbreviated element name `<f>` and carry only `id` and `n` (name). To retrieve full folder metadata, use `GetFolder` or `GetFoldersAndDocuments`.
 
+- This API returns the short-form `<f>` / `<d>` elements. Extended attributes - property sets, security, rules, `UserViewStatus`, `AIEnhanced` - are not included. Use [GetFoldersAndDocuments](GetFoldersAndDocuments.md) for the full `<document>` element.
+
 - Document items use the abbreviated element name `<d>` and carry a minimal attribute set. To retrieve full document metadata, use `GetDocument` or `GetFoldersAndDocuments`.
 
 - All items are returned in a single response with no paging. For large folders with hundreds of items, consider `GetFoldersAndDocumentsByPage` or `GetFoldersAndDocumentsByPage2` to page through results.

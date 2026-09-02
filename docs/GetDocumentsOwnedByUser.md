@@ -1,4 +1,4 @@
-# GetDocumentsOwnedByUser API
+﻿# GetDocumentsOwnedByUser API
 
 Returns a paged list of documents owned by the specified user, sorted by document name ascending. Supports offset-based paging via `startingRow` and `rowCount`.
 
@@ -74,6 +74,11 @@ Additional standard document attributes are included based on document type and 
 ```xml
 <response success="true" />
 ```
+
+Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
+`AIEnhancedAttributes`, saying which of the document's attributes infoRouter Connect produced -
+`0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values and for the rule
+that a bit is cleared once a person writes that attribute themselves.
 
 ### Error Response
 

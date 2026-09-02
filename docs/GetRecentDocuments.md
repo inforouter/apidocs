@@ -116,6 +116,10 @@ Returns a `<root>` element containing `<document>` child elements. Documents are
 
             DocTypeName=""
 
+            AIEnhanced="17"
+
+            AIEnhancedAttributes="Summary, DocumentType"
+
             VersionNumber="3"
 
             PublishedVersionNumber="3"
@@ -234,6 +238,11 @@ Returns a `<root>` element containing `<document>` child elements. Documents are
 See `GetDocument` for the complete list of `<document>` element attributes and their descriptions.
 
 
+
+Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
+`AIEnhancedAttributes`, saying which of the document's attributes infoRouter Connect produced -
+`0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values and for the rule
+that a bit is cleared once a person writes that attribute themselves.
 
 ### Error Response
 

@@ -1,4 +1,4 @@
-# GetISOReviewAssignmentsOfUser API
+﻿# GetISOReviewAssignmentsOfUser API
 
 Returns a paged list of documents assigned to the specified user for ISO review.
 
@@ -38,6 +38,11 @@ Returns a paged list of documents assigned to the specified user for ISO review.
   <document id="622" name="ProcedureManual.pdf" path="/ISO/ProcedureManual.pdf" ... />
 </root>
 ```
+
+Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
+`AIEnhancedAttributes`, saying which of the document's attributes infoRouter Connect produced -
+`0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values and for the rule
+that a bit is cleared once a person writes that attribute themselves.
 
 ### Error Response
 

@@ -1,4 +1,4 @@
-# GetFavoriteDocumentsOfUser API
+﻿# GetFavoriteDocumentsOfUser API
 
 Returns a paged list of documents marked as favorites by the specified user.
 
@@ -38,6 +38,11 @@ Returns a paged list of documents marked as favorites by the specified user.
   <document id="205" name="ProjectPlan.pdf" path="/Projects/ProjectPlan.pdf" ... />
 </root>
 ```
+
+Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
+`AIEnhancedAttributes`, saying which of the document's attributes infoRouter Connect produced -
+`0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values and for the rule
+that a bit is cleared once a person writes that attribute themselves.
 
 ### Error Response
 
