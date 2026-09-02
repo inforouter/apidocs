@@ -186,15 +186,15 @@ The root element is `<response>` (not `<root>`). It carries metadata about the q
 |-----------|-------------|
 | `id` | Unique integer ID of the document. |
 | `n` | Document file name (including extension). |
-| `mdate` | Last modification date (`yyyy-MM-dd` format). |
-| `cdate` | Creation date (`yyyy-MM-dd` format). |
+| `mdate` | Last modification date, universal format (`2026-08-19T15:34:41.527Z`). |
+| `cdate` | Creation date, universal format. |
 | `size` | File size in bytes. |
 | `dformat` | MIME type description (e.g. `PDF Document`, `Microsoft Excel Spreadsheet`). |
 | `chkoutbyusername` | Login name of the user who has the document checked out, or empty if not checked out. |
 | `chkoutbyfullname` | Full name of the user who has the document checked out, or empty if not checked out. |
 | `version` | Latest version number. |
 | `publishedversion` | Published version number (`0` if no version is published). |
-| `regdate` | Date the document was registered/uploaded (`yyyy-MM-dd` format). |
+| `regdate` | Date the document was registered/uploaded, universal format. |
 | `dtype` | Document type integer ID (`0` if no type assigned). |
 
 

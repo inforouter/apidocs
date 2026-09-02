@@ -1,4 +1,4 @@
-# GetFoldersAndDocumentsByPage API
+﻿# GetFoldersAndDocumentsByPage API
 
 Returns a page of documents and folders at the specified path, with optional name filtering for both folders and documents. Each page contains up to 20 items. Use `PageNumber` to navigate through large listings.
 
@@ -22,7 +22,7 @@ Returns a page of documents and folders at the specified path, with optional nam
 | `Path` | string | Yes | Full infoRouter path to the folder (e.g. `/Finance/Reports`). |
 | `FolderFilter` | string | No | Optional substring filter for folder names. Pass empty string or null for no filtering. |
 | `DocumentFilter` | string | No | Optional substring filter for document names. Pass empty string or null for no filtering. |
-| `PageNumber` | int | Yes | Page number to retrieve (1-based). Each page contains up to 20 items. |
+| `PageNumber` | int | Yes | Page number to retrieve (1-based). Pass `-1` for every item in one response, with no `page` or `pageSize` on the root. |
 
 ---
 
@@ -30,13 +30,84 @@ Returns a page of documents and folders at the specified path, with optional nam
 
 ### Success Response
 
+Folders come back as `<f>` and documents as `<d>` - the same short-form elements
+[GetFoldersAndDocuments1](GetFoldersAndDocuments1.md) returns, with `page` and `pageSize` added to the
+root. They are **not** the `<folder>` / `<document>` elements
+[GetFoldersAndDocuments](GetFoldersAndDocuments.md) returns.
+
 ```xml
-<response success="true">
-  <folder id="456" name="2024" />
-  <document id="1001" name="Q1-Report.pdf" versionid="1000045" />
-  <document id="1002" name="Q2-Report.pdf" versionid="1000067" />
+<response success="true"
+          error=""
+          folderid="1329"
+          parentid="1001"
+          name="Reports"
+          path="\Finance\Reports"
+          folderfilter=""
+          documentfilter=""
+          page="1"
+          pageSize="20"
+          itemcount="3">
+
+  <!-- Folder items - id and name only -->
+  <f id="42" n="2024" />
+  <f id="43" n="2023" />
+
+  <!-- Document items -->
+  <d id="1494"
+     n="Q1-Report.pdf"
+     mdate="2026-08-19T15:34:41.527Z"
+     cdate="2026-08-19T15:34:41.527Z"
+     size="308"
+     dformat="Plain Text"
+     chkoutbyusername=""
+     chkoutbyfullname=""
+     version="1000000"
+     publishedversion="1000000"
+     regdate="2026-08-19T15:34:41.757Z"
+     dtype="0" />
+
 </response>
 ```
+
+#### Root attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `success` | `true` if the request succeeded. |
+| `error` | Error message if `success` is `false`; otherwise empty. |
+| `folderid` | Integer ID of the queried folder (the folder at `Path`). |
+| `parentid` | Integer ID of the queried folder's parent. |
+| `name` | Name of the queried folder. |
+| `path` | Full infoRouter path of the queried folder. |
+| `folderfilter` | The folder name filter that was applied. |
+| `documentfilter` | The document name filter that was applied. |
+| `page` | The page number that was returned. |
+| `pageSize` | Items per page, as configured on the server. |
+| `itemcount` | Count of folders plus documents in **this page**, not the total across all pages. |
+
+#### `<f>` - folder items
+
+| Attribute | Description |
+|-----------|-------------|
+| `id` | Unique integer ID of the sub-folder. |
+| `n` | Name of the sub-folder. |
+
+#### `<d>` - document items
+
+| Attribute | Description |
+|-----------|-------------|
+| `id` | Unique integer ID of the document. |
+| `n` | Document file name (including extension). |
+| `mdate` | Last modification date, universal format (`2026-08-19T15:34:41.527Z`). |
+| `cdate` | Creation date, universal format. |
+| `size` | File size in bytes. |
+| `dformat` | MIME type description (e.g. `PDF Document`, `Plain Text`). |
+| `chkoutbyusername` | Login name of the user who has the document checked out, or empty if not checked out. |
+| `chkoutbyfullname` | Full name of that user, or empty if not checked out. |
+| `version` | Latest version number, in the large-integer scheme (version 1 is `1000000`). |
+| `publishedversion` | Published version number (`0` if no version is published). |
+| `regdate` | Date the document was registered/uploaded, universal format. |
+| `dtype` | Document type integer ID (`0` if no type assigned). |
 
 ### Error Response
 
@@ -113,12 +184,12 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ## Notes
 
 - Returns only **direct** children (one level deep) of the specified path.
-- Each page returns up to 20 items; folders and documents are mixed in the response.
+- Page size is set on the server and reported back as `pageSize`; it is not a parameter of this call.
 - `FolderFilter` and `DocumentFilter` perform a case-insensitive substring match on the name.
 - An empty response (no child elements) after page 1 means there are no matching items.
 - For advanced filtering (by metadata, date ranges, or full-text content) and sorting, use `GetFoldersAndDocumentsByPage2`.
 - For full property details per item, use `GetFoldersAndDocuments`.
-- This paged API returns only `id`, `name`, and `versionid` per item. Extended attributes including `UserViewStatus` are not included. Use `GetFoldersAndDocuments` for the full attribute set.
+- This paged API returns the short-form `<f>` / `<d>` elements. Extended attributes - property sets, security, rules, `UserViewStatus`, `AIEnhanced` - are not included. Use [GetFoldersAndDocuments](GetFoldersAndDocuments.md) for the full `<document>` element.
 
 ---
 

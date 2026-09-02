@@ -1,4 +1,4 @@
-# GetFoldersAndDocuments2 API
+﻿# GetFoldersAndDocuments2 API
 
 Returns the list of documents and folders at the specified path in a lightweight ("ultra-fast") format. This API is optimized for speed and returns a minimal set of attributes for each item. Use this when you need a quick listing and do not require full property details.
 
@@ -27,14 +27,57 @@ Returns the list of documents and folders at the specified path in a lightweight
 
 ### Success Response
 
+Folders come back as `<f>` and documents as `<d>`. The `<d>` element here is **not** the one
+[GetFoldersAndDocuments1](GetFoldersAndDocuments1.md) returns: this API carries the published version
+checksum and the template id instead of the dates and the checkout, which is what makes it useful for
+comparing a local copy against the server.
+
 ```xml
-<response success="true">
-  <folder id="456" name="2024" />
-  <folder id="457" name="2023" />
-  <document id="1001" name="Q1-Report.pdf" versionid="1000045" />
-  <document id="1002" name="Q2-Report.pdf" versionid="1000067" />
+<response success="true"
+          error=""
+          id="1329"
+          name="Reports"
+          itemcount="4">
+
+  <!-- Folder items - id and name only -->
+  <f id="42" n="2024" />
+  <f id="43" n="2023" />
+
+  <!-- Document items -->
+  <d id="1494" n="Q1-Report.pdf" sz="308" pv="1000000" lv="1000000" chksum="BFDB77A6" tid="0" />
+  <d id="1495" n="Q2-Report.pdf" sz="512" pv="1000000" lv="2000000" chksum="1A2B3C4D" tid="0" />
+
 </response>
 ```
+
+#### Root attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `success` | `true` if the request succeeded. |
+| `error` | Error message if `success` is `false`; otherwise empty. |
+| `id` | Integer ID of the queried folder (the folder at `Path`). |
+| `name` | Name of the queried folder. |
+| `itemcount` | Count of folders plus documents returned. |
+
+#### `<f>` - folder items
+
+| Attribute | Description |
+|-----------|-------------|
+| `id` | Unique integer ID of the sub-folder. |
+| `n` | Name of the sub-folder. |
+
+#### `<d>` - document items
+
+| Attribute | Description |
+|-----------|-------------|
+| `id` | Unique integer ID of the document. |
+| `n` | Document file name (including extension). |
+| `sz` | File size in bytes. |
+| `pv` | Published version number (`0` if no version is published). |
+| `lv` | Latest version number. Both are in the large-integer scheme, where version 1 is `1000000`. |
+| `chksum` | Checksum of the published version, for telling a changed file from an unchanged one without downloading it. Empty where none is stored. |
+| `tid` | Template ID the document was created from (`0` if none). |
 
 ### Error Response
 
@@ -94,7 +137,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - No filtering, sorting, or paging is supported. All accessible items at the path are returned.
 - For full property details (rules, property sets, security), use `GetFoldersAndDocuments` or `GetFoldersAndDocuments1`.
 - For filtering and paging, use `GetFoldersAndDocumentsByPage` or `GetFoldersAndDocumentsByPage2`.
-- This lightweight API returns only `id`, `name`, and `versionid` per item. Extended attributes including `UserViewStatus` are not included. Use `GetFoldersAndDocuments` for the full attribute set.
+- This lightweight API returns the short-form `<f>` / `<d>` elements. Extended attributes - property sets, security, rules, `UserViewStatus`, `AIEnhanced` - are not included. Use [GetFoldersAndDocuments](GetFoldersAndDocuments.md) for the full `<document>` element.
 
 ---
 
