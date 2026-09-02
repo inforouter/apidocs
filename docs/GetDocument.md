@@ -139,6 +139,10 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             DocTypeName=""
 
+            AIEnhanced="17"
+
+            AIEnhancedAttributes="Summary, DocumentType"
+
             VersionNumber="3"
 
             PublishedVersionNumber="3"
@@ -269,6 +273,8 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `RegisteredBy` | Login name of the user who registered the document. |
 | `DocTypeID` | Document type definition ID (`0` if none assigned). |
 | `DocTypeName` | Document type name, or empty if none assigned. |
+| `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
+| `AIEnhancedAttributes` | The same thing named, e.g. `Summary, DocumentType`. Empty when `AIEnhanced` is `0`. Convenience only - test the bits, not the text. |
 | `VersionNumber` | Latest (working) version number. |
 | `PublishedVersionNumber` | Published version number (`0` if no published version exists). |
 | `PublishingRule` | Publishing rule name (e.g. `PublishingNotRequired`, `MustBePublished`). |
@@ -351,6 +357,29 @@ attribute cannot carry attributes of its own.
 ---
 
 
+
+
+### AIEnhanced
+
+`AIEnhanced` says which of the document's attributes infoRouter Connect produced, one bit per attribute, so a listing can badge a document and say which parts a model wrote without reading each of them.
+
+| Bit | Value | Attribute |
+|-----|-------|-----------|
+| 0 | `1` | `Summary` |
+| 1 | `2` | `Description` |
+| 2 | `4` | `Keywords` |
+| 3 | `8` | `OcrText` |
+| 4 | `16` | `DocumentType` |
+| 5 | `32` | `Abstract` |
+| 6 | `64` | `ExtractedData` - property set values read out of the document |
+| 7 | `128` | `Markdown` |
+| 8 | `256` | `RedactedText` |
+
+`AIEnhanced="17"` is `1 | 16`: the summary and the document type. `AIEnhancedAttributes` names the same set for readability; a client should test the number.
+
+A bit is set when Connect writes that attribute and **cleared when a person writes it since**, so the flag says the attribute is the model's work now - not that a model touched it at some point. Writing a summary with [SetDocumentSummary](SetDocumentSummary.md), or a description with [UpdateDocumentProperties](UpdateDocumentProperties.md), clears its bit.
+
+A document that predates the flag reports `0`: nothing was produced for it, which is what `0` means. There is no "unknown" state.
 
 ## Required Permissions
 

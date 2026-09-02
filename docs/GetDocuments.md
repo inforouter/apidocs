@@ -115,6 +115,10 @@ Returns a `<response>` root element with one `<document>` child element per docu
 
             DocTypeName=""
 
+            AIEnhanced="17"
+
+            AIEnhancedAttributes="Summary, DocumentType"
+
             VersionNumber="3"
 
             PublishedVersionNumber="3"
@@ -249,6 +253,8 @@ Returns a `<response>` root element with one `<document>` child element per docu
 | `RegisteredBy` | Login name of the user who registered the document. |
 | `DocTypeID` | Document type definition ID (`0` if none assigned). |
 | `DocTypeName` | Document type name, or empty if none assigned. |
+| `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
+| `AIEnhancedAttributes` | The same thing named, e.g. `Summary, DocumentType`. Empty when `AIEnhanced` is `0`. Convenience only - test the bits, not the text. |
 | `VersionNumber` | Latest (working) version number. |
 | `PublishedVersionNumber` | Published version number (`0` if no published version exists). |
 | `PublishingRule` | Publishing rule name (e.g. `PublishingNotRequired`, `MustBePublished`). |
