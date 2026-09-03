@@ -390,7 +390,7 @@ A bit is cleared only when the attribute itself is removed - there is then nothi
 | `Description` | [UpdateDocumentProperties](UpdateDocumentProperties.md) with an empty description |
 | `Keywords` | replacing the generated keyword list with an empty one |
 | `DocumentType` | `UpdateDocumentType` with `DocumentTypeID=0`, which removes the type |
-| `ExtractedData` | saving the property set with every field empty |
+| `ExtractedData` | removing the property set from the document. Emptying its fields does **not** clear it - the set is still there, and it is still a set the service filled in. A multi-row set loses the flag when its last row goes. |
 | `Abstract`, `OcrText`, `Markdown`, `RedactedText` | nothing - these are produced by the server and there is no user operation that removes them |
 
 Whether the values still need somebody's attention is a **separate** question, answered by [AIExtractConfidence](GetDocument.md#aiextractconfidence), which a review does clear. The two together say more than either alone: `ExtractedData` set with `AIExtractConfidence` of `0` means "extracted, and somebody has been through it", which no single flag could express.
