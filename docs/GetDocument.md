@@ -380,7 +380,20 @@ attribute cannot carry attributes of its own.
 
 `AIEnhanced="17"` is `1 | 16`: the summary and the document type. `AIEnhancedAttributes` names the same set for readability; a client should test the number.
 
-A bit is set when Connect writes that attribute and **cleared when a person writes it since**, so the flag says the attribute is the model's work now - not that a model touched it at some point. Writing a summary with [SetDocumentSummary](SetDocumentSummary.md), or a description with [UpdateDocumentProperties](UpdateDocumentProperties.md), clears its bit.
+A bit is set when Connect writes that attribute, and it **survives a correction**. The flag says where the attribute came from, not who edited it last: a person who fixes a generated summary keeps the flag, because a reader still wants to know it began as the model's work.
+
+A bit is cleared only when the attribute itself is removed - there is then nothing left for it to describe:
+
+| Bit | Cleared by |
+|-----|------------|
+| `Summary` | [SetDocumentSummary](SetDocumentSummary.md) with an empty summary |
+| `Description` | [UpdateDocumentProperties](UpdateDocumentProperties.md) with an empty description |
+| `Keywords` | replacing the generated keyword list with an empty one |
+| `DocumentType` | `UpdateDocumentType` with `DocumentTypeID=0`, which removes the type |
+| `ExtractedData` | saving the property set with every field empty |
+| `Abstract`, `OcrText`, `Markdown`, `RedactedText` | nothing - these are produced by the server and there is no user operation that removes them |
+
+Whether the values still need somebody's attention is a **separate** question, answered by [AIExtractConfidence](GetDocument.md#aiextractconfidence), which a review does clear. The two together say more than either alone: `ExtractedData` set with `AIExtractConfidence` of `0` means "extracted, and somebody has been through it", which no single flag could express.
 
 A document that predates the flag reports `0`: nothing was produced for it, which is what `0` means. There is no "unknown" state.
 
@@ -391,7 +404,7 @@ A document that predates the flag reports `0`: nothing was produced for it, whic
 
 The lowest of the fields Connect actually filled, because a property set is only as trustworthy as its worst answer and a listing has room for one number. A field a person had already answered does not count towards it - it carries no confidence of the service's at all.
 
-`0` means **nothing to review**, and covers two cases a caller does not need to tell apart: nothing was extracted, or a person has since saved the values themselves. Saving a document's property set values clears this to `0` and clears the `ExtractedData` bit of [AIEnhanced](GetDocument.md#aienhanced) with it - that save is what marks the document reviewed.
+`0` means **nothing to review**. Saving a document's property set values clears it to `0` - that save is what marks the document reviewed. The `ExtractedData` bit of [AIEnhanced](GetDocument.md#aienhanced) is **not** cleared with it: the values are still the model's work, they have just been checked. To tell a reviewed document from one nothing was ever extracted for, read the two together - `ExtractedData` set with a confidence of `0` is "extracted, and reviewed".
 
 Suggested bands, as half-open intervals so they tile with no gap and nothing in two bands at once:
 
