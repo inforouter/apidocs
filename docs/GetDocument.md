@@ -143,6 +143,8 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             AIEnhancedAttributes="Summary, DocumentType"
 
+            AIExtractConfidence="65"
+
             VersionNumber="3"
 
             PublishedVersionNumber="3"
@@ -275,6 +277,7 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `DocTypeName` | Document type name, or empty if none assigned. |
 | `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
 | `AIEnhancedAttributes` | The same thing named, e.g. `Summary, DocumentType`. Empty when `AIEnhanced` is `0`. Convenience only - test the bits, not the text. |
+| `AIExtractConfidence` | How sure infoRouter Connect was about the weakest value it extracted into the document's property sets, as a percentage `0` - `100`. `0` means nothing needs reviewing. See [AIExtractConfidence](GetDocument.md#aiextractconfidence). |
 | `VersionNumber` | Latest (working) version number. |
 | `PublishedVersionNumber` | Published version number (`0` if no published version exists). |
 | `PublishingRule` | Publishing rule name (e.g. `PublishingNotRequired`, `MustBePublished`). |
@@ -380,6 +383,28 @@ attribute cannot carry attributes of its own.
 A bit is set when Connect writes that attribute and **cleared when a person writes it since**, so the flag says the attribute is the model's work now - not that a model touched it at some point. Writing a summary with [SetDocumentSummary](SetDocumentSummary.md), or a description with [UpdateDocumentProperties](UpdateDocumentProperties.md), clears its bit.
 
 A document that predates the flag reports `0`: nothing was produced for it, which is what `0` means. There is no "unknown" state.
+
+
+### AIExtractConfidence
+
+`AIExtractConfidence` says how sure infoRouter Connect was about the **weakest** value it extracted into the document's property sets, as a percentage from `0` to `100`. It is there so a listing can highlight a document whose extracted values are worth a person's attention.
+
+The lowest of the fields Connect actually filled, because a property set is only as trustworthy as its worst answer and a listing has room for one number. A field a person had already answered does not count towards it - it carries no confidence of the service's at all.
+
+`0` means **nothing to review**, and covers two cases a caller does not need to tell apart: nothing was extracted, or a person has since saved the values themselves. Saving a document's property set values clears this to `0` and clears the `ExtractedData` bit of [AIEnhanced](GetDocument.md#aienhanced) with it - that save is what marks the document reviewed.
+
+Suggested bands, as half-open intervals so they tile with no gap and nothing in two bands at once:
+
+| Band | Range |
+|------|-------|
+| Poor | `1` - `69` |
+| Low | `70` - `79` |
+| Medium | `80` - `89` |
+| High | `90` - `100` |
+
+> Values below the server's `extractedFieldMinConfidence` setting (see [GetConnectSettings](GetConnectSettings.md)) are never written at all - the field is left empty for a person instead. With the default of `0.5` the lowest value you will ever see is `50`, so raising that setting narrows the poor and low bands and can empty them.
+
+> A field Connect could not fill carries no confidence, so it does not enter this number. A document where two fields were extracted at `95` and eight were left empty reports `95`. This value reports how good the answers are, not how many of them there are.
 
 ## Required Permissions
 

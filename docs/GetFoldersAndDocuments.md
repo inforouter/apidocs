@@ -212,6 +212,8 @@ Folders appear first, followed by documents. All items are immediate children of
 
             AIEnhancedAttributes="Summary, DocumentType"
 
+            AIExtractConfidence="65"
+
             VersionNumber="3"
 
             PublishedVersionNumber="3"
