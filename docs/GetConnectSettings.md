@@ -1,4 +1,4 @@
-# GetConnectSettings API
+﻿# GetConnectSettings API
 
 Returns what this infoRouter instance can ask the **infoRouter Connect** AI service for: the capabilities the service offers, whether each one is usable right now, and the rules infoRouter applies to them.
 
@@ -28,7 +28,7 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 <response success="true" error="">
   <ConnectSettings configured="true" reachable="true" provisioned="true" scrubPii="true"
                    maxKeywordCount="10" storeOcrText="true"
-                   documentTypeMinConfidence="0.75" extractedFieldMinConfidence="0.5">
+                   documentTypeMinConfidence="0.75">
     <SupportedExtensions>pdf,docx,xlsx,pptx,html,htm,txt,md,csv</SupportedExtensions>
     <Service aiReady="true" scrubbingReady="true" ocrAvailable="true"
              documentTypeReady="true" documentTypes="3" typesVersion="393781196">
@@ -58,7 +58,14 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 | `maxKeywordCount` | How many keywords are asked for when a request does not say. |
 | `storeOcrText` | Whether text read out of a scan is kept on the document. |
 | `documentTypeMinConfidence` | How sure the service must be before a type match is applied. A matched type is written onto a document that has none; a type somebody chose is never replaced. |
-| `extractedFieldMinConfidence` | How sure it must be before an extracted value is written. |
+
+> **`extractedFieldMinConfidence` was removed in 9.0.** There is no longer a threshold on
+> extracted field values: whatever Connect finds is written, however unsure it was, because a
+> value a person is going to review is worth more than the blank it would otherwise leave. How
+> sure it was is reported per document instead, as
+> [AIExtractConfidence](GetDocument.md#aiextractconfidence). `documentTypeMinConfidence` stays:
+> applying the wrong document type pulls in a retention schedule and a required property set,
+> which is a larger thing to undo than one field value.
 | `error` | Present only when something could not be read. |
 
 `<SupportedExtensions>` is the comma separated list of file types the service is expected to be able to read here. A document of any other type is refused before a call is made — except OCR, which exists for exactly the file types this list leaves out.

@@ -402,9 +402,11 @@ Suggested bands, as half-open intervals so they tile with no gap and nothing in 
 | Medium | `80` - `89` |
 | High | `90` - `100` |
 
-> Values below the server's `extractedFieldMinConfidence` setting (see [GetConnectSettings](GetConnectSettings.md)) are never written at all - the field is left empty for a person instead. With the default of `0.5` the lowest value you will ever see is `50`, so raising that setting narrows the poor and low bands and can empty them.
+> There is no confidence threshold. Whatever Connect finds is written, however unsure it was, on the reasoning that a value a person is going to review is worth more than the blank it would otherwise leave. So the scale runs the whole way: a value of `12` means Connect wrote something it had very little confidence in, and that document is exactly the one to send somebody to.
+>
+> A written value never reports `0`, because `0` means "nothing here needs reviewing". The lowest a written value reports is `1`.
 
-> A field Connect could not fill carries no confidence, so it does not enter this number. A document where two fields were extracted at `95` and eight were left empty reports `95`. This value reports how good the answers are, not how many of them there are.
+> A field Connect found nothing for is still left empty and carries no confidence, so it does not enter this number. A document where two fields were extracted at `95` and eight were found nothing for reports `95`. This value reports how good the answers are, not how many of them there are.
 
 ## Required Permissions
 
