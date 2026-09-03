@@ -118,8 +118,6 @@ Returns a `<root>` element containing `<document>` child elements. Documents are
 
             AIEnhanced="17"
 
-            AIEnhancedAttributes="Summary, DocumentType"
-
             AIExtractConfidence="65"
 
             VersionNumber="3"
@@ -242,9 +240,9 @@ See `GetDocument` for the complete list of `<document>` element attributes and t
 
 
 Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
-`AIEnhancedAttributes`, saying which of the document's attributes infoRouter Connect produced -
-`0` when none did - and `AIExtractConfidence`, how sure it was about the weakest value it put in
-a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienhanced) and
+`AIExtractConfidence`. The first says which of the document's attributes infoRouter Connect
+produced, as a set of bits - `0` when none did; the second how sure it was about the weakest value
+it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienhanced) and
 [AIExtractConfidence](GetDocument.md#aiextractconfidence).
 
 ### Error Response

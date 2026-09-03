@@ -141,8 +141,6 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             AIEnhanced="17"
 
-            AIEnhancedAttributes="Summary, DocumentType"
-
             AIExtractConfidence="65"
 
             VersionNumber="3"
@@ -276,7 +274,6 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `DocTypeID` | Document type definition ID (`0` if none assigned). |
 | `DocTypeName` | Document type name, or empty if none assigned. |
 | `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
-| `AIEnhancedAttributes` | The same thing named, e.g. `Summary, DocumentType`. Empty when `AIEnhanced` is `0`. Convenience only - test the bits, not the text. |
 | `AIExtractConfidence` | How sure infoRouter Connect was about the weakest value it extracted into the document's property sets, as a percentage `0` - `100`. `0` means nothing needs reviewing. See [AIExtractConfidence](GetDocument.md#aiextractconfidence). |
 | `VersionNumber` | Latest (working) version number. |
 | `PublishedVersionNumber` | Published version number (`0` if no published version exists). |
@@ -378,7 +375,7 @@ attribute cannot carry attributes of its own.
 | 7 | `128` | `Markdown` |
 | 8 | `256` | `RedactedText` |
 
-`AIEnhanced="17"` is `1 | 16`: the summary and the document type. `AIEnhancedAttributes` names the same set for readability; a client should test the number.
+`AIEnhanced="17"` is `1 | 16`: the summary and the document type.
 
 A bit is set when Connect writes that attribute, and it **survives a correction**. The flag says where the attribute came from, not who edited it last: a person who fixes a generated summary keeps the flag, because a reader still wants to know it began as the model's work.
 
