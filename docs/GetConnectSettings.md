@@ -28,7 +28,7 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 <response success="true" error="">
   <ConnectSettings configured="true" reachable="true" provisioned="true" scrubPii="true"
                    maxKeywordCount="10" storeOcrText="true"
-                   documentTypeMinConfidence="0.75">
+>
     <SupportedExtensions>pdf,docx,xlsx,pptx,html,htm,txt,md,csv</SupportedExtensions>
     <Service aiReady="true" scrubbingReady="true" ocrAvailable="true"
              documentTypeReady="true" documentTypes="3" typesVersion="393781196">
@@ -57,16 +57,18 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 | `scrubPii` | Whether documents are scrubbed of personal data on the way out by default. |
 | `maxKeywordCount` | How many keywords are asked for when a request does not say. |
 | `storeOcrText` | Whether text read out of a scan is kept on the document. |
-| `documentTypeMinConfidence` | How sure the service must be before a type match is applied. A matched type is written onto a document that has none; a type somebody chose is never replaced. |
 
-> **`extractedFieldMinConfidence` was removed in 9.0.** There is no longer a threshold on
-> extracted field values: whatever Connect finds is written, however unsure it was, because a
-> value a person is going to review is worth more than the blank it would otherwise leave. How
-> sure it was is reported per document instead, as
-> [AIExtractConfidence](GetDocument.md#aiextractconfidence). `documentTypeMinConfidence` stays:
-> applying the wrong document type pulls in a retention schedule and a required property set,
-> which is a larger thing to undo than one field value.
-| `error` | Present only when something could not be read. |
+> **Both confidence thresholds were removed in 9.0.** infoRouter no longer keeps a threshold of
+> its own for either document type matching or extracted field values.
+>
+> The service decides how sure a document type match must be, in its own control panel, and
+> reports the number it is using as `documentTypeThreshold` on the `<Service>` element below.
+> infoRouter used to keep a second threshold beside it, which could silently override that panel.
+>
+> Extracted field values have no threshold at all now: whatever Connect finds is written, however
+> unsure it was, because a value a person is going to review is worth more than the blank it would
+> otherwise leave. How sure it was is reported per document as
+> [AIExtractConfidence](GetDocument.md#aiextractconfidence).
 
 `<SupportedExtensions>` is the comma separated list of file types the service is expected to be able to read here. A document of any other type is refused before a call is made — except OCR, which exists for exactly the file types this list leaves out.
 
@@ -82,6 +84,7 @@ What the service reports about itself. All of it can change without anybody touc
 | `documentTypeReady` | A document type list has been pushed and stored. |
 | `documentTypes` | How many types the service holds. |
 | `typesVersion` | The version of that list, as the service reports it. |
+| `documentTypeThreshold` | How sure the service must be before it returns a document type match, as it reports it. `0` where the service did not answer. Reported, not set here - it is configured in the service's own control panel. |
 
 `<TranslateLanguages>` lists what the service can translate between, each with the `code` a request sends. Absent when translation is not offered.
 
