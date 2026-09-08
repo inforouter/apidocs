@@ -146,6 +146,7 @@ Each element uses three attributes:
 | `DOCAUTHOR` | -" | Author name string | Filters by document author metadata field. |
 | `RDDEFID` | -" | Integer Retention & Disposition definition ID | Filters by retention schedule definition. |
 | `PUBLISHSTATUS` | -" | `0` (ignore) / `1` (unpublished) / `2` (published) | Filters by publish status. |
+| `AIENHANCED` | -" | `ANY` / `ALL` / `NONE`, or a comma-separated list of attribute names (see **AI Enhanced Criteria** below) | Filters by which of a document's attributes infoRouter Connect produced. Documents only. |
 | `SUBSCRIPTIONSOF` | -" | infoRouter username | Returns items (documents and folders) that the specified user is subscribed to. |
 | `FAVORITESOF` | -" | infoRouter username | Returns items in the specified user's favorites list. |
 | `RECENTDOCUMENTS` | -" | -" | Returns the current user's recent documents. No `VALUE` attribute is required; the presence of this element is sufficient. |
@@ -153,6 +154,49 @@ Each element uses three attributes:
 | `TEMPLATEPATH` | -" | Full infoRouter document path of the template, or `~D<id>` short form. Use `~D999` for HTML documents. | Filters documents rendered from the specified template. Use `~D999` to find all HTML form documents. |
 | `PROPERTYSETNAME` | -" | Property set name (child elements define field criteria) | Filters by custom property set values. See **Property Set Criteria** below. |
 
+
+### AI Enhanced Criteria
+
+`AIENHANCED` filters on which of a document's attributes infoRouter Connect produced. Everything
+is said in `VALUE`; there is no `OPERATOR`.
+
+| `VALUE` | Matches |
+|---------|---------|
+| `ANY` | Documents where Connect produced **at least one** attribute. |
+| `ALL` | Documents where Connect produced **every** attribute it can produce. |
+| `NONE` | Documents where Connect produced **nothing**. |
+| A list of attribute names | Documents carrying **all** of the named attributes. |
+
+The attribute names are the ones the `AIEnhanced` attribute reports on each document -
+`SUMMARY`, `DESCRIPTION`, `KEYWORDS`, `OCRTEXT`, `DOCUMENTTYPE`, `ABSTRACT`, `EXTRACTEDDATA`,
+`MARKDOWN`, `REDACTEDTEXT`. See [AIEnhanced](GetDocument.md#aienhanced) for what each one means.
+Case and spacing do not matter.
+
+```xml
+<!-- documents a model has touched at all -->
+<criteria NAME="AIENHANCED" VALUE="ANY" />
+
+<!-- documents no model has touched -->
+<criteria NAME="AIENHANCED" VALUE="NONE" />
+
+<!-- documents whose summary Connect wrote -->
+<criteria NAME="AIENHANCED" VALUE="SUMMARY" />
+
+<!-- documents carrying both a generated summary and a generated abstract -->
+<criteria NAME="AIENHANCED" VALUE="SUMMARY,ABSTRACT" />
+```
+
+Notes:
+
+- **Documents only.** The flag lives on documents, so a search carrying this criterion returns
+  no folders and no shortcuts, in the same way `DOCTYPE` and `IMPORTANCE` already do.
+- A list means **all** of the names, not any of them. `SUMMARY,ABSTRACT` is a document carrying
+  both. To find documents with either, run the two searches.
+- `ANY`, `ALL` and `NONE` cover every attribute, including ones added in later releases, so a
+  search written today keeps meaning what it says.
+- A `VALUE` that is neither one of the three words nor a known attribute name is rejected, and the
+  error lists what it could have been. A misspelt attribute fails rather than quietly narrowing
+  the search.
 
 ### Date Criteria Subtypes
 
@@ -417,6 +461,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
   <criteria NAME="PUBLISHSTATUS"     VALUE="2" />
 
+  <criteria NAME="AIENHANCED"        VALUE="SUMMARY" />
+
   <criteria NAME="PROPERTYSETNAME"   VALUE="ProjectMetadata">
 
     <criteria NAME="Department" OPERATOR="EQ"   VALUE="Finance" />
@@ -551,6 +597,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `Possible values for CLEVEL: NOMARKINGS, DECLASSIFIED, CONFIDENTIAL, SECRET, TOPSECRET` | Invalid `CLEVEL` value. |
 | `Possible operators for DATECRITERIA: EQ, EQLT, EQGT, BETWEEN` | Invalid `DATECRITERIA` operator. |
 | `Possible values for PUBLISHSTATUS: 0, 1, 2` | Invalid `PUBLISHSTATUS` value. |
+| `Possible values for AIENHANCED: ANY, ALL, NONE, or a comma separated list of: ...` | Invalid `AIENHANCED` value or attribute name. |
 | `Possible operator values for SIZEIS: EQLT, EQGT` | Invalid `SIZEIS` operator. |
 | `Property set field cannot be found` | The specified property set or field name does not exist. |
 | `CHECKOUTSTATUS: CHECKEDOUTBYUSER requires criteria USERNAME attribute` | Missing `USERNAME` attribute when using `CHECKEDOUTBYUSER`. |
