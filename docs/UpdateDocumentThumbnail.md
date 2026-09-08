@@ -20,7 +20,7 @@ Uploads or replaces the thumbnail image for a document. Any existing thumbnail i
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentPath` | string | Yes | Full infoRouter path of the document (e.g. `/Finance/Reports/Q1Summary.pdf`). |
-| `thumbnailContent` | byte[] | Yes | Raw image bytes of the thumbnail. GIF format is recommended. |
+| `thumbnailContent` | byte[] | Yes | Raw image bytes of the thumbnail, in any common image format. The image is re-encoded before it is stored, so the format sent does not have to be the format kept. |
 
 ## Response
 
@@ -48,7 +48,7 @@ The calling user must have **Change Document Properties** permission on the docu
 POST /srv.asmx/UpdateDocumentThumbnail HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf&thumbnailContent=<base64-encoded-gif-bytes>
+authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf&thumbnailContent=<base64-encoded-image-bytes>
 ```
 
 ## Notes
@@ -56,7 +56,7 @@ authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf&thumbnai
 - If a thumbnail already exists for the document it is replaced by the new content.
 - To retrieve the current thumbnail, use `GetDocumentThumbnail`.
 - To remove a thumbnail without replacing it, use `DeleteDocumentThumbnail`.
-- GIF format is the native thumbnail format used by infoRouter.
+- JPEG is the native thumbnail format used by infoRouter since 9.0; before that it was GIF. Whatever is uploaded is re-encoded as a JPEG of at most 240 pixels on the longest edge, with the aspect ratio preserved and no enlargement of a smaller image, so the stored thumbnail will not match the uploaded bytes.
 
 ## Related APIs
 

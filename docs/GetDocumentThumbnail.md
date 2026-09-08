@@ -1,6 +1,6 @@
 # GetDocumentThumbnail API
 
-Retrieves the thumbnail image bytes for a document. Returns the raw GIF image data that was previously uploaded via `UpdateDocumentThumbnail`.
+Retrieves the thumbnail image bytes for a document. Returns the raw JPEG image data, whether the server generated it from the document or it was uploaded via `UpdateDocumentThumbnail`.
 
 ## Endpoint
 
@@ -25,7 +25,9 @@ Retrieves the thumbnail image bytes for a document. Returns the raw GIF image da
 
 ### Success Response
 
-Raw GIF image bytes (`image/gif`). The response body contains the binary thumbnail data with no XML wrapper.
+Raw JPEG image bytes (`image/jpeg`). The response body contains the binary thumbnail data with no XML wrapper.
+
+Before 9.0 the response was a 50 pixel GIF (`image/gif`). Callers that assumed GIF must be updated; see the 9.0 release notes.
 
 ### Failure Response
 
@@ -60,7 +62,8 @@ authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf
 
 ## Notes
 
-- Thumbnails are stored as GIF images regardless of the source document type.
+- Thumbnails are stored as JPEG images, at most 240 pixels on the longest edge, regardless of the source document type. The aspect ratio of the source image is preserved, and an image already smaller than 240 pixels in both dimensions is not enlarged.
+- Thumbnails created before 9.0 were 50 pixel GIF images. They were deleted by the 9.0 upgrade and are regenerated as JPEG on the first request, so the first call for a given document may be slower than usual.
 - To check whether a document has a thumbnail before calling this API, inspect the `ThumbnailExists` attribute returned by `GetDocument`.
 - To upload or replace a thumbnail, use `UpdateDocumentThumbnail`.
 - To delete a thumbnail, use `DeleteDocumentThumbnail`.
