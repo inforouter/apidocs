@@ -48,6 +48,18 @@ The initial response returns a result count and session information, **not** the
 | `count` | Total number of matching items found. |
 | `ranksorted` | `"true"` if results are sorted by relevance rank (full-text search); `"false"` for field-sorted results. |
 
+### Relevance and Where the Term Was Found
+
+Because this call returns no items, it carries no per-document relevance either. Both arrive with
+the items: page the prepared session with [GetNextSearchPage](GetNextSearchPage.md), and every
+document a full-text `KEYWORDS` filter ranked carries a `<RankInfo>` child element giving `Rank`
+(higher is a closer match) and where the term was found: `FoundIn` is `1` for the document's own
+text (in the version `FoundInVersionNumber` names), `2` for its properties or comments, `3` for an
+e-mail attachment, `4` for a workflow history entry. A document matched by field criteria alone
+carries no `<RankInfo>` element. See
+[GetNextSearchPage](GetNextSearchPage.md#rankinfo-element-full-text-search-results) for the full
+attribute table.
+
 ---
 
 ## Required Permissions
@@ -107,7 +119,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - Returns only **direct** children (one level deep) of the specified path.
 - The API response contains a `count` and creates a server-side search session. Use the search session to retrieve paginated results.
 - `filterXml` syntax is defined by the infoRouter search filter format -" the same format used by the `Search` API.
-- When `SortBy=Rank`, results are sorted by full-text search relevance; `ranksorted="true"` is returned in the response.
+- When `SortBy=Rank`, results are sorted by full-text search relevance; `ranksorted="true"` is returned in the response. The rank of each individual document, and the part of the document the term was found in, come back on the pages as `<RankInfo>`.
 - This API requires the infoRouter content search service to be configured and running for full-text filtering.
 - For simpler paged listings (name filter only), use `GetFoldersAndDocumentsByPage`.
 
@@ -118,6 +130,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - [GetFoldersAndDocumentsByPage](GetFoldersAndDocumentsByPage.md) - Simpler paged listing with text filters
 - [GetFoldersAndDocuments2](GetFoldersAndDocuments2.md) - Ultra-fast listing without paging
 - [Search](Search.md) - Full system-wide search with the same XML filter format
+- [GetNextSearchPage](GetNextSearchPage.md) - Retrieve the prepared results page by page, with `<RankInfo>` on each ranked document
 
 ---
 

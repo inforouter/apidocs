@@ -127,7 +127,7 @@ Error messages are prefixed with `Source:` or `Destination:` to indicate which p
 
 - Copying a document with **Confidential** or higher classification level requires the caller to have the corresponding classification clearance in the destination domain.
 
-- The destination folder must not have a **cutoff date** that prevents new document creation.
+- The destination folder must not have a **cutoff date**. A folder with any cutoff date, past or future, accepts no new documents or subfolders.
 
 
 
@@ -285,7 +285,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `Destination: <message>` | The destination folder could not be found or the user lacks create permission. |
 | Access denied (read) | The calling user does not have Read access on the source item. |
 | Access denied (create) | The calling user does not have Create permission in the destination folder. |
-| Destination folder has a cutoff date | Documents cannot be added to a folder that has reached its cutoff date. |
+| `This folder has been cut-off. New documents cannot be created in this folder.` | The destination folder has a cutoff date. Any cutoff date blocks new documents, even one that is still in the future. A folder copy returns `This folder has been cut off. New folders cannot be created in this folder.` instead. |
 | Document name already exists | A document with the same name already exists in the destination folder. |
 
 

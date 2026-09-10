@@ -315,6 +315,36 @@ After a successful `Search` call, use `GetNextSearchPage` to retrieve the first 
 
 
 
+### Relevance and Where the Term Was Found
+
+
+
+`Search` itself returns no items, so it carries no per-document relevance either - only
+`ranksorted`, which says whether the pages that follow will come back in relevance order. The
+relevance of each document, and which part of it the term was found in, arrive with the items
+themselves: every document a full-text `KEYWORDS` search ranked carries a `<RankInfo>` child
+element in the `GetNextSearchPage` and `GetPreviousSearchPage` responses.
+
+
+
+```xml
+
+<RankInfo Rank="95" FoundIn="1" FoundInVersionNumber="3000000" />
+
+```
+
+
+
+A higher `Rank` is a closer match. `FoundIn` says where the term was found, as a number: `1` the
+text of the document itself (in the version `FoundInVersionNumber` names), `2` its properties or
+comments, `3` an e-mail attachment, `4` a workflow history entry, `0` unknown. A document matched
+by database criteria alone - no `KEYWORDS` element in the criteria, or a keyword the content search
+engine did not rank - carries no `<RankInfo>` element at all. See
+[GetNextSearchPage](GetNextSearchPage.md#rankinfo-element-full-text-search-results) for the full
+attribute table and suggested captions.
+
+
+
 ### Error Response
 
 

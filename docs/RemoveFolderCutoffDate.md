@@ -1,6 +1,8 @@
 # RemoveFolderCutoffDate API
 
-Removes the cutoff date from the specified folder and, optionally, from its subfolders and documents. Returns a log of the operation. If any individual item fails, the overall success flag returns `false` even if other items succeeded.
+Removes the cutoff date from the specified folder and, optionally, from its subfolders and documents. Once its cutoff date is removed, the folder accepts new documents and subfolders again. Removal works from the top down: a folder's cutoff date cannot be removed while its parent folder has one.
+
+This call is not all-or-nothing. Items that fail are listed in the response; items that succeeded keep their cutoff date removed.
 
 ## Endpoint
 
@@ -20,44 +22,54 @@ Removes the cutoff date from the specified folder and, optionally, from its subf
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the folder (e.g. `/Finance/Reports`). |
-| `includeSubFolders` | bool | Yes | If `true`, the cutoff date is also removed from all subfolders recursively. |
-| `includeDocuments` | bool | Yes | If `true`, the cutoff date is also removed from all documents within the folder (and subfolders if `includeSubFolders=true`). |
+| `includeSubFolders` | bool | Yes | If `true`, the cutoff date is also removed from all subfolders, recursively. |
+| `includeDocuments` | bool | Yes | If `true`, the cutoff date is also removed from the documents in the folder, and in its subfolders when `includeSubFolders=true`. |
 
 ---
 
 ## Response
 
-### Success Response -" No Errors
+### Success Response
+
+Every item was processed without an error.
 
 ```xml
 <response success="true" error="" />
 ```
 
-### Partial Success Response -" Some Items Failed
+### Partial Result
+
+One `log` element for each item that failed. Items not listed succeeded or were skipped.
 
 ```xml
 <response success="false" error="MultiStatus">
-  <logitem path="/Finance/Reports/Q1.pdf" status="failed" message="Access denied." />
-  <logitem path="/Finance/Reports/Q2.pdf" status="success" />
+  <log>
+    <item>\Finance\Reports</item>
+    <error>The parent folder has been cut off. The cut-off state cannot be removed from child folders.</error>
+  </log>
 </response>
 ```
 
 ### Error Response
 
+Errors that stop the call before any item is processed, such as an invalid ticket or a folder that does not exist, return a single message and a numeric `errorcode`.
+
 ```xml
-<response success="false" error="Folder not found." />
+<response success="false" error="[error message]" errorcode="[number]" />
 ```
 
-| Attribute | Description |
-|-----------|-------------|
-| `success` | `"true"` only if all operations succeeded without any errors. `"false"` if any individual item failed. |
-| `error` | `"MultiStatus"` indicates a partial result with per-item log entries. Otherwise contains a single error message. |
+| Attribute / element | Description |
+|---------------------|-------------|
+| `success` | `"true"` only if no item failed. |
+| `error` | `"MultiStatus"` when items failed; the `log` elements list them. Otherwise a single error message, or empty on success. |
+| `log/item` | Path of the folder or document that failed, with `\` separators. |
+| `log/error` | Why it failed, in the calling user's language. |
 
 ---
 
 ## Required Permissions
 
-The calling user must have **write** permission on the folder. For documents, write permission on each document is also required.
+The caller must be allowed by the library's **Retention Period Change** policy on the folder, and on every subfolder and document the call changes. By default that is the library manager, the owner, and users with Change permission. Items the caller is not allowed to change are listed as failures.
 
 ---
 
@@ -106,9 +118,14 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- Use `RemoveDocumentCutoffDate` to remove the cutoff date from a single document.
-- When `success="false"` with `error="MultiStatus"`, inspect the `logitem` child elements for per-item results.
-- If `includeSubFolders=false` and `includeDocuments=false`, only the cutoff date on the specified folder itself is removed.
+- **Parent folder rule.** If the folder's parent has a cutoff date, the folder is listed with `The parent folder has been cut off. The cut-off state cannot be removed from child folders.` Nothing inside it is changed. Start from the top of the cut-off tree.
+- **Order of work.** The folder's own date is removed first, then its subfolders and documents when requested. This is why one call with `includeSubFolders=true` can clear a whole tree.
+- If `includeSubFolders=false` and `includeDocuments=false`, only the folder's own date is removed, and everything inside keeps its date. Use this to reopen a single document: remove the folder's date this way, then call `RemoveDocumentCutoffDate` on the document.
+- Once anything inside has no cutoff date, the folder cannot be cut off again until that item has one.
+- **Shortcuts** (`.LNK`) are skipped.
+- The call succeeds for a folder that has no cutoff date; its contents are still processed as requested.
+- If clearing a date changes a folder's or document's disposition date, its open retention and disposition tasks are removed.
+- Subscribers are **not** notified when cutoff dates are removed.
 
 ---
 
@@ -127,8 +144,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | Folder not found | The specified path does not resolve to an existing folder. |
-| Access denied | The user does not have write permission on the folder. |
-| `MultiStatus` | Some items succeeded and some failed. See `logitem` elements for details. |
+| `MultiStatus` | One or more items failed. See the `log` elements. |
+| `The parent folder has been cut off. The cut-off state cannot be removed from child folders.` | Logged for a folder whose parent folder has a cutoff date. |
+| Access denied | Logged for a folder or document the caller is not allowed to change under the Retention Period Change policy. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---

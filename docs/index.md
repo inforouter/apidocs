@@ -179,7 +179,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [RegisterEmail1](RegisterEmail1.md) - Register an email message as a document in infoRouter and set user-defined keywords
 - [RegisterEmail2](RegisterEmail2.md) - Register an email message using separate folder path and document name parameters
 - [RegisterEmail3](RegisterEmail3.md) - Register an email message passing all fields as a single XML string
-- [RemoveDocumentCutoffDate](RemoveDocumentCutoffDate.md) - Remove the cutoff date from a document, returning it to an unconstrained state
+- [RemoveDocumentCutoffDate](RemoveDocumentCutoffDate.md) - Remove the cutoff date from a document so it can be checked out again
 - [RemoveFromDownloadQueue](RemoveFromDownloadQueue.md) - Remove a document or folder from the current user's download queue
 - [RemoveExpirationDate](RemoveExpirationDate.md) - Remove the expiration date from a document, returning it to a non-expiring state
 - [RemoveFromFavorites](RemoveFromFavorites.md) - Remove a document or folder from the current user's favorites list
@@ -187,7 +187,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [ServerSideImport](ServerSideImport.md) - **[Obsolete]** Server-side file system import -" always returns an error, do not use
 - [SetClassificationLevel](SetClassificationLevel.md) - Set the classification level (NoMarkings/Declassified/Confidential/Secret/TopSecret) of a document or folder
 - [SetDocumentCompletionStatus](SetDocumentCompletionStatus.md) - Set the completion status (PercentComplete and CompletionDate) of a document
-- [SetDocumentCutoffDate](SetDocumentCutoffDate.md) - Apply a cutoff date to a document, freezing it from further modification
+- [SetDocumentCutoffDate](SetDocumentCutoffDate.md) - Apply a cutoff date to a document, blocking check-out and new versions
 - [SetDocumentImportance](SetDocumentImportance.md) - Set the importance level (NoMarkings/Low/Normal/High/Vital) of a document
 - [SetDocumentPublishingRule](SetDocumentPublishingRule.md) - Set the publishing rule on a document (LATEST, LASTAPPROVED, TAGGED, SPESIFICVERSION, UNPUBLISHED)
 - [SetDocumentRetention](SetDocumentRetention.md) - **[Obsolete since 8.1.155]** Disabled -" always returns an error, use SetDocumentRandDSchedule instead

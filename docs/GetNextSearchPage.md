@@ -144,12 +144,7 @@ The root element carries pagination metadata as attributes, with one child eleme
                     DateApplied="2026-09-02T13:02:48.250Z" />
 
     <!-- Included only when a full-text KEYWORDS search ranked this result -->
-    <RankInfo Rank="95"
-              FoundInPropertiesOrComments="FALSE"
-              FoundInAttachments="FALSE"
-              FoundInWorkflowHistory="FALSE"
-              FoundInVersionNumber="3000000"
-              FoundInPublishedVersion="TRUE" />
+    <RankInfo Rank="95" FoundIn="1" FoundInVersionNumber="3000000" />
 
     <!-- Included only when withOwner=true -->
     <User exists="true" UserID="4" FirstName="System" LastName="Administrator"
@@ -236,12 +231,43 @@ When results include documents found via a `KEYWORDS` full-text search, each doc
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `Rank` | integer | Relevance score assigned by the content search engine. Higher values indicate closer matches. |
-| `FoundInPropertiesOrComments` | TRUE/FALSE | The match was found in the document's metadata properties or comments. |
-| `FoundInAttachments` | TRUE/FALSE | The match was found in an attachment file. |
-| `FoundInWorkflowHistory` | TRUE/FALSE | The match was found in the workflow history of the document. |
-| `FoundInVersionNumber` | integer | The version number in which the match was found. `0` means the match is not version-specific. |
-| `FoundInPublishedVersion` | TRUE/FALSE | The matching version is the published version of the document. |
+| `Rank` | integer | Relevance score assigned by the content search engine; higher values indicate closer matches. The built-in Windows Search index reports `1` to `100`; a remote search service reports on its own scale, so compare ranks within one result set rather than across installations. |
+| `FoundIn` | integer | Where the term was found, as one of the values in the table below. |
+| `FoundInVersionNumber` | integer | The version the match was found in, in the same internal form as the `VersionNumber` attribute of `<document>` (`3000000` is version 3). `0` for every `FoundIn` value other than `1` - a match in properties, an attachment or a workflow history entry belongs to the document as a whole, not to one version. |
+
+
+
+#### `FoundIn` Values
+
+
+
+| Value | Meaning | Suggested caption |
+|-------|---------|-------------------|
+| `0` | Unknown. The engine reported a place this version of infoRouter does not recognise. | - |
+| `1` | The text of the document itself, in the version named by `FoundInVersionNumber`. | Found in the document content |
+| `2` | The document's properties or its comments. | Search criteria found in meta information |
+| `3` | An e-mail attachment carried by the document. | Search criteria have been found in an e-mail attachment |
+| `4` | A workflow history entry - a comment entered while the document went through a workflow. | Search criteria found in comments provided during a workflow |
+
+
+
+The captions are suggestions only; the value is what the API contracts on, and the wording belongs
+to the client. Values `2`, `3` and `4` are the sentences infoRouter's own resource file already
+carries in every installed language, so a client hosted inside infoRouter can reuse those
+translations rather than write its own.
+
+
+
+> **One place per document.** The search engine reports the first place it found the term, not
+> every place. A term that appears in both a document's text and its properties comes back once,
+> as whichever the engine reached first, so rank the document by `Rank`, not by how many places it
+> matched.
+
+
+
+> **Whether the match is in the published version** is a comparison the client makes: `FoundIn` is
+> `1` and `FoundInVersionNumber` equals the `PublishedVersionNumber` attribute of the `<document>`
+> element the `<RankInfo>` sits inside.
 
 
 
