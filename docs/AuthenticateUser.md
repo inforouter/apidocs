@@ -103,6 +103,33 @@ SOAPAction: "http://tempuri.org/AuthenticateUser"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every other call needs the ticket this one returns, so start here. The answer is XML whatever the
+outcome, and `success` is the only thing worth branching on - a failure is still an HTTP 200.
+
+```javascript
+async function authenticate(uid, pwd) {
+  const params = new URLSearchParams({ UID: uid, PWD: pwd });
+
+  const response = await fetch(`/srv.asmx/AuthenticateUser?${params}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    // errorcode is a number from enum_IR.IrErrorNumbers; error is the text, in the caller's language
+    throw new Error(`${root.getAttribute('errorcode')}: ${root.getAttribute('error')}`);
+  }
+
+  return root.getAttribute('ticket');
+}
+
+const ticket = await authenticate('sysadmin', 'pass');
+```
+
+Hold on to the ticket and pass it as `authenticationTicket` to everything else.
+
 ## Notes
 
 - The `ticket` value in the response is a GUID and must be stored by the client and passed as `authenticationTicket` in every subsequent API call.
