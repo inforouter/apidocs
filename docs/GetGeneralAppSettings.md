@@ -306,6 +306,13 @@ using (var client = new SrvSoapClient())
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or a caller with no ticket - the anonymous user cannot perform this action |
+
+
 | Error | Description |
 |-------|-------------|
 | `[901]Session expired or Invalid ticket` | Invalid authentication ticket |

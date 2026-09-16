@@ -109,6 +109,46 @@ SOAPAction: "http://tempuri.org/SetSystemBehaviorSettings"
 3. **Apply Changes**: Call `SetSystemBehaviorSettings` with the updated XML
 4. **Verify**: Call `GetSystemBehaviorSettings` again to confirm changes were applied
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes what `GetSystemBehaviorSettings` returns, **once the root element is renamed**. The reader answers
+under `<Value>`; this deserializes against `<SystemBehaviorSettings>`, so sending the reading back
+untouched fails. Read, rename, change what you mean to change, send the whole document back:
+anything left out goes back to its default rather than staying as it was.
+
+```javascript
+const current = await call('GetSystemBehaviorSettings', { authenticationTicket: ticket });
+
+// the reader says <Value>, the writer wants <SystemBehaviorSettings>
+const settings = current.querySelector('Value');
+const renamed = document.createElementNS(null, 'SystemBehaviorSettings');
+while (settings.firstChild) renamed.appendChild(settings.firstChild);
+
+// ... change what you mean to change ...
+
+await call('SetSystemBehaviorSettings', {
+  authenticationTicket: ticket,
+  settingsXml: new XMLSerializer().serializeToString(renamed)
+});
+```
+
 ## Notes
 
 - **LoginDelay**: Values outside the range 0-2000 will be automatically normalized:
@@ -119,6 +159,15 @@ SOAPAction: "http://tempuri.org/SetSystemBehaviorSettings"
 - **Audit Trail**: Consider enabling login logging for compliance and security monitoring
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | a caller with no ticket, or one who may not update settings |
+| `4000` | `settingsXml` is not well formed, or does not deserialize into the settings document |
+
 
 Common error responses:
 

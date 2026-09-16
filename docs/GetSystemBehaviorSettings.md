@@ -215,6 +215,14 @@ The following database keys in the `ApplicationSettings` table map to these prop
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | a caller with no ticket |
+
+
 Common error responses:
 
 | Error | Description |

@@ -294,6 +294,13 @@ Use `GetSystemBehaviorSettings` to access these settings (requires admin permiss
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or a caller with no ticket - the anonymous user cannot perform this action |
+
+
 Common error responses:
 
 | Error | Description |

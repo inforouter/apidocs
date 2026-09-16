@@ -211,6 +211,41 @@ A holiday whose year is any other value is a **one-time holiday** that applies o
 4. Submit the updated XML via `SetGeneralAppSettings`.
 5. On success, settings are refreshed in memory automatically and take effect immediately.
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes what `GetGeneralAppSettings` returns, as it stands - the reader already answers under
+`<GeneralSettings>`, which is what this deserializes against. Read, change what you mean to change, send
+the whole document back: anything left out goes back to its default rather than staying as it was.
+
+```javascript
+const current = await call('GetGeneralAppSettings', { authenticationTicket: ticket });
+const settings = current.querySelector('GeneralSettings');
+
+// ... change what you mean to change ...
+
+await call('SetGeneralAppSettings', {
+  authenticationTicket: ticket,
+  settingsXml: new XMLSerializer().serializeToString(settings)
+});
+```
+
 ## Notes
 
 - All numeric values are expressed in *bytes* unless the property name indicates minutes/hours.
@@ -220,3 +255,14 @@ A holiday whose year is any other value is a **one-time holiday** that applies o
 - Failure responses always include a localized message in the `error` attribute.
 - Because this API overwrites the entire `GeneralSettings` object, avoid sending partial XML documents.
 - Audit and change tracking should be handled at the application level by storing copies of previous XML payloads.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | a caller with no ticket, or one who may not update settings |
+| `4000` | `settingsXml` is not well formed, or does not deserialize into the settings document |
+

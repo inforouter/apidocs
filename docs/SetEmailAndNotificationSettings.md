@@ -95,6 +95,41 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123&settingsXml=<EmailAndNotificationSettings>...</EmailAndNotificationSettings>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes what `GetEmailAndNotificationSettings` returns, as it stands - the reader already answers under
+`<EmailAndNotificationSettings>`, which is what this deserializes against. Read, change what you mean to change, send
+the whole document back: anything left out goes back to its default rather than staying as it was.
+
+```javascript
+const current = await call('GetEmailAndNotificationSettings', { authenticationTicket: ticket });
+const settings = current.querySelector('EmailAndNotificationSettings');
+
+// ... change what you mean to change ...
+
+await call('SetEmailAndNotificationSettings', {
+  authenticationTicket: ticket,
+  settingsXml: new XMLSerializer().serializeToString(settings)
+});
+```
+
 ## Notes
 
 - The recommended workflow is: call `GetEmailAndNotificationSettings`, modify the returned XML, then pass it to `SetEmailAndNotificationSettings`.
@@ -102,3 +137,14 @@ authenticationTicket=abc123&settingsXml=<EmailAndNotificationSettings>...</Email
 - `AttachmentSizeLimit` must be provided in bytes; the UI displays this value in KB.
 - `FaxQue` is accepted in the XML but only persisted if it differs from the default value (`c:\faxque`).
 - Settings take effect immediately; the in-memory cache is invalidated on a successful update.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | a caller with no ticket - this one reports a bad request where its siblings report 4030 |
+| `4000` | `settingsXml` is not well formed, or does not deserialize into the settings document |
+

@@ -93,8 +93,44 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads where mail is sent from and what is notified. Everything is under `<EmailAndNotificationSettings>`.
+
+```javascript
+const root = await call('GetEmailAndNotificationSettings', { authenticationTicket: ticket });
+const settings = root.querySelector('EmailAndNotificationSettings');
+```
+
 ## Notes
 
 - Use the returned XML as the input template for `SetEmailAndNotificationSettings`.
 - SMTP server connection settings (server, port, username, password) are read-only and configured in `appsettings.json`; they are not returned by this API.
 - `AttachmentSizeLimit` is in bytes; the UI displays it in KB.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | a caller with no ticket |
+
