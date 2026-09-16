@@ -53,9 +53,9 @@ The `xmlRules` parameter must be a valid XML string with `<Rules>` as the root e
 | `DOCUMENTDELETES` | `"allows"` or `"disallows"` | Controls document deletion. |
 | `NEWDOCUMENTS` | `"allows"` or `"disallows"` | Controls uploading of new documents. |
 | `CLASSIFIEDDOCUMENTS` | `"allows"` or `"disallows"` | Controls whether classified (restricted) documents are permitted. |
-| `AUTOPROMPTPROPERTYSETNAME` | Property set name string, or empty string to clear | Auto-prompts users to fill the named property set when uploading. Pass an empty string to remove the prompt. |
+| `AUTOPROMPTPROPERTYSETNAME` | Property set name string, or empty string to clear | Auto-prompts users to fill the named property set when uploading. Pass an empty string to remove the prompt. Also accepted as `AUTOPROMPTPROPERTSETNAME`, the misspelling it first shipped with. |
 
-> **Note:** Rule names are case-insensitive. Only rules present in `xmlRules` are updated; omitted rules retain their current values.
+> **Note:** Rule **names** are case-insensitive, but **values** are not: only the exact lower-case word `disallows` disallows an action. `DISALLOWS` or `Disallows` reads as `allows`. Only rules present in `xmlRules` are updated; omitted rules retain their current values, and a rule name the server does not know is ignored without an error.
 
 ---
 
@@ -64,13 +64,13 @@ The `xmlRules` parameter must be a valid XML string with `<Rules>` as the root e
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Folder not found." />
+<response success="false" error="Target folder cannot be found" errorcode="4041" />
 ```
 
 ---
@@ -115,10 +115,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- Rule names are case-insensitive.
-- Only the rules present in `xmlRules` are updated; rules not mentioned retain their current values.
+- Rule names are case-insensitive; values are not. Only the exact word `disallows` disallows.
+- Only the rules present in `xmlRules` are updated; rules not mentioned retain their current values. An unknown rule name is ignored.
 - Setting `ApplyToTree=true` recursively applies the specified rules to all subfolders.
-- Use `GetFolderRules` to retrieve the current rules for a folder before modifying them.
+- Use [GetFolderRules](GetFolderRules.md) to read the current rules first. It returns every rule in the form this API takes, so a caller can read them, change one and write them all back.
+- **A property set name that matches no property set is ignored**, and the call still reports success: the folder keeps the property set it prompted for before. Check the name with `GetPropertySetDefinitions` first.
+- `ALLOWABLEFILETYPES` values are tidied up before they are stored: dots and spaces are dropped and the extensions are upper-cased and sorted, so ` .pdf , docx ` comes back from `GetFolderRules` as `DOCX,PDF`.
+- Rules are enforced from the moment they are written: with `NEWFOLDERS` set to `disallows`, `CreateFolder` in that folder is refused.
 
 ---
 
@@ -137,5 +140,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | Folder not found | The specified path does not resolve to an existing folder. |
 | Access denied | The user does not have the required permissions. |
-| Invalid xmlRules | The `xmlRules` parameter is not a valid XML string. |
+| `4000` Required argument: xmlRules | `xmlRules` is empty or not well-formed XML. |
 | `SystemError:...` | An unexpected server-side error occurred. |
+
+Sending `xmlRules` that is not well-formed answers with the error above. Older servers answered it with HTTP 500 and a stack trace.

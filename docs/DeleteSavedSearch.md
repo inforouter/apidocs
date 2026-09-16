@@ -26,20 +26,20 @@ Deletes a saved search or search page definition by ID.
 ### Success
 
 ```xml
-<root success="true" />
+<response success="true" error="" />
 ```
 
 ### Error
 
 ```xml
-<root success="false" error="Error message here" />
+<response success="false" error="Access denied. Only search administrators can perform this operation." errorcode="4030" />
 ```
 
 ## Required Permissions
 
 - User must be authenticated.
-- **Personal entries** (`isPersonal=true`): only the entry owner may delete.
-- **System-wide entries** (`isPersonal=false`): requires the **Search Administrator** role.
+- **Personal entries**: the owner, or a member of the `[Search & Category Administrators]` role group.
+- **System-wide entries**: members of the `[Search & Category Administrators]` role group.
 
 ## Example Requests
 
@@ -78,14 +78,12 @@ SOAPAction: "http://tempuri.org/DeleteSavedSearch"
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `[921] ...` | User is not authenticated |
-| `[2840] ...` | Caller is not a Search Administrator (system-wide entry) |
-| `[2842] ...` | The default search page (ID 1) cannot be deleted |
-| `[3167] ...` | Caller is not the owner of the entry (personal entry) |
-| `[3169] ...` | Entry not found |
+| `errorcode` | Error (English) | Cause |
+|-------------|-----------------|-------|
+| `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |
+| `4041` | `Search or category page cannot be found.` | No entry with `searchPageId` |
+| `4030` | `Access denied. Only search administrators can perform this operation.` | Not the owner of a personal entry, or a system-wide entry, and not a search administrator |
+| `4030` | `Advanced search page cannot be renamed or deleted.` | `searchPageId` is `1` |
 
 ## Notes
 

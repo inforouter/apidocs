@@ -100,6 +100,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Deleting a user group removes all its memberships and any folder/document permissions assigned to the group. This action cannot be undone.
 - Pass empty `DomainName` or null for global groups.
+- `DomainName` is required to delete a *local* group. Group names are only unique within a library, so a name passed without a library name is resolved as a global group; if no global group has that name the call returns "User group not found" even when a local group of that name exists.
 - Members of the group are not deleted -" only the group itself is removed.
 
 ---

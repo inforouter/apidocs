@@ -39,7 +39,7 @@ Removes a specific applied tag from a document. Because a document may have the 
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`). |
 | `tagText` | string | Yes | Exact text of the tag to remove. Must be case-sensitive and match the stored value exactly. Obtain the exact tag text from the document's applied tag list or from `GetTagDefintions`. |
-| `tagDate` | DateTime | Yes | The exact date and time the tag was applied, in `yyyy-MM-ddTHH:mm:ss` format. UTC values are automatically converted to server local time before matching. Must match the stored `TAGDATE` value exactly. |
+| `tagDate` | DateTime | Yes | The exact date and time the tag was applied, as returned by the document's applied tag list (ISO 8601 including milliseconds, e.g. `2026-05-04T07:23:42.093Z`). Pass that value back unchanged rather than re-typing it to the second, or nothing will match. UTC values are automatically converted to server local time before matching. Must match the stored `TAGDATE` value exactly. |
 | `taggedBy` | int | Yes | Internal user ID of the user who applied the tag. Must match the stored `TAGGEDBYID` value exactly. Obtain via `GetUser` or `GetAllUsers`. |
 | `versionNumber` | int | Yes | Internal version number of the document version the tag was applied to. This is the raw internal version number (e.g. `1000000` for Version 1, `2000000` for Version 2). Must match the stored `VERSIONNUMBER` value exactly. |
 
@@ -65,7 +65,7 @@ Removes a specific applied tag from a document. Because a document may have the 
 
 
 
-> **Note:** A `success="true"` response is returned even if no matching tag record was found. The underlying `DELETE` statement deletes zero rows silently -" no error is raised for a non-matching combination.
+> **Note:** A `success="true"` response means a tag row was actually removed. If nothing matched, the call returns `success="false"` with a not-found error.
 
 
 
@@ -115,7 +115,7 @@ GET /srv.asmx/RemoveTagFromDocument
 
   &tagText=Approved
 
-  &tagDate=2024-06-15T14:30:00
+  &tagDate=2024-06-15T14:30:00.123Z
 
   &taggedBy=12
 
@@ -145,7 +145,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &tagText=Approved
 
-&tagDate=2024-06-15T14:30:00
+&tagDate=2024-06-15T14:30:00.123Z
 
 &taggedBy=12
 
@@ -175,7 +175,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
       <tns:tagText>Approved</tns:tagText>
 
-      <tns:tagDate>2024-06-15T14:30:00</tns:tagDate>
+      <tns:tagDate>2024-06-15T14:30:00.123Z</tns:tagDate>
 
       <tns:taggedBy>12</tns:taggedBy>
 
@@ -199,9 +199,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
-- **Exact Match Required**: The deletion targets the `APPLIEDTAGS` database table using an exact match on `DOCUMENTID + VERSIONNUMBER + TAGTEXT + TAGDATE + TAGGEDBYID`. If any value differs by even one character, millisecond, or digit, no rows will be deleted and success is still returned. Always obtain the tag values programmatically rather than constructing them manually.
+- **Exact Match Required**: The deletion targets the `APPLIEDTAGS` database table using an exact match on `DOCUMENTID + VERSIONNUMBER + TAGTEXT + TAGDATE + TAGGEDBYID` -" these five columns are the table's primary key. If any value differs by even one character, millisecond, or digit, no rows are deleted and the call reports not found. Always obtain the tag values programmatically rather than constructing them manually.
 
-- **Silent No-Match**: If the specified tag record does not exist (e.g. it was already removed, or the values do not match), the API returns `success="true"` without error. There is no way to distinguish a successful removal from a no-match removal.
+- **No-Match Is Reported**: If the specified tag record does not exist (e.g. it was already removed, or the values do not match), the API returns `success="false"` with a not-found error. A `success="true"` response therefore means a row was genuinely removed.
+
+- **Date Precision Differs By Database**: `TAGDATE` is stored in a `DATETIME` column on SQL Server and MySQL and a `DATE` column on Oracle. SQL Server keeps milliseconds; MySQL and Oracle keep whole seconds. Passing back the value the server gave you always matches, on every database; constructing your own value may not.
 
 - **tagDate UTC Conversion**: If `tagDate` is passed as a UTC value (with `Kind = Utc`), it is automatically converted to server local time before the database comparison. If passed as an unspecified or local time, it is used as-is.
 
@@ -242,6 +244,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `Document not found.` | The `path` does not resolve to an existing document. |
+| `Tagged version cannot be found` | No tag row matched the given tag text, date, tagger and version number, so nothing was removed. |
 | `Insufficient rights.` | The calling user does not have the `DocumentPropertyChange` permission on the document. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 

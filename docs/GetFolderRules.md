@@ -1,6 +1,6 @@
 # GetFolderRules API
 
-Returns the rules (policies) configured for the specified folder. Rules govern what operations are allowed or disallowed within the folder, such as file type restrictions, checkout/checkin policies, and document/folder deletion permissions.
+Returns the rules of a folder: which file types it accepts, which actions it allows, and which property set it prompts for. Every rule it returns can be written back with [SetFolderRules](SetFolderRules.md).
 
 ## Endpoint
 
@@ -10,7 +10,7 @@ Returns the rules (policies) configured for the specified folder. Rules govern w
 
 ## Methods
 
-- **GET** `/srv.asmx/GetFolderRules?authenticationTicket=...&Path=...`
+- **GET** `/srv.asmx/GetFolderRules?AuthenticationTicket=...&Path=...`
 - **POST** `/srv.asmx/GetFolderRules` (form data)
 - **SOAP** Action: `http://tempuri.org/GetFolderRules`
 
@@ -18,118 +18,139 @@ Returns the rules (policies) configured for the specified folder. Rules govern w
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `Path` | string | Yes | Full infoRouter path to the folder (e.g. `/Finance/Reports`). |
-
----
+| `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
+| `Path` | string | Yes | Full infoRouter path of the folder, e.g. `/Finance/Reports`. A library's root folder is `/Finance` |
 
 ## Response
 
-### Success Response
+### Success
 
 ```xml
-<response success="true">
+<response success="true" error="">
   <Rules>
-    <Rule Name="AllowableFileTypes" Value="*" />
+    <Rule Name="AllowableFileTypes" Value="DOCX,PDF" />
     <Rule Name="Checkins" Value="allows" />
-    <Rule Name="Checkouts" Value="allows" />
+    <Rule Name="Checkouts" Value="disallows" />
     <Rule Name="DocumentDeletes" Value="allows" />
     <Rule Name="FolderDeletes" Value="allows" />
     <Rule Name="NewDocuments" Value="allows" />
-    <Rule Name="NewFolders" Value="allows" />
+    <Rule Name="NewFolders" Value="disallows" />
     <Rule Name="ClassifiedDocuments" Value="disallows" />
+    <Rule Name="AutoPromptPropertsetName" Value="INVOICE" warning="mispelled attribute name. Use 'AutoPromptPropertysetName' instead." />
+    <Rule Name="AutoPromptPropertysetName" Value="INVOICE" />
   </Rules>
 </response>
 ```
 
-### Error Response
+### Error
 
 ```xml
-<response error="Folder not found." />
+<response success="false" error="Target folder cannot be found" errorcode="4041" />
 ```
 
-### Rule Descriptions
+## The Rules
 
-| Rule Name | Possible Values | Description |
-|-----------|----------------|-------------|
-| `AllowableFileTypes` | `*` or comma-separated extensions (e.g. `.pdf,.docx`) | File types that may be uploaded to this folder. `*` means all file types are allowed. |
-| `Checkins` | `"allows"` / `"disallows"` | Whether document check-ins are permitted. |
-| `Checkouts` | `"allows"` / `"disallows"` | Whether document check-outs are permitted. |
-| `DocumentDeletes` | `"allows"` / `"disallows"` | Whether documents can be deleted from this folder. |
-| `FolderDeletes` | `"allows"` / `"disallows"` | Whether subfolders can be deleted. |
-| `NewDocuments` | `"allows"` / `"disallows"` | Whether new documents can be uploaded to this folder. |
-| `NewFolders` | `"allows"` / `"disallows"` | Whether new subfolders can be created. |
-| `ClassifiedDocuments` | `"allows"` / `"disallows"` | Whether classified (restricted) documents are permitted. |
+| Rule | Value | Meaning |
+|------|-------|---------|
+| `AllowableFileTypes` | `*`, or extensions separated by commas | Which file types may be uploaded. `*` = any. Extensions come back upper case, without dots, in alphabetical order (`DOCX,PDF`) |
+| `Checkins` | `allows` / `disallows` | Whether documents may be checked in |
+| `Checkouts` | `allows` / `disallows` | Whether documents may be checked out |
+| `DocumentDeletes` | `allows` / `disallows` | Whether documents may be deleted |
+| `FolderDeletes` | `allows` / `disallows` | Whether subfolders may be deleted |
+| `NewDocuments` | `allows` / `disallows` | Whether documents may be added |
+| `NewFolders` | `allows` / `disallows` | Whether subfolders may be created |
+| `ClassifiedDocuments` | `allows` / `disallows` | Whether classified documents may be stored here |
+| `AutoPromptPropertysetName` | A property set name, or empty | The property set the user is prompted to fill in when uploading. Empty = no prompt |
+| `AutoPromptPropertsetName` | Same value | The same rule under the name it first shipped with, missing the `y`. Kept so older callers keep working, and carries a `warning` attribute saying so. Read `AutoPromptPropertysetName` instead |
 
----
+A newly created library allows everything, accepts every file type, prompts for no property set, and disallows classified documents.
 
 ## Required Permissions
 
-The calling user must have **read** permission on the folder.
+- Read permission on the folder.
 
----
+## Examples
 
-## Example
-
-### GET Request
+### GET
 
 ```
-GET /srv.asmx/GetFolderRules
-  ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
-  &Path=/Finance/Reports
-HTTP/1.1
+GET /srv.asmx/GetFolderRules?AuthenticationTicket=abc123&Path=%2FFinance%2FReports HTTP/1.1
 ```
 
-### POST Request
+### POST
 
 ```
 POST /srv.asmx/GetFolderRules HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
-&Path=/Finance/Reports
+AuthenticationTicket=abc123&Path=%2FFinance%2FReports
 ```
 
-### SOAP Request
+### SOAP 1.1
 
 ```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
+POST /srv.asmx HTTP/1.1
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://tempuri.org/GetFolderRules"
+
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
-    <tns:GetFolderRules>
-      <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
-      <tns:Path>/Finance/Reports</tns:Path>
-    </tns:GetFolderRules>
+    <GetFolderRules xmlns="http://tempuri.org/">
+      <AuthenticationTicket>abc123</AuthenticationTicket>
+      <Path>/Finance/Reports</Path>
+    </GetFolderRules>
   </soap:Body>
 </soap:Envelope>
 ```
 
----
+### JavaScript: Read the Rules, Change One, Write It Back
 
-## Notes
+`GetFolderRules` returns the rules in the form `SetFolderRules` takes, so a UI can round-trip them. Leave the misspelled rule out of what you send.
 
-- Use `SetFolderRules` to modify the rules for a folder.
-- `GetFolder` with `WithRules=true` also returns the rules as part of the full folder object.
-- Rules are stored at the folder level and can optionally be applied to the entire subfolder tree using `SetFolderRules` with `ApplyToTree=true`.
+```js
+async function disallowNewFolders(ticket, path) {
+  const post = async (action, params) => {
+    const response = await fetch(`/srv.asmx/${action}`, {
+      method: 'POST',
+      body: new URLSearchParams({ AuthenticationTicket: ticket, ...params }),
+    });
+    const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+    if (root.getAttribute('success') !== 'true') throw new Error(root.getAttribute('error'));
+    return root;
+  };
 
----
+  // Read.
+  const rules = Array.from((await post('GetFolderRules', { Path: path })).getElementsByTagName('Rule'))
+    .map((rule) => ({ name: rule.getAttribute('Name'), value: rule.getAttribute('Value') }))
+    .filter((rule) => rule.name !== 'AutoPromptPropertsetName');   // the misspelled duplicate
 
-## Related APIs
+  // Change one.
+  rules.find((rule) => rule.name === 'NewFolders').value = 'disallows';
 
-- [SetFolderRules](SetFolderRules.md) - Set folder rules
-- [GetFolder](GetFolder.md) - Get full folder properties including optional rules
-- [UpdateFolderProperties](UpdateFolderProperties.md) - Update folder name and description
-
----
+  // Write back. The values are already in the form SetFolderRules expects.
+  const xml = `<Rules>${rules.map((r) => `<Rule Name="${r.name}" Value="${r.value}" />`).join('')}</Rules>`;
+  await post('SetFolderRules', { Path: path, xmlRules: xml, ApplyToTree: 'false' });
+}
+```
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Folder not found | The specified path does not resolve to an existing folder. |
-| Access denied | The user does not have read permission on the folder. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+| `errorcode` | Error (English) | Cause |
+|-------------|-----------------|-------|
+| `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |
+| `4041` | `Target folder cannot be found` | No folder at `Path`, or the caller may not see it |
+| `4000` | `Required argument: Path` | `Path` was empty |
 
----
+## Notes
+
+- The rules are the folder's own. They are not merged with a parent's: `SetFolderRules` with `ApplyToTree` writes a parent's rules onto its subfolders.
+- `AutoPromptPropertysetName` names a property set. If that property set is later deleted, the rule comes back empty.
+- Both spellings always carry the same value; they are one rule, returned twice.
+
+## Related APIs
+
+- [SetFolderRules](SetFolderRules.md) — Write the rules of a folder
+- [GetFolder](GetFolder.md) — Folder properties, optionally including its rules
+- [GetFolderAIPreferences](GetFolderAIPreferences.md) — The infoRouter Connect preferences of a folder
+- [GetPropertySetDefinitions](GetPropertySetDefinitions.md) — The property sets a folder can prompt for

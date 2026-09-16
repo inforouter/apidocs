@@ -365,7 +365,9 @@ attribute table and suggested captions.
 
 
 
-Any authenticated user may call this API. Results are automatically filtered to items the user has at least **Read** permission for. Read-only users may also use this API.
+Any authenticated user may call this API. Read-only users may also use it.
+
+Results are always limited to libraries the user can view. Whether each hit is also checked against the item's own permissions depends on the server setting `Search:CheckSecurityOnSearch`, which is **off** by default. With it off, a hit in a library the user belongs to is returned even when the item's permissions would deny reading it; opening the item still fails. With it on, every hit is checked for **Read** (documents) or **List** (folders) permission before it is returned.
 
 
 

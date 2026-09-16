@@ -1,6 +1,6 @@
 # GetSavedSearch API
 
-Returns the full definition of a single saved search or search page by ID, including its field-visibility configuration.
+Returns a saved search or search page: its name, owner, access, and every field with its value and visibility. The response carries everything [UpdateSavedSearch](UpdateSavedSearch.md) needs, in the form it takes.
 
 ## Endpoint
 
@@ -19,82 +19,108 @@ Returns the full definition of a single saved search or search page by ID, inclu
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
-| `searchPageId` | int | Yes | ID of the search page to retrieve. Obtain IDs from `GetSavedSearches` |
+| `searchPageId` | int | Yes | Id of the entry. Obtain ids from `GetSavedSearches` |
 
 ## Response
 
 ### Success
 
 ```xml
-<root success="true">
-  <SearchPage id="47" name="Contract Search" description="Search for contract documents"
-              ownerId="0" anonymousAccess="false" publicAccess="true" userGroupIds="12,34">
+<response success="true" error="">
+  <SearchPage id="2138" name="Contract Search" description="Keyword, name and date only" type="searchPage"
+              ownerId="0" anonymousAccess="false" publicAccess="true"
+              userGroupIds="105,1062" userGroupNames="[Search &amp; Category Administrators]|Finance\Controllers">
     <SEARCH>
-      <ITEM NAME="SEARCHFOR" VALUE="" VISIBLE="TRUE" />
+      <ITEM NAME="SEARCHSCOPE" VALUE="0" VISIBLE="FALSE" />
+      <ITEM NAME="SEARCHFOR" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="DOCTYPE" VALUE="" VISIBLE="FALSE" />
       <ITEM NAME="KEYWORDS" VALUE="" VISIBLE="TRUE" />
-      <ITEM NAME="DOCUMENTNAME" VALUE="" VISIBLE="FALSE" />
-      ...
+      <ITEM NAME="DOCUMENTNAME" VALUE="" VISIBLE="TRUE" />
+      <ITEM NAME="FOLDERDESC" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="DOCUMENTID" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="FOLDERBYID" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="USERNAME" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="FOLDER" VALUE="0" INCLUDESUBFOLDERS="TRUE" VISIBLE="FALSE" />
+      <ITEM NAME="CHECKOUTSTATUS" USERNAME="0" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="DATECRITERIA" VALUE="" DATETYPE="" DATE1="" DATE2="" PREVIOUSN="0" PREVIOUSDATETYPE="" VISIBLE="TRUE" />
+      <ITEM NAME="SIZEIS" VALUE="" SIZEAMOUNT="0" VISIBLE="FALSE" />
+      <ITEM NAME="IMPORTANCE" VALUE="-1" OPERATOR="" VISIBLE="FALSE" />
+      <ITEM NAME="CLEVEL" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="DOCUMENTFORMAT" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="VIEWCRITERIA" VALUE="" USERNAME="0" VISIBLE="FALSE" />
+      <ITEM NAME="DOCSRC" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="DOCLANG" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="DOCAUTHOR" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="TAGTEXT" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="RDDEFID" VALUE="0" VISIBLE="FALSE" />
+      <ITEM NAME="PUBLISHSTATUS" VALUE="0" VISIBLE="FALSE" />
+      <ITEM NAME="AIENHANCED" VALUE="" VISIBLE="FALSE" />
+      <ITEM NAME="PROPERTYSETNAME" VALUE="" ATTRIBUTES="" CONDITIONS="" VALUES="" VISIBLE="TRUE" FIELDS="TRUE" />
     </SEARCH>
   </SearchPage>
-</root>
+</response>
 ```
 
 ### Error
 
 ```xml
-<root success="false" error="Error message here" />
+<response success="false" error="Search or category page cannot be found." errorcode="4041" />
 ```
 
 ## Response Fields
 
-### `SearchPage` attributes
+### `SearchPage` Attributes
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `id` | int | Search page ID |
-| `name` | string | Display name |
-| `description` | string | Optional description |
-| `ownerId` | int | `0` = system-wide page; `> 0` = private page owned by that user ID |
-| `anonymousAccess` | bool | Whether anonymous users can access this page. Always `false` for personal pages |
-| `publicAccess` | bool | Whether all authenticated users can access this page. Always `false` for personal pages |
-| `userGroupIds` | string | Comma-separated group IDs that have explicit access. Empty = no group restriction. Always empty for personal pages |
+| Attribute | Type | Description | Send to UpdateSavedSearch as |
+|-----------|------|-------------|------------------------------|
+| `id` | int | Entry id | `searchPageId` |
+| `name` | string | Display name, without the owner id a personal entry is stored with | `name` |
+| `description` | string | Description | `description` |
+| `type` | string | `savedSearch` or `searchPage` | `searchPageType` |
+| `ownerId` | int | `0` = system-wide; otherwise the owning user's id | `isPersonal` = `ownerId != 0` |
+| `anonymousAccess` | bool | The anonymous user may use it. Always `false` for personal entries | `anonymousAccess` |
+| `publicAccess` | bool | Every signed-in user may use it. Always `false` for personal entries | `publicAccess` |
+| `userGroupIds` | string | Comma-separated ids of the groups it is shared with. Empty for personal entries | — |
+| `userGroupNames` | string | The same groups by name, `\|`-separated, `library\group` for local groups | `userGroupNames` |
 
-### `SEARCH` child element
+### `SEARCH` Element
 
-An inline XML element containing the field-visibility configuration. Each `<ITEM>` child defines one search field:
+All 25 fields in a fixed order, each with its value and `VISIBLE`. Values come back normalized (importance as a number, MIME types in upper case, dates as UTC timestamps, property set conditions as numbers). Field meanings and the normalization table are in [SavedSearchXmlReference](SavedSearchXmlReference.md#what-comes-back).
 
-```xml
-<SEARCH>
-  <ITEM NAME="SEARCHFOR" VALUE="" VISIBLE="TRUE" />
-  <ITEM NAME="KEYWORDS" VALUE="" VISIBLE="FALSE" />
-  ...
-</SEARCH>
-```
-
-To clone or update the search page via `UpdateSavedSearch`, serialize this `<SEARCH>` element to a string and pass it as the `searchParametersXml` parameter.
+Serialize the element to a string to send it as `searchParametersXml`; unchanged, it stores the same definition.
 
 ## Required Permissions
 
-- User must be authenticated.
+A user may read the entries [GetSavedSearches](GetSavedSearches.md) lists for them:
 
-## Example Requests
+| Entry | Who may read it |
+|-------|-----------------|
+| Personal | Its owner only. Not search administrators |
+| System-wide, `publicAccess=true` | Every signed-in user |
+| System-wide, shared with groups | Members of those groups |
+| System-wide, any | Members of the `[Search & Category Administrators]` role group |
+| System-wide, `anonymousAccess=true` | The anonymous user |
 
-### Request (GET)
+Anyone else gets `4030 Access denied.`
+
+## Examples
+
+### GET
 
 ```
-GET /srv.asmx/GetSavedSearch?authenticationTicket=abc123&searchPageId=47 HTTP/1.1
+GET /srv.asmx/GetSavedSearch?authenticationTicket=abc123&searchPageId=2138 HTTP/1.1
 ```
 
-### Request (POST)
+### POST
 
 ```
 POST /srv.asmx/GetSavedSearch HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=abc123&searchPageId=47
+authenticationTicket=abc123&searchPageId=2138
 ```
 
-### Request (SOAP 1.1)
+### SOAP 1.1
 
 ```xml
 POST /srv.asmx HTTP/1.1
@@ -106,27 +132,48 @@ SOAPAction: "http://tempuri.org/GetSavedSearch"
   <soap:Body>
     <GetSavedSearch xmlns="http://tempuri.org/">
       <authenticationTicket>abc123</authenticationTicket>
-      <searchPageId>47</searchPageId>
+      <searchPageId>2138</searchPageId>
     </GetSavedSearch>
   </soap:Body>
 </soap:Envelope>
 ```
 
+### JavaScript
+
+```js
+const response = await fetch('/srv.asmx/GetSavedSearch', {
+  method: 'POST',
+  body: new URLSearchParams({ authenticationTicket: ticket, searchPageId: 2138 }),
+});
+const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+if (root.getAttribute('success') !== 'true') throw new Error(root.getAttribute('error'));
+
+const page = root.getElementsByTagName('SearchPage')[0];
+const visibleFields = Array.from(page.getElementsByTagName('ITEM'))
+  .filter((item) => item.getAttribute('VISIBLE').toUpperCase() === 'TRUE')
+  .map((item) => item.getAttribute('NAME'));
+```
+
+`getSavedSearch` in the [JavaScript helper](SavedSearchXmlReference.md#javascript-helper) returns the same as an object.
+
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `[3169] ...` | Search page not found |
+| `errorcode` | Error (English) | Cause |
+|-------------|-----------------|-------|
+| `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |
+| `4041` | `Search or category page cannot be found.` | No entry with `searchPageId` |
+| `4030` | `Access denied.` | The caller may not read the entry (see [Required Permissions](#required-permissions)) |
 
 ## Notes
 
-- Use `GetSavedSearches` first to discover available search page IDs.
-- The `searchParametersXml` output can be modified and passed back to `UpdateSavedSearch` to create a variant of an existing page.
-- `userGroupIds` contains numeric IDs. To resolve group names, use the user group management APIs.
+- A group deleted after the entry was saved no longer appears in `userGroupNames`.
+- A property set deleted after the entry was saved comes back as an empty `PROPERTYSETNAME`.
+- There is no API that runs a saved search by id. See [Running a Saved Search](SavedSearchXmlReference.md#running-a-saved-search).
 
 ## Related APIs
 
-- `GetSavedSearches` — List all search page definitions visible to the current user
-- `UpdateSavedSearch` — Create or update a search page definition
-- `DeleteSavedSearch` — Delete a saved search or search page by ID
+- [GetSavedSearches](GetSavedSearches.md) — List the entries the user may use
+- [UpdateSavedSearch](UpdateSavedSearch.md) — Change an entry
+- [CreateSavedSearch](CreateSavedSearch.md) — Create an entry
+- [DeleteSavedSearch](DeleteSavedSearch.md) — Delete an entry
+- [SavedSearchXmlReference](SavedSearchXmlReference.md) — Field reference, JavaScript helper, running a saved search

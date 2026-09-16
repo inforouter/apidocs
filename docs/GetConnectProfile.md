@@ -91,6 +91,10 @@ Anything else is an argument error. It is not read as the default on purpose: th
 
 `true` — the requested items are produced again even where they are already stored.
 
+`true` is also how an item that came back `Failed` is tried again: the job starts over with its attempts reset. With `false` it keeps answering `Failed`, so work Connect keeps refusing is not paid for again on every poll.
+
+Send `true` on the call that starts the work, and poll with `false`. Every call with `true` asks for the items again, so a client that keeps polling with `true` pays for them again each time an answer arrives, and restarts a failed job every time it fails.
+
 It does **not** override the rule that a summary or description **a person wrote** is never replaced by generated content. That rule is enforced where the answer is written, so a request with `ForceRefresh=true` on a document whose summary was written by hand will spend the AI call and then decline to overwrite. If you want the generated content back, remove the hand-written content first.
 
 `IncludeExtractData` reads what the named property set already holds on the document first, and answers `Ready` with it when there is anything there — so a client polling for the result of an extraction is answered from the document rather than charged for another call. `ForceRefresh=true` reads the document again; the write rules above still apply, so a field somebody answered keeps their answer.
@@ -141,7 +145,7 @@ An `ExtractedData` row carries the values that were read, one `FIELDNAME: value`
 | `Ready` | The answer is there | use it |
 | `Queued` | Work is waiting for a worker | ask again in a few seconds |
 | `Processing` | A worker has it and is waiting on Connect | ask again in a few seconds |
-| `Failed` | Connect could not produce it and the job used up its attempts | report it; retrying will not help |
+| `Failed` | Connect could not produce it and the job used up its attempts | report it; asking again with `ForceRefresh=false` will not help, one call with `ForceRefresh=true` tries again |
 | `Disabled` | It will never be produced, and nothing went wrong | stop asking; do not show an error |
 
 `Disabled` means one of three things, and the `error` attribute says which: this instance has switched that operation off (`IRConnect.Operations`), this server cannot carry it out, or the document is a file type Connect cannot read. It is final. A greyed-out row is the right way to show it.
@@ -198,7 +202,7 @@ The server works out the cheapest set of calls that answers what you asked for. 
 
 Ask once. While the aggregate `status` is `Queued` or `Processing`, ask again every few seconds; the rows that are already `Ready` stay ready. The background worker polls every 5 seconds by default (`IRConnect.QueuePollSeconds`) and runs one job at a time, so a busy server may leave work queued for a while. There is no callback; polling is the only way to learn the work has finished.
 
-Rows that are `Ready`, `Failed` or `Disabled` are final and will not change on a later call.
+Rows that are `Ready`, `Failed` or `Disabled` are final: asking again with `ForceRefresh=false` returns the same answer. `ForceRefresh=true` produces a `Ready` item again and restarts a `Failed` one.
 
 ## Required Permissions
 

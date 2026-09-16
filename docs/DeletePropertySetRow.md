@@ -1,6 +1,6 @@
 # DeletePropertySetRow API
 
-Deletes a property set row from a document or folder. The target object is resolved by path -" the system checks for a document first, then a folder. The row to delete can be identified by its row number (`rownbr`) or by matching field values. Multiple rows and multiple property sets can be targeted in a single call.
+Deletes a property set row from a document or folder. The target object is resolved by path -" the system checks for a document first, then a folder. The row to delete is identified by its row number (`rownbr`); omitting it removes **every** row of that property set from the object. Multiple rows and multiple property sets can be targeted in a single call.
 
 ## Endpoint
 
@@ -34,21 +34,19 @@ Deletes a property set row from a document or folder. The target object is resol
 
 ### Row Identification
 
-A row can be identified in one of two ways:
-
-**By row number** (preferred):
+A row is identified by its row number:
 
 ```xml
 <row rownbr="2" />
 ```
 
-**By field values** (when row number is unknown):
+To remove every row of the property set from the object, omit `rownbr` (or give it as `0`):
 
 ```xml
-<row PROJECT_CODE="PRJ-2024-001" STATUS="Active" />
+<row />
 ```
 
-When `rownbr` is `0` or omitted, the system matches rows by comparing the provided field attribute values. When `rownbr` is specified and greater than `0`, the system deletes the row with that exact row number.
+When `rownbr` is specified and greater than `0`, the system deletes the row with that exact row number. When it is `0` or omitted, **all** rows of that property set are removed from the object -" field attributes are not used to select rows on delete, whatever else the row element carries. The one exception is the property set the document's document type requires: that cannot be emptied, and the call reports it instead.
 
 ### Multiple Rows and Property Sets
 
@@ -59,7 +57,7 @@ When `rownbr` is `0` or omitted, the system matches rows by comparing the provid
     <row rownbr="3" />
   </pset>
   <pset name="AuditInfo">
-    <row AUDITOR="jsmith" />
+    <row />
   </pset>
 </psets>
 ```
@@ -132,7 +130,7 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/MyLibrary/Projec
 ## Notes
 
 - The `Path` resolves to a **document** first; if no document is found, it is resolved as a **folder**.
-- When identifying rows by field values instead of `rownbr`, all specified fields must match for the row to be deleted.
+- Field attributes on a `<row>` element are ignored on delete: the row number alone selects the row, and without one every row of that property set is removed.
 - To delete property set rows from a user account, use [DeletePropertySetRowForUser](DeletePropertySetRowForUser.md).
 - To add a row, use [AddPropertySetRow](AddPropertySetRow.md). To update a row, use [UpdatePropertySetRow](UpdatePropertySetRow.md).
 

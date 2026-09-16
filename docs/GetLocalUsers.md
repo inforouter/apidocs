@@ -1,6 +1,6 @@
 # GetLocalUsers API
 
-Returns a list of local users in the specified domain/library. Local users are those who are direct members of the domain (as opposed to users who access the domain through a user group).
+Returns the local users of the specified domain/library: user accounts that were created in and belong to that library, as opposed to global users who are given membership of it.
 
 ## Endpoint
 
@@ -67,7 +67,7 @@ Returns a `<users>` collection with one `<User>` element per local user.
 
 ## Required Permissions
 
-**Domain manager or system administrator.** The calling user must be a manager of the specified domain or a system administrator.
+**Any authenticated user.** The call checks only that the caller is signed in; it does not require management of the library. Anonymous callers are refused.
 
 ---
 
@@ -110,8 +110,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
-- Returns only **direct** (local) user members of the domain. Users who have access through a user group are not included.
-- To get all users including those with indirect membership through user groups, use `GetDomainUsers`.
+- Returns only accounts whose home library is this one. Global users who are members of the library, whether added directly or through a user group, are not included.
+- To get every user with access to the library, use `GetDomainUsers`. For its direct members only, use `GetDomainMembers`.
+- A library that owns no user accounts returns an empty list, even when it has many members.
 - Each `<User>` element includes a child `<Preferences>` element with notification and display settings.
 
 ---
@@ -132,7 +133,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `[115] Domain not found` | The specified domain/library does not exist. |
-| Access denied | The calling user is not a manager of this domain or a system administrator. |
+| Access denied | The caller is anonymous; the call requires a signed-in user. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---

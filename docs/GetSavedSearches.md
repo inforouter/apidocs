@@ -34,17 +34,17 @@ Lists saved searches and/or search page definitions visible to the authenticated
 ### Success
 
 ```xml
-<root success="true">
-  <SearchPage id="1"  name="Advanced Search"      type="searchPage"  ownerId="0"  anonymousAccess="false" publicAccess="true" description="" />
-  <SearchPage id="3"  name="My Q4 Contracts"      type="savedSearch" ownerId="12" anonymousAccess="false" publicAccess="false" description="" />
-  <SearchPage id="7"  name="All Active Documents"  type="savedSearch" ownerId="0"  anonymousAccess="true"  publicAccess="true" description="System-wide saved search" />
-</root>
+<response success="true" error="">
+  <SearchPage id="1"    name="Advanced Search"      description=""                         type="searchPage"  ownerId="0"  anonymousAccess="false" publicAccess="true" />
+  <SearchPage id="7"    name="All Active Documents" description="System-wide saved search" type="savedSearch" ownerId="0"  anonymousAccess="true"  publicAccess="true" />
+  <SearchPage id="2138" name="My Q4 Contracts"      description=""                         type="savedSearch" ownerId="12" anonymousAccess="false" publicAccess="false" />
+</response>
 ```
 
 ### Error
 
 ```xml
-<root success="false" error="Error message here" />
+<response success="false" error="Invalid parameter value in field (searchPageType). Accepted values are: savedSearch, searchPage, all" errorcode="4000" />
 ```
 
 ## Response Attributes (per `SearchPage` element)
@@ -61,8 +61,12 @@ Lists saved searches and/or search page definitions visible to the authenticated
 
 ## Visibility Rules
 
-- **Search administrators** receive all entries of the requested type(s).
-- **Regular users** receive system-wide entries (`ownerId = 0`) plus any private entries they own (`ownerId = their user ID`).
+- **Every signed-in user** receives their own personal entries. Nobody receives another user's personal entries.
+- **Search administrators** (members of `[Search & Category Administrators]`) also receive every system-wide entry.
+- **Other users** also receive the system-wide entries that are public (`publicAccess=true`) or shared with one of their groups.
+- **The anonymous user** receives the system-wide entries with `anonymousAccess=true`.
+
+[GetSavedSearch](GetSavedSearch.md) lets a user read exactly the entries this list returns.
 
 ## Required Permissions
 
@@ -114,16 +118,18 @@ SOAPAction: "http://tempuri.org/GetSavedSearches"
 | Error | Description |
 |-------|-------------|
 | `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| Invalid searchPageType | `searchPageType` value is not `all`, `searchPage`, or `savedSearch` |
+| `4000` Invalid parameter value in field (searchPageType) | `searchPageType` is not `all`, `searchPage`, `savedSearch` or empty |
 
 ## Notes
 
-- When `searchPageType` is `all`, results from `searchPage` are returned first, followed by `savedSearch` entries.
+- Entries are ordered by name, whatever their type. A personal entry sorts by its stored name, which begins with the owner's user id.
 - The `type` attribute is always present, making it safe to filter client-side after receiving an `all` response.
 
 ## Related APIs
 
 - `GetSavedSearch` — Get the full definition of a single entry including field-visibility configuration
-- `UpdateSavedSearch` — Create or update a search page definition or saved search
+- `CreateSavedSearch` — Create a saved search or search page
+- `UpdateSavedSearch` — Change a saved search or search page
+- [SavedSearchXmlReference](SavedSearchXmlReference.md) — Field reference, JavaScript helper, running a saved search
 - `DeleteSavedSearch` — Delete a saved search or search page by ID
 - `Search` — Execute a search using XML-based criteria

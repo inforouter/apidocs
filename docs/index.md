@@ -395,6 +395,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [DeleteSavedSearch](DeleteSavedSearch.md) - Delete a saved search or search page definition by ID
 - [GetSavedSearch](GetSavedSearch.md) - Get the full definition of a single saved search or search page including field-visibility configuration
 - [GetSavedSearches](GetSavedSearches.md) - List saved searches and/or search page definitions visible to the current user
+- [SavedSearchXmlReference](SavedSearchXmlReference.md) - Saved search and search page XML fields, JavaScript helper, and how to run a saved search
 - [UpdateSavedSearch](UpdateSavedSearch.md) - Update an existing saved search or search page definition
 - [Search](Search.md) - Prepare a search result set using XML-based criteria with sorting options
 
