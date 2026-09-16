@@ -219,7 +219,8 @@ SOAPAction: "http://tempuri.org/GetDomainPolicies"
 
 ## Notes
 
-- This API is the read counterpart of `SetDomainPolicies`
+- This API is the read counterpart of `SetDomainPolicies`, and its answer can be fed straight back: pass the `<DomainPolicies>` element as that operation's `xmlPolicies`
+- The three role attributes are written as `RightDomainManager`, `RightObjectOwner` and `RightSubobjectOwner`. `SetDomainPolicies` accepts those names as well as the lower-case-second-word spelling its own documentation used to give
 - The response includes all configurable (non-system) policies
 - The `AllowedRights` attribute is a pipe-delimited string with a leading pipe (e.g., `|CHANGE|FULLCONTROL`). It is empty when `SecurityApplies` is `false`
 - The `DocumentRead` policy has `SecurityApplies="false"` and an empty `AllowedRights` since the read right level is fixed

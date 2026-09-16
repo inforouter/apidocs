@@ -45,9 +45,9 @@ Sets the policies for a domain/library.
   <ActionPolicies>
     <Policy Action="DocumentDelete"
             RightAnonymous="false"
-            RightDomainmanager="true"
-            RightObjectowner="true"
-            RightSubobjectowner="false"
+            RightDomainManager="true"
+            RightObjectOwner="true"
+            RightSubobjectOwner="false"
             RightRequired="FULLCONTROL"
             LogAction="true"/>
     <!-- Additional Policy elements -->
@@ -80,11 +80,15 @@ Sets the policies for a domain/library.
 |-----------|------|-------------|
 | `Action` | string | The action type (see valid values below) |
 | `RightAnonymous` | boolean | Allow anonymous users to perform this action |
-| `RightDomainmanager` | boolean | Allow domain managers to perform this action |
-| `RightObjectowner` | boolean | Allow object owners to perform this action |
-| `RightSubobjectowner` | boolean | Allow sub-object owners to perform this action |
+| `RightDomainManager` | boolean | Allow domain managers to perform this action. Also accepted: `RightDomainmanager` |
+| `RightObjectOwner` | boolean | Allow object owners to perform this action. Also accepted: `RightObjectowner` |
+| `RightSubobjectOwner` | boolean | Allow sub-object owners to perform this action. Also accepted: `RightSubobjectowner` |
 | `RightRequired` | string | Required right level (see valid values below) |
 | `LogAction` | boolean | Enable audit logging for this action |
+
+Attribute names are case sensitive. The three role attributes above accept two spellings: the one
+`GetDomainPolicies` writes, and the lower-case-second-word spelling this operation documented
+earlier. When both are present on one `Policy` element, the `GetDomainPolicies` spelling wins.
 
 ## Valid Action Values
 
@@ -170,7 +174,7 @@ The caller must have **UpdateLibraryPolicies** permission on the specified domai
 POST /srv.asmx/SetDomainPolicies HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=abc123-def456&domainName=MyLibrary&xmlPolicies=<Policies><DomainRules><AnonymousHideIncomplete>true</AnonymousHideIncomplete></DomainRules><ActionPolicies><Policy Action="DocumentDelete" RightDomainmanager="true" RightObjectowner="true" RightRequired="FULLCONTROL" LogAction="true"/></ActionPolicies></Policies>
+authenticationTicket=abc123-def456&domainName=MyLibrary&xmlPolicies=<Policies><DomainRules><AnonymousHideIncomplete>true</AnonymousHideIncomplete></DomainRules><ActionPolicies><Policy Action="DocumentDelete" RightDomainManager="true" RightObjectOwner="true" RightRequired="FULLCONTROL" LogAction="true"/></ActionPolicies></Policies>
 ```
 
 ### Request (SOAP 1.1)
@@ -195,9 +199,9 @@ SOAPAction: "http://tempuri.org/SetDomainPolicies"
           <ActionPolicies>
             <Policy Action="DocumentDelete"
                     RightAnonymous="false"
-                    RightDomainmanager="true"
-                    RightObjectowner="true"
-                    RightSubobjectowner="false"
+                    RightDomainManager="true"
+                    RightObjectOwner="true"
+                    RightSubobjectOwner="false"
                     RightRequired="CHANGE"
                     LogAction="true"/>
           </ActionPolicies>
@@ -210,7 +214,10 @@ SOAPAction: "http://tempuri.org/SetDomainPolicies"
 
 ## Notes
 
+- The XML `GetDomainPolicies` returns can be fed straight back in: pass its `<DomainPolicies>` element as `xmlPolicies`, the root element name being ignored
 - Policies not specified in the XML will retain their current values
+- `RightRequired` is applied only when it names one of that policy's `AllowedRights`, which `GetDomainPolicies` reports; any other value leaves the current requirement alone
+- A few policies are created requiring `NOACCESS`, which their own `AllowedRights` does not list. The first write to a library's policies settles that to no required right, and `GetDomainPolicies` reports it as an empty `RightRequired` from then on
 - System policies cannot be modified and will be ignored
 - The `DocumentDelete` and `FolderDelete` actions always have logging enabled regardless of the `LogAction` setting
 - The `DocumentRead` action always applies to anonymous users regardless of the `RightAnonymous` setting
