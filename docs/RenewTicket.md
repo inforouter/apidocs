@@ -115,6 +115,37 @@ SOAPAction: "http://tempuri.org/RenewTicket"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Signs in and hands back the old ticket's session if there is one, so a client can refresh without
+dropping what it had. With `OldTicket` empty it is an ordinary sign-in.
+
+```javascript
+const root = await call('RenewTicket', {
+  UID: 'sysadmin', PWD: 'pass', Lang: 'en', OldTicket: currentTicket
+});
+const ticket = root.getAttribute('ticket');
+```
+
+An `OldTicket` that is not a guid is refused with "invalid ticket format".
+
 ## Notes
 
 - **Credentials are always validated:** Unlike some renew patterns that skip credential checks when the old ticket is still valid, `RenewTicket` always authenticates `UID` and `PWD` against the database. If the credentials are wrong, the call fails even if `OldTicket` is currently valid.
@@ -133,6 +164,14 @@ SOAPAction: "http://tempuri.org/RenewTicket"
 - [LogOut](LogOut.md) - Explicitly invalidate a ticket
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4000` | `OldTicket` is not a guid - the message is `invalid ticket format` |
+| `4010` | `[900]` the credentials are wrong |
+
 
 | Error | Description |
 |-------|-------------|

@@ -88,6 +88,34 @@ https://yourserver/resetpassword.aspx?username=jsmith&secretText=3f2a1b4c-5d6e-7
 
 The `secretText` value from this link (a GUID) is then passed to `ChangePasswordUsingSecretText` together with the `username` and the desired new password to complete the reset.
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Mails a secret to the address on the account, which `ChangePasswordUsingSecretText` then takes.
+
+```javascript
+await call('ForgotPassword', { emailAddress: 'jsmith@example.com' });
+```
+
+An address nobody has is refused rather than silently accepted, so do not show the error to the
+person typing it - it tells them whether the address has an account.
+
 ## Notes
 
 - **Token expiry:** The reset token is valid for **1 hour** from the time the email is sent. After expiry it cannot be used.
@@ -104,6 +132,13 @@ The `secretText` value from this link (a GUID) is then passed to `ChangePassword
 - [ChangePasswordUsingSecretText](ChangePasswordUsingSecretText.md) - Complete the reset by submitting the token received by email and a new password
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4000` | no account has that address |
+
 
 | Error | Description |
 |-------|-------------|

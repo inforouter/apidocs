@@ -118,8 +118,8 @@ async function authenticate(uid, pwd) {
     .documentElement;
 
   if (root.getAttribute('success') !== 'true') {
-    // errorcode is a number from enum_IR.IrErrorNumbers; error is the text, in the caller's language
-    throw new Error(`${root.getAttribute('errorcode')}: ${root.getAttribute('error')}`);
+    // errorCode is a number from enum_IR.IrErrorNumbers; error is the text, in the caller's language
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
   }
 
   return root.getAttribute('ticket');
@@ -149,6 +149,13 @@ Hold on to the ticket and pass it as `authenticationTicket` to everything else.
 - [LogOut](LogOut.md) - Invalidate the authentication ticket
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | `[900]` wrong password, unknown user, or a disabled account |
+
 
 | Error | Description |
 |-------|-------------|

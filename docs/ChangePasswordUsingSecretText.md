@@ -87,6 +87,38 @@ SOAPAction: "http://tempuri.org/ChangePasswordUsingSecretText"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Finishes a forgotten-password round trip: the secret is the one mailed out by `ForgotPassword`, and
+it is what stands in for the old password.
+
+```javascript
+await call('ChangePasswordUsingSecretText', {
+  userName: 'jsmith',
+  secretText: '<the secret from the email>',
+  newPassword: 'the new one'
+});
+```
+
+A wrong or spent secret is refused, so treat a thrown error as "ask them to start again".
+
 ## Notes
 
 - **`secretText` format:** The token must be a valid GUID string. Any other format (e.g. a plain word or partial GUID) is rejected immediately before any database lookup.
@@ -104,6 +136,13 @@ SOAPAction: "http://tempuri.org/ChangePasswordUsingSecretText"
 - [ChangeUserPassword](ChangeUserPassword.md) - Change a user's password when you already have a valid authentication ticket
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the user name is unknown, or the secret is wrong or spent |
+
 
 | Error | Description |
 |-------|-------------|

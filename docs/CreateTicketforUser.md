@@ -90,6 +90,38 @@ SOAPAction: "http://tempuri.org/CreateTicketforUser"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Mints a ticket for somebody else without their password, for a trusted service signing its own users
+in. `TrustedUserPwd` is the shared secret that authorises it.
+
+```javascript
+const root = await call('CreateTicketforUser', {
+  TrustedUserPwd: '<the trusted password>',
+  UserName: 'jsmith'
+});
+const ticket = root.getAttribute('ticket');
+```
+
+Keep the trusted password on a server. Anything holding it can sign in as anyone.
+
 ## Notes
 
 - **Trusted password is a server secret:** The `TrustedUserPwd` value is set in `appsettings.json` on the infoRouter server. It is not a user password and is not stored in the user database. Treat it like an API key -" rotate it periodically and never expose it in client-side code.
@@ -107,6 +139,14 @@ SOAPAction: "http://tempuri.org/CreateTicketforUser"
 - [LogOut](LogOut.md) - Invalidate the authentication ticket
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | `[900]` the trusted password is wrong |
+| `4000` | `[902]` the account may not be issued a ticket at all - the system administrator account is one |
+
 
 | Error | Description |
 |-------|-------------|

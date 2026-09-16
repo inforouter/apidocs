@@ -104,6 +104,35 @@ SOAPAction: "http://tempuri.org/AuthenticateUser1"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Same as `AuthenticateUser`, plus the language the answer should be written in - which matters most
+when the call fails, because nobody is signed in yet to have a language of their own.
+
+```javascript
+const root = await call('AuthenticateUser1', { UID: 'sysadmin', PWD: 'pass', Lang: 'tr' });
+const ticket = root.getAttribute('ticket');
+```
+
+Leave `Lang` empty and the browser's `Accept-Language` decides.
+
 ## Notes
 
 - The `Lang` parameter overrides the user's own preferred language setting for this session only. The user's stored profile preference is not permanently changed.
@@ -121,6 +150,13 @@ SOAPAction: "http://tempuri.org/AuthenticateUser1"
 - [LogOut](LogOut.md) - Invalidate the authentication ticket
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | `[900]` wrong password, unknown user, or a disabled account |
+
 
 | Error | Description |
 |-------|-------------|

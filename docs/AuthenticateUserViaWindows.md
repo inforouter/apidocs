@@ -117,6 +117,33 @@ Authorization: Negotiate <kerberos-token>
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Signs in whoever the web server has already authenticated, so there are no credentials to send. It
+only works where windows authentication is turned on; elsewhere it is refused.
+
+```javascript
+const root = await call('AuthenticateUserViaWindows', { language: 'en', oldTicket: '' });
+const ticket = root.getAttribute('ticket');
+```
+
 ## Notes
 
 - **`oldTicket` fallback to cookie:** If `oldTicket` is not supplied in the request parameters, the server automatically checks for a cookie named `ticket` on the incoming request. If found, that value is used as the old ticket. If neither is present, a completely new session is created.
@@ -135,6 +162,13 @@ Authorization: Negotiate <kerberos-token>
 - [LogOut](LogOut.md) - Invalidate the authentication ticket
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | `[900]` no windows identity to sign in - including where windows authentication is off |
+
 
 | Error | Description |
 |-------|-------------|

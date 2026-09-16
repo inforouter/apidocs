@@ -73,6 +73,33 @@ SOAPAction: "http://tempuri.org/LogOut"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Cancels the ticket. Anything still holding it is signed out.
+
+```javascript
+await call('LogOut', { authenticationTicket: ticket });
+```
+
+Afterwards `isValidTicket` answers `4010` for it.
+
 ## Notes
 
 - **Ticket is removed from memory cache:** The session entry is deleted from the server's in-memory cache. Any subsequent API call using the same ticket will immediately receive a `[901] Session expired or Invalid ticket` error.
@@ -87,6 +114,13 @@ SOAPAction: "http://tempuri.org/LogOut"
 - [RenewTicket](RenewTicket.md) - Renew a ticket that is about to expire
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | `[901]` the ticket is expired or unknown |
+
 
 | Error | Description |
 |-------|-------------|

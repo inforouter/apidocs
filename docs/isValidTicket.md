@@ -98,6 +98,37 @@ SOAPAction: "http://tempuri.org/isValidTicket"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Answers whether a ticket is still live, and who it belongs to. Note the lower-case first letter of
+the action name.
+
+```javascript
+try {
+  const root = await call('isValidTicket', { authenticationTicket: ticket });
+  console.log('still signed in as', root.getAttribute('username'));
+} catch {
+  // 4010 - expired, cancelled, or never issued
+}
+```
+
 ## Notes
 
 - **Passive check only:** This method does not renew or extend the ticket's 30-day sliding expiration. The expiration timestamp returned in `expireOn` reflects the current value, unchanged by this call.
@@ -113,6 +144,13 @@ SOAPAction: "http://tempuri.org/isValidTicket"
 - [LogOut](LogOut.md) - Explicitly invalidate a ticket
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | `[901]` the ticket is expired, cancelled, or never issued |
+
 
 | Error | Description |
 |-------|-------------|

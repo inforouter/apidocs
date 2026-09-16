@@ -78,6 +78,38 @@ SOAPAction: "http://tempuri.org/ChangeUserPassword"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report. `call` below is used by the sample on every page.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sets another account's password outright, so it needs a ticket with the rights to do it - this is not
+the call a user changes their own password with.
+
+```javascript
+await call('ChangeUserPassword', {
+  authenticationTicket: ticket,
+  UserName: 'jsmith',
+  NewPassword: 'the new one'
+});
+```
+
+The old password stops working immediately, including any session holding a ticket issued under it.
+
 ## Notes
 
 - **Same-password restriction:** The new password must differ from the user's current password. Submitting the same password is rejected.
@@ -93,6 +125,14 @@ SOAPAction: "http://tempuri.org/ChangeUserPassword"
 - [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) - Retrieve the current password complexity policy
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4030` | the caller may not set another account’s password - including a caller with no ticket, who is the anonymous user |
+| `4010` | `[901]` the ticket is expired or unknown |
+
 
 | Error | Description |
 |-------|-------------|
