@@ -255,9 +255,57 @@ SOAPAction: "http://tempuri.org/GetLogs"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+One day's entries, under `<Value>`. The date is `yyyy-MM-dd`.
+
+The log types it accepts are `Errors`, `LoginAttempts`, `Logins`, `Notifications`, `Information`,
+`Warning`, `Upgrade`, `Maintenance` and `IRConnect`. Anything else is answered `4000` with that list
+in the message.
+
+```javascript
+const root = await call('GetLogs', {
+  authenticationTicket: ticket, logType: 'Errors', logDate: '2026-09-16'
+});
+
+for (const entry of root.querySelectorAll('Value > Error')) {
+  console.log(entry.querySelector('LogDate').textContent, entry.querySelector('Message').textContent);
+}
+```
+
+A day with nothing in it is a success with an empty result, not an error.
+
 ## Notes
 
 - The `logType` parameter is case-insensitive
 - If no log file exists for the specified date, an empty `<Value>` element is returned
 - Log dates correspond to files stored on disk; use `GetLogStatistics` to discover which dates have log entries and how many entries each date contains
 - The `logDate` parameter must be parseable as a date; invalid formats will return an error
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not view server status - including a caller with no ticket |
+| `4000` | a log type it does not recognise - the message lists the ones it does |
+

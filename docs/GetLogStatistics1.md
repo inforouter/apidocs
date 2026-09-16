@@ -140,8 +140,52 @@ SOAPAction: "http://tempuri.org/GetLogStatistics1"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The same as `GetLogStatistics`, over a number of days you choose rather than the default window.
+
+The log types it accepts are `Errors`, `LoginAttempts`, `Logins`, `Notifications`, `Information`,
+`Warning`, `Upgrade`, `Maintenance` and `IRConnect`. Anything else is answered `4000` with that list
+in the message.
+
+```javascript
+const root = await call('GetLogStatistics1', {
+  authenticationTicket: ticket, logType: 'Errors', lastNDays: 30
+});
+```
+
+`lastNDays` may not exceed 365; beyond that it is answered `4000`.
+
 ## Notes
 
 - Every day in the requested window is returned, including days with `Count=0`
 - `Count` is the number of XML child elements in the log file for that date
 - Use returned `LogDate` values as the `logDate` parameter when calling `GetLogs`
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not view server status - including a caller with no ticket |
+| `4000` | a log type it does not recognise, or `lastNDays` over 365 |
+

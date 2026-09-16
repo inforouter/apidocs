@@ -130,6 +130,45 @@ SOAPAction: "http://tempuri.org/GetLogStatistics"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+How many entries each day holds, as `<Value>` pairs of `<LogDate>` and `<Count>` under
+`<Statistics>`.
+
+The log types it accepts are `Errors`, `LoginAttempts`, `Logins`, `Notifications`, `Information`,
+`Warning`, `Upgrade`, `Maintenance` and `IRConnect`. Anything else is answered `4000` with that list
+in the message.
+
+```javascript
+const root = await call('GetLogStatistics', { authenticationTicket: ticket, logType: 'Errors' });
+
+for (const day of root.querySelectorAll('Statistics > Value')) {
+  console.log(day.querySelector('LogDate').textContent, day.querySelector('Count').textContent);
+}
+```
+
+**Two of the nine listed types do not work.** `Information` and `Warning` answer `5000` carrying a
+`DirectoryNotFoundException` on an installation that has never written one of those logs - nothing
+creates the directory and this does not tolerate its absence. Reading the log itself does not behave
+that way: `GetLogs` for a date with nothing in it answers success.
+
 ## Notes
 
 - Always returns the last **365 days**, one entry per day
@@ -137,3 +176,15 @@ SOAPAction: "http://tempuri.org/GetLogStatistics"
 - `Count` is the number of XML child elements in the log file for that date
 - Use returned `LogDate` values as the `logDate` parameter when calling `GetLogs`
 - To use a custom lookback window, use [`GetLogStatistics1`](GetLogStatistics1.md)
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not view server status - including a caller with no ticket |
+| `4000` | a log type it does not recognise - the message lists the ones it does |
+| `5000` | `Information` or `Warning` where that log has never been written - see above |
+

@@ -327,6 +327,41 @@ print(f"Company: {server_info['company']}")
 print(f"Licensed Users: {server_info['license_count']}")
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The one operation on the contract that takes no authentication ticket, which is what makes it the one
+to ask first: it tells a client what version it is talking to and what the server thinks the time is,
+before anybody has signed in.
+
+```javascript
+const response = await fetch('/srv.asmx/ServerInfo');
+const root = new DOMParser()
+  .parseFromString(await response.text(), 'text/xml')
+  .documentElement;
+
+console.log(root.getAttribute('VersionNumber'));
+console.log(root.getAttribute('Coordinated_Universal_Time'));
+```
+
+It answers the same whether or not a ticket is sent.
+
 ## Notes
 
 - **No Authentication Required**: This is one of the few API endpoints that can be called without authentication
@@ -376,3 +411,8 @@ For additional information, see:
 - [API Documentation](https://support.inforouter.com/api-docs/ServerInfo)
 - [Server Configuration Guide](https://support.inforouter.com/server-configuration)
 - [License Management](https://support.inforouter.com/license-management)
+
+## Error Codes
+
+This operation takes no ticket and does not refuse a caller.
+

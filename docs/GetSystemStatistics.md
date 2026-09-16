@@ -77,9 +77,46 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123-...
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Counts of users, documents and activity, under `<SystemStatistics>`. The user counts agree with
+`GetLicenseInfo`.
+
+```javascript
+const root = await call('GetSystemStatistics', { authenticationTicket: ticket });
+console.log(root.querySelector('TotalDocumentCount').textContent, 'documents');
+```
+
 ## Notes
 
 - `TotalUserCount` excludes the built-in system administrator account.
 - `TotalDocumentSize` is calculated from the VERSIONS table and reflects the sum of all stored version sizes in bytes.
 - `TotalCheckedOutDocuments` counts all documents currently locked for editing across all libraries.
 - `RegisteredDocumentsIn30Days`, `RegisteredDocumentsIn60Days`, and `RegisteredDocumentsIn90Days` count documents whose `REGISTERDATE` falls within the last 30, 60, or 90 days respectively. Only documents in active libraries (`DOMAINTYPE=0`) are included; recycle bin documents are excluded.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not view server status - including a caller with no ticket |
+
