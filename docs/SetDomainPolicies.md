@@ -217,7 +217,6 @@ SOAPAction: "http://tempuri.org/SetDomainPolicies"
 - The XML `GetDomainPolicies` returns can be fed straight back in: pass its `<DomainPolicies>` element as `xmlPolicies`, the root element name being ignored
 - Policies not specified in the XML will retain their current values
 - `RightRequired` is applied only when it names one of that policy's `AllowedRights`, which `GetDomainPolicies` reports; any other value leaves the current requirement alone
-- A few policies are created requiring `NOACCESS`, which their own `AllowedRights` does not list. The first write to a library's policies settles that to no required right, and `GetDomainPolicies` reports it as an empty `RightRequired` from then on
 - System policies cannot be modified and will be ignored
 - The `DocumentDelete` and `FolderDelete` actions always have logging enabled regardless of the `LogAction` setting
 - The `DocumentRead` action always applies to anonymous users regardless of the `RightAnonymous` setting
