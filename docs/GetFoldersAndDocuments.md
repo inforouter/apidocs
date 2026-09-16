@@ -1,14 +1,8 @@
 ﻿# GetFoldersAndDocuments API
 
-
-
 Returns the complete list of immediate sub-folders and documents in the specified infoRouter path. Both folders and documents are returned in a single response -" folders first, followed by documents sorted by name ascending. Optional parameters control how much detail is included for each item, allowing callers to request property sets, security lists, owner information, and version history as needed.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the complete list of immediate sub-folders and documents in the specifie
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetFoldersAndDocuments?authenticationTicket=...&Path=...&withrules=...&withpropertysets=...&withsecurity=...&withOwner=...&withVersions=...`
 
@@ -28,11 +18,7 @@ Returns the complete list of immediate sub-folders and documents in the specifie
 
 - **SOAP** Action: `http://tempuri.org/GetFoldersAndDocuments`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -44,33 +30,19 @@ Returns the complete list of immediate sub-folders and documents in the specifie
 | `withOwner` | bool | Yes | `true` to include owner user information as a child element in each result. `false` to omit. |
 | `withVersions` | bool | Yes | `true` to include document version history (`<Versions>` child element) in each document result. `false` to omit. Has no effect on folder items. |
 
-
-
 > **Performance tip:** Set all boolean flags to `false` for the fastest, most compact response. Only enable the flags your application actually consumes.
-
-
 
 ---
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 Folders appear first, followed by documents. All items are immediate children of the specified path -" the listing is **not** recursive.
-
-
 
 ```xml
 
 <root success="true">
-
-
 
   <!-- -"--"- Folder items -"--"- -->
 
@@ -106,8 +78,6 @@ Folders appear first, followed by documents. All items are immediate children of
 
           CutoffDate="">
 
-
-
     <!-- Included only when withrules=true -->
 
     <Rules>
@@ -130,13 +100,9 @@ Folders appear first, followed by documents. All items are immediate children of
 
     </Rules>
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withsecurity=true -->
 
@@ -150,17 +116,11 @@ Folders appear first, followed by documents. All items are immediate children of
 
     </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
 
-
-
   </folder>
-
-
 
   <!-- -"--"- Document items -"--"- -->
 
@@ -270,45 +230,29 @@ Folders appear first, followed by documents. All items are immediate children of
 
             UserViewStatus="2">
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withsecurity=true -->
 
     <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
-
-
 
     <!-- Included only when withVersions=true -->
 
     <Versions> ... </Versions>
 
-
-
   </document>
-
-
 
 </root>
 
 ```
 
-
-
 ### Folder Element Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -329,11 +273,7 @@ Folders appear first, followed by documents. All items are immediate children of
 | `DispositionDate` | Scheduled disposition date, or empty if not set. |
 | `CutoffDate` | Cutoff date, or empty if not set. |
 
-
-
 ### Document Element Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -390,11 +330,7 @@ Folders appear first, followed by documents. All items are immediate children of
 | `VersionCount` | Total number of versions for this document. |
 | `UserViewStatus` | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
 
-
-
 ### Optional Child Elements
-
-
 
 | Element | Applies to | Enabled by | Description |
 |---------|-----------|------------|-------------|
@@ -404,11 +340,7 @@ Folders appear first, followed by documents. All items are immediate children of
 | `<User>` (owner) | Folders and documents | `withOwner=true` | Owner user details (UserID, UserName, FullName, etc.). |
 | `<Versions>` | Documents only | `withVersions=true` | Full version history of the document. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -416,31 +348,17 @@ Folders appear first, followed by documents. All items are immediate children of
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least **List** permission on the specified folder to retrieve its contents. Documents and sub-folders to which the user has no access are automatically excluded from the response. Read-only users may call this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" minimal response
-
-
 
 ```
 
@@ -462,19 +380,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request -" with property sets and owner
-
-
 
 ```
 
 POST /srv.asmx/GetFoldersAndDocuments HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -492,11 +404,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -530,15 +438,60 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the folders and documents directly inside one folder, in full: `<folder>` and `<document>`
+elements carrying everything the five flags asked for.
+
+`Path` is a non-nullable string on the REST action, so an empty one is refused by model binding with
+HTTP 400 before the operation runs - there is no error document to read in that case.
+
+The flags never change *which* items come back, only how much is written about each, so turning them
+all off is the cheapest way to ask what is in a folder. Turning them all on can multiply the size of
+the answer several times over.
+
+```javascript
+const root = await call('GetFoldersAndDocuments', {
+  authenticationTicket: ticket,
+  Path: '/Public/ApiTests',
+  withrules: false,
+  withpropertysets: false,
+  withsecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+
+for (const folder of root.querySelectorAll(':scope > folder')) {
+  console.log('[dir]', folder.getAttribute('Name'));
+}
+for (const document of root.querySelectorAll(':scope > document')) {
+  console.log('     ', document.getAttribute('Name'), document.getAttribute('Size'));
+}
+```
+
+For a much smaller answer over the same items, use `GetFoldersAndDocuments1` or
+`GetFoldersAndDocuments2`.
 
 ## Notes
-
-
 
 - The listing is **not recursive** -" only the immediate children (sub-folders and documents) of the specified `Path` are returned.
 
@@ -562,15 +515,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - For paged browsing of large folders, consider using `GetFoldersAndDocumentsByPage` or `GetFoldersAndDocumentsByPage2` instead.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetFoldersAndDocuments1](GetFoldersAndDocuments1.md) - Returns the same contents in short form (name, path, and ID only)
 
@@ -584,15 +531,21 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [Search](Search.md) - Find documents and folders across the system using search criteria
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path - including one the caller may not see, which is not told apart from one that does not exist |
+| `HTTP 400` | `Path` was empty; refused by model binding, so there is no error document |
+
+A call with no ticket at all is not automatically refused: it signs in as the anonymous user, so a
+library flagged as anonymous can be listed without authenticating. Everything else answers `4041`,
+because a folder the anonymous user cannot see is not told apart from one that does not exist.
 
 | Error | Description |
 |-------|-------------|
@@ -600,8 +553,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `Folder not found` | The specified `Path` does not exist or is not accessible to the calling user. |
 
-
-
 ---
-
 

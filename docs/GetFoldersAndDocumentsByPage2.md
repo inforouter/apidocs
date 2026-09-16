@@ -21,7 +21,7 @@ Returns a paged list of documents and folders at the specified path using an adv
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the folder to list (e.g. `/Finance/Reports`). Only direct children are included. |
 | `filterXml` | string | No | Optional XML filter criteria. Defines field-level filters, date ranges, and full-text query terms. Pass empty string or null for no filtering. |
-| `SortBy` | string | Yes | Field name to sort results by (e.g. `DocumentName`, `ModificationDate`, `Rank`). |
+| `SortBy` | string | Yes | Column to sort by, or `PROPERTYSETNAME.FIELDNAME` to sort by a custom field. Case-insensitive. One of: `DOCUMENTNAME`, `DOCUMENTSIZE`, `MIMETYPEDESCRIPTION`, `MODIFICATIONDATE`, `STATUSCODE`, `FOLDERNAME`, `LASTVERSIONNUMBER`, `PERCENTCOMPLETE`, `CREATIONDATE`, `MODIFIEDBYNAME`, `DESCRIPTION`, `OWNERNAME`, `FLOWNAME`, `VIEW`, `CHECKEDOUTBYNAME`, `COMPLETIONDATE`, `IMPORTANCE`, `RDDEFID`, `CLEVEL`, `DECLASSIFYON`, `DOWNGRADEON`, `DISPOSITIONDATE`, `LASTISOREVIEW`, `NEXTISOREVIEW`. Anything else is refused with `4000`, and the message lists the accepted values. |
 | `AscendingOrder` | bool | Yes | Sort direction. `true` = ascending (A-'Z, oldest first), `false` = descending (Z-'A, newest first). |
 
 ---
@@ -114,12 +114,67 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Despite the name, this one returns no page. It opens a search over the folder and answers how many
+items matched; the items themselves come from `GetNextSearchPage` on the same session.
+
+`Path` is a non-nullable string on the REST action, so an empty one is refused by model binding with
+HTTP 400 before the operation runs - there is no error document to read in that case.
+
+`SortBy` is a non-nullable string too, so an empty one is refused the same way. Sort names are
+case-insensitive, and a name that is not on the list is refused with `4000` and a message naming the
+ones that are.
+
+```javascript
+const opened = await call('GetFoldersAndDocumentsByPage2', {
+  authenticationTicket: ticket,
+  Path: '/Public/ApiTests',
+  filterXml: '',
+  SortBy: 'MODIFICATIONDATE',
+  AscendingOrder: false
+});
+
+console.log(opened.getAttribute('count'), 'items matched');
+
+// The count is all this call returns. Read the items a page at a time.
+const page = await call('GetNextSearchPage', {
+  authenticationTicket: ticket,
+  withrules: false,
+  withPropertySets: false,
+  withSecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+```
+
+`filterXml` is optional, but it is parsed as XML when it is not empty: a value that is not
+well-formed is answered `5000` carrying the `XmlException`, where every other malformed-XML input in
+the API is a `4000`. Treat that as something to avoid triggering rather than something to depend on.
+
 ## Notes
 
 - Returns only **direct** children (one level deep) of the specified path.
 - The API response contains a `count` and creates a server-side search session. Use the search session to retrieve paginated results.
 - `filterXml` syntax is defined by the infoRouter search filter format -" the same format used by the `Search` API.
-- When `SortBy=Rank`, results are sorted by full-text search relevance; `ranksorted="true"` is returned in the response. The rank of each individual document, and the part of the document the term was found in, come back on the pages as `<RankInfo>`.
+- **`Rank` is not an accepted `SortBy` value here**, despite being one wherever search results are ranked: passing it is answered `4000`. `ranksorted` on the response reports whether the prepared session ended up rank-sorted; the rank of each individual document, and the part of the document the term was found in, come back on the pages as `<RankInfo>`.
 - This API requires the infoRouter content search service to be configured and running for full-text filtering.
 - For simpler paged listings (name filter only), use `GetFoldersAndDocumentsByPage`.
 
@@ -135,6 +190,21 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path - including one the caller may not see, which is not told apart from one that does not exist |
+| `4000` | `SortBy` is not one of the accepted sort names; the message lists them |
+| `5000` | `filterXml` is not well-formed XML. It should be a `4000`, and may become one |
+| `HTTP 400` | `Path` was empty; refused by model binding, so there is no error document |
+| `HTTP 400` | `SortBy` was empty; also refused by model binding |
+
+A call with no ticket at all is not automatically refused: it signs in as the anonymous user, so a
+library flagged as anonymous can be listed without authenticating. Everything else answers `4041`,
+because a folder the anonymous user cannot see is not told apart from one that does not exist.
 
 | Error | Description |
 |-------|-------------|

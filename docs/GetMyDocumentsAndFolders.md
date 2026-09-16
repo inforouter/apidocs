@@ -136,6 +136,45 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists what the calling user owns, in the same full `<folder>` and `<document>` shape as
+`GetFoldersAndDocuments` and with the same five flags. There is no `Path`: the answer is about who
+the caller is, not where they are looking.
+
+```javascript
+const root = await call('GetMyDocumentsAndFolders', {
+  authenticationTicket: ticket,
+  withrules: false,
+  withpropertysets: false,
+  withsecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+
+console.log(root.querySelectorAll(':scope > document').length, 'documents owned');
+```
+
+A caller with no ticket at all is the anonymous user, and the anonymous user owns nothing, so this is
+one of the operations that refuses an unticketed call outright rather than answering for anonymous.
+
 ## Notes
 
 - Returns items across all locations in infoRouter where the authenticated user is the owner.
@@ -156,6 +195,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - unlike the folder listings, this operation does not answer for the anonymous user |
+
 
 | Error | Description |
 |-------|-------------|

@@ -20,8 +20,8 @@ Returns a page of documents and folders at the specified path, with optional nam
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the folder (e.g. `/Finance/Reports`). |
-| `FolderFilter` | string | No | Optional substring filter for folder names. Pass empty string or null for no filtering. |
-| `DocumentFilter` | string | No | Optional substring filter for document names. Pass empty string or null for no filtering. |
+| `FolderFilter` | string | No | Name filter for subfolders. Matches the whole name unless it contains a `*`. One value only. Empty for no filtering. |
+| `DocumentFilter` | string | No | Name filter for documents. Matches any part of the name unless it contains a `*`. Several may be given, separated by `;`. Empty for no filtering. |
 | `PageNumber` | int | Yes | Page number to retrieve (1-based). Pass `-1` for every item in one response, with no `page` or `pageSize` on the root. |
 
 ---
@@ -181,11 +181,73 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The same short `<f>` and `<d>` shape as `GetFoldersAndDocuments1`, with two name filters and a page
+number. `itemcount` counts **this page**, not the whole folder.
+
+`Path` is a non-nullable string on the REST action, so an empty one is refused by model binding with
+HTTP 400 before the operation runs - there is no error document to read in that case.
+
+### The two filters are not the same kind of filter
+
+This is the thing about these operations most likely to catch a caller out. `*` is the only wildcard
+either of them understands: a `%`, `_` or `?` in the value is ordinary text, not a pattern.
+
+| | `FolderFilter` | `DocumentFilter` |
+|---|---|---|
+| With no `*` | matches the **whole name** - `Api` does not find `ApiTests` | matches **any part** of the name - `Api` finds `ApiTests.txt`, and so does `Tests` |
+| With a `*` | `Api*` matches, `*` alone matches everything | `Api*` anchors it to the start, so the `%...%` wrap is not added |
+| In `"double quotes"` | whole name, even if it contains a `*` | whole name |
+| Several values | not supported - the whole string is one name | separate them with `;`, and a name matching any of them is returned |
+
+Both are case-insensitive. Leave a filter empty to apply none.
+
+```javascript
+let page = 1;
+
+for (;;) {
+  const root = await call('GetFoldersAndDocumentsByPage', {
+    authenticationTicket: ticket,
+    Path: '/Public/ApiTests',
+    FolderFilter: '',
+    DocumentFilter: '*.pdf;*.docx',   // several patterns, any of which may match
+    PageNumber: page
+  });
+
+  for (const d of root.querySelectorAll(':scope > d')) console.log(d.getAttribute('n'));
+
+  if (Number(root.getAttribute('itemcount')) < Number(root.getAttribute('pageSize'))) break;
+  page++;
+}
+```
+
+A page past the end is a success with nothing in it, not an error, so a loop that stops on a short
+page never needs to ask for the total first. Pass `PageNumber=-1` for everything in one answer, which
+also drops `page` and `pageSize` from the root.
+
 ## Notes
 
 - Returns only **direct** children (one level deep) of the specified path.
 - Page size is set on the server and reported back as `pageSize`; it is not a parameter of this call.
-- `FolderFilter` and `DocumentFilter` perform a case-insensitive substring match on the name.
+- `FolderFilter` and `DocumentFilter` do **not** match the same way: without a `*` the folder filter wants the whole name and the document filter matches any part of it. See the table above.
 - An empty response (no child elements) after page 1 means there are no matching items.
 - For advanced filtering (by metadata, date ranges, or full-text content) and sorting, use `GetFoldersAndDocumentsByPage2`.
 - For full property details per item, use `GetFoldersAndDocuments`.
@@ -201,7 +263,26 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+**The code for a missing folder is not the same across the family.** `GetFoldersAndDocuments`,
+`GetFoldersAndDocuments2` and `GetFoldersAndDocumentsByPage2` answer `4041`; this one and
+`GetFoldersAndDocuments1` answer `4000`. The message is the same in all five. A client that has to work
+with more than one of them should treat both numbers as "no such folder".
+
+---
+
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no folder at that path - including one the caller may not see. Its three siblings answer `4041` for the same condition; see the note below |
+| `HTTP 400` | `Path` was empty; refused by model binding, so there is no error document |
+
+A call with no ticket at all is not automatically refused: it signs in as the anonymous user, so a
+library flagged as anonymous can be listed without authenticating. Everything else answers `4000`,
+because a folder the anonymous user cannot see is not told apart from one that does not exist.
 
 | Error | Description |
 |-------|-------------|

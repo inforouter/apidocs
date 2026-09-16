@@ -130,6 +130,45 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The leanest of the listings: `<f>` and `<d>` again, but fewer attributes on each and only an `id`,
+a `name` and an `itemcount` on the root. What a `<d>` carries is chosen for deciding whether a local
+copy is stale - `lv`, `pv` and `chksum` - rather than for showing a folder to a person.
+
+`Path` is a non-nullable string on the REST action, so an empty one is refused by model binding with
+HTTP 400 before the operation runs - there is no error document to read in that case.
+
+```javascript
+const root = await call('GetFoldersAndDocuments2', {
+  authenticationTicket: ticket,
+  Path: '/Public/ApiTests'
+});
+
+for (const d of root.querySelectorAll(':scope > d')) {
+  console.log(d.getAttribute('n'), d.getAttribute('lv'), d.getAttribute('chksum'));
+}
+```
+
+Version numbers here are in the large-integer scheme, where version 1 is `1000000`.
+
 ## Notes
 
 - Returns only **direct** children (one level deep) of the specified path.
@@ -151,6 +190,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path - including one the caller may not see, which is not told apart from one that does not exist |
+| `HTTP 400` | `Path` was empty; refused by model binding, so there is no error document |
+
+A call with no ticket at all is not automatically refused: it signs in as the anonymous user, so a
+library flagged as anonymous can be listed without authenticating. Everything else answers `4041`,
+because a folder the anonymous user cannot see is not told apart from one that does not exist.
 
 | Error | Description |
 |-------|-------------|
