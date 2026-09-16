@@ -377,6 +377,35 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports the ISO review entries on one document. Entries are under `<Value>`, and a document with none is a success with nothing in
+it rather than an error.
+
+```javascript
+const root = await call('GetISOLogs', {
+  authenticationTicket: ticket,
+  DocumentPath: '/Public/ApiTests/test-document.txt'
+});
+```
+
 ## Notes
 
 
@@ -435,6 +464,15 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller can see the document but may not read its log |
+| `4041` | no document at that path - including a path the caller cannot see, so an anonymous caller gets this rather than 4030 |
+
 
 
 

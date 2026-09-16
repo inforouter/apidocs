@@ -127,6 +127,52 @@ SOAPAction: "http://tempuri.org/GetCheckInLog"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports who checked what back in in a date range. Rows come back as `<log>` inside `<logs>`.
+
+The dates are `yyyy-MM-dd`. They bind as `DateTime`, so a value that is not a date is refused with
+HTTP 400 before the operation runs - not with this API's error document. An empty one binds to its
+default, which leaves the range open at that end, and a range given backwards is accepted and reports
+nothing.
+
+**Its dates are not like the others.** Every sibling here writes `DATE` as ISO-8601 in UTC, for
+example `2026-09-16T18:23:37.457Z`. This one writes the server's own format in the server's local
+time - `16.09.2026 21:23:37` - which does not change with the caller's language, so reading it means
+knowing the server's locale. Treat that as something to work around rather than to rely on.
+
+```javascript
+const root = await call('GetCheckInLog', {
+  authenticationTicket: ticket,
+  startDate: '2026-01-01',
+  endDate: '2026-12-31',
+  pathFilter: ''            // empty for everywhere, or a path to narrow it
+});
+
+for (const row of root.querySelectorAll('logs > log')) {
+  console.log(row.getAttribute('DATE'), row.getAttribute('NAME'));
+}
+```
+
+Leave `pathFilter` empty to search everywhere.
+
 ## Notes
 
 - Results are ordered by action date descending (most recent first).
@@ -136,6 +182,15 @@ SOAPAction: "http://tempuri.org/GetCheckInLog"
 - Check-in logging must be enabled in the domain policies for entries to be recorded.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not read this log - including a caller with no ticket |
+| `HTTP 400` | a date parameter that is not a date; refused by model binding, so there is no error document |
+
 
 | Error | Description |
 |-------|-------------|

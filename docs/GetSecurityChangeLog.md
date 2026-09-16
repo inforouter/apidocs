@@ -195,6 +195,46 @@ SOAPAction: "http://tempuri.org/GetSecurityChangeLog"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+What has been changed about who may do what.
+
+The dates are `yyyy-MM-dd`. They bind as `DateTime`, so a value that is not a date is refused with
+HTTP 400 before the operation runs - not with this API's error document. An empty one binds to its
+default, which leaves the range open at that end, and a range given backwards is accepted and reports
+nothing.
+
+```javascript
+const root = await call('GetSecurityChangeLog', {
+  authenticationTicket: ticket,
+  path: '/Public/ApiTests',     // required, even though it is declared as optional
+  userName: '',                 // empty for anybody
+  startDate: '2026-01-01',
+  endDate: '2026-12-31'
+});
+```
+
+**`path` is required in practice.** It is declared as an optional string, so an empty one reaches the
+operation rather than being refused by model binding - and the operation then answers `4000`, "Path
+parameter is required." `userName` really is optional; leave it empty for anybody.
+
 ## Notes
 
 - Results are ordered by date applied.
@@ -204,6 +244,15 @@ SOAPAction: "http://tempuri.org/GetSecurityChangeLog"
 - Both document and folder security changes are included in library-level queries.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | `path` was left empty - it is required despite being declared optional |
+| `4030` | the caller may not read the security change log |
+
 
 Common error responses:
 

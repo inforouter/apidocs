@@ -110,6 +110,47 @@ SOAPAction: "http://tempuri.org/GetVersionDeleteLog"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports which versions were removed in a date range. Rows come back as `<log>` inside `<logs>`.
+
+The dates are `yyyy-MM-dd`. They bind as `DateTime`, so a value that is not a date is refused with
+HTTP 400 before the operation runs - not with this API's error document. An empty one binds to its
+default, which leaves the range open at that end, and a range given backwards is accepted and reports
+nothing.
+
+```javascript
+const root = await call('GetVersionDeleteLog', {
+  authenticationTicket: ticket,
+  startDate: '2026-01-01',
+  endDate: '2026-12-31',
+  pathFilter: ''            // empty for everywhere, or a path to narrow it
+});
+
+for (const row of root.querySelectorAll('logs > log')) {
+  console.log(row.getAttribute('DATE'), row.getAttribute('NAME'));
+}
+```
+
+Leave `pathFilter` empty to search everywhere.
+
 ## Notes
 
 - Results are ordered by action date descending (most recent first).
@@ -120,6 +161,15 @@ SOAPAction: "http://tempuri.org/GetVersionDeleteLog"
 - The `ISLASTVERSION` attribute indicates whether the deleted version was the last remaining version of the document.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not read this log - including a caller with no ticket |
+| `HTTP 400` | a date parameter that is not a date; refused by model binding, so there is no error document |
+
 
 Common error responses:
 

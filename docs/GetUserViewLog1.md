@@ -274,6 +274,41 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The same as `GetUserViewLog`, narrowed to a date range.
+
+The dates are `yyyy-MM-dd`. They bind as `DateTime`, so a value that is not a date is refused with
+HTTP 400 before the operation runs - not with this API's error document. An empty one binds to its
+default, which leaves the range open at that end, and a range given backwards is accepted and reports
+nothing.
+
+```javascript
+const root = await call('GetUserViewLog1', {
+  authenticationTicket: ticket, userName: 'jsmith',
+  startdate: '2026-01-01', endDate: '2026-12-31'
+});
+```
+
+Note the lower-case `d` in `startdate` where `endDate` has a capital one.
+
 ## Notes
 
 
@@ -341,6 +376,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not read this user’s view log |
+| `4041` | no user by that name - including one the caller cannot see |
+
 
 
 

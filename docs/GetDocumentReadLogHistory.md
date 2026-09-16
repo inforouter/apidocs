@@ -243,6 +243,39 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Who has read a document, version by version, under `<ViewLog>`. `UserID` of 0 means everybody.
+
+```javascript
+const root = await call('GetDocumentReadLogHistory', {
+  authenticationTicket: ticket,
+  Path: '/Public/ApiTests/test-document.txt',
+  UserID: 0
+});
+
+for (const version of root.querySelectorAll('Version')) {
+  console.log(version.getAttribute('Number'), version.getAttribute('Viewer'), version.getAttribute('ViewDate'));
+}
+```
+
 ## Notes
 
 
@@ -286,6 +319,15 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller can see the document but may not read its log |
+| `4041` | no document at that path - including a path the caller cannot see, so an anonymous caller gets this rather than 4030 |
+
 
 
 
