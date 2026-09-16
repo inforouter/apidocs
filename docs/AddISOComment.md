@@ -190,7 +190,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetISOLogs](GetISOLogs.md) - Retrieve the ISO comment history for a document
 
-- [GetISOReviewAssignments](GetISOReviewAssignments.md) - Get documents assigned to the current user for ISO review
+- [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md) - Get documents assigned to the current user for ISO review
 
 - [Search](Search.md) - Search for documents, e.g. by next ISO review date
 

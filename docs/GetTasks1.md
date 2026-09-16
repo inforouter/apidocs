@@ -1,6 +1,6 @@
 # GetTasks1 API
 
-Returns a paged list of workflow tasks based on XML search criteria. Identical to [getTasks](GetTasks.md) but adds `startingRow` and `rowCount` parameters for pagination. The response includes `startingRow` and `rowCount` attributes in addition to `taskCount` so clients can page through large result sets.
+Returns a paged list of workflow tasks based on XML search criteria. Identical to [getTasks](getTasks.md) but adds `startingRow` and `rowCount` parameters for pagination. The response includes `startingRow` and `rowCount` attributes in addition to `taskCount` so clients can page through large result sets.
 
 ## Endpoint
 
@@ -356,6 +356,6 @@ SOAPAction: "http://tempuri.org/GetTasks1"
 
 ## Related APIs
 
-- [getTasks](GetTasks.md) - Same API without paging (returns all matching tasks)
+- [getTasks](getTasks.md) - Same API without paging (returns all matching tasks)
 - [GetTask](GetTask.md) - Get a single task by task ID with full instruction and comment text
 - [GetUsersTaskPerformance](GetUsersTaskPerformance.md) - Get user task performance statistics

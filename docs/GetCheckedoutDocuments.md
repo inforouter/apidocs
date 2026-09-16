@@ -439,7 +439,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get documents authored by a specified user
 
-- [GetISOReviewAssignments](GetISOReviewAssignments.md) - Get documents assigned to a user for ISO review
+- [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md) - Get documents assigned to a user for ISO review
 
 
 

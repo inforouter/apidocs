@@ -68,5 +68,5 @@ GET /srv.asmx/RemoveWorkflowAttachment?authenticationTicket=abc123&taskId=4812&d
 
 - [AddWorkflowAttachment](AddWorkflowAttachment.md) — Attach a document to an active workflow task.
 - [GetTask](GetTask.md) — Get task details including the current Attachments list.
-- [GetTasks](GetTasks.md) — Get a filtered list of tasks.
+- [GetTasks](getTasks.md) — Get a filtered list of tasks.
 - [CompleteTask](CompleteTask.md) — Mark a task as completed.

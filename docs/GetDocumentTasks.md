@@ -202,12 +202,12 @@ Host: yourserver
 - Results are sorted by due date ascending.
 - `FinishDate`, `StartDate`, `AllowedStartDate`, `ReminderDate`, and `SupervisorNotificationDate` return `0001-01-01T00:00:00` when not applicable.
 - Use [GetTask](GetTask.md) to retrieve the full details of a single task including extended instructions, full comments, requirements, and attachments.
-- Use [GetTasks](GetTasks.md) to retrieve tasks across all documents using filter criteria.
+- Use [GetTasks](getTasks.md) to retrieve tasks across all documents using filter criteria.
 
 ## Related APIs
 
 - [GetTask](GetTask.md) - Return the full details of a single workflow task by ID.
-- [GetTasks](GetTasks.md) - Return tasks across all documents using XML filter criteria.
+- [GetTasks](getTasks.md) - Return tasks across all documents using XML filter criteria.
 - [GetDocumentWorkflows](GetDocumentWorkflows.md) - Return workflow instances for a document.
 - [CompleteTask](CompleteTask.md) - Complete a workflow task.
 - [ReassignTask](ReassignTask.md) - Reassign a workflow task to a different user.

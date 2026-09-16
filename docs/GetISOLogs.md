@@ -416,7 +416,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - [AddISOComment](AddISOComment.md) - Record a new ISO review comment on a document
 
 
-- [GetISOReviewAssignments](GetISOReviewAssignments.md) - Get the list of ISO review task assignments for a document
+- [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md) - Get the list of ISO review task assignments for a document
 
 
 - [GetSoxLogs](GetSoxLogs.md) - Get the SOX compliance review log for a document

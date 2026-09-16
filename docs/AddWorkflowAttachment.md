@@ -67,5 +67,5 @@ GET /srv.asmx/AddWorkflowAttachment?authenticationTicket=abc123&taskId=4812&docu
 ## Related APIs
 
 - [GetTask](GetTask.md) — Get task details including the current Attachments list.
-- [GetTasks](GetTasks.md) — Get a filtered list of tasks.
+- [GetTasks](getTasks.md) — Get a filtered list of tasks.
 - [CompleteTask](CompleteTask.md) — Mark a task as completed.

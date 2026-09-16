@@ -118,6 +118,9 @@ nav:
     - SetFolderCutoffDate: SetFolderCutoffDate.md
     - RemoveFolderCutoffDate: RemoveFolderCutoffDate.md
     - UpdateFolderProperties: UpdateFolderProperties.md
+    - GetFolderAIPreferences: GetFolderAIPreferences.md
+    - SetFolderAIPreferences: SetFolderAIPreferences.md
+    - GetFoldersOwnedByUser: GetFoldersOwnedByUser.md
 
   - Documents:
     - GetDocument: GetDocument.md
@@ -156,12 +159,34 @@ nav:
     - UpdateDocumentProperties1: UpdateDocumentProperties1.md
     - UpdateDocumentProperties2: UpdateDocumentProperties2.md
     - UpdateDocumentType: UpdateDocumentType.md
+    - CreateHtmlDocument: CreateHtmlDocument.md
+    - UpdateHtmlDocument: UpdateHtmlDocument.md
+    - UpdateURLDocument: UpdateURLDocument.md
+    - UpdateVersionComment: UpdateVersionComment.md
+    - PruneDocumentVersions: PruneDocumentVersions.md
+    - GetVersionRendition: GetVersionRendition.md
+    - GetDocumentSummary: GetDocumentSummary.md
+    - SetDocumentSummary: SetDocumentSummary.md
+    - GetDocumentThumbnail: GetDocumentThumbnail.md
+    - UpdateDocumentThumbnail: UpdateDocumentThumbnail.md
+    - DeleteDocumentThumbnail: DeleteDocumentThumbnail.md
+    - GetDocumentExpirationDate: GetDocumentExpirationDate.md
+    - SetDocumentPublishingRule: SetDocumentPublishingRule.md
+    - GetDocumentsOwnedByUser: GetDocumentsOwnedByUser.md
+    - GetConnectProfile: GetConnectProfile.md
+    - GetConnectSettings: GetConnectSettings.md
+    - DistributeDocument: DistributeDocument.md
+    - EditFilledForm: EditFilledForm.md
+    - SaveFilledForm: SaveFilledForm.md
+    - UseFormTemplate: UseFormTemplate.md
 
   - Document Types:
     - GetDocumentTypes: GetDocumentTypes.md
     - CreateDocumentTypeDef: CreateDocumentTypeDef.md
     - UpdateDocumentTypeDef: UpdateDocumentTypeDef.md
     - DeleteDocumentTypeDef: DeleteDocumentTypeDef.md
+    - CreateDocumentTypeDef1: CreateDocumentTypeDef1.md
+    - UpdateDocumentTypeDef1: UpdateDocumentTypeDef1.md
 
   - Upload & Download:
     - UploadDocument: UploadDocument.md
@@ -191,11 +216,21 @@ nav:
     - DownloadFileChunk: DownloadFileChunk.md
     - DownloadZip: DownloadZip.md
     - DownloadZipWithHandler: DownloadZipWithHandler.md
+    - UploadZip: UploadZip.md
+    - UploadZipWithHandler: UploadZipWithHandler.md
+    - AddToDownloadQueue: AddToDownloadQueue.md
+    - RemoveFromDownloadQueue: RemoveFromDownloadQueue.md
 
   - Search:
     - Search: Search.md
     - GetNextSearchPage: GetNextSearchPage.md
     - GetPreviousSearchPage: GetPreviousSearchPage.md
+    - CreateSavedSearch: CreateSavedSearch.md
+    - UpdateSavedSearch: UpdateSavedSearch.md
+    - GetSavedSearch: GetSavedSearch.md
+    - GetSavedSearches: GetSavedSearches.md
+    - DeleteSavedSearch: DeleteSavedSearch.md
+    - Saved Search XML Reference: SavedSearchXmlReference.md
 
   - Checkout & Locking:
     - GetCheckedoutDocuments: GetCheckedoutDocuments.md
@@ -242,6 +277,8 @@ nav:
     - RegisterEmail1: RegisterEmail1.md
     - RegisterEmail2: RegisterEmail2.md
     - RegisterEmail3: RegisterEmail3.md
+    - UpdateUserContactInfo: UpdateUserContactInfo.md
+    - SendWelcomeEmailForUser: SendWelcomeEmailForUser.md
 
   - Domains:
     - GetDomain: GetDomain.md
@@ -283,7 +320,7 @@ nav:
     - GetFolderFlows: GetFolderFlows.md
     - GetDomainFlows: GetDomainFlows.md
     - GetWorkflowStatistics: GetWorkflowStatistics.md
-    - GetISOReviewAssignments: GetISOReviewAssignments.md
+    - GetISOReviewAssignmentsOfUser: GetISOReviewAssignmentsOfUser.md
     - ActivateFlowDef: ActivateFlowDef.md
     - DeactivateFlowDef: DeactivateFlowDef.md
     - CreateFlowDef: CreateFlowDef.md
@@ -316,6 +353,20 @@ nav:
     - RemoveCurrentWorkflow: RemoveCurrentWorkflow.md
     - AddISOComment: AddISOComment.md
     - AddSOXComment: AddSOXComment.md
+    - CreateTask: CreateTask.md
+    - CreateRelatedTask: CreateRelatedTask.md
+    - UpdateTaskStatus: UpdateTaskStatus.md
+    - GetTasks1: GetTasks1.md
+    - GetDocumentTasks: GetDocumentTasks.md
+    - GetDocumentWorkflow: GetDocumentWorkflow.md
+    - GetDocumentWorkflows: GetDocumentWorkflows.md
+    - GetWorkflowDefinitions: GetWorkflowDefinitions.md
+    - UpdateWorkflowDefinition: UpdateWorkflowDefinition.md
+    - UpdateWorkflowStepDef: UpdateWorkflowStepDef.md
+    - UpdateWorkflowTaskDef: UpdateWorkflowTaskDef.md
+    - UpdateRunningWorkflowTaskDef: UpdateRunningWorkflowTaskDef.md
+    - AddWorkflowAttachment: AddWorkflowAttachment.md
+    - RemoveWorkflowAttachment: RemoveWorkflowAttachment.md
 
   - Security & Access:
     - GetAccessList: GetAccessList.md
@@ -347,6 +398,7 @@ nav:
     - GetUserViewLog1: GetUserViewLog1.md
     - GetVersionCreateLog: GetVersionCreateLog.md
     - GetVersionDeleteLog: GetVersionDeleteLog.md
+    - GetUserViewLogLite: GetUserViewLogLite.md
 
   - Retention & Lifecycle:
     - GetRetentionSourceAuthorities: GetRetentionSourceAuthorities.md
@@ -369,6 +421,14 @@ nav:
     - SetFolderRandDSchedule: SetFolderRandDSchedule.md
     - RemoveDocumentRandDSchedule: RemoveDocumentRandDSchedule.md
     - RemoveFolderRandDSchedule: RemoveFolderRandDSchedule.md
+    - DeleteRandDSchedule1: DeleteRandDSchedule1.md
+    - DisposeItem: DisposeItem.md
+    - GetAppliedRDScheduleLogs: GetAppliedRDScheduleLogs.md
+    - GetRdFreezeLogs: GetRdFreezeLogs.md
+    - SetRdFreezeFlag: SetRdFreezeFlag.md
+    - GetISOReviewDefinition: GetISOReviewDefinition.md
+    - SetISOReviewDefinition: SetISOReviewDefinition.md
+    - RemoveISOReviewDefinition: RemoveISOReviewDefinition.md
 
   - Property Sets:
     - GetPropertySets: GetPropertySets.md
@@ -400,6 +460,8 @@ nav:
     - GetTagDefintions: GetTagDefintions.md
     - SetTagToDocument: SetTagToDocument.md
     - RemoveTagFromDocument: RemoveTagFromDocument.md
+    - GetTagDefinitions: GetTagDefinitions.md
+    - GetAppliedTags: GetAppliedTags.md
 
   - Document Associations:
     - AssociateDocument: AssociateDocument.md
@@ -415,7 +477,6 @@ nav:
     - AddToFavorites: AddToFavorites.md
     - RemoveFromFavorites: RemoveFromFavorites.md
     - GetSubscriptions: GetSubscriptions.md
-    - GetSubscriptionsByUser: GetSubscriptionsByUser.md
     - GetSubscribers: GetSubscribers.md
     - AddUserToDocumentSubscribers: AddUserToDocumentSubscribers.md
     - AddUsergroupToDocumentSubscribers: AddUsergroupToDocumentSubscribers.md
@@ -426,6 +487,10 @@ nav:
     - RemoveUserFromFolderSubscribers: RemoveUserFromFolderSubscribers.md
     - RemoveUsergroupFromFolderSubscribers: RemoveUsergroupFromFolderSubscribers.md
     - RemoveAllSubscriptions: RemoveAllSubscriptions.md
+    - GetFavoriteDocumentsOfUser: GetFavoriteDocumentsOfUser.md
+    - GetFavoriteFoldersOfUser: GetFavoriteFoldersOfUser.md
+    - GetSubscribedDocumentsByUser: GetSubscribedDocumentsByUser.md
+    - GetSubscribedFoldersByUser: GetSubscribedFoldersByUser.md
 
   - Recycle Bin:
     - GetRecycleBinContent: GetRecycleBinContent.md
@@ -471,3 +536,12 @@ nav:
     - CreateEditDocumentURL: CreateEditDocumentURL.md
     - CreateURL: CreateURL.md
     - MaintenanceBeat: MaintenanceBeat.md
+    - GetSystemStatistics: GetSystemStatistics.md
+    - GetLogStatistics1: GetLogStatistics1.md
+    - GetEmailAndNotificationSettings: GetEmailAndNotificationSettings.md
+    - SetEmailAndNotificationSettings: SetEmailAndNotificationSettings.md
+    - GetAddIns: GetAddIns.md
+    - GetCustomMenus: GetCustomMenus.md
+    - GetUserFolderColumns: GetUserFolderColumns.md
+    - SetUserFolderColumns: SetUserFolderColumns.md
+    - SendEmail: SendEmail.md
