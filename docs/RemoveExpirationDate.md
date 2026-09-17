@@ -1,14 +1,8 @@
 ﻿# RemoveExpirationDate API
 
-
-
 Removes the expiration date from the specified document, returning it to an unconstrained (non-expiring) state. When the expiration date is cleared, any associated notification schedule is also removed. If the document did not have an expiration date, the call succeeds without making any changes.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Removes the expiration date from the specified document, returning it to an unco
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/RemoveExpirationDate?authenticationTicket=...&documentPath=...`
 
@@ -28,30 +18,18 @@ Removes the expiration date from the specified document, returning it to an unco
 
 - **SOAP** Action: `http://tempuri.org/RemoveExpirationDate`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentPath` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -59,11 +37,7 @@ Removes the expiration date from the specified document, returning it to an unco
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -71,31 +45,17 @@ Removes the expiration date from the specified document, returning it to an unco
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have **Document Property Change** permission on the document.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -109,11 +69,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -121,19 +77,13 @@ POST /srv.asmx/RemoveExpirationDate HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &documentPath=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -157,15 +107,41 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Clears the expiration date on a document, and the notification that went with it.
+
+```javascript
+await call('RemoveExpirationDate', {
+  authenticationTicket: ticket,
+  documentPath: '/Finance/Reports/Q1.pdf'
+});
+```
+
+Afterwards [GetDocumentExpirationDate](GetDocumentExpirationDate.md) reports `1900-01-01`, the base
+date meaning "no expiry" - there is no "not set" to read. Removing one that was never set is a
+success.
 
 ## Notes
-
-
 
 - Removing the expiration date also clears any associated **notification schedule** (the notify-before-days value and notification agent are both reset).
 
@@ -179,29 +155,26 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Use `GetDocument` to inspect the current `ExpirationDate` attribute of a document before calling this API.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [SetExpirationDate](SetExpirationDate.md) - Apply an expiration date to a document, optionally with advance notification
 
 - [GetDocument](GetDocument.md) - Get document properties including the current `ExpirationDate`
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not change expiration dates here |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -212,8 +185,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Access denied | The user does not have Document Property Change permission on the document. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

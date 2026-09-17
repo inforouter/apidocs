@@ -106,6 +106,47 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
 &releaseTag=
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Decides which version of a document readers get.
+
+```javascript
+await call('SetDocumentPublishingRule', {
+  authenticationTicket: ticket,
+  documentPath: '/Finance/Reports/Q1.pdf',
+  publishingRule: 'LATEST',
+  publishedVersionNumber: 0,
+  releaseTag: '-'              // must not be empty, even when the rule ignores it
+});
+```
+
+The rule is one of `LATEST`, `LASTAPPROVED`, `TAGGED`, `SPESIFICVERSION`, `UNPUBLISHED`, and anything
+else is refused `4000` with those five in the message.
+
+**Note the spelling: `SPESIFICVERSION`.** The correctly spelled `SPECIFICVERSION` is refused. The
+message is an untranslated English literal, so it reads the same in every language.
+
+**`releaseTag` cannot be empty over REST.** It is declared as a non-nullable string, so model binding
+refuses an empty one with HTTP 400 before the operation runs - even for `LATEST`, which has no tag and
+ignores the value. Send any non-empty placeholder when the rule does not use it.
+
 ## Notes
 
 - `publishingRule` is case-insensitive (`LATEST`, `latest`, and `Latest` are all accepted).
@@ -116,6 +157,16 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
 - Compare with `PublishDocument` (publishes a specific version number directly) and `UnpublishDocument` (sets the document to unpublished state directly).
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | `publishingRule` is not one of the five names |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not change the publishing rule here |
+| `HTTP 400` | `releaseTag` or `publishingRule` was empty; refused by model binding, even where the rule ignores the tag |
 
 | Error | Description |
 |-------|-------------|

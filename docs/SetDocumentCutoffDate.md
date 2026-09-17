@@ -90,6 +90,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sets the cutoff date on one document.
+
+```javascript
+await call('SetDocumentCutoffDate', {
+  authenticationTicket: ticket,
+  path: '/Finance/Reports/Q1.pdf',
+  cutoffDate: '2026-06-30'
+});
+```
+
+`cutoffDate` is a **nullable** `DateTime`, so an empty one reaches the operation rather than being
+refused by model binding, and clears the date - the same thing
+[RemoveDocumentCutoffDate](RemoveDocumentCutoffDate.md) does. The date is read as local midnight and
+reported back by [GetDocument](GetDocument.md) in UTC, so the day that reads back may differ from the
+day that was sent.
+
+Unlike [SetFolderCutoffDate](SetFolderCutoffDate.md) there is no MultiStatus here: one document, one
+answer.
+
 ## Notes
 
 - **The lock does not wait for the date.** Once any cutoff date is saved, check-out is refused. That includes uploads that check the document out and in, and saves through WebDAV. For a future date the error is `Document cannot be checked out. A future cut-off date has been applied to this document. If you wish to edit this document, please remove the cut-off date.` Once the date has passed it is `Document cannot be checked out. A cut-off date has been specified for this document.`
@@ -114,6 +152,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not set cutoff dates here |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

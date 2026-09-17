@@ -86,6 +86,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sets how important a document is.
+
+```javascript
+await call('SetDocumentImportance', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  Importance: 2            // -1 NoMarkings, 0 Low, 1 Normal, 2 High, 3 Vital
+});
+```
+
+[GetDocument](GetDocument.md) reads the value back as a name - `NoMarkings`, `Low`, `Normal`, `High`,
+`Vital` - rather than as the number that was sent.
+
+**A value outside that range is answered `5000`, not `4000`.** The operation lets an
+`ArgumentOutOfRangeException` out rather than refusing the request, so a bad importance looks like a
+server fault. The message does name the five valid values.
+[SetClassificationLevel](SetClassificationLevel.md), doing the same kind of job, refuses its bad
+values properly with `4000`.
+
 ## Notes
 
 - The `importance` parameter must be exactly one of the five defined integer codes. Any other value (e.g. `4`, `-2`) causes the API to return an error immediately without modifying the document.
@@ -104,6 +142,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `5000` | `Importance` is outside -1 to 3; it should be a `4000` |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

@@ -185,6 +185,42 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Writes a filled form back as a document, from a template and the content that was entered.
+
+```javascript
+const root = await call('SaveFilledForm', {
+  authenticationTicket: ticket,
+  path: '/Forms/Filled/expenses-2026-03.htm',   // the document to write
+  templatePath: '/Forms/Templates/expenses.htm',
+  xmlContent: '<form><field name="total">412.80</field></form>'
+});
+
+console.log(root.getAttribute('DocumentID'), root.getAttribute('DocumentName'));
+```
+
+`path` is the document to create, complete with its name.
+[EditFilledForm](EditFilledForm.md) is the other half of the pair - though note the warning on its
+page before using it.
+
 ## Notes
 
 - This API produces **HTML documents** (`.html` / `.htm`). If the document name in `path` does not end with `.html` or `.htm`, the extension `.htm` is automatically appended to the created file name.
@@ -208,6 +244,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4090` | a document of that name is already in the folder |
+| `4041` | no folder at the parent of `path`, or no document at `templatePath` |
+| `4030` | the caller may not create documents there |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

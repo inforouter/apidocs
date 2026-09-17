@@ -65,6 +65,41 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes a document or folder off the calling user's download queue.
+
+```javascript
+await call('RemoveFromDownloadQueue', {
+  authenticationTicket: ticket,
+  itemPath: '/Finance/Reports/Q1.pdf'
+});
+```
+
+Removing something that is not on the list is a success, so this is safe to call without checking
+first. A path that names nothing at all is `4041`.
+
+**An unticketed caller is answered success rather than refused.** The anonymous user has no lists, so
+nothing is removed and nothing is at risk, but a client cannot tell that apart from a removal that
+happened. Every other write in this area refuses an unticketed call with `4010`.
+
 ## Notes
 
 - Removing an item that is **not in the queue** is a no-op and still returns `success="true"`.
@@ -73,6 +108,14 @@ Host: yourserver
 - To retrieve the current queue contents, use [GetDownloadQue](GetDownloadQue.md).
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at that path |
+| `none` | an unticketed caller is answered success |
 
 | Error | Description |
 |-------|-------------|

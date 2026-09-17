@@ -1,14 +1,8 @@
 ﻿# SetClassificationLevel API
 
-
-
 Sets the classification level of the specified document or folder. Classification markings control access visibility and are recorded in the classification change log. Optional downgrade and declassify dates can be provided for classified levels (Confidential, Secret, Top Secret).
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Sets the classification level of the specified document or folder. Classificatio
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/SetClassificationLevel?AuthenticationTicket=...&Path=...&ClassificationLevel=...`
 
@@ -28,11 +18,7 @@ Sets the classification level of the specified document or folder. Classificatio
 
 - **SOAP** Action: `http://tempuri.org/SetClassificationLevel`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -44,11 +30,7 @@ Sets the classification level of the specified document or folder. Classificatio
 | `ReasonForAction` | string | No | Free-text reason for the classification change. Recorded in the classification change log. |
 | `Agency` | string | No | Name of the agency responsible for the classification action. Recorded in the classification change log. |
 
-
-
 ### Classification Level Values
-
-
 
 | Value | Name | Description |
 |-------|------|-------------|
@@ -58,23 +40,13 @@ Sets the classification level of the specified document or folder. Classificatio
 | `3` | Secret | Secret classification. |
 | `4` | TopSecret | Top Secret classification. |
 
-
-
 > **Note:** `DowngradeOn` and `DeclassifyOn` are silently ignored (reset to no-date) when `ClassificationLevel` is `0` (NoMarkings) or `1` (Declassified), as these dates are only meaningful for classified items.
-
-
 
 ---
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -82,11 +54,7 @@ Sets the classification level of the specified document or folder. Classificatio
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -94,31 +62,17 @@ Sets the classification level of the specified document or folder. Classificatio
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have **Change Classification** permission on the target document or folder.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -142,19 +96,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/SetClassificationLevel HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -172,11 +120,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -210,15 +154,49 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sets the classification of a document, with the dates it should be downgraded and declassified on.
+
+```javascript
+await call('SetClassificationLevel', {
+  authenticationTicket: ticket,
+  Path: '/Defence/Reports/Q1.pdf',
+  ClassificationLevel: 2,            // 0 NoMarkings, 1 Declassified, 2 Confidential, 3 Secret, 4 TopSecret
+  DowngradeOn: '',
+  DeclassifyOn: '2030-01-01',
+  ReasonForAction: 'Contains supplier pricing',
+  Agency: 'Procurement'
+});
+```
+
+**The folder has to allow classified documents first.** The `ClassifiedDocuments` rule is checked
+before anything else, and a folder that disallows them answers `4030` however valid the rest of the
+call is - see [SetFolderRules](SetFolderRules.md). Setting the level back to `0` declassifies a
+document and is allowed wherever the document may be changed.
+
+A level outside 0 to 4 is refused `4000` with the five named in the message.
 
 ## Notes
-
-
 
 - Both **documents** and **folders** are supported. The path is resolved as a document first; if no document is found, it is resolved as a folder.
 
@@ -234,27 +212,25 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Passing `ClassificationLevel=0` (NoMarkings) removes all classification markings from the item.
 
-
-
 ---
-
-
 
 ## Related APIs
 
-
-
 - [GetDocument](GetDocument.md) - Get document properties including the current classification level and dates
-
-
 
 ---
 
-
-
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the folder rules disallow classified documents, or the caller may not classify here |
+| `4000` | `ClassificationLevel` is not one of 0 to 4 |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -266,8 +242,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Access denied | The user does not have Change Classification permission on the target item. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

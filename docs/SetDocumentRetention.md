@@ -74,6 +74,32 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+> **This operation is obsolete and does nothing.** Every call is answered `4000` with a message saying
+> so. It is still routed, so a client written against an older version gets an answer it can read
+> rather than a 404, but there is no version of the call that works.
+
+Use the retention and disposition schedule operations instead - see
+[SetFolderRandDSchedule](SetFolderRandDSchedule.md) and the `RandDSchedule` family.
+
 ## Notes
 
 - This API has been **disabled since infoRouter 8.1.155**. The implementation returns an error immediately without performing any operation.
@@ -92,6 +118,12 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4000` | every call: "'SetDocumentRetention' infoRouter Web Service API is obsolete. Please follow the new API documentation." |
 
 | Error | Description |
 |-------|-------------|

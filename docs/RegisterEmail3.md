@@ -1,14 +1,8 @@
 ﻿# RegisterEmail3 API
 
-
-
 Registers an email message as a document in infoRouter, passing all email fields as a single XML string. The destination folder and document name are specified as separate parameters. This variant is useful when the calling application already has the email data in an XML structure, and avoids the need to pass many individual query-string or form parameters. Behavior is otherwise identical to `RegisterEmail2`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Registers an email message as a document in infoRouter, passing all email fields
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/RegisterEmail3?AuthenticationTicket=...&FolderPath=...&EmailName=...&parametersXml=...`
 
@@ -28,11 +18,7 @@ Registers an email message as a document in infoRouter, passing all email fields
 
 - **SOAP** Action: `http://tempuri.org/RegisterEmail3`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -41,15 +27,9 @@ Registers an email message as a document in infoRouter, passing all email fields
 | `EmailName` | string | Yes | Document name for the email (e.g. `Meeting-Notes.EMAIL`). If the `.EMAIL` extension is omitted, it is appended automatically. Pass exactly `.EMAIL` to have the system auto-prefix the generated document ID as the name. |
 | `parametersXml` | string | Yes | An XML string containing all email fields. See the **`parametersXml` Structure** section below. |
 
-
-
 ### `parametersXml` Structure
 
-
-
 The value is a well-formed XML document. The root element name is arbitrary. Each email field is a direct child element. Element names are **case-insensitive**.
-
-
 
 ```xml
 
@@ -83,8 +63,6 @@ The value is a well-formed XML document. The root element name is arbitrary. Eac
 
 ```
 
-
-
 | XML Element | Required | Description |
 |-------------|----------|-------------|
 | `Senders` | Yes | Sender email address(es). Multiple addresses separated by semicolon. Defaults to `"Unknown Sender"` if omitted or empty. |
@@ -100,31 +78,19 @@ The value is a well-formed XML document. The root element name is arbitrary. Eac
 | `MessageId` | No | The email's Message-ID header value (e.g. `CABxyz123@mail.example.com`). Used for duplicate detection: if a document with the same `EmailName` and the same `MessageId` already exists in the folder, the call fails. |
 | `AttachmentHandlers` | No | Semicolon-separated list of attachment descriptors in the format `{filename}:{upload-handler-guid}`. Upload handlers must be pre-created with `CreateUploadHandler`. |
 
-
-
 > **Note:** `MessageId` is only available via `RegisterEmail3`. The other `RegisterEmail` variants do not expose this field.
-
-
 
 ---
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
 <response success="true" error="" DocumentID="1051" DocumentName="Meeting-Notes.EMAIL" />
 
 ```
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -133,11 +99,7 @@ The value is a well-formed XML document. The root element name is arbitrary. Eac
 | `DocumentID` | The infoRouter document ID assigned to the newly registered email document. |
 | `DocumentName` | The actual document name used (may differ from `EmailName` if auto-naming or extension appending was applied). |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -145,39 +107,23 @@ The value is a well-formed XML document. The root element name is arbitrary. Eac
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must be **authenticated** (anonymous users cannot register emails). The user must have **add document** permission on the target folder.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/RegisterEmail3 HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -189,11 +135,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -211,15 +153,9 @@ HTTP/1.1
 
 ```
 
-
-
 > **Note:** URL-encode the `parametersXml` value when using GET. POST is strongly recommended for this API because the XML body can be lengthy and contain characters that require encoding.
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -277,15 +213,80 @@ HTTP/1.1
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Files an e-mail as a document, with every field of the message in one XML document instead of as
+separate parameters.
+
+> **It loses the blind-copy address, and writes it into the visible one.**
+> `RegisterEmailModel.ParseFromXml` handles `<BCCAddress>` by assigning the *CC* property - the same
+> one `<CCAddress>` sets - so the last of the two wins and `BCC` is stored empty. A message registered
+> this way with a `<BCCAddress>` ends up with that address in the `CC` field of its `SYSTBL_EMAIL`
+> property set, where anyone who may read the document can see it. Use
+> [RegisterEmail2](RegisterEmail2.md), which takes the two as parameters and stores both correctly,
+> until this is fixed.
+
+```javascript
+const parametersXml = `
+  <email>
+    <Senders>supplier@example.com</Senders>
+    <Recipients>accounts@example.com</Recipients>
+    <CCAddress>manager@example.com</CCAddress>
+    <SentDate>2026-09-01</SentDate>
+    <Subject>Invoice query</Subject>
+    <TextBody>Could you check invoice 4471?</TextBody>
+    <Keywords>invoice,supplier</Keywords>
+  </email>`;
+
+const root = await call('RegisterEmail3', {
+  authenticationTicket: ticket,
+  FolderPath: '/Finance/Emails',
+  EmailName: '2026-09-supplier-query',
+  parametersXml
+});
+```
+
+Element names are matched without regard to case. **Malformed XML here is an HTTP 500 with no error
+document at all** - the parse runs before the operation is entered and outside any handler - so
+validate the document before sending it.
+
+### Which of the four to use
+
+| | Where it goes | Keywords | Everything else |
+|---|---|---|---|
+| [RegisterEmail](RegisterEmail.md) | `TargetPath` - the **document** path | no | parameters |
+| [RegisterEmail1](RegisterEmail1.md) | `TargetPath` - the **document** path | yes | parameters |
+| [RegisterEmail2](RegisterEmail2.md) | `FolderPath` + `EmailName` | yes | parameters |
+| [RegisterEmail3](RegisterEmail3.md) | `FolderPath` + `EmailName` | yes | one XML document |
+
+Prefer `RegisterEmail2`. The first two take a single `TargetPath` which is the path of the *document*
+to create, not the folder to put it in - so aiming one at a folder writes the document beside that
+folder, named after it. `RegisterEmail2` takes the folder and the name separately and cannot be got
+wrong that way.
+
+`.email` is appended to the name unless it already ends with it, and the document is dated from
+`SentDate` rather than from now.
 
 ## Notes
-
-
 
 - `FolderPath` and `EmailName` are always separate parameters -" they cannot be placed inside `parametersXml`. Any `EmailName` field inside the XML is ignored.
 
@@ -305,15 +306,9 @@ HTTP/1.1
 
 - After a successful call, all referenced upload handlers are automatically deleted from the server.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [RegisterEmail](RegisterEmail.md) - Register an email using a combined `TargetPath` (no keywords, no MessageId)
 
@@ -327,15 +322,19 @@ HTTP/1.1
 
 - [GetDocument](GetDocument.md) - Get the properties of the registered email document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4090` | a document of that name is already in the folder |
+| `4041` | no folder at `FolderPath` |
+| `HTTP 500` | `parametersXml` is not well-formed XML; the exception escapes and there is no error document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -351,8 +350,5 @@ HTTP/1.1
 | Access denied | The user does not have add document permission on the target folder. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

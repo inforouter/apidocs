@@ -101,6 +101,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Writes the summary of a document by hand, or takes one back.
+
+```javascript
+await call('SetDocumentSummary', {
+  authenticationTicket: ticket,
+  path: '/Finance/Reports/Q1.pdf',
+  versionNumber: 0,           // 0 means the published version
+  summary: 'Quarterly results, revenue up 4%.'
+});
+```
+
+**An empty summary is a summary.** Sending one clears what is there, which is how a person takes back
+a summary they do not want - most likely one infoRouter Connect produced. That is deliberate: refusing
+an empty value would make "delete this summary" impossible over REST, where an empty form field
+arrives as null.
+
+A summary written this way records who wrote it and which version it is of, both readable from
+[GetDocumentSummary](GetDocumentSummary.md) on the `<Value>` element.
+
 ## Notes
 
 - Insert-or-update semantics: the first call for a document inserts its single row; every later call overwrites it, including one naming a different version.
@@ -113,6 +151,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 - This API does not call the Connect service; it only writes to the database.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not change this document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

@@ -1,14 +1,8 @@
 ﻿# RegisterEmail2 API
 
-
-
 Registers an email message as a document in infoRouter, specifying the destination folder path and the email document name as two separate parameters instead of a combined path. This makes it convenient when the folder and file name are already available as distinct values. Behavior is otherwise identical to `RegisterEmail1`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Registers an email message as a document in infoRouter, specifying the destinati
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/RegisterEmail2?AuthenticationTicket=...&FolderPath=...&EmailName=...&Senders=...&...`
 
@@ -28,11 +18,7 @@ Registers an email message as a document in infoRouter, specifying the destinati
 
 - **SOAP** Action: `http://tempuri.org/RegisterEmail2`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -51,27 +37,17 @@ Registers an email message as a document in infoRouter, specifying the destinati
 | `AttachmentHandlers` | string | No | Semicolon-separated list of email attachment descriptors. Each entry has the format `{filename}:{upload-handler-guid}`. Upload handlers must be pre-created with `CreateUploadHandler` and populated with `UploadFileChunk`. Pass empty string or omit if there are no attachments. |
 | `keywords` | string | No | Comma-separated list of user-defined keywords to assign to the registered email document (e.g. `invoice,Q1,finance`). Pass empty string or omit to register without keywords. |
 
-
-
 > **`RegisterEmail2` vs `RegisterEmail1`:** The only structural difference is that `TargetPath` (a combined folder + file name path) is replaced by two separate parameters: `FolderPath` and `EmailName`. All email fields, attachment handling, keywords, responses, and error conditions are identical.
-
-
 
 ### Attachments
 
-
-
 The `AttachmentHandlers` parameter format is:
-
-
 
 ```
 
 {filename1}:{handler-guid1};{filename2}:{handler-guid2}
 
 ```
-
-
 
 - Entries are separated by `;`
 
@@ -81,27 +57,17 @@ The `AttachmentHandlers` parameter format is:
 
 - After a successful call, the upload handlers are automatically deleted from the server
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
 <response success="true" error="" DocumentID="1051" DocumentName="Meeting-Notes.EMAIL" />
 
 ```
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -110,11 +76,7 @@ The `AttachmentHandlers` parameter format is:
 | `DocumentID` | The infoRouter document ID assigned to the newly registered email document. |
 | `DocumentName` | The actual document name used (may differ from `EmailName` if auto-naming was applied). |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -122,39 +84,23 @@ The `AttachmentHandlers` parameter format is:
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must be **authenticated** (anonymous users cannot register emails). The user must have **add document** permission on the target folder.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/RegisterEmail2 HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -186,11 +132,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -228,11 +170,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -280,15 +218,74 @@ HTTP/1.1
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Files an e-mail as a document, taking the folder and the document name separately. **This is the
+variant to reach for**: the others take a single path that is the document's, not the folder's, which
+is easy to get wrong.
+
+```javascript
+const root = await call('RegisterEmail2', {
+  authenticationTicket: ticket,
+  FolderPath: '/Finance/Emails',
+  EmailName: '2026-09-supplier-query',       // .email is added
+  Senders: 'supplier@example.com',
+  Recipients: 'accounts@example.com',
+  CCAddress: 'manager@example.com',
+  BCCAddress: 'audit@example.com',
+  SentDate: '2026-09-01',
+  Subject: 'Invoice query',
+  header: '',
+  htmlBody: '<p>Could you check invoice 4471?</p>',
+  textBody: 'Could you check invoice 4471?',
+  AttachmentHandlers: '',
+  keywords: 'invoice,supplier'
+});
+
+console.log(root.getAttribute('DocumentID'), root.getAttribute('DocumentName'));
+```
+
+The addresses are stored on the document as a `SYSTBL_EMAIL` property set, readable with
+[GetDocument](GetDocument.md) and `withPropertySets=true`. This variant stores `CCAddress` and
+`BCCAddress` correctly; [RegisterEmail3](RegisterEmail3.md) does not.
+
+### Which of the four to use
+
+| | Where it goes | Keywords | Everything else |
+|---|---|---|---|
+| [RegisterEmail](RegisterEmail.md) | `TargetPath` - the **document** path | no | parameters |
+| [RegisterEmail1](RegisterEmail1.md) | `TargetPath` - the **document** path | yes | parameters |
+| [RegisterEmail2](RegisterEmail2.md) | `FolderPath` + `EmailName` | yes | parameters |
+| [RegisterEmail3](RegisterEmail3.md) | `FolderPath` + `EmailName` | yes | one XML document |
+
+Prefer `RegisterEmail2`. The first two take a single `TargetPath` which is the path of the *document*
+to create, not the folder to put it in - so aiming one at a folder writes the document beside that
+folder, named after it. `RegisterEmail2` takes the folder and the name separately and cannot be got
+wrong that way.
+
+`.email` is appended to the name unless it already ends with it, and the document is dated from
+`SentDate` rather than from now.
 
 ## Notes
-
-
 
 - `FolderPath` is the destination folder only -" do not include the document name. `EmailName` is the document name only -" do not include a folder path.
 
@@ -304,15 +301,9 @@ HTTP/1.1
 
 - Use `RegisterEmail3` to pass all email parameters in a single XML string instead of individual parameters.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [RegisterEmail](RegisterEmail.md) - Register an email using a combined `TargetPath` (no keywords)
 
@@ -326,15 +317,18 @@ HTTP/1.1
 
 - [GetDocument](GetDocument.md) - Get the properties of the registered email document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4090` | a document of that name is already in the folder |
+| `4041` | no folder at `FolderPath` |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -348,8 +342,5 @@ HTTP/1.1
 | Access denied | The user does not have add document permission on the target folder. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

@@ -1,14 +1,8 @@
 ﻿# RemoveFromFavorites API
 
-
-
 Removes the specified document or folder from the currently authenticated user's favorites list. If the item is not currently in the favorites list, the call completes successfully without making any changes.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Removes the specified document or folder from the currently authenticated user's
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/RemoveFromFavorites?authenticationTicket=...&itemPath=...`
 
@@ -28,30 +18,18 @@ Removes the specified document or folder from the currently authenticated user's
 
 - **SOAP** Action: `http://tempuri.org/RemoveFromFavorites`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `itemPath` | string | Yes | Full infoRouter path to the document or folder to remove from favorites (e.g. `/Finance/Reports/Q1-Report.pdf` or `/Finance/Reports`). Short document ID paths (`~D{id}` or `~D{id}.ext`) are also accepted. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -59,11 +37,7 @@ Removes the specified document or folder from the currently authenticated user's
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -71,31 +45,17 @@ Removes the specified document or folder from the currently authenticated user's
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 No special permissions are required beyond authentication. The call always operates on the **currently authenticated user's** favorites list; a user cannot modify another user's favorites through this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request (document)
-
-
 
 ```
 
@@ -109,11 +69,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request (folder)
-
-
 
 ```
 
@@ -127,11 +83,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -139,19 +91,13 @@ POST /srv.asmx/RemoveFromFavorites HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &itemPath=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -175,15 +121,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes a document or folder off the calling user's favourites.
+
+```javascript
+await call('RemoveFromFavorites', {
+  authenticationTicket: ticket,
+  itemPath: '/Finance/Reports'
+});
+```
+
+Removing something that is not on the list is a success, so this is safe to call without checking
+first. A path that names nothing at all is `4041`.
+
+**An unticketed caller is answered success rather than refused.** The anonymous user has no lists, so
+nothing is removed and nothing is at risk, but a client cannot tell that apart from a removal that
+happened. Every other write in this area refuses an unticketed call with `4010`.
 
 ## Notes
-
-
 
 - Both **documents** and **folders** can be removed from favorites using this API. The path is resolved as a document first; if no document is found at the path, it is resolved as a folder.
 
@@ -195,29 +170,25 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Use `AddToFavorites` to add a document or folder to the favorites list.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [AddToFavorites](AddToFavorites.md) - Add a document or folder to the current user's favorites list
 
 - [GetFavorites](GetFavorites.md) - Get the list of documents and folders marked as favorites by the current user
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at that path |
+| `none` | an unticketed caller is answered success |
 
 | Error | Description |
 |-------|-------------|
@@ -226,8 +197,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Document/Folder not found | The specified path does not resolve to an existing document or folder. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 
