@@ -135,6 +135,61 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Replaces the access list on a folder or a document, and stops it inheriting one.
+
+```javascript
+await call('SetAccessList', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports',
+  AccessListXML:
+    '<AccessList>' +
+      '<DomainMembers Right="2" />' +
+      '<UserGroup DomainName="" GroupName="AllStaff" Right="4" />' +
+      '<User UserName="jsmith" Right="5" />' +
+    '</AccessList>',
+  ApplyToTree: false
+});
+
+// Then read it back - see the warning below.
+const written = await call('GetAccessList', { authenticationTicket: ticket, Path: '/Finance/Reports' });
+```
+
+**It replaces the whole list.** Anything not named is gone, so read the current list with
+[GetAccessList](GetAccessList.md) and send it back with the changes. `<AccessList />` is a valid list
+meaning "nobody explicitly", and `ApplyToTree=true` writes the same list down the whole subtree.
+
+> **A holder it cannot find is silently dropped.** A user name nobody has, or a group that does not
+> exist, is answered `success="true"` and simply left out of the list - so a typed or renamed name
+> produces a confident "done" and grants nothing at all. Nothing in the answer says which entries were
+> kept. **Read the list back and check the entries you meant to write are in it.** User names are
+> matched without regard to case, and come back the way the server holds them.
+
+> **A right above 6 is clamped to 6, which is full control.** `Right="7"` and `Right="66"` both grant
+> everything, and a negative value clamps to `0`. The mistake is in the direction that gives away more
+> rather than less, so validate the number before sending it.
+
+Malformed `AccessListXML` is refused properly with `4000` here - unlike several other XML parameters
+in this API, which let the exception out as an HTTP 500.
+
 ## Notes
 
 - Setting the access list on a document ignores the `ApplyToTree` parameter.
@@ -155,6 +210,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at that path - including one the caller may not see |
+| `4030` | the caller may not change security on this item |
+| `4000` | `AccessListXML` is not well-formed XML |
+| `none` | a user or group that cannot be found is dropped without a word, and the call still succeeds |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

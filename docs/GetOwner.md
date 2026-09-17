@@ -100,6 +100,41 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports the user who owns a folder or a document, as the same `<User>` element the user operations
+return.
+
+```javascript
+const root = await call('GetOwner', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf'
+});
+
+const owner = root.querySelector('User');
+console.log(owner.getAttribute('UserName'), owner.getAttribute('Email'));
+```
+
+Unlike the access list, the owner is not treated as private: a caller with no ticket may read it where
+the item itself is readable.
+
 ## Notes
 
 - Works for both documents and folders.
@@ -117,6 +152,14 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at that path - including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

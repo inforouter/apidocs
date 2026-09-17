@@ -82,6 +82,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Throws away an item's own access list so that it inherits the one above it again.
+
+```javascript
+await call('ApplyInheritedAccessList', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports'
+});
+
+// InheritedSecurity is "true" again afterwards
+```
+
+The undo for [SetAccessList](SetAccessList.md). It takes a document as readily as a folder, and an
+item that is already inheriting is a success rather than an error.
+
 ## Notes
 
 - This operation removes any custom access list entries on the target item and reverts it to inherit security from its parent folder.
@@ -102,6 +135,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at that path - including one the caller may not see |
+| `4030` | the caller may not change security on this item |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

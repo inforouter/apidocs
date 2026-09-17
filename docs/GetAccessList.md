@@ -119,6 +119,62 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports who may do what with a folder or a document.
+
+```javascript
+const root = await call('GetAccessList', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports'
+});
+
+const list = root.querySelector('AccessList');
+
+if (list.getAttribute('InheritedSecurity') === 'true') {
+  // the item has no list of its own; this one comes from the folder above
+}
+
+for (const entry of list.querySelectorAll('User, UserGroup, Anonymous, DomainMembers')) {
+  console.log(entry.tagName,
+              entry.getAttribute('UserName') ?? entry.getAttribute('GroupName') ?? '',
+              entry.getAttribute('Right'),
+              entry.getAttribute('Description'));
+}
+```
+
+An access list is one `<AccessList>` element carrying the entries as children, and three attributes
+about the list itself: `InheritedSecurity` (`true` while the item has no list of its own),
+`DateApplied` and `AppliedBy`. A folder that has never been given a list inherits one and says so,
+with `DateApplied` empty.
+
+Each entry carries a `Right` and a `Description` - the number and the name of the same thing, the name
+in the caller's language. The four kinds of entry are `<Anonymous>`, `<DomainMembers>`, `<UserGroup>`
+and `<User>`.
+
+It answers the current list only. Use [GetAccessListHistory](GetAccessListHistory.md) for the ones
+before it.
+
+An access list names people, so this is refused to a caller with no ticket even where the item itself
+may be read anonymously.
+
 ## Notes
 
 - Returns the **current** access list only (no history). To also retrieve historical access list entries, use `GetAccessListHistory`.
@@ -139,6 +195,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at that path - including one the caller may not see |
+| `4030` | the caller may not read this item's access list |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

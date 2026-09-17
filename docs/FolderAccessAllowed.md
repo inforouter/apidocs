@@ -106,6 +106,71 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Asks whether the caller may do one thing to one folder.
+
+**It answers by succeeding or failing, not with a boolean.** Allowed is a plain success; not allowed
+is a failure. So a `4030` here is the answer to the question rather than a fault to report:
+
+```javascript
+async function allowed(action, path, actionId) {
+  const response = await fetch(`/srv.asmx/${action}?` + new URLSearchParams({
+    authenticationTicket: ticket, Path: path, ActionId: actionId
+  }));
+  const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+
+  if (root.getAttribute('success') === 'true') return true;
+  if (root.getAttribute('errorCode') === '4030') return false;
+
+  throw new Error(root.getAttribute('error'));      // 4041, 4000 - a real problem
+}
+```
+
+Both answer for the **anonymous user** when there is no ticket, rather than refusing - which is what
+makes them useful to an unauthenticated client deciding what to offer.
+
+### The actions it takes
+
+| `ActionId` | |
+|---:|---|
+| `2` | Delete folder |
+| `5` | Add or change meta data |
+| `6` | Remove meta data |
+| `7` | Set folder rules |
+| `10` | Change ownership |
+| `11` | Change security |
+| `17` | Change folder properties |
+| `26` | Read security access list |
+| `33` | Move this folder within this library |
+| `34` | Move this folder outside of this library |
+| `37` | Create document |
+| `38` | Create folder |
+| `41` | List folder contents |
+
+Anything else - including `42`, read folder statistics, which is a real action elsewhere - is refused
+`4000` with the list in the message.
+
+Use [DocumentAccessAllowed](DocumentAccessAllowed.md) for documents; this one answers `4041` for a
+document path, and the two take different sets of actions.
+
 ## Notes
 
 - Passing an invalid `ActionId` returns a `success="false"` response with a message listing the valid action IDs.
@@ -123,6 +188,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may not do that - this is the answer to the question, not a fault |
+| `4000` | `ActionId` is not one this operation takes; the message lists the ones it does |
+| `4041` | no folder at that path - including a document path |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

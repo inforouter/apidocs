@@ -112,6 +112,57 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Changes who owns a folder or a document.
+
+```javascript
+// The answer says success="false" even when it worked - see below. Confirm with GetOwner.
+await fetch('/srv.asmx/SetOwner?' + new URLSearchParams({
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  NewOwnerUserName: 'jsmith',
+  ApplytoTree: false
+}));
+
+const owner = await call('GetOwner', {
+  authenticationTicket: ticket, Path: '/Finance/Reports/Q1.pdf'
+});
+
+if (owner.querySelector('User').getAttribute('UserName') !== 'jsmith') {
+  throw new Error('the owner did not change');
+}
+```
+
+> **It reports `success="false" error="MultiStatus"` even when it worked.** The answer is built by the
+> multi-status helper, which always writes that pair, and the helper is reached on every call - so a
+> successful change looks exactly like a failed one. There is no `errorCode` and no `<log>` either:
+> the answer carries nothing at all to branch on. **Confirm with [GetOwner](GetOwner.md).**
+>
+> The one thing it does report properly is a user nobody is, which is `4041` - so a `4041` means the
+> name was wrong, and a `MultiStatus` means anything else, including success.
+
+`ApplytoTree=true` changes the owner of everything below a folder as well. Note the spelling of that
+parameter: a lower-case `t` in `ApplytoTree`, unlike `ApplyToTree` on
+[SetAccessList](SetAccessList.md).
+
 ## Notes
 
 - Setting the owner on a **document** ignores the `ApplytoTree` parameter.
@@ -132,6 +183,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no user by that name, or nothing at `Path` |
+| `none` | everything else, including success, is `success="false" error="MultiStatus"` with no code and no log |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
