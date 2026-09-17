@@ -1,14 +1,8 @@
 ﻿# CreateDocumentTypeDef API
 
-
-
 Creates a new document type definition in the system. Document types allow documents to be categorized and optionally associated with a required custom property set, enforcing metadata collection for documents of that type.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Creates a new document type definition in the system. Document types allow docum
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/CreateDocumentTypeDef?authenticationTicket=...&DocumentTypeName=...&RequiredPropertySetName=...`
 
@@ -28,11 +18,7 @@ Creates a new document type definition in the system. Document types allow docum
 
 - **SOAP** Action: `http://tempuri.org/CreateDocumentTypeDef`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -40,15 +26,9 @@ Creates a new document type definition in the system. Document types allow docum
 | `DocumentTypeName` | string | Yes | Name for the new document type. Maximum 30 characters. May contain only letters, digits, spaces, and underscores. The name `GENERIC` is reserved and cannot be used. |
 | `RequiredPropertySetName` | string | No | Name of an existing global property set to associate with this document type. When specified, documents of this type will require the named property set. The property set must be global (system-wide) and applicable to documents. Pass an empty string or omit to create a document type with no required property set. |
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -56,18 +36,12 @@ Creates a new document type definition in the system. Document types allow docum
 
 ```
 
-
-
 | Attribute | Description |
 |-----------|-------------|
 | `success` | `true` if the document type was created successfully. |
 | `DocumentTypeId` | The integer ID assigned to the newly created document type. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -75,31 +49,17 @@ Creates a new document type definition in the system. Document types allow docum
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Only **system administrators** may call this API. Non-administrator users receive an error even if they are domain managers.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" without a property set
-
-
 
 ```
 
@@ -115,11 +75,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" with a required property set
-
-
 
 ```
 
@@ -135,19 +91,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/CreateDocumentTypeDef HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -157,11 +107,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -187,15 +133,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a document type, optionally requiring a property set on documents that use it.
+
+```javascript
+const root = await call('CreateDocumentTypeDef', {
+  authenticationTicket: ticket,
+  DocumentTypeName: 'Supplier Invoice',
+  RequiredPropertySetName: 'INVOICE'      // empty for none
+});
+
+console.log(root.getAttribute('DocumentTypeId'));
+```
+
+Creating a document type is an administrator's job: a caller without those rights is refused `4030`,
+not `4010`. Use [CreateDocumentTypeDef1](CreateDocumentTypeDef1.md) to set a description or a
+retention schedule at the same time; this variant leaves both empty.
 
 ## Notes
-
-
 
 - Document type names are case-insensitive for uniqueness checks -" `Contract` and `CONTRACT` are treated as the same name.
 
@@ -207,15 +182,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To retrieve all defined document types, use `GetDocumentTypes`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocumentTypes](GetDocumentTypes.md) - Retrieve all defined document types
 
@@ -223,15 +192,19 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [DeleteDocumentTypeDef](DeleteDocumentTypeDef.md) - Delete a document type definition
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4030` | the caller is not a system administrator |
+| `4090` | a document type of that name already exists |
+| `4041` | no property set by the name in `RequiredPropertySetName` |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -245,8 +218,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `Specified custom propertyset is not a public property set.` | The named property set is not a global (system-wide) property set. |
 | `Property set not found` | The value specified in `RequiredPropertySetName` does not match any existing property set. |
 
-
-
 ---
-
 

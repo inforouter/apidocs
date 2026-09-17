@@ -1,14 +1,8 @@
 ﻿# Copy API
 
-
-
 Copies an existing document or folder to the specified destination path. The copy is placed inside the destination folder under the name derived from `DestinationPath`. Both documents and folders are supported; the source path is resolved as a document first, and as a folder if no document is found.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Copies an existing document or folder to the specified destination path. The cop
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/Copy?authenticationTicket=...&SourcePath=...&DestinationPath=...`
 
@@ -28,11 +18,7 @@ Copies an existing document or folder to the specified destination path. The cop
 
 - **SOAP** Action: `http://tempuri.org/Copy`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -40,30 +26,18 @@ Copies an existing document or folder to the specified destination path. The cop
 | `SourcePath` | string | Yes | Full infoRouter path of the document or folder to copy (e.g. `/Finance/Reports/Q1Report.pdf` or `/Finance/Reports`). |
 | `DestinationPath` | string | Yes | Target location for the copy. See **DestinationPath formats** below. |
 
-
-
 ### DestinationPath Formats
 
-
-
 The `DestinationPath` parameter controls both where the copy is placed and what it is named.
-
-
 
 | Format | Example | Behaviour |
 |--------|---------|-----------|
 | Full path | `/Finance/Archive/Q1Report_copy.pdf` | Copy is placed in `/Finance/Archive/` and named `Q1Report_copy.pdf`. The parent folder must already exist. |
 | Short folder ID | `~F12345` | Copy is placed in folder ID 12345 using the **original source name**. Useful when working with folder IDs rather than full paths. |
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -71,15 +45,9 @@ The `DestinationPath` parameter controls both where the copy is placed and what 
 
 ```
 
-
-
 ### Folder Copy -" Partial-failure Response
 
-
-
 When copying a folder, individual sub-item errors are logged. If any errors occurred the response includes the log:
-
-
 
 ```xml
 
@@ -91,11 +59,7 @@ When copying a folder, individual sub-item errors are logged. If any errors occu
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -105,19 +69,11 @@ When copying a folder, individual sub-item errors are logged. If any errors occu
 
 ```
 
-
-
 Error messages are prefixed with `Source:` or `Destination:` to indicate which path caused the problem.
-
-
 
 ---
 
-
-
 ## Required Permissions
-
-
 
 - The caller must be an **authenticated user** with a valid ticket.
 
@@ -129,19 +85,11 @@ Error messages are prefixed with `Source:` or `Destination:` to indicate which p
 
 - The destination folder must not have a **cutoff date**. A folder with any cutoff date, past or future, accepts no new documents or subfolders.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request -" Copy a Document
-
-
 
 ```
 
@@ -149,11 +97,7 @@ GET /srv.asmx/Copy?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Sou
 
 ```
 
-
-
 ### GET Request -" Copy a Document to Folder by ID
-
-
 
 ```
 
@@ -161,11 +105,7 @@ GET /srv.asmx/Copy?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Sou
 
 ```
 
-
-
 ### GET Request -" Copy a Folder
-
-
 
 ```
 
@@ -173,19 +113,13 @@ GET /srv.asmx/Copy?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Sou
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/Copy HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -195,11 +129,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -225,15 +155,50 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Copies a document or a folder. Like [Move](Move.md), `DestinationPath` is the **full new path of the
+copy**, not the folder to put it in: copying `/a/Q1.pdf` into `/b` means `/b/Q1.pdf`.
+
+```javascript
+await call('Copy', {
+  authenticationTicket: ticket,
+  SourcePath: '/Finance/Reports/Q1.pdf',
+  DestinationPath: '/Finance/Archive/Q1.pdf'
+});
+```
+
+A folder is copied with everything under it. The original is left where it was - that is the only
+difference from `Move`.
+
+**A successful copy carries no `errorCode` at all**, where most operations report `errorCode="0"`. A
+client reading `errorCode` before checking `success` sees nothing and must not treat that as a
+failure.
+
+**"It is already there" does not have one code in this family.** `AddToDownloadQueue` reports it as
+`4000`, `AddToFavorites` as `4090`, `Copy` as `4000` and `CreateDocumentShortcut` as `4090`. Branch on
+the operation, not on a shared rule.
 
 ## Notes
-
-
 
 - The source path is resolved as a **document first**. If no document is found at `SourcePath`, it is resolved as a **folder**.
 
@@ -249,15 +214,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To **rename** the copy, provide a different file name in `DestinationPath`. To keep the original name, point `DestinationPath` to the target folder using the `~F<folderId>` format.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [Move](Move.md) - Move a document or folder to a different path
 
@@ -267,15 +226,19 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetFolder](GetFolder.md) - Retrieve properties of a folder
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4000` | something of that name is already at the destination, or there is nothing at `SourcePath` - the message is prefixed "Source:" |
+| `4030` | the caller may not read the source or write at the destination |
+| `none` | partial failures come back as `success="false" error="[log]"` with the items listed inside |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -288,8 +251,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `This folder has been cut-off. New documents cannot be created in this folder.` | The destination folder has a cutoff date. Any cutoff date blocks new documents, even one that is still in the future. A folder copy returns `This folder has been cut off. New folders cannot be created in this folder.` instead. |
 | Document name already exists | A document with the same name already exists in the destination folder. |
 
-
-
 ---
-
 

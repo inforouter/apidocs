@@ -1,18 +1,10 @@
 ﻿# CreateURL API
 
-
-
 Creates a new URL document or updates the target address of an existing URL document at the specified path. URL documents are infoRouter items that store a hyperlink -" when opened, they redirect the user to the stored web address.
-
-
 
 When the target `Path` does not exist, a new URL document is created. When it already exists, a new version is created with the updated address.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ When the target `Path` does not exist, a new URL document is created. When it al
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/CreateURL?authenticationTicket=...&Path=...&AddressURL=...`
 
@@ -32,11 +20,7 @@ When the target `Path` does not exist, a new URL document is created. When it al
 
 - **SOAP** Action: `http://tempuri.org/CreateURL`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -44,15 +28,9 @@ When the target `Path` does not exist, a new URL document is created. When it al
 | `Path` | string | Yes | Full infoRouter path for the URL document to create or update (e.g. `/MyLibrary/Links/CompanyWebsite`). The document name must **not** end with the `.url` extension. |
 | `AddressURL` | string | Yes | The target web address to store in the URL document (e.g. `https://www.example.com`). |
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -60,11 +38,7 @@ When the target `Path` does not exist, a new URL document is created. When it al
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -72,33 +46,19 @@ When the target `Path` does not exist, a new URL document is created. When it al
 
 ```
 
-
-
 ---
 
-
-
 ## Required Permissions
-
-
 
 - **Creating a new URL document**: The authenticated user must have **Add Document** permission on the destination folder (the parent of `Path`).
 
 - **Updating an existing URL document**: The authenticated user must have **Check Out** and **Publish** permissions on the existing document at `Path`. If the document is already checked out by another user, the call fails.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request -" Create new URL document
-
-
 
 ```
 
@@ -114,19 +74,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request -" Create new URL document
-
-
 
 ```
 
 POST /srv.asmx/CreateURL HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -136,19 +90,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### POST Request -" Update existing URL document
-
-
 
 ```
 
 POST /srv.asmx/CreateURL HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -158,11 +106,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -188,15 +132,42 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a document that holds a web address.
+
+```javascript
+await call('CreateURL', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Links/supplier.url',
+  AddressURL: 'https://www.example.com/portal'
+});
+```
+
+**The address is not checked.** Anything non-empty is stored as written - no scheme is required and
+nothing is fetched - so a typo is kept and only shows up when someone follows the link. An empty
+`AddressURL` is refused by model binding with HTTP 400.
 
 ## Notes
-
-
 
 - The document name in `Path` must **not** include the `.url` file extension. infoRouter stores the URL address internally and does not use Windows-style `.url` files.
 
@@ -208,15 +179,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - If the document at `Path` is checked out by a **different user**, the call fails with an error.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [CreateDocumentShortcut](CreateDocumentShortcut.md) - Create a shortcut to another infoRouter document
 
@@ -224,15 +189,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocumentVersions](GetDocumentVersions.md) - List all versions of a document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4090` | a document of that name is already in the folder |
+| `4041` | no folder at the parent of `Path` |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -242,8 +210,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `Folder not found` | The destination folder (parent of `Path`) does not exist or is not accessible. |
 | `This document has been checked out by another user.` | The document at `Path` is checked out by a different user; it cannot be updated. |
 
-
-
 ---
-
 

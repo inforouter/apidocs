@@ -65,6 +65,40 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Puts a document or a folder into the calling user's download queue.
+
+```javascript
+await call('AddToDownloadQueue', {
+  authenticationTicket: ticket,
+  itemPath: '/Finance/Reports/Q1.pdf'
+});
+```
+
+The same item twice is refused with `4000`. A folder is accepted as readily as a document.
+
+**"It is already there" does not have one code in this family.** `AddToDownloadQueue` reports it as
+`4000`, `AddToFavorites` as `4090`, `Copy` as `4000` and `CreateDocumentShortcut` as `4090`. Branch on
+the operation, not on a shared rule.
+
 ## Notes
 
 - Returns an error if the item is already in the queue.
@@ -73,6 +107,15 @@ Host: yourserver
 - To download the queued items as a ZIP archive, use [DownloadZip](DownloadZip.md).
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4000` | the item is already in the queue |
+| `4041` | nothing at that path - including something the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

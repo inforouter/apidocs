@@ -66,6 +66,39 @@ authenticationTicket=abc123&documentTypeId=5
 <root success="true" />
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes a document type.
+
+```javascript
+await call('DeleteDocumentTypeDef', {
+  authenticationTicket: ticket,
+  documentTypeId: 1081
+});
+```
+
+**An id that does not exist is still a success.** There is no `4041` and no count of what was removed,
+so a caller cannot tell a delete that removed a type from one that found nothing - unlike
+[DeleteDocument](DeleteDocument.md) and [DeleteDocumentThumbnail](DeleteDocumentThumbnail.md) next to
+it, which both answer `4041`. Check with [GetDocumentTypes](GetDocumentTypes.md) if it matters.
+
 ## Notes
 
 - This operation permanently deletes the document type definition
@@ -77,6 +110,14 @@ authenticationTicket=abc123&documentTypeId=5
   - `UpdateDocumentTypeDef` - Update an existing document type
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4030` | the caller is not a system administrator |
+| `none` | an id that matches no document type is a success, not an error |
 
 Common error responses:
 

@@ -1,14 +1,8 @@
 ﻿# CreateEditDocumentURL API
 
-
-
 Creates a time-limited WebDAV URL for directly opening and editing a specific document in a WebDAV-enabled application such as Microsoft Office. The returned URL points to the document file and can be passed to Office applications to open it for in-place editing via WebDAV.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Creates a time-limited WebDAV URL for directly opening and editing a specific do
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/CreateEditDocumentURL?authenticationTicket=...&DocumentPath=...`
 
@@ -28,26 +18,16 @@ Creates a time-limited WebDAV URL for directly opening and editing a specific do
 
 - **SOAP** Action: `http://tempuri.org/CreateEditDocumentURL`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DocumentPath` | string | Yes | Full infoRouter path of the document to edit (e.g. `/MyLibrary/Reports/Budget.xlsx`). The document must exist and be of a WebDAV-editable type (e.g. Office documents). |
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -59,18 +39,12 @@ Creates a time-limited WebDAV URL for directly opening and editing a specific do
 
 ```
 
-
-
 | Element / Attribute | Description |
 |---------------------|-------------|
 | `success` | `true` if the URL was generated successfully. |
 | `Value` | The WebDAV path to the document. Prepend the server base URL (e.g. `https://yourserver`) to form the full URL to pass to a WebDAV client or Office application. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -78,31 +52,17 @@ Creates a time-limited WebDAV URL for directly opening and editing a specific do
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated non-anonymous user may call this API. The document at `DocumentPath` must be accessible to the user (Read permission is sufficient to generate the URL).
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -116,11 +76,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -128,19 +84,13 @@ POST /srv.asmx/CreateEditDocumentURL HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &DocumentPath=/MyLibrary/Reports/Budget.xlsx
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -164,15 +114,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### Using the returned URL
 
-
-
 Prepend your server's base URL to form the complete WebDAV address:
-
-
 
 ```
 
@@ -180,19 +124,49 @@ https://yourserver/dav/sid-3f2504e0-4f89-11d3-9a0c-0305e82c3301/MyLibrary/Report
 
 ```
 
-
-
 Pass this full URL to an Office application (e.g. via `ShellExecute` on Windows, or the Office URI scheme `ms-word:ofe|u|<url>`) to open the document for direct editing.
-
-
 
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+> **This operation does not currently work.** Every call fails with HTTP 500 and no error document,
+> whether the document exists or not. The adapter builds an app URL from
+> `context.Request.PathBase.ToString().ChopEnd(8)`, and `PathBase` is empty unless the application is
+> hosted under a path base, so the chop runs `Substring(0, -8)` and throws before the document is even
+> looked up. The value it computes is only used to estimate whether the generated URL would be too
+> long, so nothing about the answer depends on it. Use [CreateDiskMountURL](CreateDiskMountURL.md) to
+> open a WebDAV session in the meantime.
+
+When it works, it returns the WebDAV path to one document, with a fresh Office-edit session in it:
+
+```javascript
+const root = await call('CreateEditDocumentURL', {
+  authenticationTicket: ticket,
+  DocumentPath: '/Finance/Reports/Budget.xlsx'
+});
+
+const url = location.origin + root.querySelector('Value').textContent;
+```
 
 ## Notes
-
-
 
 - The returned `Value` is a **document-specific** WebDAV path. It points directly to the file and is intended for single-document edit sessions. To mount the entire infoRouter file system as a drive, use `CreateDiskMountURL` instead.
 
@@ -204,15 +178,9 @@ Pass this full URL to an Office application (e.g. via `ShellExecute` on Windows,
 
 - The document does not need to be checked out before calling this API. The WebDAV client is responsible for checkout/check-in via the DAV protocol during the edit session.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [CreateDiskMountURL](CreateDiskMountURL.md) - Create a root-level WebDAV mount URL for the entire infoRouter file system
 
@@ -220,15 +188,15 @@ Pass this full URL to an Office application (e.g. via `ShellExecute` on Windows,
 
 - [GetDownloadInfo](GetDownloadInfo.md) - Get download URL and metadata for a document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `HTTP 500` | every call, including one naming a document that exists; see the note above |
 
 | Error | Description |
 |-------|-------------|
@@ -236,8 +204,5 @@ Pass this full URL to an Office application (e.g. via `ShellExecute` on Windows,
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `Document not found` | The `DocumentPath` does not refer to an existing document. |
 
-
-
 ---
-
 

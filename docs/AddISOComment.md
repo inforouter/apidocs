@@ -1,14 +1,8 @@
 ﻿# AddISOComment API
 
-
-
 Adds an ISO compliance review comment to the latest version of the specified document. The comment is recorded as an ISO log entry and the document's last ISO review date is updated. The calling user must have an active ISO Review Task assigned to them for the target document.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Adds an ISO compliance review comment to the latest version of the specified doc
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/AddISOComment?authenticationTicket=...&DocumentPath=...&CommentText=...`
 
@@ -28,27 +18,17 @@ Adds an ISO compliance review comment to the latest version of the specified doc
 
 - **SOAP** Action: `http://tempuri.org/AddISOComment`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DocumentPath` | string | Yes | Full infoRouter path of the document to comment on (e.g. `/Finance/Reports/Q1Report.pdf`). |
-| `CommentText` | string | Yes | The ISO review comment text to record. Leading/trailing whitespace is normalized before saving. |
-
-
+| `CommentText` | string | Yes | The ISO review comment. It is recorded against a review task assigned to the caller; without one the call is refused with `4000`. |
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -56,11 +36,7 @@ Adds an ISO compliance review comment to the latest version of the specified doc
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -68,15 +44,9 @@ Adds an ISO compliance review comment to the latest version of the specified doc
 
 ```
 
-
-
 ---
 
-
-
 ## Required Permissions
-
-
 
 - The caller must be an **authenticated user** with a valid ticket.
 
@@ -84,19 +54,11 @@ Adds an ISO compliance review comment to the latest version of the specified doc
 
 - The document must not be in an **Offline (archived)** state.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -104,19 +66,13 @@ GET /srv.asmx/AddISOComment?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/AddISOComment HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -126,11 +82,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -156,15 +108,47 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+**This is not a free-form comment.** It answers an ISO or periodic review task assigned to the
+calling user, and a caller with no such task on the document is refused with `4000` - so it cannot be
+used to annotate a document the way [AddDocumentComment](AddDocumentComment.md) and
+[AddSOXComment](AddSOXComment.md) can. Assign the review first; the entry then appears in
+[GetISOLogs](GetISOLogs.md).
+
+```javascript
+try {
+  await call('AddISOComment', {
+    authenticationTicket: ticket,
+    DocumentPath: '/Quality/Procedures/SOP-12.pdf',
+    CommentText: 'Reviewed, no change required.'
+  });
+} catch (error) {
+  // 4000 here means "you have no review task on this document", not "the text was wrong"
+  console.warn(error.message);
+}
+```
 
 ## Notes
-
-
 
 - The comment is always applied to the **latest version** of the document (`LastVersionNumber`). There is no way to add an ISO comment to a specific older version via this API.
 
@@ -176,15 +160,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - An ISO Review Task is created as part of a Workflow process that includes an ISO review step. If no such workflow task exists for the calling user on this document, this API call will fail.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [AddSOXComment](AddSOXComment.md) - Add an SOX compliance comment to a document
 
@@ -194,15 +172,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [Search](Search.md) - Search for documents, e.g. by next ISO review date
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4000` | the caller has no ISO or periodic review task assigned on this document |
+| `4041` | no document at that path - including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -212,8 +193,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | There is no ISO Review Task assigned to you | The calling user does not have an active ISO Review Task for this document. |
 | Document is offline | The document is archived (offline state) and cannot accept ISO comments. |
 
-
-
 ---
-
 

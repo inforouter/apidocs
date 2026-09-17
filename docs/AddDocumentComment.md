@@ -117,6 +117,55 @@ SOAPAction: "http://tempuri.org/AddDocumentComment"
 - `DocumentAccessAllowed` - Check if user has specific access rights
 - `GetAccessList` - Get document access control list
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Adds a comment to a document. Comments accumulate: nothing is replaced, and there is no limit on how
+many a document may carry.
+
+```javascript
+await call('AddDocumentComment', {
+  authenticationTicket: ticket,
+  DocumentPath: '/Finance/Reports/Q1.pdf',
+  CommentText: 'Checked against the ledger.'
+});
+
+// read them back
+const comments = await call('GetDocumentComments', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf'
+});
+
+for (const comment of comments.querySelectorAll('Comment')) {
+  console.log(comment.getAttribute('AuthorName'),
+              comment.getAttribute('CommentDate'),
+              comment.textContent);
+}
+```
+
+`CommentText` is a non-nullable string on the REST action, so an empty comment is refused by model
+binding with HTTP 400 rather than stored. A comment has no id: to remove one, hand its `AuthorID` and
+`CommentDate` back to [DeleteDocumentComment](DeleteDocumentComment.md).
+
+This is not the same list as [AddSOXComment](AddSOXComment.md) or [AddISOComment](AddISOComment.md),
+which write compliance log entries that `GetDocumentComments` does not return.
+
 ## Notes
 
 - This is an **asynchronous operation** - the API returns a `Task<XElement>`
@@ -147,6 +196,14 @@ SOAPAction: "http://tempuri.org/AddDocumentComment"
    - Comments provide context for document history
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4041` | no document at that path - including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 Common error responses:
 

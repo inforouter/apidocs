@@ -1,18 +1,10 @@
 ﻿# CreateUploadHandler API
 
-
-
 Creates a server-side temporary upload handler that enables large file uploads to be sent in smaller chunks. Returns a handler GUID and the negotiated chunk size to use for subsequent `UploadFileChunk` calls.
-
-
 
 This is the first step in the chunked upload workflow. The handler acts as a staging area on the server until the upload is finalized by `UploadDocumentWithHandler`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ This is the first step in the chunked upload workflow. The handler acts as a sta
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/CreateUploadHandler?authenticationTicket=...&PreferedChunkSize=...`
 
@@ -32,26 +20,16 @@ This is the first step in the chunked upload workflow. The handler acts as a sta
 
 - **SOAP** Action: `http://tempuri.org/CreateUploadHandler`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PreferedChunkSize` | int | Yes | Preferred chunk size in bytes for subsequent `UploadFileChunk` calls. Pass `0` to use the system default. The server enforces a minimum of **262,144 bytes (256 KB)** and a maximum of **33,554,432 bytes (32 MB)**; values outside this range are silently clamped to the nearest limit. |
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -59,19 +37,13 @@ This is the first step in the chunked upload workflow. The handler acts as a sta
 
 ```
 
-
-
 | Attribute | Description |
 |-----------|-------------|
 | `success` | `true` if the handler was created successfully. |
 | `UploadHandler` | GUID string identifying the upload handler. Pass this value to every subsequent `UploadFileChunk` and `UploadDocumentWithHandler` call. |
 | `ChunkSize` | The actual chunk size in bytes the server has accepted (after clamping). Split the file into chunks of exactly this size (the last chunk may be smaller) when calling `UploadFileChunk`. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -79,31 +51,17 @@ This is the first step in the chunked upload workflow. The handler acts as a sta
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user may call this API.
-
-
 
 ---
 
-
-
 ## Chunked Upload Workflow
 
-
-
 Use the following sequence to upload a large file in chunks:
-
-
 
 1. **`CreateUploadHandler`** -" Allocate a handler and obtain the `UploadHandler` GUID and `ChunkSize`.
 
@@ -113,19 +71,11 @@ Use the following sequence to upload a large file in chunks:
 
 4. **`DeleteUploadHandler`** -" Clean up the handler if the upload is cancelled or if an error occurs before step 3 completes.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -139,11 +89,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -151,19 +97,13 @@ POST /srv.asmx/CreateUploadHandler HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &PreferedChunkSize=1048576
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -187,15 +127,49 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Opens a server-side upload slot for a chunked upload and says how big the chunks should be.
+
+```javascript
+const root = await call('CreateUploadHandler', {
+  authenticationTicket: ticket,
+  PreferedChunkSize: 1048576
+});
+
+const handler = root.getAttribute('UploadHandler');
+const chunkSize = Number(root.getAttribute('ChunkSize'));   // use this, not the number you sent
+```
+
+**Read `ChunkSize` back and use it.** The size asked for is a suggestion: the server clamps it to its
+own minimum and maximum and may return something quite different, and `0` means "your default" rather
+than zero. Splitting the file by the number you sent rather than the one you were given is the usual
+cause of a chunked upload that fails part-way.
+
+**This one does not check the ticket.** Unlike every other write here, a caller with no ticket is
+handed a handler and a chunk size. Uploading through it is still checked, so a handler on its own
+achieves nothing, but it does let an unauthenticated caller open upload slots.
 
 ## Notes
-
-
 
 - Pass `PreferedChunkSize=0` to let the server select the default chunk size configured in the application settings.
 
@@ -207,15 +181,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Upload handlers are tied to the authenticated user's session. A handler created with one ticket cannot be used with a different user's ticket.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [UploadFileChunk](UploadFileChunk.md) - Upload a single chunk of a file to an open handler
 
@@ -225,23 +193,20 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [UploadDocument](UploadDocument.md) - Upload a complete document in a single call (no handler required)
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `none` | a caller with no ticket is served; the operation does not authenticate |
 
 | Error | Description |
 |-------|-------------|
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 
-
-
 ---
-
 

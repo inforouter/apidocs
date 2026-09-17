@@ -1,14 +1,8 @@
 ﻿# CreateDocumentShortcut API
 
-
-
 Creates a document shortcut (`.lnk` file) at the specified path that points to an existing target document. Shortcuts allow the same document to appear in multiple locations without duplicating the file content.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Creates a document shortcut (`.lnk` file) at the specified path that points to a
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/CreateDocumentShortcut?authenticationTicket=...&Path=...&TargetDocumentPath=...`
 
@@ -28,11 +18,7 @@ Creates a document shortcut (`.lnk` file) at the specified path that points to a
 
 - **SOAP** Action: `http://tempuri.org/CreateDocumentShortcut`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -40,15 +26,9 @@ Creates a document shortcut (`.lnk` file) at the specified path that points to a
 | `Path` | string | Yes | Full infoRouter path for the new shortcut document to be created (e.g. `/MyLibrary/Shortcuts/AnnualReport.lnk`). The file name portion **must** end with the `.lnk` extension. |
 | `TargetDocumentPath` | string | Yes | Full infoRouter path of the existing document the shortcut will point to (e.g. `/MyLibrary/Finance/AnnualReport.pdf`). |
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -56,11 +36,7 @@ Creates a document shortcut (`.lnk` file) at the specified path that points to a
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -68,31 +44,17 @@ Creates a document shortcut (`.lnk` file) at the specified path that points to a
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The authenticated user must have **Add Document** permission on the destination folder (the parent folder of the `Path` parameter). The target document specified by `TargetDocumentPath` must also be accessible to the user.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -108,19 +70,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/CreateDocumentShortcut HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -130,11 +86,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -160,15 +112,42 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a shortcut document pointing at another document.
+
+```javascript
+await call('CreateDocumentShortcut', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Shortcuts/Q1.lnk',        // must end in .lnk
+  TargetDocumentPath: '/Finance/Reports/Q1.pdf'
+});
+```
+
+**The name must end in `.lnk`**, and that is checked before the target is looked at - so a shortcut
+named `.htm` pointing at a document that does not exist is answered with the extension complaint, not
+with "not found". Get the extension right first, then worry about the target.
 
 ## Notes
-
-
 
 - The `Path` parameter specifies both the destination folder and the shortcut file name. The file name (last segment of the path) **must** end with `.lnk`. If it does not, the API returns an error.
 
@@ -180,15 +159,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - When the shortcut is opened in infoRouter, it redirects the user to the target document.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [Copy](Copy.md) - Copy a document or folder to another location (creates a full copy, not a shortcut)
 
@@ -196,15 +169,19 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocument](GetDocument.md) - Retrieve properties of a document (works on both shortcuts and regular documents)
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4000` | the name does not end in `.lnk`; checked before the target is |
+| `4090` | a document of that name is already in the folder |
+| `4041` | no document at `TargetDocumentPath` |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -214,8 +191,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `Folder not found` | The destination folder (parent of `Path`) does not exist or is not accessible. |
 | `Document not found` | The `TargetDocumentPath` does not refer to an existing document. |
 
-
-
 ---
-
 

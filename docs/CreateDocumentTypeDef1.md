@@ -108,6 +108,42 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+[CreateDocumentTypeDef](CreateDocumentTypeDef.md) with two more things it can set: a retention and
+disposition schedule, and a description. Everything else is the same.
+
+```javascript
+const root = await call('CreateDocumentTypeDef1', {
+  authenticationTicket: ticket,
+  DocumentTypeName: 'Supplier Invoice',
+  RequiredPropertySetName: 'INVOICE',
+  RandDScheduleName: '',                    // empty for none
+  Description: 'Invoices received from suppliers'
+});
+```
+
+The description is the only one of the two that comes back from
+[GetDocumentTypes](GetDocumentTypes.md), so it is the simplest way to confirm the type was created
+the way it was meant.
+
 ## Notes
 
 - Document type names are case-insensitive for uniqueness checks — `Contract` and `CONTRACT` are treated as the same name.
@@ -131,6 +167,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
+| `4030` | the caller is not a system administrator |
+| `4090` | a document type of that name already exists |
+| `4041` | no property set, or no retention schedule, by the name given |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
