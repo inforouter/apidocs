@@ -1,6 +1,6 @@
 # UploadTiffAsPDF API
 
-Uploads a TIFF image file and stores it as a PDF document at the specified path. The server converts the TIFF to PDF automatically before storing. If no document exists at the path, a new document is created. If a document already exists, a new version is added.
+Intended to upload a TIFF image and store it as a PDF. **It does not convert** - see the warning below. What it does is a plain upload: a new document if the path is free, a new version if it is not.
 
 ## Endpoint
 
@@ -10,7 +10,6 @@ Uploads a TIFF image file and stores it as a PDF document at the specified path.
 
 ## Methods
 
-- **GET** `/srv.asmx/UploadTiffAsPDF?authenticationTicket=...&path=...&fileContent=...`
 - **POST** `/srv.asmx/UploadTiffAsPDF` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadTiffAsPDF`
 
@@ -87,6 +86,46 @@ Content-Type: image/tiff
 
 ---
 
+## JavaScript
+
+> **This operation does not convert anything.** The conversion runs only when the *new document name*
+> ends in `.tif` or `.tiff` - and both TIFF actions call the shared uploader with that name empty,
+> passing the destination as `Path` instead. The condition can therefore never be true, whatever the
+> caller sends. What actually happens is a plain upload: the bytes are stored verbatim under the name
+> in `Path`, and content that is not a TIFF at all is accepted without complaint.
+>
+> Until this is fixed, treat it as [UploadDocument](UploadDocument.md) and convert on the client.
+
+```javascript
+// Anything carrying bytes is POST-only: a byte[] cannot be bound from a query string, and a GET is
+// answered HTTP 415 before the operation runs.
+async function post(action, fields) {
+  const response = await fetch(`/srv.asmx/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ authenticationTicket: ticket, ...fields })
+  });
+
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml').documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+
+const base64 = bytes => btoa(String.fromCharCode(...bytes));
+```
+
+```javascript
+// What it does today: stores the bytes as they are, under the name in Path.
+await post('UploadTiffAsPDF', {
+  Path: '/Scans/2026/invoice.tif',
+  FileContent: base64(tiffBytes)
+});
+```
+
 ## Notes
 
 - The PDF conversion is performed server-side. The infoRouter PDF conversion service must be configured and running.
@@ -105,6 +144,17 @@ Content-Type: image/tiff
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | a document is already at that path and is not checked out by the caller |
+| `4041` | no folder at the parent of the path |
+| `4030` | the caller may not add documents there, or the folder rules forbid the file type |
+| `HTTP 415` | the call was a GET; the content can only be posted |
+| `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

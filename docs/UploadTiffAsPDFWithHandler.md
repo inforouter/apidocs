@@ -86,6 +86,82 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+> **This operation does not convert anything.** The conversion runs only when the *new document name*
+> ends in `.tif` or `.tiff` - and both TIFF actions call the shared uploader with that name empty,
+> passing the destination as `Path` instead. The condition can therefore never be true, whatever the
+> caller sends. What actually happens is a plain upload: the bytes are stored verbatim under the name
+> in `Path`, and content that is not a TIFF at all is accepted without complaint.
+>
+> Until this is fixed, treat it as [UploadDocument](UploadDocument.md) and convert on the client.
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+```javascript
+await call('UploadTiffAsPDFWithHandler', {
+  authenticationTicket: ticket,
+  Path: '/Scans/2026/invoice.tif',
+  UploadHandler: handler
+});
+```
+
+The staged equivalent of [UploadTiffAsPDF](UploadTiffAsPDF.md), and it converts exactly as much:
+nothing.
+
+### Staging content
+
+```javascript
+// 1. open a handler and read back the chunk size the server chose
+const opened = await call('CreateUploadHandler', {
+  authenticationTicket: ticket, PreferedChunkSize: 1048576
+});
+const handler = opened.getAttribute('UploadHandler');
+const chunkSize = Number(opened.getAttribute('ChunkSize'));
+
+// 2. send the file a chunk at a time, each with its own CRC32
+for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+  const chunk = bytes.slice(offset, offset + chunkSize);
+  const last = offset + chunkSize >= bytes.length;
+
+  let sent = await post('UploadFileChunk', {
+    UploadHandler: handler,
+    FileChunk: base64(chunk),
+    ChunkHEXCRC: crc32Hex(chunk),        // uppercase hex, no padding
+    LastChunk: String(last)
+  });
+
+  // a checksum mismatch asks for that chunk again rather than for the whole upload
+  while (sent.getAttribute('tryagain') === 'true') {
+    sent = await post('UploadFileChunk', { /* the same chunk */ });
+  }
+}
+
+// 3. commit it - this consumes the handler
+await call('UploadDocumentWithHandler', {
+  authenticationTicket: ticket, Path: '/Finance/Reports/Q1.pdf', UploadHandler: handler
+});
+```
+
+**A handler is consumed by the call that commits it.** Committing the same handler twice is `4000`
+"upload handler cannot be found". Abandon one that is no longer wanted with
+[DeleteUploadHandler](DeleteUploadHandler.md).
+
 ## Notes
 
 - The PDF conversion is performed server-side after all chunks are assembled. The infoRouter PDF conversion service must be configured and running.
@@ -105,6 +181,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the upload handler is unknown, expired, or has already been committed |
+| `4000` | a document is already at that path and is not checked out by the caller |
+| `4041` | no folder at the parent of the path |
+| `4030` | the caller may not add documents there, or the folder rules forbid the file type |
+| `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

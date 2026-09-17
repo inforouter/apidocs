@@ -215,6 +215,42 @@ You must parse this value to know which form inputs to collect and to build the 
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Renders a form template ready to be filled in. The HTML comes back as the root element's **CDATA**
+rather than in a child element.
+
+```javascript
+const root = await call('UseFormTemplate', {
+  authenticationTicket: ticket,
+  targetFolderPath: '/Forms/Filled',
+  templatePath: '/Forms/Templates/expenses.htm',
+  submitUrl: '/my-app/submit'
+});
+
+document.getElementById('host').innerHTML = root.textContent;
+```
+
+[SaveFilledForm](SaveFilledForm.md) writes the result back. Note that this operation answers a caller
+with **no ticket** as readily as an authenticated one, which its neighbours do not.
+
 ## Notes
 
 - The `templatePath` accepts either a full document path or the `~D<id>` short form. `~D999` is the reserved identifier for the built-in HTML document type and does not correspond to a physical document in the repository.
@@ -233,6 +269,15 @@ You must parse this value to know which form inputs to collect and to build the 
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at `templatePath`, or no folder at `targetFolderPath` |
+| `none` | a caller with no ticket is served |
+| `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

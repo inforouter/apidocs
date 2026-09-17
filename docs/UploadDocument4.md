@@ -10,7 +10,6 @@ Uploads a new document or creates a new version of an existing document at the s
 
 ## Methods
 
-- **GET** `/srv.asmx/UploadDocument4?authenticationTicket=...&path=...&fileContent=...&xmlParameters=...`
 - **POST** `/srv.asmx/UploadDocument4` (form data — recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadDocument4`
 
@@ -119,6 +118,69 @@ Content-Disposition: form-data; name="xmlParameters"
 
 ---
 
+## JavaScript
+
+```javascript
+// Anything carrying bytes is POST-only: a byte[] cannot be bound from a query string, and a GET is
+// answered HTTP 415 before the operation runs.
+async function post(action, fields) {
+  const response = await fetch(`/srv.asmx/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ authenticationTicket: ticket, ...fields })
+  });
+
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml').documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+
+const base64 = bytes => btoa(String.fromCharCode(...bytes));
+```
+
+```javascript
+await post('UploadDocument4', {
+  Path: '/Finance/Reports/Q1.pdf',
+  FileContent: base64(bytes),
+  xmlParameters:
+    '<parameters>' +
+      '<parameter Name="DESCRIPTION" Value="Q1 figures" />' +
+      '<parameter Name="KEYWORDS" Value="quarterly,finance" />' +
+      '<parameter Name="VERSIONCOMMENT" Value="Corrected after review" />' +
+      '<parameter Name="CHECKOUT" Value="YES" />' +
+    '</parameters>'
+});
+```
+
+The parameter document is the same one [CreateHtmlDocument](CreateHtmlDocument.md) takes, with the
+same two traps: **it is required even when empty** - send `<parameters />` - and a **malformed one is
+answered HTTP 500 with no error document at all**, because the parse runs before the operation is
+entered and outside any handler. Boolean values take English words only (`ON`, `TRUE`, `T`, `YES`,
+`Y`, `1` and their negatives), whatever language the refusal message arrives in.
+
+### The upload family
+
+Two ways in. Either the bytes travel with the call, or they are staged first and the call names the
+handler that holds them.
+
+| Bytes with the call | Staged, by handler | Adds |
+|---|---|---|
+| [UploadDocument](UploadDocument.md) | [UploadDocumentWithHandler](UploadDocumentWithHandler.md) | nothing |
+| [UploadDocument1](UploadDocument1.md) | [UploadDocumentWithHandler1](UploadDocumentWithHandler1.md) | a version comment |
+| [UploadDocument2](UploadDocument2.md) | | the `Checkout` flag |
+| [UploadDocument3](UploadDocument3.md) | [UploadDocumentWithHandler2](UploadDocumentWithHandler2.md) | a comment, and a checkout flag or a version number |
+| [UploadDocument4](UploadDocument4.md) | [UploadDocumentWithHandler3](UploadDocumentWithHandler3.md) | a parameter document |
+| | [UploadNewDocumentWidthHandler](UploadNewDocumentWidthHandler.md) | a folder and a name instead of one path |
+
+**Uploading over a document that already exists is a new version, and only whoever holds the checkout
+may make one.** Without a checkout the answer is `4000` "this document is not checked out". The
+`Checkout` flag means *check it out for me if it is not already*: the operation then checks out,
+uploads and checks back in, leaving the document free. It does not mean "leave it checked out".
+
 ## Notes
 
 - Passing an empty string `""` for `xmlParameters` uses server defaults for all options.
@@ -138,6 +200,19 @@ Content-Disposition: form-data; name="xmlParameters"
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | a document is already at that path and is not checked out by the caller |
+| `4041` | no folder at the parent of the path |
+| `4030` | the caller may not add documents there, or the folder rules forbid the file type |
+| `4000` | a boolean parameter carried a value that is not one of the English words |
+| `HTTP 415` | the call was a GET; the content can only be posted |
+| `HTTP 400` | `xmlParameters` was empty; it is required, so send `<parameters />` |
+| `HTTP 500` | `xmlParameters` was not well-formed XML; the exception escapes and there is no error document |
 
 | Error | Description |
 |-------|-------------|

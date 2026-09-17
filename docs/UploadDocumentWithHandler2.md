@@ -98,6 +98,102 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Commits staged content and **sets the version number explicitly**, from a major, a minor and a
+revision.
+
+```javascript
+await call('UploadDocumentWithHandler2', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  UploadHandler: handler,
+  VersionComments: 'Release 2.1.3',
+  MPVersionMajor: 2,
+  MPVersionMinor: 1,
+  MPVersionRevision: 3
+});
+```
+
+Those three are packed into the single integer infoRouter stores:
+`major * 1000000 + minor * 1000 + revision`, so 2, 1, 3 becomes `2001003`. This is the clearest
+demonstration in the API that a version number is **not an ordinal** - the second version of a
+document is `1000001`, not `2000000`.
+
+### Staging content
+
+```javascript
+// 1. open a handler and read back the chunk size the server chose
+const opened = await call('CreateUploadHandler', {
+  authenticationTicket: ticket, PreferedChunkSize: 1048576
+});
+const handler = opened.getAttribute('UploadHandler');
+const chunkSize = Number(opened.getAttribute('ChunkSize'));
+
+// 2. send the file a chunk at a time, each with its own CRC32
+for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+  const chunk = bytes.slice(offset, offset + chunkSize);
+  const last = offset + chunkSize >= bytes.length;
+
+  let sent = await post('UploadFileChunk', {
+    UploadHandler: handler,
+    FileChunk: base64(chunk),
+    ChunkHEXCRC: crc32Hex(chunk),        // uppercase hex, no padding
+    LastChunk: String(last)
+  });
+
+  // a checksum mismatch asks for that chunk again rather than for the whole upload
+  while (sent.getAttribute('tryagain') === 'true') {
+    sent = await post('UploadFileChunk', { /* the same chunk */ });
+  }
+}
+
+// 3. commit it - this consumes the handler
+await call('UploadDocumentWithHandler', {
+  authenticationTicket: ticket, Path: '/Finance/Reports/Q1.pdf', UploadHandler: handler
+});
+```
+
+**A handler is consumed by the call that commits it.** Committing the same handler twice is `4000`
+"upload handler cannot be found". Abandon one that is no longer wanted with
+[DeleteUploadHandler](DeleteUploadHandler.md).
+
+### The upload family
+
+Two ways in. Either the bytes travel with the call, or they are staged first and the call names the
+handler that holds them.
+
+| Bytes with the call | Staged, by handler | Adds |
+|---|---|---|
+| [UploadDocument](UploadDocument.md) | [UploadDocumentWithHandler](UploadDocumentWithHandler.md) | nothing |
+| [UploadDocument1](UploadDocument1.md) | [UploadDocumentWithHandler1](UploadDocumentWithHandler1.md) | a version comment |
+| [UploadDocument2](UploadDocument2.md) | | the `Checkout` flag |
+| [UploadDocument3](UploadDocument3.md) | [UploadDocumentWithHandler2](UploadDocumentWithHandler2.md) | a comment, and a checkout flag or a version number |
+| [UploadDocument4](UploadDocument4.md) | [UploadDocumentWithHandler3](UploadDocumentWithHandler3.md) | a parameter document |
+| | [UploadNewDocumentWidthHandler](UploadNewDocumentWidthHandler.md) | a folder and a name instead of one path |
+
+**Uploading over a document that already exists is a new version, and only whoever holds the checkout
+may make one.** Without a checkout the answer is `4000` "this document is not checked out". The
+`Checkout` flag means *check it out for me if it is not already*: the operation then checks out,
+uploads and checks back in, leaving the document free. It does not mean "leave it checked out".
+
 ## Notes
 
 - The manual version label (e.g. `2.0.1`) is a human-readable label separate from the internal infoRouter version ID.
@@ -116,6 +212,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the upload handler is unknown, expired, or has already been committed |
+| `4000` | a document is already at that path and is not checked out by the caller |
+| `4041` | no folder at the parent of the path |
+| `4030` | the caller may not add documents there, or the folder rules forbid the file type |
+| `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

@@ -10,7 +10,6 @@ Uploads a single binary chunk to a server-side upload handler as part of a chunk
 
 ## Methods
 
-- **GET** `/srv.asmx/UploadFileChunk?authenticationTicket=...&uploadHandler=...&fileChunk=...&chunkHEXCRC=...&lastChunk=...`
 - **POST** `/srv.asmx/UploadFileChunk` (form data -" recommended for binary content)
 - **SOAP** Action: `http://tempuri.org/UploadFileChunk`
 
@@ -109,6 +108,72 @@ false
 
 ---
 
+## JavaScript
+
+```javascript
+// Anything carrying bytes is POST-only: a byte[] cannot be bound from a query string, and a GET is
+// answered HTTP 415 before the operation runs.
+async function post(action, fields) {
+  const response = await fetch(`/srv.asmx/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ authenticationTicket: ticket, ...fields })
+  });
+
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml').documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+
+const base64 = bytes => btoa(String.fromCharCode(...bytes));
+```
+
+### Staging content
+
+```javascript
+// 1. open a handler and read back the chunk size the server chose
+const opened = await call('CreateUploadHandler', {
+  authenticationTicket: ticket, PreferedChunkSize: 1048576
+});
+const handler = opened.getAttribute('UploadHandler');
+const chunkSize = Number(opened.getAttribute('ChunkSize'));
+
+// 2. send the file a chunk at a time, each with its own CRC32
+for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+  const chunk = bytes.slice(offset, offset + chunkSize);
+  const last = offset + chunkSize >= bytes.length;
+
+  let sent = await post('UploadFileChunk', {
+    UploadHandler: handler,
+    FileChunk: base64(chunk),
+    ChunkHEXCRC: crc32Hex(chunk),        // uppercase hex, no padding
+    LastChunk: String(last)
+  });
+
+  // a checksum mismatch asks for that chunk again rather than for the whole upload
+  while (sent.getAttribute('tryagain') === 'true') {
+    sent = await post('UploadFileChunk', { /* the same chunk */ });
+  }
+}
+
+// 3. commit it - this consumes the handler
+await call('UploadDocumentWithHandler', {
+  authenticationTicket: ticket, Path: '/Finance/Reports/Q1.pdf', UploadHandler: handler
+});
+```
+
+**A handler is consumed by the call that commits it.** Committing the same handler twice is `4000`
+"upload handler cannot be found". Abandon one that is no longer wanted with
+[DeleteUploadHandler](DeleteUploadHandler.md).
+
+The answer carries `tryagain`, and on the last chunk `filehexcrc` - the checksum of the whole staged
+file, for a client that wants to check it before committing. `ChunkHEXCRC` is CRC-32 as uppercase hex
+with no padding, computed over the chunk's raw bytes rather than over its base64.
+
 ## Notes
 
 - Always check the `tryagain` attribute in the response. If `tryagain="true"`, the chunk checksum did not match -" resend the same chunk without advancing.
@@ -129,6 +194,16 @@ false
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the upload handler is unknown, expired, or has already been committed |
+| `none` | a checksum mismatch is `success="false"` with `tryagain="true"`, meaning send that chunk again |
+| `HTTP 415` | the call was a GET; the content can only be posted |
+| `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

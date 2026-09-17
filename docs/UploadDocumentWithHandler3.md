@@ -65,7 +65,15 @@ The server may respond with `tryagain="true"` on a transient failure for a singl
 
 ---
 
-### JavaScript Sample
+#Commits content staged with [UploadFileChunk](UploadFileChunk.md), taking the same parameter document
+[UploadDocument4](UploadDocument4.md) does. It is required even when empty - send `<parameters />` -
+and a malformed one is answered HTTP 500 with no error document, because the parse runs before the
+operation is entered and outside any handler.
+
+**A handler is consumed by the call that commits it**: committing the same one twice is `4000`
+"upload handler cannot be found".
+
+## JavaScript Sample
 
 The sample below uses the browser `File` API and `fetch`. It covers all four steps, computes CRC32 in-browser, handles `tryagain` retries, verifies the final file checksum, and explicitly deletes the upload handler after a successful finalization.
 
@@ -291,6 +299,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the upload handler is unknown, expired, or has already been committed |
+| `4000` | a document is already at that path and is not checked out by the caller |
+| `4041` | no folder at the parent of the path |
+| `4030` | the caller may not add documents there, or the folder rules forbid the file type |
+| `HTTP 400` | `xmlParameters` was empty; it is required, so send `<parameters />` |
+| `HTTP 500` | `xmlParameters` was not well-formed XML; the exception escapes and there is no error document |
 
 | Error | Description |
 |-------|-------------|

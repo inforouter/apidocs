@@ -278,6 +278,16 @@ SOAPAction: "http://tempuri.org/UploadZipWithHandler"
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the upload handler is unknown, expired, or has already been committed |
+| `4041` | no folder at `folderPath` |
+| `4030` | the caller may not add documents there, or the folder rules forbid the file type |
+| `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
+
 | Error | Description |
 |-------|-------------|
 | `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
