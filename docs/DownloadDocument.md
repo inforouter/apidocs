@@ -1,14 +1,8 @@
 ﻿# DownloadDocument API
 
-
-
 Downloads the latest version of a document and returns its content as a raw byte array. This is a single-call download suitable for small to medium-sized files. For large files, use the chunked download workflow (`GetDownloadHandler` -' `DownloadFileChunk` -' `DeleteDownloadHandler`) instead.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Downloads the latest version of a document and returns its content as a raw byte
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/DownloadDocument?authenticationTicket=...&Path=...`
 
@@ -28,68 +18,39 @@ Downloads the latest version of a document and returns its content as a raw byte
 
 - **SOAP** Action: `http://tempuri.org/DownloadDocument`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path of the document to download (e.g. `/MyLibrary/Reports/Report.pdf`). |
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 The response body contains the raw binary content of the document's latest version.
 
-
-
-- **REST (GET/POST)**: Returns raw bytes (`application/octet-stream`).
+- **REST (GET/POST)**: Returns `application/json` - a JSON **string** holding the content as base64,
+  not raw bytes. `await response.json()` gives the base64; decode it before use.
 
 - **SOAP**: Returns a `base64`-encoded byte array within the SOAP response envelope.
 
-
-
 ### Error Response
-
-
 
 On any error (authentication failure, document not found, offline document, or download failure), an **empty byte array** is returned. There is no XML error message. The caller must check whether the returned byte array is empty to detect failure.
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user with read access to the document may call this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -103,11 +64,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -115,19 +72,13 @@ POST /srv.asmx/DownloadDocument HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &Path=/MyLibrary/Reports/Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -151,11 +102,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Response (success)
-
-
 
 ```xml
 
@@ -175,15 +122,59 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+**The download operations do not answer XML, and over REST they do not answer raw bytes either.**
+They are declared to return `byte[]`, and the REST stack serialises that as `application/json`: the
+body is a JSON string whose contents are base64. Decode it before writing anything to disk.
+
+```javascript
+async function download(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const base64 = await response.json();            // a JSON string, not an object
+
+  if (base64 === '') throw new Error('empty - see below');
+
+  return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+}
+```
+
+**Failure is an empty string.** There is no error document and no `errorCode`: a document that is not
+there, a path naming a folder, a version that does not exist and a refusal all come back as `""`. A
+caller cannot tell them apart, and cannot tell any of them from a file that really is empty. Check
+with [DocumentExists](DocumentExists.md) first when it matters.
+
+```javascript
+const bytes = await download('DownloadDocument', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf'
+});
+```
+
+For a document too large to hold in memory, stage it with
+[DownloadZipWithHandler](DownloadZipWithHandler.md) and read it with
+[DownloadFileChunk](DownloadFileChunk.md) instead.
 
 ## Notes
-
-
 
 - This API always downloads the **latest version** of the document. To download a specific version use `DownloadDocumentVersion`.
 
@@ -195,15 +186,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - The downloaded bytes represent the file exactly as stored in the warehouse -" no conversion or transformation is applied.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [DownloadDocumentVersion](DownloadDocumentVersion.md) - Download a specific version of a document
 
@@ -215,15 +200,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocument](GetDocument.md) - Get document properties without downloading content
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `none` | every failure is an empty string with no error document; see above |
 
 | Condition | Result |
 |-----------|--------|
@@ -232,8 +217,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Document is in Offline state | Empty byte array returned |
 | Download failure | Empty byte array returned |
 
-
-
 ---
-
 

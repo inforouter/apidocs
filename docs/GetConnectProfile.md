@@ -2,7 +2,6 @@
 
 Has the local **infoRouter Connect** service profile a document version — a summary, a description, an abstract, keywords, the document type, the text of a scan, the values of a property set — and reports where each of the things you asked for has got to.
 
-
 This API **never calls the Connect service itself**. Producing any of this takes as long as a language model takes to answer, which is far too long to hold a web request open, so the work is queued and a background worker runs it. A call returns whatever is already stored, queues the rest, and tells you which is which. Asking twice does not queue the work twice, and a request from a user is placed ahead of everything queued automatically when documents were uploaded.
 
 > **Ask for everything you want in one call.** It is not merely convenient — it is usually cheaper. A description, an abstract, a summary, keywords and a document type are **one** AI call between them, where five separate requests would be five. The `plannedCalls` attribute on the response tells you the cost before any of it is spent.
@@ -275,6 +274,51 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Asks the AI service for what it knows about one document version - any of a summary, a description,
+an abstract, keywords, a document type, OCR text, markdown or extracted data, according to the flags.
+
+```javascript
+const root = await call('GetConnectProfile', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  VersionNumber: 0,               // 0 means the published version
+  ForceRefresh: false,            // true re-asks the service instead of using what is stored
+  IncludeSummary: true,
+  IncludeDescription: true,
+  IncludeAbstract: false,
+  IncludeKeywords: true,
+  IncludeDocumentType: false,
+  IncludeOcrText: false,
+  IncludeMarkdown: false,
+  IncludeRedactedText: false,
+  IncludeExtractData: '',
+  MaxKeywordCount: 10,
+  ScrubPii: ''
+});
+```
+
+Check with [GetConnectSettings](GetConnectSettings.md) first: asking for something the service is not
+provisioned for is a wasted round trip.
+
 ## Notes
 
 - Folders can have any of this produced automatically for documents added to them; see [SetFolderAIPreferences](SetFolderAIPreferences.md). A folder that asks for profiling gets the description, abstract, summary, keywords and document type from one call, the same way this API does. A folder cannot ask for a named property set — that is a per-request decision.
@@ -283,6 +327,15 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 - Generation requires infoRouter Connect to be configured through the `IRConnect` application settings.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not read the document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 Errors carry an `errorcode` attribute alongside the message. The code is the HTTP status multiplied by ten, so `4041` is 404 and `5030` is 503.
 

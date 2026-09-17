@@ -1,18 +1,10 @@
 ﻿# GetCheckedoutDocuments API
 
-
-
 Returns the list of documents currently checked out by the authenticated user. Only documents belonging to the calling user's active checkouts are included -" no folder items are returned. Results are sorted by document name ascending.
-
-
 
 To retrieve checked-out documents for a **different** user (requires elevated permissions), use `GetCheckedoutDocumentsByUser`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ To retrieve checked-out documents for a **different** user (requires elevated pe
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetCheckedoutDocuments?AuthenticationTicket=...&withpropertysets=...&withsecurity=...&withOwner=...&withVersions=...`
 
@@ -32,11 +20,7 @@ To retrieve checked-out documents for a **different** user (requires elevated pe
 
 - **SOAP** Action: `http://tempuri.org/GetCheckedoutDocuments`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -46,33 +30,19 @@ To retrieve checked-out documents for a **different** user (requires elevated pe
 | `withOwner` | bool | Yes | `true` to include owner user information as a child element in each document result. `false` to omit. |
 | `withVersions` | bool | Yes | `true` to include document version history (`<Versions>` child element) in each document result. `false` to omit. |
 
-
-
 > **Performance tip:** Set all boolean flags to `false` for the fastest, most compact response. Only enable the flags your application actually needs.
-
-
 
 ---
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 Returns a `<response>` root element with `<document>` child elements -" one per checked-out document -" sorted by document name ascending. If the current user has no checked-out documents, the response contains no child elements.
-
-
 
 ```xml
 
 <response success="true" error="">
-
-
 
   <document DocumentID="1051"
 
@@ -180,45 +150,29 @@ Returns a `<response>` root element with `<document>` child elements -" one per 
 
             UserViewStatus="2">
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withsecurity=true -->
 
     <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
-
-
 
     <!-- Included only when withVersions=true -->
 
     <Versions> ... </Versions>
 
-
-
   </document>
-
-
 
 </response>
 
 ```
 
-
-
 ### Document Element Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -276,11 +230,7 @@ Returns a `<response>` root element with `<document>` child elements -" one per 
 | `VersionCount` | Total number of versions for this document. |
 | `UserViewStatus` | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
 
-
-
 ### Optional Child Elements
-
-
 
 | Element | Enabled by | Description |
 |---------|------------|-------------|
@@ -289,11 +239,7 @@ Returns a `<response>` root element with `<document>` child elements -" one per 
 | `<User>` | `withOwner=true` | Owner user details. |
 | `<Versions>` | `withVersions=true` | Full version history list for the document. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -301,31 +247,17 @@ Returns a `<response>` root element with `<document>` child elements -" one per 
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user may call this API. The response contains only documents checked out by the **calling user** -" there is no way to query another user's checkouts with this method. Use `GetCheckedoutDocumentsByUser` for that purpose (requires elevated permissions).
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -345,19 +277,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetCheckedoutDocuments HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -371,11 +297,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -405,15 +327,49 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents the calling user has checked out, in the full `<document>` shape
+[GetDocument](GetDocument.md) uses.
+
+```javascript
+const root = await call('GetCheckedoutDocuments', {
+  authenticationTicket: ticket,
+  withpropertysets: false,
+  withsecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+
+for (const document of root.querySelectorAll(':scope > document')) {
+  console.log(document.getAttribute('Path'), document.getAttribute('Name'),
+              document.getAttribute('CheckoutDate'));
+}
+```
+
+There is no `userName` here: it always answers for the caller. Use
+[GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) to ask about somebody else.
 
 ## Notes
-
-
 
 - Only documents checked out by the **currently authenticated user** are returned. This API cannot be used to query another user's checkouts.
 
@@ -425,15 +381,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - The `CheckoutDate`, `CheckoutBy`, and `CheckoutByUserName` attributes will always be populated for the returned documents since only checked-out documents are included.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked-out documents for a specified user (requires elevated permissions)
 
@@ -441,15 +391,16 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md) - Get documents assigned to a user for ISO review
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4010` | there is no ticket at all; the message is "User has been deleted.", which describes nobody |
 
 | Error | Description |
 |-------|-------------|
@@ -457,8 +408,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

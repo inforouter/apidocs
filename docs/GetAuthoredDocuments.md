@@ -84,9 +84,66 @@ authenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents one user wrote, a page at a time, in the full `<document>` shape
+[GetDocument](GetDocument.md) uses.
+
+```javascript
+let startingRow = 0;
+const rowCount = 100;
+
+for (;;) {
+  const root = await call('GetAuthoredDocuments', {
+    authenticationTicket: ticket, userName: 'jsmith', startingRow, rowCount
+  });
+
+  for (const document of root.querySelectorAll(':scope > document')) {
+    console.log(document.getAttribute('Path'));
+  }
+
+  startingRow += rowCount;
+  if (startingRow >= Number(root.getAttribute('recordCount'))) break;
+}
+```
+
+`rowCount=0` means **every row**, not none, and the answer then reports `rowCount` as the total rather
+than the zero that was sent - so a loop that trusts the value it sent will not terminate. The root
+carries `recordCount`, the total ignoring the paging, alongside the `startingRow` and `rowCount` that
+were applied.
+
 ## Notes
 
 - Use `startingRow=0` and `rowCount=0` to retrieve all authored documents (equivalent to calling [GetAuthoredDocuments](GetAuthoredDocuments.md)).
 - Results are returned in ascending order by document name.
 - The `totalcount` attribute on the root element reflects the total number of matching documents, regardless of paging parameters.
 - Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name |
+| `4010` | there is no ticket at all; the message is "User has been deleted." |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

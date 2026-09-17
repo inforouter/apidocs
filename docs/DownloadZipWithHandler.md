@@ -1,14 +1,8 @@
 ﻿# DownloadZipWithHandler API
 
-
-
 Stages a zip archive of specified documents and folders on the server and returns a download handler GUID for subsequent chunked retrieval via `DownloadFileChunk`. Unlike `DownloadZip`, this API returns XML (not raw bytes), supports partial results, and provides log details when items cannot be included.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Stages a zip archive of specified documents and folders on the server and return
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/DownloadZipWithHandler?authenticationTicket=...&Paths=...&partialResult=...`
 
@@ -28,11 +18,7 @@ Stages a zip archive of specified documents and folders on the server and return
 
 - **SOAP** Action: `http://tempuri.org/DownloadZipWithHandler`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -40,15 +26,9 @@ Stages a zip archive of specified documents and folders on the server and return
 | `Paths` | string | Yes | Pipe-separated (`\|`) list of infoRouter paths to include in the zip. Each entry can be a full path to a document or folder, or a short ID path (`~D{id}` for a document, `~F{id}` for a folder). Paths that cannot be resolved are silently skipped. |
 | `partialResult` | bool | Yes | Controls behavior when some items cannot be included in the archive. `false` -" fails if any errors occur during zip creation (strict mode). `true` -" succeeds and returns a handler even if some items were skipped, as long as the archive was created (partial mode). |
 
-
-
 ### Paths Format
 
-
-
 Multiple items are separated by a pipe character (`|`):
-
-
 
 ```
 
@@ -56,15 +36,9 @@ Multiple items are separated by a pipe character (`|`):
 
 ```
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -72,11 +46,7 @@ Multiple items are separated by a pipe character (`|`):
 
 ```
 
-
-
 If some items were skipped during a partial result zip, `error` is set to `"[log]"` and child log elements describe which items were excluded:
-
-
 
 ```xml
 
@@ -88,19 +58,13 @@ If some items were skipped during a partial result zip, `error` is set to `"[log
 
 ```
 
-
-
 | Attribute | Description |
 |-----------|-------------|
 | `success` | `true` if the zip archive was created and the handler is ready. |
 | `downloadhandler` | GUID identifying the staged zip file. Pass this to `DownloadFileChunk` to retrieve the archive in chunks, then to `DeleteDownloadHandler` to clean up. |
 | `error` | Empty string if no errors occurred. `"[log]"` if child log elements are present describing items that could not be included. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -112,27 +76,15 @@ If some items were skipped during a partial result zip, `error` is set to `"[log
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user with read access to the specified documents and folders may call this API.
-
-
 
 ---
 
-
-
 ## Chunked Download Workflow
-
-
 
 1. **`DownloadZipWithHandler`** *(this API)* -" Stage the zip archive and obtain a `downloadhandler` GUID.
 
@@ -140,19 +92,11 @@ Any authenticated user with read access to the specified documents and folders m
 
 3. **`DeleteDownloadHandler`** -" Clean up the handler and the temporary zip file on the server.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request (strict mode)
-
-
 
 ```
 
@@ -168,11 +112,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request (partial mode)
-
-
 
 ```
 
@@ -188,19 +128,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/DownloadZipWithHandler HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -210,11 +144,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -240,15 +170,66 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Builds the archive on the server and hands back a handler to read it with, rather than returning the
+bytes. This is the way to fetch something too big to hold in memory.
+
+```javascript
+const opened = await call('DownloadZipWithHandler', {
+  authenticationTicket: ticket,
+  Paths: '/Finance/Reports/Q1.pdf|/Finance/Archive',
+  partialResult: false
+});
+
+const handler = opened.getAttribute('downloadhandler');
+
+// read it, then let the server throw the archive away
+let offset = 0;
+for (;;) {
+  const chunk = await call('DownloadFileChunk', {
+    authenticationTicket: ticket, DownloadHandler: handler,
+    StartOffset: offset, ChunkSize: 65536
+  });
+
+  // chunk.textContent is base64
+  offset += Number(chunk.getAttribute('chunklength'));
+  if (chunk.getAttribute('lastchunk') === 'true') break;
+}
+
+await call('DeleteDownloadHandler', { authenticationTicket: ticket, DownloadHandler: handler });
+```
+
+**Its root element is `<Response>` with a capital R**, where every other operation answers
+`<response>`. A client selecting on the element name has to allow for both.
+
+**`partialResult` does nothing.** A path that resolves to nothing is dropped silently and the archive
+is built from the rest, whether the flag is `true` or `false`, and the answer carries no list of what
+was left out. Only a list where *nothing* resolves is refused, with `4000`. If it matters that every
+path was included, check them with [DocumentExists](DocumentExists.md) first.
+
+The same `|` separator as [DownloadZip](DownloadZip.md).
 
 ## Notes
-
-
 
 - Unlike `DownloadZip`, this API returns **XML** -" the zip archive is not returned directly. Use the `downloadhandler` GUID to retrieve the zip in chunks via `DownloadFileChunk`.
 
@@ -264,15 +245,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Always call `DeleteDownloadHandler` after finishing the chunked download to free temporary server storage.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [DownloadFileChunk](DownloadFileChunk.md) - Download chunks of the staged zip archive using the handler GUID
 
@@ -282,15 +257,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDownloadQue](GetDownloadQue.md) - Get the list of items in the current user's download queue
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4000` | nothing in `Paths` resolved to a document or folder |
+| `4000` | the ticket is expired or unknown. Every other operation reports that as `4010`; this one rebuilds the answer from the message alone and the code is lost, so the text still reads "[901]Session expired or Invalid ticket" |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -301,8 +278,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[log]` (with `success="false"`) | Zip creation failed; inspect child log elements for details. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

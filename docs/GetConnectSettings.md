@@ -137,6 +137,47 @@ GET /srv.asmx/GetConnectSettings?AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-03
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports what the infoRouter Connect AI service is configured for and what it can currently do. Read
+this before offering an AI feature, rather than calling the feature and handling the failure.
+
+```javascript
+const root = await call('GetConnectSettings', { authenticationTicket: ticket });
+const settings = root.querySelector('ConnectSettings');
+
+if (settings.getAttribute('reachable') !== 'true') return;      // service is down
+
+const usable = new Set(
+  [...settings.querySelectorAll('Capability')]
+    .filter(c => c.getAttribute('usable') === 'true')
+    .map(c => c.getAttribute('key'))
+);
+
+if (usable.has('summarize')) { /* offer summarising */ }
+```
+
+A `<Capability>` says three separate things: `enabledOnService` is whether the service offers it,
+`ready` whether it is provisioned, and `usable` whether both hold - branch on `usable`.
+`<SupportedExtensions>` lists the file types the service will read at all.
+
 ## Notes
 
 - Cache it. The report changes when an administrator changes something, not between two documents.
@@ -144,6 +185,12 @@ GET /srv.asmx/GetConnectSettings?AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-03
 - Ask for the work itself with [GetConnectProfile](GetConnectProfile.md), which reports per answer what became of the request.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 
 | Error | `errorcode` | Description |
 |-------|-------------|-------------|

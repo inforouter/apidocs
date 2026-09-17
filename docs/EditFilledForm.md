@@ -186,6 +186,47 @@ function InfoRouterEditForm({ renderedHtml, authTicket, documentPath }) {
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Returns the HTML of a filled form, ready to be edited and posted back.
+
+```javascript
+const root = await call('EditFilledForm', {
+  authenticationTicket: ticket,
+  documentPath: '/Forms/Filled/expenses-2026-03.htm',
+  submitUrl: '/my-app/submit'
+});
+
+document.getElementById('host').innerHTML = root.textContent;   // the HTML arrives as CDATA
+```
+
+> **It checks the document out first, and does not put it back when it fails.** The operation checks
+> the document out before rendering it, and returns the rendering failure without releasing the
+> checkout. A document that is not a filled form - an ordinary HTML document, say - is therefore left
+> locked by whoever asked, while the answer says only `4041` "document not found", which is wrong
+> twice over: the document is there, and it is now checked out. Release it with
+> [UnLock](UnLock.md) (`force=true`) if this happens.
+
+Pass the route of your own page as `submitUrl` to intercept the submission; leave it empty to post to
+the built-in handler.
+
 ## Notes
 
 - The rendered HTML is returned inside a CDATA section. Extract the element's text content before rendering it in a browser.
@@ -203,6 +244,15 @@ function InfoRouterEditForm({ renderedHtml, authTicket, documentPath }) {
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - **and also** what a document that is not a filled form is told, after it has been checked out |
+| `4230` | the document is checked out by somebody else |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

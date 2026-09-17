@@ -1,14 +1,8 @@
 ﻿# GetDocument API
 
-
-
 Returns the full metadata and properties of a single document identified by its infoRouter path. Optional parameters control whether additional detail (custom property sets, access control list, owner, version history) is included in the response.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the full metadata and properties of a single document identified by its 
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocument?AuthenticationTicket=...&Path=...&withPropertySets=...&withSecurity=...&withOwner=...&withVersions=...`
 
@@ -28,11 +18,7 @@ Returns the full metadata and properties of a single document identified by its 
 
 - **SOAP** Action: `http://tempuri.org/GetDocument`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -43,15 +29,9 @@ Returns the full metadata and properties of a single document identified by its 
 | `withOwner` | bool | Yes | `true` to include owner user information as a child element. `false` to omit. |
 | `withVersions` | bool | Yes | `true` to include document version history (`<Versions>` child element). `false` to omit. |
 
-
-
 ### Path Formats
 
-
-
 Both full paths and short ID paths are accepted:
-
-
 
 ```
 
@@ -63,33 +43,19 @@ Both full paths and short ID paths are accepted:
 
 ```
 
-
-
 > **Performance tip:** Set all boolean flags to `false` for the fastest, most compact response. Only enable the flags your application actually needs.
-
-
 
 ---
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 Returns a `<response>` root element with a single `<document>` child element containing the document's properties.
-
-
 
 ```xml
 
 <response success="true" error="">
-
-
 
   <document DocumentID="1051"
 
@@ -201,51 +167,33 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             UserViewStatus="2">
 
-
-
     <!-- Included only when withPropertySets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when the description has a recorded author -->
 
     <DescriptionLog AppliedById="4" AppliedBy="System Administrator" DateApplied="2024-03-01T09:14:22.000Z" />
 
-
-
     <!-- Included only when withSecurity=true -->
 
     <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
-
-
 
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
 
-
-
     <!-- Included only when withVersions=true -->
 
     <Versions> ... </Versions>
 
-
-
   </document>
-
-
 
 </response>
 
 ```
 
-
-
 ### Document Element Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -305,11 +253,7 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `VersionCount` | Total number of versions for this document. |
 | `UserViewStatus` | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
 
-
-
 ### Optional Child Elements
-
-
 
 | Element | Enabled by | Description |
 |---------|------------|-------------|
@@ -318,8 +262,6 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `<AccessList>` | `withSecurity=true` | Access control list (users, groups, rights) for the document. |
 | `<User>` | `withOwner=true` | Owner user details. |
 | `<Versions>` | `withVersions=true` | Full version history list for the document. |
-
-
 
 ### `<DescriptionLog>`
 
@@ -344,20 +286,13 @@ attribute cannot carry attributes of its own.
 
 ### Error Response
 
-
-
 ```xml
 
 <response success="false" error="Document not found." />
 
 ```
 
-
-
 ---
-
-
-
 
 ### AIEnhanced
 
@@ -394,7 +329,6 @@ Whether the values still need somebody's attention is a **separate** question, a
 
 A document that predates the flag reports `0`: nothing was produced for it, which is what `0` means. There is no "unknown" state.
 
-
 ### AIExtractConfidence
 
 `AIExtractConfidence` says how sure infoRouter Connect was about the **weakest** value it extracted into the document's property sets, as a percentage from `0` to `100`. It is there so a listing can highlight a document whose extracted values are worth a person's attention.
@@ -420,23 +354,13 @@ Suggested bands, as half-open intervals so they tile with no gap and nothing in 
 
 ## Required Permissions
 
-
-
 The calling user must have at least read access to the document. If the document does not exist or is not accessible to the user, an error response is returned.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -458,11 +382,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request (short ID path)
-
-
 
 ```
 
@@ -484,19 +404,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetDocument HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -512,11 +426,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -548,15 +458,52 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports one document as a `<document>` element.
+
+```javascript
+const root = await call('GetDocument', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  withPropertySets: false,
+  withSecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+
+const document = root.querySelector('document');
+console.log(document.getAttribute('DocumentID'),
+            document.getAttribute('Size'),
+            document.getAttribute('CheckoutByUserName') || '(not checked out)');
+```
+
+The four flags never change which document comes back, only how much is written about it: `withOwner`
+adds a `<User>` child, `withPropertySets` a `<Propertysets>`, `withSecurity` an `<AccessList>` and
+`withVersions` the version history. With all four off the element has no children at all.
+
+Version numbers are in the large-integer scheme, where version 1 is `1000000`.
 
 ## Notes
-
-
 
 - Both full infoRouter paths and short document ID paths (`~D{id}` or `~D{id}.ext`) are accepted for the `Path` parameter.
 
@@ -566,15 +513,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Setting all boolean flags to `false` returns only the core document attributes, which is the fastest and most compact response.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetFoldersAndDocuments](GetFoldersAndDocuments.md) - List documents and sub-folders within a folder path
 
@@ -584,15 +525,17 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocumentVersions](GetDocumentVersions.md) - Get the version history list for a document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -601,8 +544,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Document not found | The specified path does not resolve to an existing document. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

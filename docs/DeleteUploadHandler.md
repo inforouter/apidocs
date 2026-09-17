@@ -1,14 +1,8 @@
 ﻿# DeleteUploadHandler API
 
-
-
 Deletes an upload handler and discards its staged temporary file on the server. Use this to clean up if a chunked upload is cancelled or if an error occurs before the upload is finalized with `UploadDocumentWithHandler`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Deletes an upload handler and discards its staged temporary file on the server. 
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/DeleteUploadHandler?authenticationTicket=...&UploadHandler=...`
 
@@ -28,26 +18,16 @@ Deletes an upload handler and discards its staged temporary file on the server. 
 
 - **SOAP** Action: `http://tempuri.org/DeleteUploadHandler`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `UploadHandler` | string (GUID) | Yes | The handler GUID returned by `CreateUploadHandler`. Must be a valid GUID string. |
 
-
-
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -55,11 +35,7 @@ Deletes an upload handler and discards its staged temporary file on the server. 
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -67,31 +43,17 @@ Deletes an upload handler and discards its staged temporary file on the server. 
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user may call this API.
-
-
 
 ---
 
-
-
 ## Chunked Upload Workflow
 
-
-
 Upload handlers stage large files on the server before they are committed to the document library. `DeleteUploadHandler` is the cleanup step:
-
-
 
 1. **`CreateUploadHandler`** -" Allocate a handler and obtain the `UploadHandler` GUID and `ChunkSize`.
 
@@ -101,19 +63,11 @@ Upload handlers stage large files on the server before they are committed to the
 
 4. **`DeleteUploadHandler`** -" Call this **only if the upload is cancelled or fails** before step 3 completes. After a successful `UploadDocumentWithHandler` call the handler is consumed automatically and does not need to be deleted manually.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -127,11 +81,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -139,19 +89,13 @@ POST /srv.asmx/DeleteUploadHandler HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &UploadHandler=a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -175,15 +119,43 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Abandons an upload started with [CreateUploadHandler](CreateUploadHandler.md) and lets the server
+discard whatever was uploaded so far.
+
+```javascript
+await call('DeleteUploadHandler', {
+  authenticationTicket: ticket,
+  UploadHandler: handler
+});
+```
+
+Deleting the same handler twice is a success, not a `4041` - the operation is safe to call in a
+`finally`. A value that is not a GUID is refused before anything is looked up, with the untranslated
+literal `bad Request`, which reads the same in every language and matches no other message in the
+API.
 
 ## Notes
-
-
 
 - If the handler's temporary file does not exist (e.g. already cleaned up or never fully written), the call still returns success -" no error is raised.
 
@@ -193,15 +165,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Call `DeleteUploadHandler` if an error occurs at any point during `UploadFileChunk` or before `UploadDocumentWithHandler` is called, to free the temporary server storage.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [CreateUploadHandler](CreateUploadHandler.md) - Allocate an upload handler and obtain the GUID and chunk size
 
@@ -211,15 +177,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [DeleteDownloadHandler](DeleteDownloadHandler.md) - Delete a download handler and discard its temporary file
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | `UploadHandler` is not a GUID: "bad Request" |
 
 | Error | Description |
 |-------|-------------|
@@ -227,8 +194,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `bad Request` | `UploadHandler` is not a valid GUID string. |
 
-
-
 ---
-
 
