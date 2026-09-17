@@ -120,6 +120,45 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports one folder as a `<folder>` element.
+
+The four flags never change which folders come back, only how much is written about each: `withOwner`
+adds a `<User>` child, `WithRules` a `<Rules>`, `withPropertySets` a `<Propertysets>` and
+`withSecurity` an `<AccessList>`. With all four off the `<folder>` element has no children at all.
+
+```javascript
+const root = await call('GetFolder', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports',
+  WithRules: false,
+  withPropertySets: false,
+  withSecurity: false,
+  withOwner: false
+});
+
+const folder = root.querySelector('folder');
+console.log(folder.getAttribute('FolderID'), folder.getAttribute('Name'), folder.getAttribute('OwnerName'));
+```
+
 ## Notes
 
 - Set all boolean flags to `false` for the fastest response (metadata only, no sub-elements).
@@ -140,6 +179,24 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no folder at that path - including one the caller may not see. Most of this group answers `4041` for the same condition; see the note below |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+**The code for a missing folder is not the same across this group.** `GetFolderRules`,
+`GetFolderAIPreferences`, `GetFolderCatalog`, `GetFolderStatistics` and `DeleteFolder` answer `4041`;
+this one and `GetFolders` answer `4000` for the identical condition and message, because they report
+the failure through a helper that does not carry the code. A client that has to work with more than
+one of them should treat both numbers as "no such folder".
+
+A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
+a library flagged as anonymous can be read without authenticating. The writes in this group -
+`CreateFolder`, `CreateFolder1`, `CreateHtmlDocument` - refuse it with `4010`.
 
 | Error | Description |
 |-------|-------------|

@@ -88,6 +88,43 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Asks whether a parent folder has a subfolder of a given name. The same question as
+[FolderExists](FolderExists.md) asked in two parts.
+
+**It does not return a boolean.** A folder that is there is a plain success with nothing in it, and a
+folder that is not is a `4041` failure. `success` is the answer; there is no `exists` attribute to
+read, and a failure here is the expected result rather than a fault to report.
+
+```javascript
+const response = await fetch('/srv.asmx/FolderExists1?' + new URLSearchParams({
+  authenticationTicket: ticket, FolderPath: '/Finance/Reports', FolderName: '2026'
+}));
+const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+const exists = root.getAttribute('success') === 'true';
+```
+
+`FolderName` is matched whole, not as a filter, and an empty one is refused by model binding with
+HTTP 400 rather than reaching the operation.
+
 ## Notes
 
 - This variant accepts the parent path and folder name as separate parameters, which is useful when building folder paths programmatically.
@@ -105,6 +142,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | the parent has no subfolder of that name, or the parent itself is not there |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
 
 | Error | Description |
 |-------|-------------|

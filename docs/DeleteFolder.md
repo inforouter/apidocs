@@ -82,6 +82,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Deletes a folder **and everything under it**. There is no recursive flag and no confirmation: a
+folder with a thousand documents and a tree of subfolders goes in one call, and what it took with it
+is not reported.
+
+```javascript
+await call('DeleteFolder', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/2026'
+});
+```
+
+Deleting a folder that is not there is a `4041` failure, so a delete that runs twice reports the
+second attempt rather than passing silently.
+
 ## Notes
 
 - Top-level folders (domains/libraries) **cannot** be deleted using this API. Use `DeleteDomain` instead.
@@ -102,6 +135,19 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path - and also what an unticketed caller is told, worded as "User not found" |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+`DeleteFolder` refuses an unticketed caller like the other writes, but reports it differently: it
+answers `4041` "User not found" where the others answer `4010` "Anonymous users cannot perform this
+action". The refusal is right; only the way it is worded is not, and a client should not read that
+`4041` as a missing folder.
 
 | Error | Description |
 |-------|-------------|

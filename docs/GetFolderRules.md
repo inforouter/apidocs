@@ -136,6 +136,18 @@ async function disallowNewFolders(ticket, path) {
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path - including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
+a library flagged as anonymous can be read without authenticating. The writes in this group -
+`CreateFolder`, `CreateFolder1`, `CreateHtmlDocument` - refuse it with `4010`.
+
 | `errorcode` | Error (English) | Cause |
 |-------------|-----------------|-------|
 | `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |

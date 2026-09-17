@@ -22,7 +22,7 @@ Creates a new HTML document in the specified folder. The HTML content is stored 
 | `folderPath` | string | Yes | Full infoRouter path of the destination folder (e.g. `/Finance/Reports`). |
 | `name` | string | Yes | Document name. The `.htm` extension is appended automatically if the name does not already end with `.htm` or `.html`. |
 | `htmlContent` | string | Yes | Raw HTML body text to store as the document content. |
-| `xmlParameters` | string | No | XML string containing optional upload options. Pass an empty string to use server defaults. See format below. |
+| `xmlParameters` | string | **Yes** | XML document of upload options. Required by model binding even when empty - send `<parameters />` for none. Malformed XML here fails with HTTP 500. See format below. |
 
 ## xmlParameters Format
 
@@ -127,6 +127,54 @@ GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance
 GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance/Reports&name=Q1Summary&htmlContent=<h1>Q1</h1>&xmlParameters=
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a document from HTML held in the request rather than from an uploaded file.
+
+```javascript
+const root = await call('CreateHtmlDocument', {
+  authenticationTicket: ticket,
+  folderPath: '/Finance/Reports',
+  name: 'summary.htm',
+  htmlContent: '<html><body><h1>Q3</h1></body></html>',
+  xmlParameters:
+    '<parameters>' +
+      '<parameter Name="DESCRIPTION" Value="Q3 summary" />' +
+      '<parameter Name="KEYWORDS" Value="quarterly,finance" />' +
+    '</parameters>'
+});
+
+console.log(root.getAttribute('documentId'));
+```
+
+**`xmlParameters` is required even when there are no parameters.** It is declared as a non-nullable
+string on the REST action, so an empty one is refused by model binding with HTTP 400 before the
+operation runs. Send `<parameters />` to mean "none". A parameter name the operation does not
+recognise is ignored rather than refused.
+
+**The boolean parameters take English words only.** `CHECKOUT` and the other switches accept `ON`,
+`TRUE`, `T`, `YES`, `Y`, `1` and `OFF`, `FALSE`, `F`, `NO`, `N`, `0`. The message raised when a value
+is none of those is translated into the caller's language and lists the *translated* words, so a
+caller reading the answer in German or Turkish is told to send words the parser will not accept.
+Ignore the list in the message and send one of the English words above.
+
 ## Notes
 
 - The `.htm` extension is appended to `name` automatically if the name has no HTML extension. For example, `Q1Summary` becomes `Q1Summary.htm`.
@@ -140,3 +188,17 @@ GET /srv.asmx/CreateHtmlDocument?authenticationTicket=abc123&folderPath=/Finance
 - [CreateURL](CreateURL.md) — Create a URL shortcut document.
 - [UploadDocument](UploadDocument.md) — Upload a binary document file.
 - [CreateFolder](CreateFolder.md) — Create a folder to hold HTML documents.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4090` | a document of that name is already in the folder |
+| `4041` | no folder at `folderPath` |
+| `4000` | a boolean parameter such as `CHECKOUT` carried a value that is not one of the English words listed above |
+| `HTTP 400` | `xmlParameters` was empty; it is required, so send `<parameters />` |
+| `HTTP 500` | `xmlParameters` was not well-formed XML. The parse runs before the operation is entered and outside any handler, so the exception escapes and there is no error document at all - not even a `success="false"` body. It should be a `4000` |
+

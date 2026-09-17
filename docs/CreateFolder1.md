@@ -19,8 +19,8 @@ Creates a new subfolder with an optional description inside the specified parent
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `ParentFolderPath` | string | Yes | Full infoRouter path to the existing parent folder (e.g. `/Finance/Reports`). This folder must already exist. |
-| `NewFolderName` | string | Yes | Name of the new subfolder to create. Invalid characters are sanitized automatically. |
+| `ParentFolderPath` | string | Yes | Full infoRouter path to the parent folder (e.g. `/Finance/Reports`). It does **not** have to exist: any missing folder along the way is created. Only the library at the start of the path must already exist. |
+| `NewFolderName` | string | Yes | Name of the new subfolder. Sanitised before use - see below - so the folder created may carry a different name, which the response reports. An empty name, or one of nothing but spaces, is refused with HTTP 400. |
 | `Description` | string | No | Optional description for the new folder. |
 
 ---
@@ -96,6 +96,64 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates one folder from a parent path and a name, with an optional description. Otherwise the same
+as [CreateFolder](CreateFolder.md), which derives those two from a single path.
+
+**It creates the folders above it as well.** The parent is resolved with path creation switched on,
+so a path whose parent does not exist is not refused - the whole chain is created and the response
+reports the leaf. If a caller needs "fail when the parent is missing", it has to check with
+[FolderExists](FolderExists.md) first.
+
+### The name is cleaned before it is used
+
+The folder that appears may not be the one that was asked for, which is why the response reports
+`FolderName` rather than echoing the request. Read it back rather than assuming.
+
+| In the name | What happens |
+|---|---|
+| `/` `\` `:` `*` `?` `"` `<` `>` `|` `#` tab `%` `&` `+` | each becomes one `_` |
+| `..` | collapses to `.`, repeatedly |
+| two spaces | collapse to one, repeatedly |
+| leading or trailing `.` | removed |
+| leading or trailing whitespace | removed |
+| more than 128 characters | truncated, with a hash added before the extension |
+
+So `..Q3 report  <final>..` is created as `Q3 report _final_`.
+
+```javascript
+const root = await call('CreateFolder1', {
+  authenticationTicket: ticket,
+  ParentFolderPath: '/Finance/Reports',
+  NewFolderName: '2026',
+  Description: 'Quarterly reporting'
+});
+
+// The name it used, which may differ from the one asked for.
+console.log(root.getAttribute('FolderName'));
+```
+
+`Description` is optional and may be left empty. `NewFolderName` may not: an empty name, or one of
+nothing but spaces, is refused by model binding with HTTP 400 before the operation runs.
+
 ## Notes
 
 - Root-level folders (domains/libraries) cannot be created using this API. Use `CreateDomain` instead.
@@ -115,6 +173,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4090` | a folder of that name is already in the parent |
+| `4041` | `ParentFolderPath` is `/`, or names a library that does not exist |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
 
 | Error | Description |
 |-------|-------------|

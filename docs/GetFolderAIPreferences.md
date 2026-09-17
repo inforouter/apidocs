@@ -138,6 +138,45 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports the AI switches on one folder, each as a `<Preference>` with a `Value` of `on` or `off`.
+
+```javascript
+const root = await call('GetFolderAIPreferences', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports'
+});
+
+const preferences = Object.fromEntries(
+  [...root.querySelectorAll('Preference')]
+    .map(p => [p.getAttribute('Name'), p.getAttribute('Value') === 'on'])
+);
+
+if (preferences.AutoSummarize) console.log('new versions here are summarised');
+```
+
+A folder that has never been configured still answers, with every switch `off`, `UpdatedByUserID` of
+`0` and `UpdatedOn` of `1900-01-01T00:00:00`. Note that `UpdatedOn` is written in local time without
+a zone, unlike the `...Z` timestamps most of the API uses.
+
 ## Notes
 
 - Use `SetFolderAIPreferences` to modify the preferences of a folder.
@@ -155,6 +194,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path - including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
+a library flagged as anonymous can be read without authenticating. The writes in this group -
+`CreateFolder`, `CreateFolder1`, `CreateHtmlDocument` - refuse it with `4010`.
 
 | Error | Description |
 |-------|-------------|
