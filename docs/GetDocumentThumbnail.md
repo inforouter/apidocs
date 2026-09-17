@@ -60,6 +60,47 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+> **This returns bytes, not XML, and reports every failure as an empty string.** Like the download
+> operations it is declared to return `byte[]`, so over REST the body is `application/json` - a JSON
+> string holding base64 - and a failure is `""`. A document with no thumbnail, a document that does
+> not exist and a refusal are all the same two bytes, so there is no way to tell them apart. Check
+> with [DocumentExists](DocumentExists.md) first if it matters.
+
+```javascript
+const response = await fetch('/srv.asmx/GetDocumentThumbnail?' + new URLSearchParams({
+  authenticationTicket: ticket,
+  documentPath: '/Finance/Reports/Q1.pdf'
+}));
+
+const base64 = await response.json();
+if (base64 === '') return null;                      // no thumbnail, or no document
+
+const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+```
+
+Thumbnails are generated for the file types the server renders; an HTML document has none. Clear a
+stale one with [DeleteDocumentThumbnail](DeleteDocumentThumbnail.md), which regenerates it on next
+use.
+
 ## Notes
 
 - Thumbnails are stored as JPEG images, at most 240 pixels on the longest edge, regardless of the source document type. The aspect ratio of the source image is preserved, and an image already smaller than 240 pixels in both dimensions is not enlarged.
@@ -73,3 +114,12 @@ authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf
 - [UpdateDocumentThumbnail](UpdateDocumentThumbnail.md) — Upload a thumbnail image for a document.
 - [DeleteDocumentThumbnail](DeleteDocumentThumbnail.md) — Remove the thumbnail image from a document.
 - [GetDocument](GetDocument.md) — Get full document properties including the `ThumbnailExists` flag.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `none` | every failure, and a document with no thumbnail, is an empty string with no error document |
+

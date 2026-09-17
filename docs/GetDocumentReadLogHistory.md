@@ -288,7 +288,7 @@ for (const version of root.querySelectorAll('Version')) {
 
 - **ViewDate UTC**: All `ViewDate` timestamps are returned in UTC ISO 8601 format. An empty string indicates that the access date was not recorded.
 
-- **Version Number Format**: The `Number` attribute uses the external version format where version 1 = `1000000`, version 2 = `2000000`, etc.
+- **Version Number Format**: The `Number` attribute uses the external version format where version numbers pack a major, a minor and a revision into one integer as `major * 1000000 + minor * 1000 + revision`, so the first version is `1000000` and the second is `1000001` - not `2000000`, which would be major version 2.
 
 - **Document Path Only**: This API only accepts document paths. Passing a folder path returns a "Document not found" error.
 

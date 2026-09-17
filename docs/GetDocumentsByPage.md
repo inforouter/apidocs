@@ -1,14 +1,8 @@
 ﻿# GetDocumentsByPage API
 
-
-
 Returns a single page of documents in the specified infoRouter folder path in **short form**. Supports optional name filtering and 1-based page number navigation. The response uses the same abbreviated element names as `GetDocuments1` but adds paging attributes (`page`, `pageSize`) to the root element. Use this API when iterating through large folders one page at a time.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns a single page of documents in the specified infoRouter folder path in **
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocumentsByPage?AuthenticationTicket=...&Path=...&DocumentFilter=...&PageNumber=...`
 
@@ -28,11 +18,7 @@ Returns a single page of documents in the specified infoRouter folder path in **
 
 - **SOAP** Action: `http://tempuri.org/GetDocumentsByPage`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -41,23 +27,13 @@ Returns a single page of documents in the specified infoRouter folder path in **
 | `DocumentFilter` | string | No | Semicolon-separated list of document name patterns to filter results (e.g. `Report;Budget`). Pass an empty string or omit to return all documents. Matching is performed against document file names. |
 | `PageNumber` | int | Yes | 1-based page number to retrieve. The first page is `1`. The page size is determined by the system-wide **Search Page Size** setting. Pass `-1` to return all documents without paging. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 The root element is `<response>` and carries metadata about the queried folder and paging state as attributes. Each document on the requested page is returned as a `<d>` child element. Sub-folder items are never included.
-
-
 
 ```xml
 
@@ -80,8 +56,6 @@ The root element is `<response>` and carries metadata about the queried folder a
           page="2"
 
           pageSize="20">
-
-
 
   <d id="1071"
 
@@ -107,8 +81,6 @@ The root element is `<response>` and carries metadata about the queried folder a
 
      dtype="0" />
 
-
-
   <d id="1072"
 
      n="Forecast-Q3.pdf"
@@ -133,17 +105,11 @@ The root element is `<response>` and carries metadata about the queried folder a
 
      dtype="5" />
 
-
-
 </response>
 
 ```
 
-
-
 ### Root Element (`<response>`) Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -158,11 +124,7 @@ The root element is `<response>` and carries metadata about the queried folder a
 | `page` | The page number that was returned (present only when `PageNumber` is not `-1`). |
 | `pageSize` | The number of documents per page as configured in system settings (present only when `PageNumber` is not `-1`). |
 
-
-
 ### Document Element (`<d>`) Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -179,11 +141,7 @@ The root element is `<response>` and carries metadata about the queried folder a
 | `regdate` | Date the document was registered/uploaded (`yyyy-MM-dd` format). |
 | `dtype` | Document type integer ID (`0` if no type assigned). |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -191,31 +149,17 @@ The root element is `<response>` and carries metadata about the queried folder a
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least **List** permission on the specified folder. Documents to which the user has no access are automatically excluded from the results and counts. Read-only users may call this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" first page, no filter
-
-
 
 ```
 
@@ -233,11 +177,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" second page with filter
-
-
 
 ```
 
@@ -255,19 +195,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetDocumentsByPage HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -279,11 +213,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -311,11 +241,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### Iterating all pages
-
-
 
 ```
 
@@ -325,23 +251,63 @@ pageSize       = response/@pageSize
 
 totalPages     = ceil(totalDocuments / pageSize)
 
-
-
 for page = 1 to totalPages:
 
     GET /srv.asmx/GetDocumentsByPage?...&PageNumber={page}
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents in one folder a page at a time, with an optional name filter. `itemcount` counts
+**this page**.
+
+```javascript
+let page = 1;
+
+for (;;) {
+  const root = await call('GetDocumentsByPage', {
+    authenticationTicket: ticket,
+    Path: '/Finance/Reports',
+    DocumentFilter: '',
+    PageNumber: page
+  });
+
+  for (const d of root.querySelectorAll(':scope > d')) console.log(d.getAttribute('n'));
+
+  if (Number(root.getAttribute('itemcount')) < Number(root.getAttribute('pageSize'))) break;
+  page++;
+}
+```
+
+**`DocumentFilter` matches any part of the name** and needs no wildcard: `port` finds `Q1-report.pdf`.
+It is not the folder filter, which wants the whole name unless given a `*`. Several values may be
+given separated by `;`, and a value in double quotes must match the whole name. `*` is the only
+wildcard.
+
+`PageNumber=-1` returns everything in one answer and drops `page` and `pageSize` from the root. A page
+past the end is a success with nothing in it rather than an error.
 
 ## Notes
-
-
 
 - `PageNumber` is **1-based** -" the first page is `1`, not `0`.
 
@@ -361,15 +327,9 @@ for page = 1 to totalPages:
 
 - Date fields use `yyyy-MM-dd` format.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocuments1](GetDocuments1.md) - Get all documents in a folder in short form without paging
 
@@ -381,15 +341,25 @@ for page = 1 to totalPages:
 
 - [GetDocument](GetDocument.md) - Get the full properties of a single document by path
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no folder at that path - including one the caller may not see; see the note below |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+**The code for a missing folder is not the same across the three.** [GetDocuments](GetDocuments.md)
+answers `4041`; this one and the other compact listing answer `4000` for the identical condition and
+message, because they report the failure through a helper that does not carry the code. Treat both as
+"no such folder".
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -398,8 +368,5 @@ for page = 1 to totalPages:
 | `Folder not found` | The specified `Path` does not exist or is not accessible to the calling user. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

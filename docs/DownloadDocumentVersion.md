@@ -24,7 +24,7 @@ Downloads a specific version of a document and returns its content as a raw byte
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path of the document (e.g. `/MyLibrary/Reports/Report.pdf`). |
-| `VersionNumber` | int | Yes | Version number to download. Accepts both legacy format (e.g. `1`, `2`, `3`) and modernized format (e.g. `1000000`, `2000000`, `3000000`) -" legacy values are automatically converted internally. Use `GetDocumentVersions` to retrieve valid version numbers. |
+| `VersionNumber` | int | Yes | Version to download, or `0` for the published one. A small number (`1`, `2`, `3`) is multiplied by 1,000,000 internally, which makes it a **major** version - not the second or third version of the document. Use the numbers `GetDocumentVersions` reports. |
 
 ## Response
 
@@ -184,7 +184,7 @@ failure.
 
 ## Notes
 
-- Both **legacy** version numbers (e.g. `1`, `2`, `3`) and **modernized** version numbers (e.g. `1000000`, `2000000`, `3000000`) are accepted. Legacy values below 1,000,000 are automatically multiplied by 1,000,000 internally before the lookup. Either format will work -" use whatever `GetDocumentVersions` returns.
+- A version number below 1,000,000 is multiplied by 1,000,000 before the lookup, so `2` means major version 2 rather than the document's second version. infoRouter packs a major, a minor and a revision into one integer as `major * 1000000 + minor * 1000 + revision`. The first version of a document is `1000000` and the second is `1000001`; `2000000` is major version 2, not the second version. Values between `1` and `999,999` are rejected. Use `GetDocumentVersions` to read the numbers a document actually has rather than computing them.
 
 - If the document is in **Offline** state, an empty byte array is returned.
 

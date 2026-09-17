@@ -1,14 +1,8 @@
 ﻿# GetDownloadHandlerByVersion API
 
-
-
 Stages a specific version of a document as a temporary server-side file and returns a download handler GUID along with file metadata and the negotiated chunk size. This is the version-aware counterpart to `GetDownloadHandler`, which always stages the latest version. Use `DownloadFileChunk` to retrieve the file data in sequential chunks, then `DeleteDownloadHandler` to clean up the temporary file when done.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Stages a specific version of a document as a temporary server-side file and retu
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDownloadHandlerByVersion?AuthenticationTicket=...&Path=...&PreferedChunkSize=...&VersionNumber=...`
 
@@ -28,11 +18,7 @@ Stages a specific version of a document as a temporary server-side file and retu
 
 - **SOAP** Action: `http://tempuri.org/GetDownloadHandlerByVersion`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -41,44 +27,32 @@ Stages a specific version of a document as a temporary server-side file and retu
 | `PreferedChunkSize` | int | Yes | Preferred byte size for each chunk when calling `DownloadFileChunk`. The server clamps this value between **262,144 bytes (256 KB)** minimum and **33,554,432 bytes (32 MB)** maximum. The actual chunk size used is returned in the `ChunkSize` attribute of the response. |
 | `VersionNumber` | int | Yes | **Internal version number** of the version to stage. This is the `Number` attribute value returned by `GetDocumentVersions` (e.g. `1000000` for version 1, `2000000` for version 2). Values between 1 and 999,999 are invalid and will return an error. Pass `0` to stage the latest version (equivalent to `GetDownloadHandler`). |
 
-
-
 ### Version Number Format
 
+infoRouter packs a major, a minor and a revision into one integer as
+`major * 1000000 + minor * 1000 + revision`, so the number is not an ordinal:
 
+| What it is | VersionNumber |
+|------------|---------------|
+| Version 1.0.0, the first version of a document | `1000000` |
+| Version 1.0.1, the second | `1000001` |
+| Version 1.1.0 | `1001000` |
+| Version 2.0.0 | `2000000` |
+| The published version | `0` |
 
-infoRouter stores version numbers internally as multiples of 1,000,000:
-
-
-
-| User-visible version | VersionNumber to pass |
-|----------------------|-----------------------|
-| Version 1 | `1000000` |
-| Version 2 | `2000000` |
-| Version 3 | `3000000` |
-| Latest version | `0` |
-
-
+Read the numbers a document actually carries from `GetDocumentVersions` rather than computing them:
+successive check-ins normally bump the revision, so the second version of a document is `1000001`,
+not `2000000`.
 
 Always use the `Number` attribute from `GetDocumentVersions` to obtain the correct value -" do not multiply the sequential version number yourself, as the internal numbering may not always follow this simple pattern.
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 The server stages the specified document version, creates a temporary handler, and returns file metadata along with the handler GUID.
-
-
 
 ```xml
 
@@ -104,11 +78,7 @@ The server stages the specified document version, creates a temporary handler, a
 
 ```
 
-
-
 ### Response Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -123,11 +93,7 @@ The server stages the specified document version, creates a temporary handler, a
 | `ChunkSize` | The actual chunk size in bytes to use with `DownloadFileChunk`. This is the `PreferedChunkSize` value clamped to the allowed range (256 KB -" 32 MB). |
 | `downloadhandler` | GUID identifying the staged temporary file on the server. Pass this to `DownloadFileChunk` to retrieve file data in chunks, and to `DeleteDownloadHandler` to clean up after the download completes. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -135,27 +101,15 @@ The server stages the specified document version, creates a temporary handler, a
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least **read** access to the document. Offline (archived) documents cannot be downloaded and return an error.
-
-
 
 ---
 
-
-
 ## Chunked Download Workflow
-
-
 
 ```
 
@@ -169,11 +123,7 @@ The calling user must have at least **read** access to the document. Offline (ar
 
 ```
 
-
-
 **Chunk iteration pattern:**
-
-
 
 ```
 
@@ -185,8 +135,6 @@ handler     = response/@downloadhandler
 
 offset      = 0
 
-
-
 loop:
 
     GET /srv.asmx/DownloadFileChunk
@@ -197,39 +145,23 @@ loop:
 
         &ChunkSize={chunkSize}
 
-
-
     append base64-decoded chunk bytes to output file
 
     offset += chunk/@chunklength
 
-
-
     if chunk/@lastchunk == "true": break
-
-
 
 GET /srv.asmx/DeleteDownloadHandler?DownloadHandler={handler}
 
 ```
 
-
-
 > Always use `chunklength` from the `DownloadFileChunk` response (not the requested `ChunkSize`) when advancing `StartOffset`, because the final chunk may be smaller.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -247,19 +179,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetDownloadHandlerByVersion HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -271,11 +197,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -303,17 +225,11 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
-
-
 
 ## Notes
 
-
-
-- `VersionNumber` must be in the **internal format** (a multiple of 1,000,000). Use the `Number` attribute from `GetDocumentVersions` to obtain the correct value. Values between 1 and 999,999 are explicitly rejected by the server and will return an error.
+- `VersionNumber` is the packed `major * 1000000 + minor * 1000 + revision`, not an ordinal. Use the `Number` attribute from `GetDocumentVersions` rather than computing it. Values between 1 and 999,999 are explicitly rejected and will return an error.
 
 - Passing `VersionNumber=0` stages the latest version, which is equivalent to calling `GetDownloadHandler`.
 
@@ -329,15 +245,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To download a version without chunking use `DownloadDocumentVersion` (returns raw bytes directly).
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocumentVersions](GetDocumentVersions.md) - Get the version list for a document to obtain valid VersionNumber values
 
@@ -351,15 +261,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [DownloadDocumentVersion](DownloadDocumentVersion.md) - Download a specific version as a raw byte array (no chunking)
 
-
-
 ---
 
-
-
 ## Error Codes
-
-
 
 | Error | Description |
 |-------|-------------|
@@ -370,8 +274,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Offline document error | The document is in an archived/offline library and cannot be downloaded. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

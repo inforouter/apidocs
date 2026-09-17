@@ -1,18 +1,10 @@
 ﻿# GetDownloadHandler API
 
-
-
 Stages the latest version of a document as a temporary server-side file and returns a download handler GUID along with file metadata and the negotiated chunk size. This is the first step in the chunked download workflow for large files. Use `DownloadFileChunk` to retrieve the file data in sequential chunks, then `DeleteDownloadHandler` to clean up the temporary file when done.
-
-
 
 To download a specific version rather than the latest, use `GetDownloadHandlerByVersion`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ To download a specific version rather than the latest, use `GetDownloadHandlerBy
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDownloadHandler?AuthenticationTicket=...&Path=...&PreferedChunkSize=...`
 
@@ -32,11 +20,7 @@ To download a specific version rather than the latest, use `GetDownloadHandlerBy
 
 - **SOAP** Action: `http://tempuri.org/GetDownloadHandler`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -44,23 +28,13 @@ To download a specific version rather than the latest, use `GetDownloadHandlerBy
 | `Path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 | `PreferedChunkSize` | int | Yes | Preferred byte size for each chunk when calling `DownloadFileChunk`. The server clamps this value between **262,144 bytes (256 KB)** minimum and **33,554,432 bytes (32 MB)** maximum. The actual chunk size used is returned in the `ChunkSize` attribute of the response. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 The server stages the document file, creates a temporary handler, and returns file metadata along with the handler GUID.
-
-
 
 ```xml
 
@@ -86,11 +60,7 @@ The server stages the document file, creates a temporary handler, and returns fi
 
 ```
 
-
-
 ### Response Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -105,11 +75,7 @@ The server stages the document file, creates a temporary handler, and returns fi
 | `ChunkSize` | The actual chunk size in bytes to use with `DownloadFileChunk`. This is the `PreferedChunkSize` value clamped to the allowed range (256 KB -" 32 MB). |
 | `downloadhandler` | GUID identifying the staged temporary file on the server. Pass this to `DownloadFileChunk` to retrieve file data in chunks, and to `DeleteDownloadHandler` to clean up after the download completes. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -117,27 +83,15 @@ The server stages the document file, creates a temporary handler, and returns fi
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least **read** access to the document. Offline (archived) documents cannot be downloaded and return an error.
-
-
 
 ---
 
-
-
 ## Chunked Download Workflow
-
-
 
 ```
 
@@ -149,11 +103,7 @@ The calling user must have at least **read** access to the document. Offline (ar
 
 ```
 
-
-
 **Chunk iteration pattern:**
-
-
 
 ```
 
@@ -165,8 +115,6 @@ handler     = response/@downloadhandler
 
 offset      = 0
 
-
-
 loop:
 
     GET /srv.asmx/DownloadFileChunk
@@ -177,39 +125,23 @@ loop:
 
         &ChunkSize={chunkSize}
 
-
-
     append base64-decoded chunk bytes to output file
 
     offset += chunk/@chunklength
 
-
-
     if chunk/@lastchunk == "true": break
-
-
 
 GET /srv.asmx/DeleteDownloadHandler?DownloadHandler={handler}
 
 ```
 
-
-
 > Always use `chunklength` from the `DownloadFileChunk` response (not the requested `ChunkSize`) when advancing `StartOffset`, because the final chunk may be smaller.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -225,19 +157,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetDownloadHandler HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -247,11 +173,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -277,15 +199,65 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Describes a document and opens a chunked read of it in one call: the answer carries the size, the
+content type and the checksum alongside a handler for [DownloadFileChunk](DownloadFileChunk.md).
+
+```javascript
+const opened = await call('GetDownloadHandler', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  PreferedChunkSize: 65536
+});
+
+const handler = opened.getAttribute('downloadhandler');
+const size = Number(opened.getAttribute('Size'));
+const chunkSize = Number(opened.getAttribute('ChunkSize'));   // use this, not the number you sent
+
+try {
+  for (let offset = 0; offset < size; ) {
+    const chunk = await call('DownloadFileChunk', {
+      authenticationTicket: ticket, DownloadHandler: handler,
+      StartOffset: offset, ChunkSize: chunkSize
+    });
+
+    // chunk.textContent is base64
+    offset += Number(chunk.getAttribute('chunklength'));
+    if (chunk.getAttribute('lastchunk') === 'true') break;
+  }
+} finally {
+  await call('DeleteDownloadHandler', { authenticationTicket: ticket, DownloadHandler: handler });
+}
+```
+
+**`PreferedChunkSize` is a suggestion.** The server clamps it to its own limits and reports what it
+chose as `ChunkSize`; asking for 65536 comes back larger. Use the value you were given.
+
+`AlterDocumentName` is the file name to save as, and `CRC32` lets a client check what it assembled.
+This is the way to fetch a document too large to hold in memory -
+[DownloadDocument](DownloadDocument.md) returns the whole thing at once.
 
 ## Notes
-
-
 
 - The `PreferedChunkSize` value is clamped server-side: values below 262,144 bytes (256 KB) are raised to 262,144; values above 33,554,432 bytes (32 MB) are lowered to 33,554,432. Always read the actual `ChunkSize` from the response.
 
@@ -301,15 +273,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To download small documents without chunking use `DownloadDocument` (returns raw bytes directly).
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDownloadHandlerByVersion](GetDownloadHandlerByVersion.md) - Create a download handler for a specific version of a document
 
@@ -321,15 +287,20 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [DownloadDocument](DownloadDocument.md) - Download the latest version of a document as a raw byte array (no chunking)
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -339,8 +310,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Offline document error | The document is in an archived/offline library and cannot be downloaded. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

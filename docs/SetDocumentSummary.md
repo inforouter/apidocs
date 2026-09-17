@@ -42,7 +42,7 @@ The same applies to a summary stored before 9.0, when nothing recorded an author
 
 ### Version Number Format
 
-infoRouter uses a large-integer version numbering scheme where version 1 = `1000000`, version 2 = `2000000`, etc. Pass `0` to target the published version, or the latest version when the document has never been published.
+infoRouter uses a large-integer version numbering scheme where version numbers pack a major, a minor and a revision into one integer as `major * 1000000 + minor * 1000 + revision`, so the first version is `1000000` and the second is `1000001` - not `2000000`, which would be major version 2. Pass `0` to target the published version, or the latest version when the document has never been published.
 
 ## Behavior
 

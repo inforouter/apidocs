@@ -1,14 +1,8 @@
 ﻿# GetDocuments1 API
 
-
-
 Returns the documents in the specified infoRouter folder path in **short form**. This is a lightweight, high-performance variant of `GetDocuments` that uses abbreviated element names and a minimal attribute set. No optional enrichment flags are available -" use `GetDocuments` when full document metadata (property sets, security, owner, versions) is required.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the documents in the specified infoRouter folder path in **short form**.
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocuments1?AuthenticationTicket=...&Path=...`
 
@@ -28,34 +18,20 @@ Returns the documents in the specified infoRouter folder path in **short form**.
 
 - **SOAP** Action: `http://tempuri.org/GetDocuments1`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the folder whose documents should be returned (e.g. `/Finance/Reports`). Must point to an existing folder the user can access. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 The root element is `<response>` and carries metadata about the queried folder as attributes. Each document in the folder is returned as a `<d>` child element using short, abbreviated attribute names. Sub-folder items are not included. If the folder exists but contains no documents, only the root element with folder metadata is returned.
-
-
 
 ```xml
 
@@ -76,8 +52,6 @@ The root element is `<response>` and carries metadata about the queried folder a
           documentfilter=""
 
           itemcount="2">
-
-
 
   <d id="1051"
 
@@ -103,8 +77,6 @@ The root element is `<response>` and carries metadata about the queried folder a
 
      dtype="0" />
 
-
-
   <d id="1052"
 
      n="Budget-2024.xlsx"
@@ -129,17 +101,11 @@ The root element is `<response>` and carries metadata about the queried folder a
 
      dtype="0" />
 
-
-
 </response>
 
 ```
 
-
-
 ### Root Element (`<response>`) Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -153,11 +119,7 @@ The root element is `<response>` and carries metadata about the queried folder a
 | `documentfilter` | The document name filter applied (always empty -" no filter for this API). |
 | `itemcount` | Total count of document items returned. |
 
-
-
 ### Document Element (`<d>`) Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -174,11 +136,7 @@ The root element is `<response>` and carries metadata about the queried folder a
 | `regdate` | Date the document was registered/uploaded (`yyyy-MM-dd` format). |
 | `dtype` | Document type integer ID (`0` if no type assigned). |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -186,31 +144,17 @@ The root element is `<response>` and carries metadata about the queried folder a
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least **List** permission on the specified folder. Documents to which the user has no access are automatically excluded from the response. Read-only users may call this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -224,11 +168,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -236,17 +176,11 @@ POST /srv.asmx/GetDocuments1 HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Path=/Finance/Reports
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -270,15 +204,46 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Path=/Finance/Reports
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents directly in one folder as compact `<d>` elements - the same shape
+[GetFoldersAndDocuments1](GetFoldersAndDocuments1.md) uses, with the folders left out.
+
+```javascript
+const root = await call('GetDocuments1', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports'
+});
+
+for (const d of root.querySelectorAll(':scope > d')) {
+  console.log(d.getAttribute('id'), d.getAttribute('n'), d.getAttribute('size'));
+}
+```
+
+This is [GetDocumentsByPage](GetDocumentsByPage.md) with no filter and no paging - the whole folder in
+one answer. The root still reports the empty `documentfilter` it applied, but no `page` or `pageSize`,
+and no `folderfilter` because it never looked at folders.
 
 ## Notes
-
-
 
 - The listing is **not recursive** -" only the immediate documents in the specified `Path` are returned. Sub-folder contents are not traversed.
 
@@ -298,15 +263,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Path=/Finance/Reports
 
 - This API is significantly faster than `GetDocuments` for large folders because it avoids loading full document objects. Use it when only identity, name, size, date, or checkout status is needed.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocuments](GetDocuments.md) - Get full properties of every document in a folder path
 
@@ -318,15 +277,25 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Path=/Finance/Reports
 
 - [GetFoldersAndDocuments](GetFoldersAndDocuments.md) - Full-detail listing with optional property sets, security, owner, and version history
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no folder at that path - including one the caller may not see; see the note below |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+**The code for a missing folder is not the same across the three.** [GetDocuments](GetDocuments.md)
+answers `4041`; this one and the other compact listing answer `4000` for the identical condition and
+message, because they report the failure through a helper that does not carry the code. Treat both as
+"no such folder".
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -334,8 +303,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&Path=/Finance/Reports
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `Folder not found` | The specified `Path` does not exist or is not accessible to the calling user. |
 
-
-
 ---
-
 

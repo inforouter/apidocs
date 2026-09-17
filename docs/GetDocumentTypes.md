@@ -1,14 +1,8 @@
 ﻿# GetDocumentTypes API
 
-
-
 Returns the list of all document type definitions configured in the system. Document types allow documents to be classified and associated with a required custom property set.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the list of all document type definitions configured in the system. Docu
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocumentTypes?AuthenticationTicket=...`
 
@@ -28,33 +18,19 @@ Returns the list of all document type definitions configured in the system. Docu
 
 - **SOAP** Action: `http://tempuri.org/GetDocumentTypes`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<response>` root element containing a `<DocumentTypes>` child with one `<DocumentType>` element per defined document type. If no document types are configured, `<DocumentTypes>` is present but empty.
-
-
 
 ```xml
 
@@ -98,11 +74,7 @@ Returns a `<response>` root element containing a `<DocumentTypes>` child with on
 
 ```
 
-
-
 ### DocumentType Element Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -113,15 +85,9 @@ Returns a `<response>` root element containing a `<DocumentTypes>` child with on
 
 | `Description` | What the document type means, in a sentence. Empty string when no description has been set. |
 
-
-
 ### No Document Types Response
 
-
-
 When no document types are configured in the system:
-
-
 
 ```xml
 
@@ -133,11 +99,7 @@ When no document types are configured in the system:
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -145,31 +107,17 @@ When no document types are configured in the system:
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user may call this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -181,11 +129,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -193,17 +137,11 @@ POST /srv.asmx/GetDocumentTypes HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -225,15 +163,44 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists every document type and the property set each one requires.
+
+```javascript
+const root = await call('GetDocumentTypes', { authenticationTicket: ticket });
+
+for (const type of root.querySelectorAll('DocumentType')) {
+  console.log(type.getAttribute('TypeID'),
+              type.getAttribute('TypeName'),
+              type.getAttribute('PropertySetName') || '(none)');
+}
+```
+
+`PropertySetID` of `0` and an empty `PropertySetName` mean the type requires no property set. Reading
+the list needs no particular rights; creating and removing types does - see
+[CreateDocumentTypeDef](CreateDocumentTypeDef.md).
 
 ## Notes
-
-
 
 - All document types defined in the system are returned; there is no filtering or pagination.
 
@@ -245,15 +212,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To create, update, or delete document type definitions, use `CreateDocumentTypeDef`, `UpdateDocumentTypeDef`, or `DeleteDocumentTypeDef`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [CreateDocumentTypeDef](CreateDocumentTypeDef.md) - Create a new document type definition
 
@@ -261,15 +222,18 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocument](GetDocument.md) - Get document properties (includes `DocTypeID` and `DocTypeName`)
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -277,8 +241,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

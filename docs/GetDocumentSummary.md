@@ -142,6 +142,45 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads the AI-written summary of a document, and says whether it is ready.
+
+```javascript
+const root = await call('GetDocumentSummary', {
+  authenticationTicket: ticket,
+  path: '/Finance/Reports/Q1.pdf'
+});
+
+switch (root.getAttribute('status')) {
+  case 'Ready':   console.log(root.querySelector('Value').textContent); break;
+  case 'Pending': /* the job is queued - ask again later */             break;
+  default:        /* nothing has been asked for on this document */     break;
+}
+```
+
+**Branch on `status` before reading `<Value>`.** The summary is produced by the AI service, so it has
+a state as well as a value, and `<Value>` is only present once it is ready. A summary the service
+tried and failed to produce is reported as `5030` with the status on the error document - the caller
+can do nothing about it, so it is answered in the 500 band rather than blamed on the request.
+
 ## Notes
 
 - Both full infoRouter paths and short document ID paths (`~D{id}` / `~D{id}.ext`) are accepted.
@@ -151,6 +190,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/Finance/Reports/
 - `VersionNumber` may name a version that has since been deleted. It is provenance, not a live reference - the summary belongs to the document and outlives any one version of it.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `5030` | infoRouter Connect could not produce the summary and the job has used up its attempts |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 Errors carry an `errorcode` attribute alongside the message. The code is the HTTP status multiplied by ten, so `4041` is 404 and `5030` is 503.
 

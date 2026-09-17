@@ -150,6 +150,51 @@ SOAPAction: "http://tempuri.org/GetDocumentsOwnedByUser"
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents one user owns, a page at a time, each as a full `<document>` element.
+
+```javascript
+let startingRow = 0;
+const rowCount = 100;
+
+for (;;) {
+  const root = await call('GetDocumentsOwnedByUser', {
+    authenticationTicket: ticket, userName: 'jsmith', startingRow, rowCount
+  });
+
+  for (const document of root.querySelectorAll(':scope > document')) {
+    console.log(document.getAttribute('Path'), document.getAttribute('Name'));
+  }
+
+  startingRow += rowCount;
+  if (startingRow >= Number(root.getAttribute('recordCount'))) break;
+}
+```
+
+**`rowCount=0` means every row, not none**, and the answer then reports `rowCount` as the total rather
+than the zero that was sent - so a loop that trusts the value it sent will not terminate. The same
+applies to [GetFoldersOwnedByUser](GetFoldersOwnedByUser.md),
+[GetAuthoredDocuments](GetAuthoredDocuments.md) and
+[GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md).
+
 ## Notes
 
 - Results are always sorted by document name **ascending** regardless of paging parameters.
@@ -160,6 +205,15 @@ SOAPAction: "http://tempuri.org/GetDocumentsOwnedByUser"
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name |
+| `4010` | the caller has no ticket; the message is "User has been deleted.", which describes nobody |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

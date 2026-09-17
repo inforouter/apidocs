@@ -1,14 +1,8 @@
 ﻿# GetDocumentVersions API
 
-
-
 Returns the full version history list for a document. Each version entry includes the version author, file size, checksum, creation and publish dates, check-in comment, and approval information.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the full version history list for a document. Each version entry include
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocumentVersions?AuthenticationTicket=...&Path=...`
 
@@ -28,34 +18,20 @@ Returns the full version history list for a document. Each version entry include
 
 - **SOAP** Action: `http://tempuri.org/GetDocumentVersions`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<response>` root element containing a `<Versions>` element with one `<Version>` child per version. The list includes all versions ordered as stored. If the document has no versions, `<Versions>` is present but empty.
-
-
 
 ```xml
 
@@ -113,15 +89,9 @@ Returns a `<response>` root element containing a `<Versions>` element with one `
 
 ```
 
-
-
 ### Version Element
 
-
-
 Each `<Version>` element has one attribute and several child elements:
-
-
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -137,11 +107,7 @@ Each `<Version>` element has one attribute and several child elements:
 | `<ApprovalStatus>` | string | Approval status (e.g. `Approved`, `Pending`, `Rejected`). |
 | `<ApprovalDate>` | string | UTC timestamp when the version was approved. Empty if not approved. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -149,31 +115,17 @@ Each `<Version>` element has one attribute and several child elements:
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least read access to the document.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -187,11 +139,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -199,19 +147,13 @@ POST /srv.asmx/GetDocumentVersions HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &Path=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -235,15 +177,47 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists every version of a document.
+
+```javascript
+const root = await call('GetDocumentVersions', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf'
+});
+
+for (const version of root.querySelectorAll('Versions > Version')) {
+  console.log(version.getAttribute('Number'),
+              version.querySelector('VersionAuthor').textContent,
+              version.querySelector('CheckSum').textContent);
+}
+```
+
+Everything except `Number` is a child element rather than an attribute: `VersionAuthor`,
+`VersionAuthorId`, `VersionSize`, `CheckSum`, `DateCreated`, `DatePublished`, `Comment`,
+`ApprovalStatus` and `ApprovalDate`.
 
 ## Notes
-
-
 
 - All date fields use UTC ISO 8601 format (`yyyy-MM-ddTHH:mm:ss.fffZ`). An empty string means the date is not set.
 
@@ -251,19 +225,13 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - All child elements are always present in each `<Version>` even when their value is empty.
 
-- Version numbers in the `Number` attribute use the modern format: version 1 = `1000000`, version 2 = `2000000`, etc.
+- Version numbers in the `Number` attribute use the modern format: version numbers pack a major, a minor and a revision into one integer as `major * 1000000 + minor * 1000 + revision`, so the first version is `1000000` and the second is `1000001` - not `2000000`, which would be major version 2.
 
 - To retrieve a single specific version, use `GetDocumentVersion`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocumentVersion](GetDocumentVersion.md) - Get metadata for a single specific version
 
@@ -273,15 +241,20 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [DeleteDocumentVersion](DeleteDocumentVersion.md) - Permanently delete a specific version
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -290,8 +263,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Document not found | The specified path does not resolve to an existing document. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

@@ -1,14 +1,8 @@
 ﻿# GetDocumentTextOnlyContent API
 
-
-
 Returns the plain-text alternative content stored alongside the published version of a document, or alongside its latest version when the document has never been published. This text-only content is a separately stored artifact in the document warehouse -" it is only present if it has been explicitly set (for example, by a conversion process or via `SetDocumentTextOnlyContent`). If the document has no versions at all, is offline, or is a shortcut or URL type, an error is returned.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the plain-text alternative content stored alongside the published versio
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocumentTextOnlyContent?AuthenticationTicket=...&Path=...`
 
@@ -28,38 +18,22 @@ Returns the plain-text alternative content stored alongside the published versio
 
 - **SOAP** Action: `http://tempuri.org/GetDocumentTextOnlyContent`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 
-
-
 > **Note:** This API always retrieves the text-only content for the **published version** of the document - or its **latest version**, when the document has never been published. There is no version number parameter.
-
-
 
 ---
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 On success, the plain text content is returned as the body of the `<response>` element (not inside a child element):
-
-
 
 ```xml
 
@@ -71,19 +45,13 @@ alternative stored in the document warehouse.</response>
 
 ```
 
-
-
 | Attribute | Description |
 |-----------|-------------|
 | `success` | `"true"` on success. |
 | `error` | Empty string on success. |
 | *(element body)* | The plain text content of the resolved version. May be an empty string if text-only content has never been set for this document. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -91,31 +59,17 @@ alternative stored in the document warehouse.</response>
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least read access to the document and its published version.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -129,11 +83,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request (short ID path)
-
-
 
 ```
 
@@ -147,11 +97,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -159,19 +105,13 @@ POST /srv.asmx/GetDocumentTextOnlyContent HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &Path=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -195,15 +135,44 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads the plain-text rendition stored against a document - what
+[SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md) wrote, and what full-text search reads.
+
+```javascript
+const root = await call('GetDocumentTextOnlyContent', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf'
+});
+
+const text = root.textContent;    // on the root itself, not in a child element
+```
+
+The text is the root element's own content rather than a child element. A document with nothing
+stored is a success with an empty root, not an error, so there is no way to tell "never generated"
+from "generated and empty".
 
 ## Notes
-
-
 
 - The text content is returned directly as the body of the `<response>` element, not inside a named child element.
 
@@ -215,15 +184,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Both full infoRouter paths and short document ID paths (`~D{id}` or `~D{id}.ext`) are accepted for the `Path` parameter.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocumentAbstract1](GetDocumentAbstract1.md) - Get the full-text search index abstract for a document version
 
@@ -231,15 +194,20 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocumentVersions](GetDocumentVersions.md) - Get the version history list for a document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -252,8 +220,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Access denied | The user does not have read access to the document or its published version. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

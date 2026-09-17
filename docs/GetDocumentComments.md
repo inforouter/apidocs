@@ -1,14 +1,8 @@
 ﻿# GetDocumentComments API
 
-
-
 Returns all comments attached to a document. Each comment includes the author's user ID, login name, timestamp, and text content.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns all comments attached to a document. Each comment includes the author's 
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocumentComments?AuthenticationTicket=...&Path=...`
 
@@ -28,34 +18,20 @@ Returns all comments attached to a document. Each comment includes the author's 
 
 - **SOAP** Action: `http://tempuri.org/GetDocumentComments`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<response>` root element containing a `<Comments>` child element with one `<Comment>` element per comment. If the document has no comments, `<Comments>` is present but empty.
-
-
 
 ```xml
 
@@ -81,11 +57,7 @@ Returns a `<response>` root element containing a `<Comments>` child element with
 
 ```
 
-
-
 ### Comment Element Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -93,19 +65,11 @@ Returns a `<response>` root element containing a `<Comments>` child element with
 | `AuthorName` | Login name of the comment author. |
 | `CommentDate` | UTC timestamp when the comment was posted, in ISO 8601 format (`yyyy-MM-ddTHH:mm:ss.fffZ`). Empty string if the date is not set. |
 
-
-
 The text content of each `<Comment>` element is the comment body.
-
-
 
 ### No Comments Response
 
-
-
 When the document exists but has no comments:
-
-
 
 ```xml
 
@@ -117,11 +81,7 @@ When the document exists but has no comments:
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -129,31 +89,17 @@ When the document exists but has no comments:
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least read access to the document.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -167,11 +113,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request (short ID path)
-
-
 
 ```
 
@@ -185,11 +127,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -197,19 +135,13 @@ POST /srv.asmx/GetDocumentComments HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &Path=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -233,15 +165,51 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the comments on a document, newest information first.
+
+```javascript
+const root = await call('GetDocumentComments', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf'
+});
+
+for (const comment of root.querySelectorAll('Comments > Comment')) {
+  console.log(comment.getAttribute('AuthorName'),
+              comment.getAttribute('CommentDate'),
+              comment.textContent);
+}
+```
+
+A document with no comments answers with an empty `<Comments />` rather than an error. A comment has
+no id: `AuthorID` and `CommentDate` together are what
+[DeleteDocumentComment](DeleteDocumentComment.md) takes to remove one.
+
+This is the comment list only. The compliance entries written by
+[AddSOXComment](AddSOXComment.md) and [AddISOComment](AddISOComment.md) are separate and do not appear
+here.
 
 ## Notes
-
-
 
 - All comments for the document are returned; there is no filtering or pagination.
 
@@ -251,15 +219,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To add a comment, use `AddDocumentComment`. To delete a specific comment, use `DeleteDocumentComment`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [AddDocumentComment](AddDocumentComment.md) - Add a new comment to a document
 
@@ -267,15 +229,20 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocument](GetDocument.md) - Get full document metadata and properties
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -284,8 +251,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Document not found | The specified path does not resolve to an existing document. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

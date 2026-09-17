@@ -1,14 +1,8 @@
 ﻿# GetDocuments API
 
-
-
 Returns the full metadata and properties of every document in the specified folder path. Optional flags control whether additional detail (custom property sets, access control list, owner, version history) is included for each document in the response. Documents are returned sorted by name in ascending order.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the full metadata and properties of every document in the specified fold
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDocuments?AuthenticationTicket=...&Path=...&withPropertySets=...&withSecurity=...&withOwner=...&withVersions=...`
 
@@ -28,11 +18,7 @@ Returns the full metadata and properties of every document in the specified fold
 
 - **SOAP** Action: `http://tempuri.org/GetDocuments`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -43,33 +29,19 @@ Returns the full metadata and properties of every document in the specified fold
 | `withOwner` | bool | Yes | `true` to include owner user information as a child element for each document. `false` to omit. |
 | `withVersions` | bool | Yes | `true` to include full version history (`<Versions>` child element) for each document. `false` to omit. |
 
-
-
 > **Performance tip:** Set all boolean flags to `false` for the fastest, most compact response. Only enable the flags your application actually needs. For folders with many documents, enabling `withVersions=true` can significantly increase response time and size.
-
-
 
 ---
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 Returns a `<response>` root element with one `<document>` child element per document found in the folder. Documents are sorted alphabetically by name (ascending). If the folder exists but contains no documents, the root element has no children.
-
-
 
 ```xml
 
 <response success="true" error="">
-
-
 
   <document DocumentID="1051"
 
@@ -177,35 +149,23 @@ Returns a `<response>` root element with one `<document>` child element per docu
 
             UserViewStatus="2">
 
-
-
     <!-- Included only when withPropertySets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withSecurity=true -->
 
     <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
-
-
 
     <!-- Included only when withVersions=true -->
 
     <Versions> ... </Versions>
 
-
-
   </document>
-
-
 
   <document DocumentID="1052"
 
@@ -217,17 +177,11 @@ Returns a `<response>` root element with one `<document>` child element per docu
 
   </document>
 
-
-
 </response>
 
 ```
 
-
-
 ### Document Element Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -285,11 +239,7 @@ Returns a `<response>` root element with one `<document>` child element per docu
 | `VersionCount` | Total number of versions for this document. |
 | `UserViewStatus` | Integer indicating whether the current user has viewed the document. `0` = `NoView` (never viewed), `1` = `Changed` (viewed but the published version has since changed), `2` = `Viewed` (viewed the current published version). |
 
-
-
 ### Optional Child Elements per Document
-
-
 
 | Element | Enabled by | Description |
 |---------|------------|-------------|
@@ -298,11 +248,7 @@ Returns a `<response>` root element with one `<document>` child element per docu
 | `<User>` | `withOwner=true` | Owner user details. |
 | `<Versions>` | `withVersions=true` | Full version history list for the document. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -310,31 +256,17 @@ Returns a `<response>` root element with one `<document>` child element per docu
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least read access to the folder specified by `Path`. Only documents that the user has permission to view are returned. If the folder does not exist or the user does not have access to it, an error response is returned.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -356,11 +288,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request (with all details)
-
-
 
 ```
 
@@ -382,19 +310,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetDocuments HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -410,11 +332,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -446,15 +364,49 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents directly in one folder, each as a full `<document>` element in the shape
+[GetDocument](GetDocument.md) uses. Subfolders are not included.
+
+```javascript
+const root = await call('GetDocuments', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports',
+  withPropertySets: false,
+  withSecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+
+for (const document of root.querySelectorAll(':scope > document')) {
+  console.log(document.getAttribute('Name'), document.getAttribute('Size'));
+}
+```
+
+The four flags never change which documents come back, only how much is written about each. For a far
+smaller answer over the same documents use [GetDocuments1](GetDocuments1.md).
 
 ## Notes
-
-
 
 - `Path` must refer to an existing folder. Document paths are not accepted.
 
@@ -470,15 +422,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - To retrieve a compact list (short form) without full document properties, use `GetDocuments1`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocument](GetDocument.md) - Get the full properties of a single document by path
 
@@ -490,15 +436,20 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocumentVersions](GetDocumentVersions.md) - Get the version history for a specific document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no folder at that path - including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|
@@ -507,8 +458,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Folder not found | The specified path does not resolve to an existing folder. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

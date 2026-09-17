@@ -1,14 +1,8 @@
 ﻿# GetVersionTextOnlyContent API
 
-
-
 Returns the plain-text alternative content stored alongside a specific version of a document. This text-only content is a separately stored artifact in the document warehouse -" it is only present if it has been explicitly set (for example, by a conversion process or via `SetVersionTextOnlyContent`). Passing `0` for the version number retrieves the latest version's content, equivalent to calling `GetDocumentTextOnlyContent`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the plain-text alternative content stored alongside a specific version o
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetVersionTextOnlyContent?AuthenticationTicket=...&Path=...&VersionNumber=...`
 
@@ -28,11 +18,7 @@ Returns the plain-text alternative content stored alongside a specific version o
 
 - **SOAP** Action: `http://tempuri.org/GetVersionTextOnlyContent`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -40,11 +26,7 @@ Returns the plain-text alternative content stored alongside a specific version o
 | `Path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 | `VersionNumber` | int | Yes | Internal version number of the version whose text-only content to retrieve. Pass `0` to retrieve the latest version. See note below for the internal version number format. |
 
-
-
-> **Internal version number format:** infoRouter stores version numbers internally as multiples of 1,000,000. Version 1 = `1000000`, version 2 = `2000000`, version 3 = `3000000`, and so on. The user-visible version label (e.g. "3") maps to `3000000`. Values between `1` and `999999` are explicitly rejected. Use `GetDocumentVersions` to obtain the correct internal version number for a given version label.
-
-
+> **Internal version number format:** infoRouter packs a major, a minor and a revision into one integer as `major * 1000000 + minor * 1000 + revision`. The first version of a document is `1000000` and the second is `1000001`; `2000000` is major version 2, not the second version. Values between `1` and `999,999` are rejected. Use `GetDocumentVersions` to read the numbers a document actually has rather than computing them.
 
 | User-visible version | VersionNumber value |
 |----------------------|---------------------|
@@ -53,23 +35,13 @@ Returns the plain-text alternative content stored alongside a specific version o
 | 3 | `3000000` |
 | Latest (any) | `0` |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 On success, the plain text content is returned as the body of the `<response>` element (not inside a child element):
-
-
 
 ```xml
 
@@ -81,19 +53,13 @@ alternative stored in the document warehouse for that version.</response>
 
 ```
 
-
-
 | Attribute | Description |
 |-----------|-------------|
 | `success` | `"true"` on success. |
 | `error` | Empty string on success. |
 | *(element body)* | The plain text content of the specified version. May be an empty string if text-only content has never been set for this version. |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -101,31 +67,17 @@ alternative stored in the document warehouse for that version.</response>
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least read access to the document and the specified version.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" specific version
-
-
 
 ```
 
@@ -141,11 +93,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" latest version (`VersionNumber=0`)
-
-
 
 ```
 
@@ -161,19 +109,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetVersionTextOnlyContent HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -183,11 +125,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -213,15 +151,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
-
-
 ## Notes
-
-
 
 - The text content is returned directly as the body of the `<response>` element, not inside a named child element.
 
@@ -237,15 +169,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Both full infoRouter paths and short document ID paths (`~D{id}` or `~D{id}.ext`) are accepted for the `Path` parameter.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md) - Get text-only content of the latest published version (no version number required)
 
@@ -257,15 +183,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocument](GetDocument.md) - Get full document metadata and properties
 
-
-
 ---
 
-
-
 ## Error Codes
-
-
 
 | Error | Description |
 |-------|-------------|
@@ -279,8 +199,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Access denied | The user does not have read access to the document or the specified version. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

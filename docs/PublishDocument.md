@@ -1,18 +1,10 @@
 ﻿# PublishDocument API
 
-
-
 Sets the published version of a document. The published version is the one that is visible to users who browse or search the library. Pass `0` for the version number to publish the latest version, or pass an internal version number to publish a specific version.
-
-
 
 > **Note:** Publishing is a separate concept from uploading a new version. A document can have multiple versions but only one published version at a time. Use `UnpublishDocument` to remove the published designation without replacing it.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ Sets the published version of a document. The published version is the one that 
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/PublishDocument?AuthenticationTicket=...&DocumentPath=...&VersionNumber=...`
 
@@ -32,11 +20,7 @@ Sets the published version of a document. The published version is the one that 
 
 - **SOAP** Action: `http://tempuri.org/PublishDocument`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -44,11 +28,7 @@ Sets the published version of a document. The published version is the one that 
 | `DocumentPath` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 | `VersionNumber` | int | Yes | Internal version number of the version to publish. Pass `0` to publish the latest version. See note below for the internal version number format. |
 
-
-
-> **Internal version number format:** infoRouter stores version numbers as multiples of 1,000,000. Version 1 = `1000000`, version 2 = `2000000`, version 3 = `3000000`, and so on. Values between `1` and `999,999`, or negative values, are explicitly rejected. Use `GetDocumentVersions` to obtain the correct internal version number for a given version label.
-
-
+> **Internal version number format:** infoRouter packs a major, a minor and a revision into one integer as `major * 1000000 + minor * 1000 + revision`. The first version of a document is `1000000` and the second is `1000001`; `2000000` is major version 2, not the second version. Values between `1` and `999,999` are rejected. Use `GetDocumentVersions` to read the numbers a document actually has rather than computing them.
 
 | User-visible version | VersionNumber value |
 |----------------------|---------------------|
@@ -57,19 +37,11 @@ Sets the published version of a document. The published version is the one that 
 | 2 | `2000000` |
 | 3 | `3000000` |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -77,11 +49,7 @@ Sets the published version of a document. The published version is the one that 
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -89,19 +57,11 @@ Sets the published version of a document. The published version is the one that 
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must satisfy **all** of the following conditions:
-
-
 
 1. Must have the **Set Publishing Rules** permission on the document (or its containing folder).
 
@@ -115,23 +75,13 @@ The calling user must satisfy **all** of the following conditions:
 
 3. If the document is currently **checked out (locked)**, only the user who holds the lock may change the publishing rule.
 
-
-
 Additionally, if the domain/library has a **Doctype** publishing requirement configured (see `GetPublishingRequirements`), the document must have a document type assigned before it can be published. Use `UpdateDocumentType` to assign one.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" publish the latest version
-
-
 
 ```
 
@@ -147,11 +97,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" publish a specific version
-
-
 
 ```
 
@@ -167,19 +113,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/PublishDocument HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -189,11 +129,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -219,19 +155,13 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### Workflow -" check requirements then publish
-
-
 
 ```
 
 1. GET /srv.asmx/GetPublishingRequirements?...&domainname=Finance
 
    -' check if <PublishingRequirement>Doctype</PublishingRequirement> is present
-
-
 
 2. If Doctype requirement exists:
 
@@ -241,21 +171,13 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
    -' if DocTypeID is 0, call UpdateDocumentType first
 
-
-
 3. GET /srv.asmx/PublishDocument?...&DocumentPath=/Finance/Reports/Q1-2024-Report.pdf&VersionNumber=0
 
 ```
 
-
-
 ---
 
-
-
 ## Notes
-
-
 
 - Passing `VersionNumber=0` publishes the **latest** version of the document, equivalent to setting the publishing rule to "Latest".
 
@@ -267,15 +189,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Both full infoRouter paths and short document ID paths (`~D{id}` or `~D{id}.ext`) are accepted.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [UnpublishDocument](UnpublishDocument.md) - Remove the published status from a document
 
@@ -287,15 +203,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [UpdateDocumentType](UpdateDocumentType.md) - Assign a document type to satisfy a Doctype publishing requirement
 
-
-
 ---
 
-
-
 ## Error Codes
-
-
 
 | Error | Description |
 |-------|-------------|
@@ -310,8 +220,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Version not found | The specified internal version number does not correspond to an existing version. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

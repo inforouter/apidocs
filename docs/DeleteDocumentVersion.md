@@ -160,7 +160,7 @@ anything a retry will fix. Read the version list from
 
 ## Notes
 
-- Version numbers in infoRouter use a modernized format where each version is stored as a multiple of 1,000,000 (e.g. version 1 -' `1000000`, version 2 -' `2000000`, version 3 -' `3000000`). Passing a version number below 1,000,000 returns an error immediately.
+- infoRouter packs a major, a minor and a revision into one integer as `major * 1000000 + minor * 1000 + revision`. The first version of a document is `1000000` and the second is `1000001`; `2000000` is major version 2, not the second version. Values between `1` and `999,999` are rejected. Use `GetDocumentVersions` to read the numbers a document actually has rather than computing them.
 
 - Always retrieve current version numbers using `GetDocumentVersions` before calling this API.
 

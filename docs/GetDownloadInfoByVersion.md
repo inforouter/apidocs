@@ -1,18 +1,10 @@
 ﻿# GetDownloadInfoByVersion API
 
-
-
 Returns download metadata for a **specific version** of a document -" file size, MIME content type, modification date, suggested download file name, and CRC32 checksum -" **without** staging the file on the server or creating a download handler. This is the version-aware counterpart to `GetDownloadInfo`, which always queries the latest version.
-
-
 
 To download the actual file content, use `GetDownloadHandlerByVersion` (chunked) or `DownloadDocumentVersion` (single call). To query the latest version without specifying a version number, use `GetDownloadInfo`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ To download the actual file content, use `GetDownloadHandlerByVersion` (chunked)
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetDownloadInfoByVersion?AuthenticationTicket=...&Path=...&VersionNumber=...`
 
@@ -32,11 +20,7 @@ To download the actual file content, use `GetDownloadHandlerByVersion` (chunked)
 
 - **SOAP** Action: `http://tempuri.org/GetDownloadInfoByVersion`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -44,44 +28,32 @@ To download the actual file content, use `GetDownloadHandlerByVersion` (chunked)
 | `Path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 | `VersionNumber` | int | Yes | **Internal version number** of the version to query, as returned in the `Number` attribute of `GetDocumentVersions` (e.g. `1000000` for version 1, `2000000` for version 2). Values between 1 and 999,999 are invalid and will return an error. Pass `0` to query the latest version (equivalent to `GetDownloadInfo`). |
 
-
-
 ### Version Number Format
 
+infoRouter packs a major, a minor and a revision into one integer as
+`major * 1000000 + minor * 1000 + revision`, so the number is not an ordinal:
 
+| What it is | VersionNumber |
+|------------|---------------|
+| Version 1.0.0, the first version of a document | `1000000` |
+| Version 1.0.1, the second | `1000001` |
+| Version 1.1.0 | `1001000` |
+| Version 2.0.0 | `2000000` |
+| The published version | `0` |
 
-infoRouter stores version numbers internally as multiples of 1,000,000:
-
-
-
-| User-visible version | VersionNumber to pass |
-|----------------------|-----------------------|
-| Version 1 | `1000000` |
-| Version 2 | `2000000` |
-| Version 3 | `3000000` |
-| Latest version | `0` |
-
-
+Read the numbers a document actually carries from `GetDocumentVersions` rather than computing them:
+successive check-ins normally bump the revision, so the second version of a document is `1000001`,
+not `2000000`.
 
 Always use the `Number` attribute from `GetDocumentVersions` to obtain the correct value.
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns file metadata for the specified version. No temporary file is created on the server and no handler GUID is issued.
-
-
 
 ```xml
 
@@ -103,11 +75,7 @@ Returns file metadata for the specified version. No temporary file is created on
 
 ```
 
-
-
 ### Response Attributes
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -120,15 +88,9 @@ Returns file metadata for the specified version. No temporary file is created on
 | `RenderedContent` | `true` if the file would be served as a server-rendered temporary representation; `false` if the original stored file would be served. |
 | `CRC32` | CRC32 checksum of the version file for integrity verification. Empty string when `RenderedContent` is `true`. |
 
-
-
 > **Note:** This response never contains `ChunkSize` or `downloadhandler` attributes because no file is staged and no handler is created.
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -136,31 +98,17 @@ Returns file metadata for the specified version. No temporary file is created on
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have at least **read** access to the document. Offline (archived) documents cannot be queried and return an error.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -176,19 +124,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetDownloadInfoByVersion HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -198,11 +140,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -228,19 +166,13 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
-
-
 
 ## Notes
 
-
-
 - This API is a **metadata-only** call. No file is read from disk, no temporary file is created, and no download handler GUID is issued.
 
-- `VersionNumber` must be in the **internal format** (a multiple of 1,000,000). Use the `Number` attribute from `GetDocumentVersions` to obtain the correct value. Values between 1 and 999,999 are explicitly rejected and will return an error.
+- `VersionNumber` is the packed `major * 1000000 + minor * 1000 + revision`, not an ordinal. Use the `Number` attribute from `GetDocumentVersions` rather than computing it. Values between 1 and 999,999 are explicitly rejected and will return an error.
 
 - Passing `VersionNumber=0` queries the latest version, which is equivalent to calling `GetDownloadInfo`.
 
@@ -250,15 +182,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - When `RenderedContent` is `true`, the `CRC32` attribute will be an empty string.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetDownloadInfo](GetDownloadInfo.md) - Get download metadata for the latest version of a document
 
@@ -270,15 +196,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocument](GetDocument.md) - Get the full metadata properties of a document
 
-
-
 ---
 
-
-
 ## Error Codes
-
-
 
 | Error | Description |
 |-------|-------------|
@@ -289,8 +209,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Offline document error | The document is in an archived/offline library and cannot be queried. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 
