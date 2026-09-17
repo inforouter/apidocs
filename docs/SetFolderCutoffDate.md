@@ -124,6 +124,53 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sets the cutoff date on a folder, and optionally on what is inside it.
+
+```javascript
+const root = await call('SetFolderCutoffDate', {
+  authenticationTicket: ticket,
+  path: '/Finance/Reports',
+  cutoffDate: '2026-06-30',
+  includeSubFolders: true,
+  includeDocuments: true
+});
+```
+
+**A refusal can arrive as a MultiStatus.** When the operation could not do everything it was asked,
+the answer is `success="false"` with `error="MultiStatus"`, the reasons inside `<log>` elements, and
+**no `errorCode` at all**. That is also the shape of a partial success, so `success="false"` here does
+not mean nothing happened - read the `<log>` to find out what did. A client that branches on
+`errorCode` sees nothing to branch on.
+
+The commonest case: a folder may only be cut off once everything inside it already is. Asking for one
+that still holds uncut subfolders or documents, without `includeSubFolders` and `includeDocuments`, is
+refused this way rather than with a code.
+
+**The date is read as local midnight and reported back in UTC.** Sending `2026-06-30` to a server
+three hours ahead of UTC stores the instant that reads back as `2026-06-29T21:00:00.000Z` on the
+folder. That is the same moment, but a client comparing the date it sent with the date it reads will
+see a different day. `cutoffDate` binds as a `DateTime`, so a value that is not a date is refused with
+HTTP 400 before the operation runs.
+
 ## Notes
 
 - **Order of work.** Subfolders and documents are processed first, deepest level first, and each gets the same date. The folder itself is cut off last, once its contents qualify.
@@ -146,6 +193,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4041` | no folder at that path - including one the caller may not see |
+| `4030` | the caller may not set cutoff dates here |
+| `none` | the folder still holds uncut items, or some items could not be done: `success="false" error="MultiStatus"` with no `errorCode` |
+| `HTTP 400` | `cutoffDate` was not a date, or `path` was empty; refused by model binding |
 
 | Error | Description |
 |-------|-------------|

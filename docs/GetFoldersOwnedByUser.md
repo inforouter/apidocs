@@ -41,31 +41,45 @@ Returns a paged list of folders owned by the specified user. Supports offset-bas
 Returns a `<response>` element with `success="true"` containing zero or more `<folder>` child elements.
 
 ```xml
-<response success="true">
-  <folder id="42" name="Reports" path="\MyLibrary\Reports"
-          domainid="1" ownerid="5" ownername="jsmith" ... />
-  <folder id="43" name="Archive" path="\MyLibrary\Archive"
-          domainid="1" ownerid="5" ownername="jsmith" ... />
+<response success="true" error="" recordCount="46" startingRow="0" rowCount="2">
+  <folder FolderID="42" ParentID="1" Name="Reports" Path="\MyLibrary\Reports" Description=""
+          CreationDate="2026-08-19T15:34:41.250Z" OwnerName="John Smith" DomainId="1"
+          ClassificationLevel="NoMarkings" ClassificationLevelId="0" DeclassifyOn="" DowngradeOn=""
+          RDDefId="0" RetentionDate="" DispositionDate="" CutoffDate="" />
+  <folder FolderID="43" ParentID="1" Name="Archive" Path="\MyLibrary\Archive" ... />
 </response>
 ```
 
 ### Folder Attribute Reference
 
+The root carries the paging:
+
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `id` | int | Unique folder identifier. |
-| `name` | string | Folder name. |
-| `path` | string | Full infoRouter path of the folder. |
-| `domainid` | int | Internal ID of the library the folder belongs to. |
-| `ownerid` | int | Internal user ID of the folder owner. |
-| `ownername` | string | Username of the folder owner. |
+| `recordCount` | int | How many folders the user owns in total, ignoring the paging. |
+| `startingRow` | int | The offset that was applied. |
+| `rowCount` | int | The page size that was applied - rewritten to `recordCount` when `0` was sent. |
 
-Additional standard folder attributes are included based on system configuration.
+Each `<folder>` is the same element [GetFolder](GetFolder.md) returns, so the attribute names are
+capitalised:
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `FolderID` | int | Unique folder identifier. |
+| `ParentID` | int | Id of the folder's parent. |
+| `Name` | string | Folder name. |
+| `Path` | string | Full infoRouter path, with `\` separators. |
+| `Description` | string | Folder description. |
+| `CreationDate` | string | When the folder was created, UTC. |
+| `OwnerName` | string | Display name of the owner - not the login name. |
+| `DomainId` | int | Id of the library the folder belongs to. |
+| `ClassificationLevel`, `ClassificationLevelId`, `DeclassifyOn`, `DowngradeOn` | | Classification, as on `GetFolder`. |
+| `RDDefId`, `RetentionDate`, `DispositionDate`, `CutoffDate` | | Retention and disposition, as on `GetFolder`. |
 
 ### Empty Result
 
 ```xml
-<response success="true" />
+<response success="true" error="" recordCount="0" startingRow="0" rowCount="100" />
 ```
 
 ### Error Response
@@ -137,6 +151,53 @@ SOAPAction: "http://tempuri.org/GetFoldersOwnedByUser"
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the folders one user owns, a page at a time. Folders come back in the full `<folder>` shape
+[GetFolder](GetFolder.md) uses, and the root carries `recordCount`, the total, alongside the
+`startingRow` and `rowCount` that were applied.
+
+```javascript
+let startingRow = 0;
+const rowCount = 100;
+
+for (;;) {
+  const root = await call('GetFoldersOwnedByUser', {
+    authenticationTicket: ticket,
+    userName: 'jsmith',
+    startingRow,
+    rowCount
+  });
+
+  for (const folder of root.querySelectorAll(':scope > folder')) {
+    console.log(folder.getAttribute('Path'));
+  }
+
+  startingRow += rowCount;
+  if (startingRow >= Number(root.getAttribute('recordCount'))) break;
+}
+```
+
+**`rowCount=0` means every row, not none.** The answer then reports `rowCount` as the total rather
+than the zero that was asked for, so a loop that trusts the value it sent will not terminate.
+
 ## Notes
 
 - `startingRow` is zero-based: `startingRow=0` returns from the first record, `startingRow=50` skips the first 50.
@@ -146,6 +207,15 @@ SOAPAction: "http://tempuri.org/GetFoldersOwnedByUser"
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no user by that name |
+| `4010` | the caller has no ticket. The message is "User has been deleted.", which describes neither the caller nor the user asked about |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

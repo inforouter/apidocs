@@ -113,6 +113,51 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Writes folder rules. Only the rules named in `xmlRules` are changed; the rest keep their values, so
+this is a partial update and `<Rules />` is a valid no-op.
+
+```javascript
+await call('SetFolderRules', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports',
+  xmlRules:
+    '<Rules>' +
+      '<Rule Name="Checkouts" Value="disallows" />' +
+      '<Rule Name="AllowableFileTypes" Value="pdf,docx" />' +
+    '</Rules>',
+  ApplyToTree: false
+});
+```
+
+`ApplyToTree=true` writes the same rules down the whole subtree, not just the folder named.
+`AllowableFileTypes` comes back from [GetFolderRules](GetFolderRules.md) upper case, without dots and
+in alphabetical order, so `pdf,docx` reads back as `DOCX,PDF`.
+
+**A value it cannot use is accepted and ignored.** `<Rule Name="Checkins" Value="perhaps" />` is
+answered `success="true"` and the rule keeps the value it had. Nothing reports the mistake, so read
+the rules back if it matters. A `Name` the operation does not recognise is ignored the same way. This
+is unlike [SetFolderAIPreferences](SetFolderAIPreferences.md), which refuses an unusable value with
+`4000` and names the ones it takes.
+
 ## Notes
 
 - Rule names are case-insensitive; values are not. Only the exact word `disallows` disallows.
@@ -133,6 +178,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4041` | no folder at that path - including one the caller may not see |
+| `4000` | `xmlRules` is missing or is not well-formed XML |
+| `4030` | the caller may not change this folder's rules |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

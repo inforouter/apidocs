@@ -86,6 +86,43 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the direct subfolders of one folder as `<f>` elements, with an `id` and a name. Documents are
+not included.
+
+```javascript
+const root = await call('GetFolders1', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports'
+});
+
+for (const f of root.querySelectorAll(':scope > f')) {
+  console.log(f.getAttribute('id'), f.getAttribute('n'));
+}
+```
+
+This is [GetFoldersByPage](GetFoldersByPage.md) with no filter and no paging - the whole folder in one
+answer. The root still carries the empty `folderfilter` it applied, but no `page` or `pageSize`. For
+the same list with every folder property on it, use [GetFolders](GetFolders.md).
+
 ## Notes
 
 - Returns only direct subfolders (one level deep), not recursive.
@@ -104,6 +141,24 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no folder at that path - including one the caller may not see. The setters in this group answer `4041` for the same condition; see the note below |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+**The code for a missing folder is not the same across this group.** `GetFolders1`, `GetFolders2` and
+`GetFoldersByPage` answer `4000`; `GetSubFoldersCount`, `UpdateFolderProperties`, `SetFolderRules`,
+`SetFolderAIPreferences`, `SetFolderCutoffDate`, `RemoveFolderCutoffDate` and `Move` answer `4041` for
+the identical condition, because the three listings report the failure through a helper that does not
+carry the code. Treat both numbers as "no such folder".
+
+A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
+a library flagged as anonymous can be read without authenticating. The writes in this group refuse it
+with `4010`.
 
 | Error | Description |
 |-------|-------------|

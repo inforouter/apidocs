@@ -20,7 +20,7 @@ Moves a document or folder from the source path to the destination path. Both do
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `SourcePath` | string | Yes | Full infoRouter path to the document or folder to move (e.g. `/Finance/Reports/Q1.pdf`). |
-| `DestinationPath` | string | Yes | Full infoRouter path to the destination (e.g. `/Finance/Archive/Q1.pdf`). The destination folder must exist. |
+| `DestinationPath` | string | Yes | The full path the item should have afterwards, **including its name** - e.g. `/Finance/Archive/Q1.pdf`, not `/Finance/Archive`. Its parent folder must already exist. See the warning below about what the last segment is and is not used for. |
 
 ---
 
@@ -99,6 +99,60 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Moves a folder or a document. The same call does both: the source path is looked up as a document
+first and as a folder second.
+
+**`DestinationPath` is the full new path of the item, not the folder to put it in.** Moving
+`/Finance/Q1.pdf` into `/Finance/Archive` means `DestinationPath=/Finance/Archive/Q1.pdf`. Passing
+`/Finance/Archive` asks for something else entirely - move `Q1.pdf` so that it *becomes* `Archive` -
+and is answered `4090` when a folder of that name is already there.
+
+```javascript
+// into another folder: repeat the name at the end
+await call('Move', {
+  authenticationTicket: ticket,
+  SourcePath: '/Finance/Reports/Q1.pdf',
+  DestinationPath: '/Finance/Archive/Q1.pdf'
+});
+
+// rename in place: same parent, different last segment
+await call('Move', {
+  authenticationTicket: ticket,
+  SourcePath: '/Finance/Reports',
+  DestinationPath: '/Finance/Quarterly Reports'
+});
+```
+
+A folder moves with everything under it. When the parent is unchanged the call is a rename, and asking
+for the path it already has is answered `4000`, "source and target folder are the same". A library
+cannot be moved: its parent is the root, and that is `4000`.
+
+**Always repeat the source's own name at the end when the parent changes.** The last segment is used
+for the duplicate-name check and then discarded - the item is moved under the name it already had. So
+a mismatched last segment does not rename anything, and if the source's own name is already taken at
+the destination the check passes on the name you wrote while the move collides on the name it used.
+That collision reaches the unique index on the folder table and comes back as `5000` carrying raw SQL,
+where it should have been a `4090`. Nothing is moved when that happens.
+
 ## Notes
 
 - The destination folder must already exist before calling this API.
@@ -119,6 +173,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4041` | nothing at `SourcePath`, or no folder at the parent of `DestinationPath` |
+| `4090` | something of that name is already at the destination |
+| `4000` | `DestinationPath` is where the item already is, or `SourcePath` is a library |
+| `4030` | the caller may not take the item out of where it is, or put it where it is going |
+| `5000` | the last segment of `DestinationPath` did not match the source's own name and that name was already taken at the destination; the answer carries a raw unique-key violation. It should be a `4090` |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

@@ -20,7 +20,7 @@ Updates the name and/or description of the specified folder. The folder itself m
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the existing folder (e.g. `/Finance/Reports`). |
-| `NewFolderName` | string | Yes | New name for the folder. The name is sanitized (carriage returns/line feeds removed) before saving. |
+| `NewFolderName` | string | Yes | New name for the folder. Unlike folder creation, which sanitises silently, an unusable name is **refused** here with `4000`. Empty, or nothing but spaces, is refused by model binding with HTTP 400. |
 | `NewDescription` | string | No | New description for the folder. Pass empty string or null to clear the description. |
 
 ---
@@ -90,6 +90,52 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Renames a folder and sets its description. Both are written every time: there is no way to change one
+and leave the other, so a caller changing the name has to send the current description back with it or
+it is cleared.
+
+```javascript
+// Read what is there, change one thing, write both back.
+const folder = (await call('GetFolder', {
+  authenticationTicket: ticket, Path: '/Finance/Reports',
+  WithRules: false, withPropertySets: false, withSecurity: false, withOwner: false
+})).querySelector('folder');
+
+await call('UpdateFolderProperties', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports',
+  NewFolderName: 'Quarterly Reports',
+  NewDescription: folder.getAttribute('Description')
+});
+```
+
+**It refuses a name that [CreateFolder1](CreateFolder1.md) would have cleaned up.** Creating a folder
+called `Q3*` silently produces `Q3_`; renaming an existing folder to `Q3*` is answered `4000` with a
+message naming the characters a folder may not carry. The two disagree, so a client that creates and
+renames with the same name-building code will find one path works and the other does not.
+
+An empty `NewFolderName`, or one of nothing but spaces, is refused by model binding with HTTP 400.
+`NewDescription` may be empty; that clears the description.
+
 ## Notes
 
 - Renaming a folder changes the folder's path. Any references to the old path will need to be updated.
@@ -108,6 +154,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4041` | no folder at that path - including one the caller may not see |
+| `4090` | a folder of that name is already in the parent |
+| `4000` | `NewFolderName` carries one of `/ \ : * ? " < > | # % & +` or a tab |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

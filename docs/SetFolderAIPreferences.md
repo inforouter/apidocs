@@ -133,6 +133,47 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Writes the AI switches on a folder. Only the preferences named are changed; the rest keep their
+values, so `<AIPreferences />` is a valid no-op.
+
+```javascript
+await call('SetFolderAIPreferences', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports',
+  xmlPreferences:
+    '<AIPreferences>' +
+      '<Preference Name="AutoSummarize" Value="on" />' +
+      '<Preference Name="ApplyToSubfolders" Value="on" />' +
+    '</AIPreferences>'
+});
+```
+
+Every `Value` is `on` or `off`; anything else is refused with `4000` and a message naming the two.
+`ApplyToSubfolders` is itself one of the preferences, and switching it on writes the whole set onto
+the existing subfolder tree - including `ApplyToSubfolders`, so the subfolders carry it too.
+
+`xmlPreferences` is declared non-nullable on the REST action, so an empty one is refused by model
+binding with HTTP 400 before the operation runs. Send `<AIPreferences />` to mean "change nothing".
+
 ## Notes
 
 - The preferences are merged onto the values currently in effect for the folder, so a call that lists a single preference leaves the others untouched.
@@ -150,6 +191,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4041` | no folder at that path - including one the caller may not see |
+| `4000` | a `Value` is neither `on` nor `off`, or `xmlPreferences` is not well-formed XML |
+| `4030` | the caller may not change this folder's preferences |
+| `HTTP 400` | `xmlPreferences` was empty; it is required, so send `<AIPreferences />` |
 
 | Error | Description |
 |-------|-------------|

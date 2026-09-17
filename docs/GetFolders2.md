@@ -86,6 +86,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The same answer as [GetFolders1](GetFolders1.md), with one difference: the number of subfolders is
+capped by the `MaximumDisplayFolderCount` UI setting, and a folder holding more than that is refused
+rather than listed. It exists for the folder tree in the web UI, which must not try to draw ten
+thousand nodes.
+
+```javascript
+const root = await call('GetFolders2', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports'
+});
+
+for (const f of root.querySelectorAll(':scope > f')) {
+  console.log(f.getAttribute('id'), f.getAttribute('n'));
+}
+```
+
+For a folder that may hold more than the cap, page through it with
+[GetFoldersByPage](GetFoldersByPage.md) instead, which has no such limit.
+
 ## Notes
 
 - The maximum number of returned folders is controlled by the `MaximumDisplayFolderCount` UI setting in infoRouter's system configuration.
@@ -105,6 +143,19 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no folder at that path - including one the caller may not see. The setters in this group answer `4041` for the same condition; see the note below |
+| `4000` | the folder holds more subfolders than `MaximumDisplayFolderCount` allows |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
+a library flagged as anonymous can be read without authenticating. The writes in this group refuse it
+with `4010`.
 
 | Error | Description |
 |-------|-------------|

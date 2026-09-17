@@ -116,6 +116,47 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Clears the cutoff date on a folder, and optionally on what is inside it. Removing a cutoff date that
+was never set is a success, so this is safe to call blindly.
+
+```javascript
+await call('RemoveFolderCutoffDate', {
+  authenticationTicket: ticket,
+  path: '/Finance/Reports',
+  includeSubFolders: true,
+  includeDocuments: true
+});
+```
+
+**A refusal can arrive as a MultiStatus.** When the operation could not do everything it was asked,
+the answer is `success="false"` with `error="MultiStatus"`, the reasons inside `<log>` elements, and
+**no `errorCode` at all**. That is also the shape of a partial success, so `success="false"` here does
+not mean nothing happened - read the `<log>` to find out what did. A client that branches on
+`errorCode` sees nothing to branch on.
+
+The commonest case: a folder may only be cut off once everything inside it already is. Asking for one
+that still holds uncut subfolders or documents, without `includeSubFolders` and `includeDocuments`, is
+refused this way rather than with a code.
+
 ## Notes
 
 - **Parent folder rule.** If the folder's parent has a cutoff date, the folder is listed with `The parent folder has been cut off. The cut-off state cannot be removed from child folders.` Nothing inside it is changed. Start from the top of the cut-off tree.
@@ -138,6 +179,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is told "Anonymous users cannot perform this action" |
+| `4041` | no folder at that path - including one the caller may not see |
+| `4030` | the caller may not change cutoff dates here |
+| `none` | some items could not be done: `success="false" error="MultiStatus"` with no `errorCode` |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

@@ -104,6 +104,55 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the direct subfolders of one folder as `<f>` elements, a page at a time, with an optional name
+filter. `itemcount` counts **this page**.
+
+`*` is the only wildcard the filter understands, and without one it matches the **whole name**:
+`report` does not find `report2026`, while `report*` does. A `%`, `_` or `?` in the filter is ordinary
+text. Wrapping the value in double quotes forces a whole-name match even if it contains a `*`. Unlike
+the document filter on [GetFoldersAndDocumentsByPage](GetFoldersAndDocumentsByPage.md), this one takes
+a single value: a `;` in it is part of the name being looked for, not a separator.
+
+```javascript
+let page = 1;
+
+for (;;) {
+  const root = await call('GetFoldersByPage', {
+    authenticationTicket: ticket,
+    Path: '/Finance',
+    FolderFilter: '',
+    PageNumber: page
+  });
+
+  for (const f of root.querySelectorAll(':scope > f')) console.log(f.getAttribute('n'));
+
+  if (Number(root.getAttribute('itemcount')) < Number(root.getAttribute('pageSize'))) break;
+  page++;
+}
+```
+
+Pass `PageNumber=-1` for everything in one answer, which also drops `page` and `pageSize` from the
+root. A page past the end is a success with nothing in it rather than an error.
+
 ## Notes
 
 - Each page returns up to 20 folders.
@@ -123,6 +172,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no folder at that path - including one the caller may not see. The setters in this group answer `4041` for the same condition; see the note below |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
+a library flagged as anonymous can be read without authenticating. The writes in this group refuse it
+with `4010`.
 
 | Error | Description |
 |-------|-------------|

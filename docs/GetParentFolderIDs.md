@@ -87,6 +87,42 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports where a folder sits, as a comma-separated chain of folder ids running from its library down
+to and **including the folder itself**.
+
+```javascript
+const root = await call('GetParentFolderIDs', {
+  authenticationTicket: ticket,
+  FolderID: 1329
+});
+
+const chain = root.getAttribute('idpath').split(',');   // e.g. ["1001", "1329"]
+const parents = chain.slice(0, -1);                     // the folder's own id is the last entry
+```
+
+**A folder that does not exist is not an error.** The answer is `success="true"` with `idpath=""`, and
+`FolderID=0` gives the same, so a caller cannot tell "no such folder" from a valid empty chain by
+looking at `success`. Check for an empty `idpath` as well.
+
 ## Notes
 
 - The `idpath` value contains folder IDs separated by `/`, ordered from the system root to the target folder.
@@ -103,6 +139,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `none` | an id that does not exist, and `0`, are answered `success="true"` with an empty `idpath` rather than a failure |
 
 | Error | Description |
 |-------|-------------|
