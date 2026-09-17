@@ -1,18 +1,10 @@
 ﻿# IsLockPossible API
 
-
-
 Checks whether the current authenticated user is able to lock (check out) the document at the specified path. This is a pre-flight check that performs all the same permission and state validations as `Lock` without actually locking the document. Use it to determine in advance whether a lock attempt will succeed and to surface a meaningful reason if it will not.
-
-
 
 > **Terminology note:** "Lock" and "Check Out" are synonymous in infoRouter. Locking a document prevents other users from creating new versions until the lock is released.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ Checks whether the current authenticated user is able to lock (check out) the do
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/IsLockPossible?AuthenticationTicket=...&Path=...`
 
@@ -32,34 +20,20 @@ Checks whether the current authenticated user is able to lock (check out) the do
 
 - **SOAP** Action: `http://tempuri.org/IsLockPossible`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<response>` element with `success="true"` when the document can be locked by the current user.
-
-
 
 ```xml
 
@@ -67,15 +41,9 @@ Returns a `<response>` element with `success="true"` when the document can be lo
 
 ```
 
-
-
 ### Error Response
 
-
-
 Returns `success="false"` with a descriptive error message when the lock is not possible. The `error` attribute contains the reason.
-
-
 
 ```xml
 
@@ -83,31 +51,17 @@ Returns `success="false"` with a descriptive error message when the lock is not 
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have **checkout (lock) permission** on the document or its containing folder. Domain managers and document owners typically have this right by default. If the folder has the *Disallow Document Checkout* rule applied, no user can lock documents within it.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -121,11 +75,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -133,19 +83,13 @@ POST /srv.asmx/IsLockPossible HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &Path=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -169,15 +113,46 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Asks whether [Lock](Lock.md) would succeed, without taking the lock.
+
+```javascript
+const response = await fetch('/srv.asmx/IsLockPossible?' + new URLSearchParams({
+  authenticationTicket: ticket, Path: '/Finance/Reports/Q1.pdf'
+}));
+const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+
+const canLock = root.getAttribute('success') === 'true';
+if (!canLock) console.log(root.getAttribute('error'));   // says who has it, when that is the reason
+```
+
+It answers by succeeding or failing rather than returning a boolean, and the failure is `4000`
+whatever the reason - already locked by you, locked by somebody else, or folder rules forbidding
+checkouts. The message distinguishes them; the code does not.
+
+Unlike [Lock](Lock.md), a folder path is answered `4041` here.
 
 ## Notes
-
-
 
 - This is a **read-only check** -" no state is changed, no lock is acquired.
 
@@ -205,15 +180,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
   - The document is an incomplete upload (still being transferred).
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [Lock](Lock.md) - Lock (check out) the document at the specified path
 
@@ -223,15 +192,18 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocument](GetDocument.md) - Get document properties including `CheckoutBy` and `CheckoutDate`
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the document cannot be locked - already checked out, or the folder rules forbid it |
+| `4041` | nothing at that path, or the path names a folder |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -249,8 +221,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Email document | Email documents (`.EMAIL`) cannot be checked out. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

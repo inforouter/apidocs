@@ -1,18 +1,12 @@
 ﻿# Lock API
 
+Locks (checks out) the document at the specified path, so that other users cannot create new versions of it until the lock is released with `UnLock`.
 
-
-Locks (checks out) the document or all documents within the folder at the specified path. Locking prevents other users from creating new versions of a document until the lock is released. Use `UnLock` to release the lock when done editing.
-
-
+**It does not lock a folder.** A folder path is accepted and answered success, but nothing is locked - see the JavaScript section below.
 
 > **Terminology note:** "Lock" and "Check Out" are synonymous in infoRouter. The terms are used interchangeably throughout the system.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +14,7 @@ Locks (checks out) the document or all documents within the folder at the specif
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/Lock?AuthenticationTicket=...&Path=...`
 
@@ -32,30 +22,18 @@ Locks (checks out) the document or all documents within the folder at the specif
 
 - **SOAP** Action: `http://tempuri.org/Lock`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to a document or folder (e.g. `/Finance/Reports/Q1-Report.pdf` or `/Finance/Reports`). When a folder path is given, all documents inside the folder are locked in bulk. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Document path -" Success
-
-
 
 ```xml
 
@@ -63,11 +41,7 @@ Locks (checks out) the document or all documents within the folder at the specif
 
 ```
 
-
-
 ### Document path -" Failure
-
-
 
 ```xml
 
@@ -75,11 +49,7 @@ Locks (checks out) the document or all documents within the folder at the specif
 
 ```
 
-
-
 ### Folder path -" All documents locked successfully
-
-
 
 ```xml
 
@@ -87,15 +57,9 @@ Locks (checks out) the document or all documents within the folder at the specif
 
 ```
 
-
-
 ### Folder path -" One or more documents could not be locked
 
-
-
 When a folder path is given and at least one document fails, the response contains a `<log>` entry per failed document with its name and the reason:
-
-
 
 ```xml
 
@@ -121,8 +85,6 @@ When a folder path is given and at least one document fails, the response contai
 
 ```
 
-
-
 | Field | Description |
 |-------|-------------|
 | `success` | `"true"` if the operation succeeded (document locked, or all folder documents locked). `"false"` on any failure. |
@@ -130,35 +92,19 @@ When a folder path is given and at least one document fails, the response contai
 | `<log>/<item>` | Document name that could not be locked (folder bulk operation only). |
 | `<log>/<error>` | Reason the specific document could not be locked. |
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have **checkout (lock) permission** on the document or its containing folder. Domain managers and document owners typically have this right by default.
-
-
 
 For folder bulk operations, each individual document is checked independently. Documents the user cannot lock are reported in the log; documents the user can lock are locked regardless.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request -" single document
-
-
 
 ```
 
@@ -172,11 +118,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" all documents in a folder
-
-
 
 ```
 
@@ -190,11 +132,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -202,19 +140,13 @@ POST /srv.asmx/Lock HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &Path=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -238,15 +170,49 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Locks (checks out) a document, so that nobody else may create a version of it until
+[UnLock](UnLock.md) releases it.
+
+```javascript
+await call('Lock', { authenticationTicket: ticket, Path: '/Finance/Reports/Q1.pdf' });
+
+try {
+  // ... upload a new version ...
+} finally {
+  await call('UnLock', { authenticationTicket: ticket, Path: '/Finance/Reports/Q1.pdf', force: false });
+}
+```
+
+**A folder path is accepted, reports success, and locks nothing.** It can be "locked" twice over,
+which a real lock would not allow; [IsLockPossible](IsLockPossible.md) on the same path answers `4041`
+"path not found"; and a subfolder can still be created inside afterwards. Lock documents one at a
+time.
+
+A successful lock carries no `errorCode` at all, where most operations report `errorCode="0"`.
+Unlocking something that is not locked is refused with `4000` rather than ignored.
 
 ## Notes
-
-
 
 - **Document path**: Locks the single document. Returns `success="true"` or `success="false"` with an error message.
 
@@ -260,15 +226,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - After locking, upload a new version with `UploadDocument` or `UploadDocumentWithHandler`, then release the lock with `UnLock`. To cancel without creating a new version, call `UnLock` with no upload.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [UnLock](UnLock.md) - Release a lock (check in) on a document or all documents in a folder
 
@@ -280,15 +240,19 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [UploadDocument](UploadDocument.md) - Upload a new version of a locked document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the document is already checked out, by the caller or by somebody else - and an unticketed caller is told this, by name, before being refused for having no ticket |
+| `4041` | nothing at that path |
+| `4030` | the caller may not check documents out here |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -306,8 +270,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | `[log]` | Folder bulk operation: one or more documents failed. See `<log>` child elements for details. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

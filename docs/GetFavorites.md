@@ -1,18 +1,10 @@
 ﻿# GetFavorites API
 
-
-
 Returns the list of documents and folders that the current authenticated user has marked as **favorites**. The favorites list is a personal per-user collection for quick access to frequently used items. The response uses the same full-detail folder and document element format as `GetFoldersAndDocuments`. Optional flags control whether additional detail (folder rules, property sets, security, owner, version history) is included for each item.
-
-
 
 To add items to the favorites list use `AddToFavorites`. To remove items use `RemoveFromFavorites`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -20,11 +12,7 @@ To add items to the favorites list use `AddToFavorites`. To remove items use `Re
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetFavorites?AuthenticationTicket=...&withrules=...&withpropertysets=...&withsecurity=...&withOwner=...&withVersions=...`
 
@@ -32,11 +20,7 @@ To add items to the favorites list use `AddToFavorites`. To remove items use `Re
 
 - **SOAP** Action: `http://tempuri.org/GetFavorites`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -47,33 +31,19 @@ To add items to the favorites list use `AddToFavorites`. To remove items use `Re
 | `withOwner` | bool | Yes | `true` to include owner user information as a child element for each item. `false` to omit. |
 | `withVersions` | bool | Yes | `true` to include document version history (`<Versions>` child element) for each document. `false` to omit. Has no effect on folder items. |
 
-
-
 > **Performance tip:** Set all boolean flags to `false` for the fastest, most compact response. Only enable the flags your application actually needs.
-
-
 
 ---
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 Returns a `<root>` element with `<folder>` and `<document>` child elements -" folders first, then documents sorted by name ascending. If the favorites list is empty, the root element is returned with no children.
-
-
 
 ```xml
 
 <root success="true">
-
-
 
   <!-- Folder items in the favorites list -->
 
@@ -109,8 +79,6 @@ Returns a `<root>` element with `<folder>` and `<document>` child elements -" fo
 
           CutoffDate="">
 
-
-
     <!-- Included only when withrules=true -->
 
     <Rules>
@@ -133,29 +101,19 @@ Returns a `<root>` element with `<folder>` and `<document>` child elements -" fo
 
     </Rules>
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withsecurity=true -->
 
     <AccessList DateApplied="2024-01-15" AppliedBy="admin" InheritedSecurity="false"> ... </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
 
-
-
   </folder>
-
-
 
   <!-- Document items in the favorites list -->
 
@@ -183,45 +141,29 @@ Returns a `<root>` element with `<folder>` and `<document>` child elements -" fo
 
             ...>
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withsecurity=true -->
 
     <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
-
-
 
     <!-- Included only when withVersions=true -->
 
     <Versions> ... </Versions>
 
-
-
   </document>
-
-
 
 </root>
 
 ```
 
-
-
 ### Optional Child Elements
-
-
 
 | Element | Enabled by | Applies to |
 |---------|------------|------------|
@@ -231,11 +173,7 @@ Returns a `<root>` element with `<folder>` and `<document>` child elements -" fo
 | `<User>` | `withOwner=true` | Folders and documents |
 | `<Versions>` | `withVersions=true` | Documents only |
 
-
-
 See `GetFoldersAndDocuments` for the complete list of `<folder>` and `<document>` element attributes and their descriptions, including the `UserViewStatus` attribute (`0` = never viewed, `1` = viewed but changed, `2` = viewed current version).
-
-
 
 Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
 `AIExtractConfidence`. The first says which of the document's attributes infoRouter Connect
@@ -245,39 +183,23 @@ it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienh
 
 ### Error Response
 
-
-
 ```xml
 
 <root success="false" error="[901] Session expired or Invalid ticket" />
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user may call this API. The response always reflects the favorites list of the **currently authenticated user** -" callers cannot query another user's favorites.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" minimal (no extra detail)
-
-
 
 ```
 
@@ -299,11 +221,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" with full detail
-
-
 
 ```
 
@@ -325,19 +243,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetFavorites HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -353,11 +265,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -389,15 +297,53 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the calling user's favourites - **both folders and documents**, as `<folder>` and `<document>`
+elements side by side in one answer.
+
+```javascript
+const root = await call('GetFavorites', {
+  authenticationTicket: ticket,
+  withrules: false,
+  withpropertysets: false,
+  withsecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+
+const folders = [...root.querySelectorAll(':scope > folder')];
+const documents = [...root.querySelectorAll(':scope > document')];
+```
+
+This is the only working way to read favourite **folders**:
+[GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md), which looks like the operation for the job,
+cannot succeed.
+
+These three answer for **the calling user only** - there is no `userName` - so a caller with no ticket
+is refused rather than answered for the anonymous user. The message is "User has been deleted.", which
+describes neither the caller nor anybody else; read the `4010`, not the text.
 
 ## Notes
-
-
 
 - The favorites list belongs to the **currently authenticated user** only. There is no parameter to specify a different user.
 
@@ -413,15 +359,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Setting all boolean flags to `false` returns only the core attributes for each item, which is the fastest and most compact response.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [AddToFavorites](AddToFavorites.md) - Add a document or folder to the current user's favorites list
 
@@ -433,15 +373,16 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetFoldersAndDocuments](GetFoldersAndDocuments.md) - Get folders and documents within a specific folder path
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the caller has no ticket; the message is "User has been deleted.", which describes nobody |
+| `4010` | the ticket is expired or unknown |
 
 | Error | Description |
 |-------|-------------|
@@ -450,8 +391,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | User has been deleted | The authenticated user account no longer exists. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

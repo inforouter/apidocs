@@ -177,6 +177,39 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Publishes a version of a document, making it the one readers get.
+
+```javascript
+await call('PublishDocument', {
+  authenticationTicket: ticket,
+  DocumentPath: '/Finance/Reports/Q1.pdf',
+  VersionNumber: 0            // 0 means the latest version
+});
+```
+
+Publishing a version that is already published is a success, not an error, so this is safe to call
+without checking first. Read `PublishedVersionNumber` from [GetDocument](GetDocument.md) to confirm
+which one it is.
+
 ## Notes
 
 - Passing `VersionNumber=0` publishes the **latest** version of the document, equivalent to setting the publishing rule to "Latest".
@@ -206,6 +239,15 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, or no version carries that number |
+| `4030` | the caller may not publish here |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

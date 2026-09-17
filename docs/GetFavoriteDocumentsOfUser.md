@@ -84,6 +84,44 @@ AuthenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents one named user has marked as favourites, a page at a time.
+
+```javascript
+const root = await call('GetFavoriteDocumentsOfUser', {
+  authenticationTicket: ticket,
+  userName: 'jsmith',
+  startingRow: 0,
+  rowCount: 100
+});
+
+console.log(root.getAttribute('recordCount'), 'favourites in total');
+```
+
+`rowCount=0` means **every row**, not none, and the answer reports `rowCount` as the total rather than
+the zero that was sent. The root carries `recordCount`, the total ignoring the paging, alongside the
+`startingRow` and `rowCount` that were applied.
+
+Asking about somebody other than yourself needs the **ListingAuditLogOfUser** administrative right.
+
 ## Notes
 
 - Use `startingRow=0` and `rowCount=0` to retrieve all favorite documents.
@@ -92,3 +130,15 @@ AuthenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 - To retrieve favorite **folders** for a user, use [GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md).
 - To retrieve the full favorites list (documents and folders combined) for the current user, use [GetFavorites](GetFavorites.md).
 - Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version. See `GetDocument` for the full attribute reference.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name |
+| `4010` | the caller has no ticket; the message is "User has been deleted.", which describes nobody |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

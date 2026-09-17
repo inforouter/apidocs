@@ -153,6 +153,41 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads the plain-text rendition stored against one version of a document.
+
+```javascript
+const root = await call('GetVersionTextOnlyContent', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  VersionNumber: 0            // 0 means the published version
+});
+
+const text = root.textContent;    // on the root itself, not in a child element
+```
+
+Same content as [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md), which always reads the
+published version; this one can read any of them. A version with nothing stored is a success with an
+empty root.
+
 ## Notes
 
 - The text content is returned directly as the body of the `<response>` element, not inside a named child element.
@@ -186,6 +221,17 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, or no version carries that number |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|

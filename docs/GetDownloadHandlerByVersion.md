@@ -227,6 +227,60 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Describes one named version and opens a chunked read of it, for
+[DownloadFileChunk](DownloadFileChunk.md).
+
+```javascript
+const opened = await call('GetDownloadHandlerByVersion', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  PreferedChunkSize: 65536,
+  VersionNumber: 1000000
+});
+
+const handler = opened.getAttribute('downloadhandler');
+const chunkSize = Number(opened.getAttribute('ChunkSize'));   // use this, not the number you sent
+
+try {
+  // ... read with DownloadFileChunk ...
+} finally {
+  await call('DeleteDownloadHandler', { authenticationTicket: ticket, DownloadHandler: handler });
+}
+```
+
+`PreferedChunkSize` is a suggestion: the server clamps it and reports what it chose as `ChunkSize`.
+
+### Four operations, two decisions
+
+| | Published version | A named version |
+|---|---|---|
+| **Describe only** | [GetDownloadInfo](GetDownloadInfo.md) | [GetDownloadInfoByVersion](GetDownloadInfoByVersion.md) |
+| **Describe and open a chunked read** | [GetDownloadHandler](GetDownloadHandler.md) | [GetDownloadHandlerByVersion](GetDownloadHandlerByVersion.md) |
+
+All four answer the same attributes - `Size`, `ContentType`, `ModificationDate`, `VersionNumber`,
+`AlterDocumentName` and `CRC32` - and the two that open a read add `ChunkSize` and `downloadhandler`.
+`VersionNumber` is echoed back exactly as it was asked for, so a `0` stays `0` rather than resolving
+to the number of the published version.
+
 ## Notes
 
 - `VersionNumber` is the packed `major * 1000000 + minor * 1000 + revision`, not an ordinal. Use the `Number` attribute from `GetDocumentVersions` rather than computing it. Values between 1 and 999,999 are explicitly rejected and will return an error.
@@ -264,6 +318,17 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, or no version carries that number |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
 
 | Error | Description |
 |-------|-------------|

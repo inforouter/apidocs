@@ -1,14 +1,8 @@
 ﻿# RegisterEmail API
 
-
-
 Registers an email message as a document in infoRouter at the specified path. The email body, metadata (sender, recipients, CC, BCC, subject, sent date), and any attachments are stored as a single `.EMAIL` document in the target folder. Use this API to archive emails directly from an email client or integration.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Registers an email message as a document in infoRouter at the specified path. Th
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/RegisterEmail?AuthenticationTicket=...&TargetPath=...&Senders=...&...`
 
@@ -28,11 +18,7 @@ Registers an email message as a document in infoRouter at the specified path. Th
 
 - **SOAP** Action: `http://tempuri.org/RegisterEmail`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -49,27 +35,17 @@ Registers an email message as a document in infoRouter at the specified path. Th
 | `textBody` | string | No | Plain text body content of the email. Pass empty string or omit if not applicable. |
 | `AttachmentHandlers` | string | No | Semicolon-separated list of email attachment descriptors. Each entry has the format `{filename}:{upload-handler-guid}`. See the **Attachments** section below. Pass empty string or omit if there are no attachments. |
 
-
-
 ### Attachments
-
-
 
 Email attachments must be pre-uploaded using `CreateUploadHandler` and `UploadFileChunk` before calling `RegisterEmail`. Each uploaded file is identified by its upload handler GUID.
 
-
-
 The `AttachmentHandlers` parameter format is:
-
-
 
 ```
 
 {filename1}:{handler-guid1};{filename2}:{handler-guid2}
 
 ```
-
-
 
 **Example:**
 
@@ -79,8 +55,6 @@ Invoice.pdf:3f2504e0-4f89-11d3-9a0c-0305e82c3301;Contract.docx:7b3504e0-4f89-11d
 
 ```
 
-
-
 - Entries are separated by `;`
 
 - Within each entry, the file name and handler GUID are separated by `:`
@@ -89,27 +63,17 @@ Invoice.pdf:3f2504e0-4f89-11d3-9a0c-0305e82c3301;Contract.docx:7b3504e0-4f89-11d
 
 - After a successful `RegisterEmail` call, the upload handlers are automatically deleted from the server
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
 <response success="true" error="" DocumentID="1051" DocumentName="Meeting-Notes.EMAIL" />
 
 ```
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -118,11 +82,7 @@ Invoice.pdf:3f2504e0-4f89-11d3-9a0c-0305e82c3301;Contract.docx:7b3504e0-4f89-11d
 | `DocumentID` | The infoRouter document ID assigned to the newly registered email document. |
 | `DocumentName` | The actual document name used (may differ from `TargetPath` if auto-naming was applied). |
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -130,39 +90,23 @@ Invoice.pdf:3f2504e0-4f89-11d3-9a0c-0305e82c3301;Contract.docx:7b3504e0-4f89-11d
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must be **authenticated** (anonymous users cannot register emails). The user must have **add document** permission on the target folder.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/RegisterEmail HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -190,11 +134,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -228,11 +168,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -276,11 +212,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### Workflow -" register email with attachments
-
-
 
 ```
 
@@ -290,27 +222,66 @@ HTTP/1.1
 
    POST /srv.asmx/UploadFileChunk (repeat until all chunks uploaded)
 
-
-
 2. POST /srv.asmx/RegisterEmail
 
    AttachmentHandlers=Invoice.pdf:abc123...;Contract.docx:def456...
-
-
 
 3. On success, response includes DocumentID and DocumentName of the new .EMAIL document
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Files an e-mail message into infoRouter as a document.
+
+```javascript
+const root = await call('RegisterEmail', {
+  authenticationTicket: ticket,
+  TargetPath: '/Finance/Emails/2026-09-supplier-query',   // the document path, without .email
+  Senders: 'supplier@example.com',
+  Recipients: 'accounts@example.com',
+  ccAddress: '',
+  bccAddress: '',
+  SentDate: '2026-09-01',
+  Subject: 'Invoice query',
+  header: '',
+  htmlBody: '<p>Could you check invoice 4471?</p>',
+  textBody: 'Could you check invoice 4471?',
+  AttachmentHandlers: ''
+});
+
+console.log(root.getAttribute('DocumentName'));   // "2026-09-supplier-query.email"
+```
+
+**`TargetPath` is the path of the document to create, not the folder to put it in** - the same rule
+[Move](Move.md) and [Copy](Copy.md) follow. Aiming it at a folder creates a document *beside* that
+folder, named after it. `.email` is appended unless the name already ends with it.
+
+The document is dated from `SentDate` rather than from now, so its creation and modification dates are
+when the message was sent. `Recipients` is required - an empty one is refused by model binding with
+HTTP 400 - while `ccAddress`, `bccAddress`, `Subject`, `header` and `AttachmentHandlers` may all be
+empty.
 
 ## Notes
-
-
 
 - The document name is taken from the **last path segment** of `TargetPath`. The parent folder path must already exist.
 
@@ -328,15 +299,9 @@ HTTP/1.1
 
 - Use `RegisterEmail2` to specify the folder path and email document name as separate parameters instead of combining them in `TargetPath`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [RegisterEmail1](RegisterEmail1.md) - Register an email with user-defined keywords
 
@@ -348,15 +313,19 @@ HTTP/1.1
 
 - [GetDocument](GetDocument.md) - Get the properties of the registered email document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4090` | a document of that name is already in the folder |
+| `4041` | no folder at the parent of `TargetPath` |
+| `4030` | the caller may not create documents there |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
@@ -370,8 +339,5 @@ HTTP/1.1
 | Access denied | The user does not have add document permission on the target folder. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

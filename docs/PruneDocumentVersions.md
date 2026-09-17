@@ -70,6 +70,42 @@ authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf&keepPubl
 GET /srv.asmx/PruneDocumentVersions?authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.pdf&keepPublished=3&keepUnpublished=1
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes old versions of a document, keeping the most recent few.
+
+```javascript
+await call('PruneDocumentVersions', {
+  authenticationTicket: ticket,
+  documentPath: '/Finance/Reports/Q1.pdf',
+  keepPublished: 3,
+  keepUnpublished: 1
+});
+```
+
+**Both counts must be 1 or greater.** `0` and negative values are refused with `4000` and the
+untranslated literal "keepPublished must be 1 or greater." - so there is no way to ask this operation
+to leave a document with no versions, which is the point of it.
+
+A document with fewer versions than the counts allow is a success that removes nothing.
+
 ## Notes
 
 - This operation is **irreversible**. Deleted versions cannot be recovered.
@@ -81,3 +117,16 @@ GET /srv.asmx/PruneDocumentVersions?authenticationTicket=abc123&documentPath=/Fi
 
 - [GetDocumentVersions](GetDocumentVersions.md) — Get the complete version history for a document.
 - [DeleteDocumentVersion](DeleteDocumentVersion.md) — Permanently delete a single specific version.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | `keepPublished` or `keepUnpublished` is less than 1 |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not delete versions here |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

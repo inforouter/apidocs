@@ -1,14 +1,8 @@
 ﻿# GetRecentDocuments API
 
-
-
 Returns the list of documents recently accessed by the current authenticated user. The list is capped by the system-wide **Recent Document Count** setting (default: 20). Only document items are returned -" no folders. Optional flags control whether additional detail (property sets, security, owner, version history) is included for each document.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the list of documents recently accessed by the current authenticated use
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetRecentDocuments?AuthenticationTicket=...&withpropertysets=...&withsecurity=...&withOwner=...&withVersions=...`
 
@@ -28,11 +18,7 @@ Returns the list of documents recently accessed by the current authenticated use
 
 - **SOAP** Action: `http://tempuri.org/GetRecentDocuments`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -42,37 +28,21 @@ Returns the list of documents recently accessed by the current authenticated use
 | `withOwner` | bool | Yes | `true` to include owner user information as a child element for each document. `false` to omit. |
 | `withVersions` | bool | Yes | `true` to include document version history (`<Versions>` child element) for each document. `false` to omit. |
 
-
-
 > **Note:** There is no `withrules` parameter -" this API returns documents only; folders are never included.
-
-
 
 > **Performance tip:** Set all boolean flags to `false` for the fastest, most compact response. Only enable the flags your application actually needs.
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<root>` element containing `<document>` child elements. Documents are returned in recency order (most recently accessed first), up to the system-configured maximum. If the user has no recent documents, the root element is returned with no children.
-
-
 
 ```xml
 
 <root success="true">
-
-
 
   <document DocumentID="1051"
 
@@ -178,35 +148,23 @@ Returns a `<root>` element containing `<document>` child elements. Documents are
 
             UserViewStatus="2">
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withsecurity=true -->
 
     <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
-
-
 
     <!-- Included only when withVersions=true -->
 
     <Versions> ... </Versions>
 
-
-
   </document>
-
-
 
   <document DocumentID="1088" Name="Budget-2024.xlsx" ...>
 
@@ -214,17 +172,11 @@ Returns a `<root>` element containing `<document>` child elements. Documents are
 
   </document>
 
-
-
 </root>
 
 ```
 
-
-
 ### Optional Child Elements
-
-
 
 | Element | Enabled by | Description |
 |---------|------------|-------------|
@@ -233,11 +185,7 @@ Returns a `<root>` element containing `<document>` child elements. Documents are
 | `<User>` | `withOwner=true` | Owner user details. |
 | `<Versions>` | `withVersions=true` | Full version history list for the document. |
 
-
-
 See `GetDocument` for the complete list of `<document>` element attributes and their descriptions.
-
-
 
 Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
 `AIExtractConfidence`. The first says which of the document's attributes infoRouter Connect
@@ -247,39 +195,23 @@ it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienh
 
 ### Error Response
 
-
-
 ```xml
 
 <root success="false" error="[901] Session expired or Invalid ticket" />
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user may call this API. The response always reflects the recent documents of the **currently authenticated user** -" callers cannot query another user's recent documents list.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" minimal (no extra detail)
-
-
 
 ```
 
@@ -299,19 +231,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetRecentDocuments HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -325,11 +251,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -359,15 +281,47 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents the calling user has looked at recently. Documents only - no folders.
+
+```javascript
+const root = await call('GetRecentDocuments', {
+  authenticationTicket: ticket,
+  withpropertysets: false,
+  withsecurity: false,
+  withOwner: false,
+  withVersions: false
+});
+```
+
+Note it takes four flags where [GetFavorites](GetFavorites.md) and [GetDownloadQue](GetDownloadQue.md)
+take five: there is no `withrules`, because rules belong to folders and none are returned.
+
+These three answer for **the calling user only** - there is no `userName` - so a caller with no ticket
+is refused rather than answered for the anonymous user. The message is "User has been deleted.", which
+describes neither the caller nor anybody else; read the `4010`, not the text.
 
 ## Notes
-
-
 
 - The recent documents list belongs to the **currently authenticated user** only. There is no parameter to specify a different user.
 
@@ -381,15 +335,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - Items are returned with their current properties at the time of the call. Documents that have since been deleted or that the user no longer has access to may be absent.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetFavorites](GetFavorites.md) - Get the current user's favorites list (documents and folders)
 
@@ -399,15 +347,16 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetFoldersAndDocuments](GetFoldersAndDocuments.md) - Get folders and documents within a specific folder path
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the caller has no ticket; the message is "User has been deleted.", which describes nobody |
+| `4010` | the ticket is expired or unknown |
 
 | Error | Description |
 |-------|-------------|
@@ -416,8 +365,5 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | User has been deleted | The authenticated user account no longer exists. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

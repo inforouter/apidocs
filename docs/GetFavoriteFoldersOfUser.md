@@ -78,6 +78,45 @@ AuthenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+> **This operation does not work.** Every call fails with `5000` and the text
+> `System.ArgumentException: Invalid FolderListType for folder retrieval (Parameter 'folderListType')`.
+> The controller asks the shared folder-listing method for the `MyFavorites` list, and that method
+> handles only `Subscriptions` and `MyDocuments` - anything else falls into its default branch and
+> throws before a query is ever run. No parameter combination avoids it.
+>
+> Use [GetFavorites](GetFavorites.md) instead: it answers for the calling user and returns the
+> favourite folders as `<folder>` elements alongside the documents.
+
+```javascript
+// What this page would have shown, done the way that works:
+const root = await call('GetFavorites', {
+  authenticationTicket: ticket,
+  withrules: false, withpropertysets: false, withsecurity: false,
+  withOwner: false, withVersions: false
+});
+
+const favouriteFolders = [...root.querySelectorAll(':scope > folder')];
+```
+
 ## Notes
 
 - Use `startingRow=0` and `rowCount=0` to retrieve all favorite folders.
@@ -85,3 +124,12 @@ AuthenticationTicket=abc-123&userName=jsmith&startingRow=0&rowCount=25
 - The `totalcount` attribute on the root element reflects the total number of favorite folders for the user, regardless of paging parameters.
 - To retrieve favorite **documents** for a user, use [GetFavoriteDocumentsOfUser](GetFavoriteDocumentsOfUser.md).
 - To retrieve the full favorites list (documents and folders combined) for the current user, use [GetFavorites](GetFavorites.md).
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `5000` | every call; see the note above |
+

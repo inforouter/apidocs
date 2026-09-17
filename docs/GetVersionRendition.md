@@ -71,8 +71,64 @@ Content-Type: application/x-www-form-urlencoded
 AuthenticationTicket=abc123&Path=/Finance/Q3.pdf&VersionNumber=0&Rendition=RedactedText
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads a derived rendition of one document version - the plain text, the structured markdown, or the
+text with personal data removed.
+
+```javascript
+const root = await call('GetVersionRendition', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  VersionNumber: 0,             // 0 means the published version
+  Rendition: 'Markdown'
+});
+
+const text = root.textContent;                    // on the root itself
+const which = root.getAttribute('rendition');     // echoed back exactly as it was asked for
+```
+
+**`Rendition` is one of `Text`, `Markdown` or `RedactedText`**, matched without regard to case.
+Anything else is refused `4000` with those three names in the message - worth relying on, because
+`redacted` looks as though it should work and does not. An empty `Rendition` is refused by model
+binding with HTTP 400 before the operation runs.
+
+A rendition that has not been produced yet is a success with empty text, not an error, so there is no
+way to tell "not generated" from "generated and empty".
+
 ## Notes
 
 - Characters XML cannot carry are removed from the response. Text pulled out of a PDF is full of one of them — the form feed a page break leaves behind — and these are artifacts of the extraction rather than anything a reader wrote. A caller that needs the bytes exactly as stored wants the file, not an XML element holding it.
 - Renditions travel with the document: copying a document copies them, so a copy is not asked to produce them all over again.
 - Each rendition belongs to one version. A new version has none until one is asked for.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | `Rendition` is not one of `Text`, `Markdown`, `RedactedText` |
+| `4041` | no document at that path, or no version carries that number |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
+can be read without authenticating.
