@@ -114,6 +114,46 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists who may reach a library - the users and the groups, in separate sections.
+
+```javascript
+const root = await call('GetDomainMembers', { authenticationTicket: ticket, DomainName: 'Finance' });
+
+const users = [...root.querySelectorAll('users > User')].map(u => u.getAttribute('UserName'));
+const groups = [...root.querySelectorAll('usergroups > *')];
+```
+
+Both `<users>` and `<usergroups>` are always present, empty when there are none. Each `<User>` is the
+full user element, with preferences and property sets - use
+[GetDomainMembers1](GetDomainMembers1.md) with `detailMode=false` for a smaller answer.
+
+Membership is what makes a library visible at all, so this list is refused to a caller with no ticket.
+
+> **Never take your own membership away from a library you still need.**
+> [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) will remove the last member,
+> including the caller, and the library then disappears from that caller's view entirely - every
+> operation on it, `DeleteDomain` included, answers `4041` "library not found", even for a system
+> administrator. The library is still there; nothing in the API can reach it again.
+
 ## Notes
 
 - Returns both direct user members and user group members.
@@ -135,6 +175,14 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no library by that name - including one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

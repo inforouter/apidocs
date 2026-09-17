@@ -104,6 +104,45 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports one library.
+
+```javascript
+const root = await call('GetDomain', { authenticationTicket: ticket, DomainName: 'Finance' });
+const domain = root.querySelector('domain');
+
+console.log(domain.getAttribute('DomainID'),
+            domain.getAttribute('AnonymousDomain'),   // "TRUE" or "FALSE"
+            domain.getAttribute('IsArchive'),
+            domain.getAttribute('IsHidden'));
+```
+
+A **library** and a **domain** are the same thing. The operations are named Domain, the messages say
+library, and the XML element is `<domain>`. Its flags come back as the words `TRUE` and `FALSE` rather
+than `true`/`false`.
+
+A library the caller cannot see is `4041`, the same as one that does not exist - so an unticketed
+caller asking about a library that is not flagged anonymous is told it is missing rather than that it
+is private.
+
 ## Notes
 
 - This API returns domain metadata only -" it does not return members, managers, or folder/document listings.
@@ -125,6 +164,14 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no library by that name - including one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

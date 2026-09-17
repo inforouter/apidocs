@@ -82,6 +82,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes a library and everything in it.
+
+```javascript
+await call('DeleteDomain', { authenticationTicket: ticket, DomainName: 'Finance' });
+```
+
+Deleting one that is not there is `4041`, so a delete that runs twice reports the second attempt.
+
+> **Never take your own membership away from a library you still need.**
+> [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) will remove the last member,
+> including the caller, and the library then disappears from that caller's view entirely - every
+> operation on it, `DeleteDomain` included, answers `4041` "library not found", even for a system
+> administrator. The library is still there; nothing in the API can reach it again.
+
 ## Notes
 
 - **Irreversible**: Deletion permanently removes all documents, folders, versions, workflow definitions, memberships, and all other data inside the domain. There is no undo.
@@ -101,6 +134,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no library by that name - including one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

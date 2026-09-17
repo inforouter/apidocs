@@ -111,6 +111,46 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Renames a library and sets its flags.
+
+```javascript
+// Every field is written, so read the current ones and send back what should survive.
+const domain = (await call('GetDomain', {
+  authenticationTicket: ticket, DomainName: 'Finance'
+})).querySelector('domain');
+
+await call('UpdateDomain', {
+  authenticationTicket: ticket,
+  DomainName: 'Finance',
+  NewDomainName: 'Finance and Accounting',
+  Anonymous: domain.getAttribute('AnonymousDomain') === 'TRUE',
+  Hidden: domain.getAttribute('IsHidden') === 'TRUE',
+  WelcomeMessage: domain.getAttribute('WelcomeMessage')
+});
+```
+
+**It writes every field it takes**, so an empty `WelcomeMessage` clears it rather than leaving it
+alone. Send the same name in `NewDomainName` to change only the flags.
+
 ## Notes
 
 - To keep the current name unchanged, pass the same value in both `DomainName` and `NewDomainName`.
@@ -131,6 +171,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no library by that name - including one the caller cannot see |
+| `4090` | a library of the new name already exists |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

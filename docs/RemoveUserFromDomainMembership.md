@@ -86,6 +86,50 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes one user's access to a library away.
+
+```javascript
+await call('RemoveUserFromDomainMembership', {
+  authenticationTicket: ticket,
+  DomainName: 'Finance',
+  Username: 'jsmith'         // note the lower-case n, unlike UserName elsewhere
+});
+```
+
+Note the spelling of the parameter: `Username`, where its neighbours use `UserName`.
+
+> **Never take your own membership away from a library you still need.**
+> [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) will remove the last member,
+> including the caller, and the library then disappears from that caller's view entirely - every
+> operation on it, `DeleteDomain` included, answers `4041` "library not found", even for a system
+> administrator. The library is still there; nothing in the API can reach it again.
+
+There is no guard against it: the operation will remove the last member of a library, and will remove
+the caller's own membership, and reports success either way. Check
+[GetDomainMembers](GetDomainMembers.md) before removing anybody who might be the last, and never
+remove yourself from a library you still need to administer.
+
+A user name nobody has is `4041`.
+
 ## Notes
 
 - If the user is also a manager of the domain, their manager role is also removed upon membership removal.
@@ -104,6 +148,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no user by that name |
+| `4041` | no library by that name - including one the caller cannot see |
+| `none` | removing the last member, or the caller's own membership, succeeds and makes the library unreachable |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

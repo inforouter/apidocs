@@ -116,6 +116,43 @@ SOAPAction: "http://tempuri.org/GetDomainStatistics"
       workflowDefinitionCount="5" />
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Counts what is in a library.
+
+```javascript
+const root = await call('GetDomainStatistics', {
+  authenticationTicket: ticket, domainName: 'Finance'
+});
+
+const statistics = root.querySelector('LibraryStatistics');
+console.log(statistics.querySelector('DocumentCount').textContent,
+            statistics.querySelector('TotalDocumentSize').textContent);
+```
+
+Everything is a child element rather than an attribute: `FolderCount`, `LocalUserCount`,
+`LocalGroupCount`, `DocumentCount`, `CheckedOutCount`, `MemberUserCount`, `MemberGroupCount`,
+`WorkflowDefinitionCount` and `TotalDocumentSize`.
+
+A library nobody has been added to still reports `MemberUserCount` of 1 - its creator.
+
 ## Notes
 
 - The `totalDocumentSize` is returned in bytes. To convert to human-readable format:
@@ -125,3 +162,14 @@ SOAPAction: "http://tempuri.org/GetDomainStatistics"
 - `localUserCount` and `localGroupCount` refer to users/groups created within this domain
 - `memberUserCount` and `memberGroupCount` include both local and global members assigned to this domain
 - Statistics are calculated in real-time and may take longer for domains with large amounts of content
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no library by that name - including one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

@@ -217,6 +217,52 @@ SOAPAction: "http://tempuri.org/GetDomainPolicies"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports what a library allows and requires: its rules, and the right needed for each action.
+
+```javascript
+const root = await call('GetDomainPolicies', {
+  authenticationTicket: ticket, domainName: 'Finance'
+});
+
+const policies = root.querySelector('DomainPolicies');
+
+for (const rule of policies.querySelector('DomainRules').children) {
+  console.log(rule.tagName, rule.textContent);      // "false" / "true"
+}
+
+for (const policy of policies.querySelectorAll('ActionPolicies > Policy')) {
+  console.log(policy.getAttribute('Action'),
+              policy.getAttribute('RightRequired'),
+              policy.getAttribute('AllowedRights'));
+}
+```
+
+**Its root element is `<root>`**, not the `<response>` most operations answer.
+
+`<DomainRules>` holds the publishing and visibility rules as child elements whose text is `true` or
+`false`. `<ActionPolicies>` holds one `<Policy>` per action, saying who may do it - anonymous, library
+manager, object owner, sub-object owner - and the right it needs.
+[SetDomainPolicies](SetDomainPolicies.md) writes the same shape back.
+
 ## Notes
 
 - This API is the read counterpart of `SetDomainPolicies`, and its answer can be fed straight back: pass the `<DomainPolicies>` element as that operation's `xmlPolicies`
@@ -226,3 +272,14 @@ SOAPAction: "http://tempuri.org/GetDomainPolicies"
 - The `DocumentRead` policy has `SecurityApplies="false"` and an empty `AllowedRights` since the read right level is fixed
 - The `DocumentCheckIn` policy has `DomainManagerApplies="false"` and `OwnershipApplies="false"` because check-in rights are determined by the checkout holder, not by role
 - The `AccessToDocumentVersions` policy has `DomainManagerApplies="false"` and `OwnershipApplies="false"` with `AnonymousApplies="true"`
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no library by that name - including one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

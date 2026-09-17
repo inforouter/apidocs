@@ -114,6 +114,43 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists every library the caller can see.
+
+```javascript
+const root = await call('GetDomains', { authenticationTicket: ticket });
+
+for (const domain of root.querySelectorAll('domains > domain')) {
+  console.log(domain.getAttribute('DomainName'), domain.getAttribute('IsArchive'));
+}
+```
+
+A **library** and a **domain** are the same thing. The operations are named Domain, the messages say
+library, and the XML element is `<domain>`. Its flags come back as the words `TRUE` and `FALSE` rather
+than `true`/`false`.
+
+A caller with no ticket is answered as the anonymous user, so the list holds only the libraries
+flagged anonymous. [GetMemberDomains](GetMemberDomains.md) narrows it further, to the ones the caller
+actually belongs to.
+
 ## Notes
 
 - Returns **all** domains including archived (`IsArchive="TRUE"`) and hidden (`IsHidden="TRUE"`) domains.
@@ -135,6 +172,12 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 
 | Error | Description |
 |-------|-------------|

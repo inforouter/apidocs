@@ -212,6 +212,50 @@ SOAPAction: "http://tempuri.org/SetDomainPolicies"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Writes a library's rules and action policies, in the shape
+[GetDomainPolicies](GetDomainPolicies.md) returns.
+
+```javascript
+// Read, change one thing, write it back.
+const current = await call('GetDomainPolicies', {
+  authenticationTicket: ticket, domainName: 'Finance'
+});
+
+const rules = current.querySelector('DomainRules');
+rules.querySelector('AnonymousHideUnpublished').textContent = 'true';
+
+await call('SetDomainPolicies', {
+  authenticationTicket: ticket,
+  domainName: 'Finance',
+  xmlPolicies: `<DomainPolicies>${rules.outerHTML}</DomainPolicies>`
+});
+```
+
+A successful call carries **no `errorCode`**, where most operations report `errorCode="0"`.
+
+Malformed XML is refused properly with `4000` and "Invalid XML format" - unlike several other XML
+parameters in this API, which let the exception out as an HTTP 500. An empty `xmlPolicies` is refused
+by model binding with HTTP 400.
+
 ## Notes
 
 - The XML `GetDomainPolicies` returns can be fed straight back in: pass its `<DomainPolicies>` element as `xmlPolicies`, the root element name being ignored
@@ -221,3 +265,16 @@ SOAPAction: "http://tempuri.org/SetDomainPolicies"
 - The `DocumentDelete` and `FolderDelete` actions always have logging enabled regardless of the `LogAction` setting
 - The `DocumentRead` action always applies to anonymous users regardless of the `RightAnonymous` setting
 - Archive domains have checkout disabled regardless of policy settings
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no library by that name - including one the caller cannot see |
+| `4000` | `xmlPolicies` is not well-formed XML |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

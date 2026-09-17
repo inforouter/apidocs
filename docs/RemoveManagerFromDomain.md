@@ -86,6 +86,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes a user's manager role away from a library.
+
+```javascript
+await call('RemoveManagerFromDomain', {
+  authenticationTicket: ticket,
+  DomainName: 'Finance',
+  UserName: 'jsmith'
+});
+```
+
+**Removing somebody who is not a manager is a success**, so this is safe to call blindly - unlike
+[RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), which answers `4041` for a user
+it does not know. Removing a manager does not remove their membership.
+
 ## Notes
 
 - This operation only removes the manager role -" the user remains a member of the domain.
@@ -104,6 +137,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no user by that name |
+| `4041` | no library by that name - including one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

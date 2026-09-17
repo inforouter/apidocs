@@ -120,6 +120,37 @@ SOAPAction: "http://tempuri.org/GetManagedDomainsByUser"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the libraries one user manages.
+
+```javascript
+const root = await call('GetManagedDomainsByUser', {
+  authenticationTicket: ticket,
+  userName: 'jsmith'        // empty answers for the caller
+});
+```
+
+**`userName` is optional**: leaving it empty answers for whoever is asking rather than being refused.
+A name nobody has is `4000` here, where most of this family answers `4041` for a missing user.
+
 ## Notes
 
 - Omitting `userName` (or passing an empty string) returns the managed domains of the currently authenticated user — no elevated permissions required.
@@ -128,6 +159,13 @@ SOAPAction: "http://tempuri.org/GetManagedDomainsByUser"
 - Compare with [GetManagers](GetManagers.md) which returns the managers of a specific domain.
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name - note this is `4000`, not the `4041` its neighbours use |
 
 | Error | Description |
 |-------|-------------|

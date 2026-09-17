@@ -106,6 +106,54 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Makes a library.
+
+```javascript
+await call('CreateDomain', {
+  authenticationTicket: ticket,
+  DomainName: 'Finance',
+  Anonymous: false,      // readable without signing in
+  Hidden: false,         // hidden from the library list
+  WelcomeMessage: 'Finance department documents'
+});
+```
+
+**Whoever creates a library is a member of it**, without being added - which matters, because a
+library with no members is unreachable. Creating one is an administrator's job: a caller without those
+rights is refused `4030`, not `4010`.
+
+A name carrying a special character is **refused** with `4000`, unlike a folder name, which is
+silently cleaned up.
+
+A **library** and a **domain** are the same thing. The operations are named Domain, the messages say
+library, and the XML element is `<domain>`. Its flags come back as the words `TRUE` and `FALSE` rather
+than `true`/`false`.
+
+> **Never take your own membership away from a library you still need.**
+> [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) will remove the last member,
+> including the caller, and the library then disappears from that caller's view entirely - every
+> operation on it, `DeleteDomain` included, answers `4041` "library not found", even for a system
+> administrator. The library is still there; nothing in the API can reach it again.
+
 ## Notes
 
 - `DomainName` must be unique; creating a domain with an existing name returns an error.
@@ -128,6 +176,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4090` | a library of that name already exists |
+| `4000` | `DomainName` carries a character a library name may not |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
