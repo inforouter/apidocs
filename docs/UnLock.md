@@ -87,6 +87,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Releases a checkout taken with [Lock](Lock.md).
+
+```javascript
+await call('Lock', { authenticationTicket: ticket, Path: path });
+try {
+  // ... upload a new version ...
+} finally {
+  await call('UnLock', { authenticationTicket: ticket, Path: path, force: false });
+}
+```
+
+**`force` decides whose lock may be broken, not whether a missing one is ignored.** Unlocking a
+document that is not checked out is refused `4000` whichever way `force` is set - so this is not safe
+to call blindly the way the other "remove" operations are. `force=true` is what breaks a checkout
+somebody else holds, and needs the rights to do so.
+
+An unticketed caller is told about the document's state - `4000` "This document has not been checked
+out." - rather than refused for having no ticket, and that message is an untranslated English literal.
+
 ## Notes
 
 - **Force unlock discards changes**: When `force=true`, any in-progress changes the locking user has made to their local copy are permanently lost. Use with caution.
@@ -104,6 +142,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the document is not checked out, whatever `force` is set to - and what an unticketed caller is told when that is the case |
+| `4041` | nothing at that path |
+| `4030` | the document is checked out by somebody else and the caller may not break it |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|

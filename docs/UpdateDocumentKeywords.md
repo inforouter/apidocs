@@ -94,6 +94,46 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Replaces the keywords on a document.
+
+```javascript
+await call('UpdateDocumentKeywords', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  Keywords: 'quarterly,finance,board pack'
+});
+```
+
+**It replaces rather than adds**, so read the current set from
+[GetDocumentKeywords](GetDocumentKeywords.md) and send it back with the additions if the old ones are
+to survive. What comes back afterwards is **sorted**, not in the order it was sent, and a keyword may
+contain spaces - so split on the comma and never on the space.
+
+**There is no way to remove every keyword with this operation.** `Keywords` is a non-nullable string,
+so an empty one is refused by model binding with HTTP 400 - unlike
+[SetDocumentSummary](SetDocumentSummary.md) and
+[SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md), which both take an empty value precisely
+so that one can be cleared.
+
 ## Notes
 
 - This API **replaces** the entire keyword set. To append, read current keywords with `GetDocumentKeywords` first.
@@ -112,6 +152,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not change this document |
+| `HTTP 400` | `Keywords` was empty; there is no way to clear them here |
 
 | Error | Description |
 |-------|-------------|

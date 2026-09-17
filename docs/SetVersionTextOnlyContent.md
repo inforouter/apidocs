@@ -1,14 +1,8 @@
 ﻿# SetVersionTextOnlyContent API
 
-
-
 Updates the plain-text alternative content of a specific version of the specified document. The text-only content is a searchable plain-text representation stored alongside the binary file. It is used for full-text indexing when the binary content cannot be indexed directly. Calling this API replaces any previously stored text-only content for the specified version.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Updates the plain-text alternative content of a specific version of the specifie
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/SetVersionTextOnlyContent?authenticationTicket=...&path=...&versionNumber=...&contentText=...`
 
@@ -28,11 +18,7 @@ Updates the plain-text alternative content of a specific version of the specifie
 
 - **SOAP** Action: `http://tempuri.org/SetVersionTextOnlyContent`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -41,19 +27,11 @@ Updates the plain-text alternative content of a specific version of the specifie
 | `versionNumber` | int | Yes | The internal version number to update. Use `GetDocumentVersions` to retrieve the list of available version numbers. Version numbers are large integers (--- 1,000,000) assigned internally by infoRouter. |
 | `contentText` | string | Yes | The plain-text content to store for the specified version. Line endings are normalized automatically. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -61,11 +39,7 @@ Updates the plain-text alternative content of a specific version of the specifie
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -73,31 +47,17 @@ Updates the plain-text alternative content of a specific version of the specifie
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must have **write** (modify) permission on the document or its containing folder.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -115,19 +75,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/SetVersionTextOnlyContent HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -139,11 +93,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -171,15 +121,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Writes the plain-text rendition stored against **one version** of a document.
+
+```javascript
+await call('SetVersionTextOnlyContent', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Reports/Q1.pdf',
+  VersionNumber: 1000000,
+  ContentText: 'Quarterly results. Revenue 4.1m.'
+});
+```
+
+[SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md) does the same for the published version.
+The difference worth knowing: **this one cannot clear the text.** Its `ContentText` is a non-nullable
+string, so an empty one is refused by model binding with HTTP 400, where the document-level operation
+declares its value nullable and treats an empty one as "clear it".
 
 ## Notes
-
-
 
 - To update text content for the **latest** version without specifying a version number, use `SetDocumentTextOnlyContent`.
 
@@ -193,15 +172,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - After updating, the document may need to be re-indexed before the new text becomes searchable.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md) - Update text-only content for the latest document version
 
@@ -209,15 +182,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetDocumentVersions](GetDocumentVersions.md) - Retrieve the list of all versions for a document
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, or no version carries that number |
+| `4030` | the caller may not change this document |
+| `HTTP 400` | `ContentText` was empty; there is no way to clear it here |
 
 | Error | Description |
 |-------|-------------|
@@ -228,8 +204,5 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 | Access denied | The user does not have write permission on the document. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
-
-
 ---
-
 

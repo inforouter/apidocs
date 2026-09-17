@@ -86,6 +86,47 @@ authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.htm&htmlCont
 GET /srv.asmx/UpdateHtmlDocument?authenticationTicket=abc123&documentPath=/Finance/Reports/Q1Summary.htm&htmlContent=<h1>Q1</h1>&description=&sendMail=false&publishOption=0
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Replaces the content of an HTML document, creating a new version.
+
+```javascript
+await call('UpdateHtmlDocument', {
+  authenticationTicket: ticket,
+  documentPath: '/Finance/Reports/summary.htm',
+  htmlContent: '<html><body><h1>Q1</h1></body></html>',
+  description: 'Revised after review',
+  sendMail: false,
+  publishOption: 0
+});
+```
+
+**Every call makes a new version.** A document updated three times carries `1000000`, `1000001` and
+`1000002` - it does not overwrite in place, and no checkout is needed.
+
+**`publishOption` is not checked.** `99` is accepted as readily as `0`, so a client sending the wrong
+number is not told.
+
+Use [UpdateURLDocument](UpdateURLDocument.md) for a `.url` document. Pointing this one at a `.url`
+answers `5000` carrying a `UriFormatException` rather than a refusal - see the error table below.
+
 ## Notes
 
 - To create a new HTML document instead of updating an existing one, use `CreateHtmlDocument`.
@@ -98,3 +139,16 @@ GET /srv.asmx/UpdateHtmlDocument?authenticationTicket=abc123&documentPath=/Finan
 - [GetDocumentAbstract](GetDocumentAbstract.md) — Retrieve the stored HTML content of an HTML form document.
 - [UpdateURLDocument](UpdateURLDocument.md) — Update the hyperlink address of an existing URL shortcut document.
 - [UploadDocument](UploadDocument.md) — Upload a binary document file as a new version.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not change this document |
+| `5000` | the document is a `.url` rather than an HTML document; a `UriFormatException` escapes where a `4000` was meant |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

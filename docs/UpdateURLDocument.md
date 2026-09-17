@@ -73,6 +73,45 @@ authenticationTicket=abc123&documentPath=/Finance/Links/Homepage.url&address=htt
 GET /srv.asmx/UpdateURLDocument?authenticationTicket=abc123&documentPath=/Finance/Links/Homepage.url&address=https://example.com/new&sendMail=true&publishOption=0
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Changes the address a stored link points at, creating a new version.
+
+```javascript
+await call('UpdateURLDocument', {
+  authenticationTicket: ticket,
+  documentPath: '/Finance/Links/supplier.url',
+  address: 'https://www.example.com/portal/v2',
+  sendMail: false,
+  publishOption: 0
+});
+```
+
+Pointing this at an HTML document is refused `4000`, with a message about parsing XML content - the
+document is read as a link file and is not one. Use [UpdateHtmlDocument](UpdateHtmlDocument.md) for
+those. The two disagree about how to report the mismatch: this one refuses properly, the other lets an
+exception out.
+
+As with [CreateURL](CreateURL.md), the address is not checked - anything non-empty is stored as
+written.
+
 ## Notes
 
 - The document at `documentPath` must be a URL shortcut (`.url` extension). Passing a regular document path will result in an error from `PublishAsync` since the document has no binary content to update.
@@ -84,3 +123,16 @@ GET /srv.asmx/UpdateURLDocument?authenticationTicket=abc123&documentPath=/Financ
 - [CreateURL](CreateURL.md) — Create a new URL shortcut document.
 - [GetDocument](GetDocument.md) — Retrieve document metadata including the current MetaTag (URL address).
 - [UndoCheckOut](UndoCheckOut.md) — Discard a checked-out version and release the checkout lock.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4030` | the caller may not change this document |
+| `4000` | the document is not a link document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+

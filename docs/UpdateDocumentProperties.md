@@ -94,6 +94,60 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Renames a document and sets its description and update instructions.
+
+```javascript
+// Read what is there, change one thing, write all three back.
+const document = (await call('GetDocument', {
+  authenticationTicket: ticket, Path: path,
+  withPropertySets: false, withSecurity: false, withOwner: false, withVersions: false
+})).querySelector('document');
+
+await call('UpdateDocumentProperties', {
+  authenticationTicket: ticket,
+  Path: path,
+  NewDocumentName: document.getAttribute('Name'),
+  NewDescription: 'Quarterly results',
+  NewUpdateInstructions: document.getAttribute('UpdateInstructions')
+});
+```
+
+### Which of the three to use
+
+| | Name, description, update instructions | Source, language, author | Importance |
+|---|---|---|---|
+| [UpdateDocumentProperties](UpdateDocumentProperties.md) | yes | | |
+| [UpdateDocumentProperties1](UpdateDocumentProperties1.md) | yes | yes | |
+| [UpdateDocumentProperties2](UpdateDocumentProperties2.md) | yes | yes | yes |
+
+Each writes **every** field it takes, so a value left empty is cleared rather than left alone. Read
+the document with [GetDocument](GetDocument.md) first and send back what should survive. Using the
+wider variant to change one narrow field will empty the fields it adds.
+
+`NewDocumentName` is nullable, so an empty one reaches the operation and is refused with `4000` "a
+document must have a name" rather than by model binding. A name carrying any of
+`/ \ : * ? " < > | # % & +` or a tab is refused `4000` too - unlike creating a document, where such a
+name is silently cleaned up.
+
 ## Notes
 
 - Passing `null` for any optional parameter leaves that field unchanged.
@@ -113,6 +167,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ---
 
 ## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4000` | `NewDocumentName` is empty or carries a character a document name may not |
+| `4090` | a document of the new name is already in the folder |
+| `4030` | the caller may not change this document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
 |-------|-------------|
