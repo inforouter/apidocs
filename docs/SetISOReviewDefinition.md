@@ -91,13 +91,13 @@ Sets the ISO review schedule on a document. Defines when and how the document sh
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -115,6 +115,81 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123-def456&documentPath=/Library/Policies/policy.pdf&xmlParameters=<ISOReviewDefinitionModel><StartDate>2024-06-01T00:00:00</StartDate><ScheduleDef>MONTHLY-ON,12,1</ScheduleDef><ReviewByUserId>-5</ReviewByUserId><Instructions>Annual policy review required</Instructions><WorkflowDefId>0</WorkflowDefId><DeadlineHours>168</DeadlineHours><Priority>1</Priority><PermissionChangeDueDate>false</PermissionChangeDueDate><PermissionChangePriority>false</PermissionChangePriority><PermissionChangeFinishDate>false</PermissionChangeFinishDate><RequireSign>false</RequireSign><RequireEdit>false</RequireEdit><RequireLastVersionRead>true</RequireLastVersionRead><RequirePublishedVersionRead>false</RequirePublishedVersionRead><RequireComments>true</RequireComments><RequireApproval>false</RequireApproval><RequireISOReview>false</RequireISOReview><RequireSOXReview>false</RequireSOXReview><RequireArchive>false</RequireArchive><RequireDowngrade>false</RequireDowngrade><RequireDeclassify>false</RequireDeclassify></ISOReviewDefinitionModel>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Puts a recurring ISO review on a document. The root element of `xmlParameters` has to be
+`<ISOReviewDefinitionModel>` - the serialiser is given that type and nothing else fits.
+
+```javascript
+const definition = `
+<ISOReviewDefinitionModel>
+  <StartDate>2027-01-01T00:00:00</StartDate>
+  <ScheduleDef>MONTHLY-ON,1,1</ScheduleDef>
+  <ReviewByUserId>101</ReviewByUserId>
+  <Instructions>Please review against the standard.</Instructions>
+  <WorkflowDefId>0</WorkflowDefId>
+  <DeadlineHours>24</DeadlineHours>
+  <Priority>5</Priority>
+  <PermissionChangeDueDate>false</PermissionChangeDueDate>
+  <PermissionChangePriority>false</PermissionChangePriority>
+  <PermissionChangeFinishDate>false</PermissionChangeFinishDate>
+  <RequireSign>false</RequireSign>
+  <RequireEdit>false</RequireEdit>
+  <RequireLastVersionRead>false</RequireLastVersionRead>
+  <RequirePublishedVersionRead>false</RequirePublishedVersionRead>
+  <RequireComments>false</RequireComments>
+  <RequireApproval>false</RequireApproval>
+  <RequireISOReview>true</RequireISOReview>
+  <RequireSOXReview>false</RequireSOXReview>
+  <RequireArchive>false</RequireArchive>
+  <RequireDowngrade>false</RequireDowngrade>
+  <RequireDeclassify>false</RequireDeclassify>
+</ISOReviewDefinitionModel>`;
+
+await call('SetISOReviewDefinition', {
+  authenticationTicket: ticket,
+  documentPath: '/Quality/Procedures/qp-001.pdf',
+  xmlParameters: definition
+});
+```
+
+### ScheduleDef
+
+A comma separated string, not an enum name. The first part is the keyword and the rest are numbers:
+
+| `ScheduleDef` | Means |
+|---|---|
+| `ONCE` | review once, on the start date |
+| `DAILY,<n>` | every *n* days |
+| `WEEKLY,<n>,<dayOfWeek>` | every *n* weeks, on that day |
+| `MONTHLY-ON,<n>,<day>` | every *n* months, on that day of the month |
+| `MONTHLY-THE,<n>,<week>,<weekday>` | every *n* months, on the *week*th *weekday* |
+
+**The numbers are not optional.** The parser reads `parts[1]`, `parts[2]` and `parts[3]` without
+checking how many parts there are, so `DAILY` on its own - or `WEEKLY,1` without the day - is a
+`5000` `IndexOutOfRangeException` rather than the `4000` an unrecognised keyword gets. An empty
+`ScheduleDef` is refused too.
+
+`StartDate` is used: a date in the future is the first review date, and one in the past is rolled
+forward to the next occurrence of the schedule.
+
 ## Notes
 
 - To remove an existing ISO review schedule, use [`RemoveISOReviewDefinition`](RemoveISOReviewDefinition.md)
@@ -125,3 +200,16 @@ authenticationTicket=abc123-def456&documentPath=/Library/Policies/policy.pdf&xml
 
 - [`RemoveISOReviewDefinition`](RemoveISOReviewDefinition.md) — Remove the ISO review schedule from a document
 - [`GetISOReviewDefinition`](GetISOReviewDefinition.md) — Get the current ISO review schedule definition for a document
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, or `ReviewByUserId` is not a user |
+| `4000` | `ScheduleDef` is empty or its keyword is not one of the five |
+| `5000` | `ScheduleDef` is missing the numbers its keyword needs, or `xmlParameters` is not an `<ISOReviewDefinitionModel>` document |
+| `4030` | the caller may not change that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

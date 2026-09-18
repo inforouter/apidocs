@@ -52,7 +52,7 @@ Long paths are automatically shortened using infoRouter short-path format (`~D{i
 ### Success
 
 ```xml
-<response success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error
@@ -114,15 +114,45 @@ SOAPAction: "http://tempuri.org/SendEmail"
 </soap:Envelope>
 ```
 
-## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[499] ...` | `itemPaths` or `recipients` is empty |
-| `[933] ...` | The Send Email feature is disabled in system settings |
-| `[2301] ...: address` | One of the recipient addresses is not a valid email address |
-| Path not found error | A path in `itemPaths` could not be resolved to a document or folder |
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sends a message with one or more infoRouter documents attached.
+
+```javascript
+await call('SendEmail', {
+  authenticationTicket: ticket,
+  recipients: 'alice@example.com,bob@example.com',   // a comma or a semicolon both separate
+  subject: 'The procedure you asked for',
+  body: 'Attached.',
+  itemPaths: '/Quality/Procedures/qp-001.pdf'        // comma separated
+});
+```
+
+**All four parameters are required.** They are non-nullable strings, so an empty one is refused by
+model binding with HTTP 400 - including `body`, and including `itemPaths`. There is no way to send a
+plain message through this operation: it always carries at least one document.
+
+`itemPaths` is a list of **documents**. A folder path among them is not resolved as a folder; the
+whole call is refused `4041`, and the message does not say which entry was the problem. An address
+that is not one is refused `4000` and the message names it.
 
 ## Notes
 
@@ -133,3 +163,15 @@ SOAPAction: "http://tempuri.org/SendEmail"
 
 - `DistributeDocument` — Send a distribution notification to all OnChange subscribers of a document
 - `GetEmailAndNotificationSettings` — Read current email feature flags
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | one of the `itemPaths` is not a document the caller can see |
+| `4000` | one of the `recipients` is not an email address; the message names it |
+| `5030` | the mail service is not reachable |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

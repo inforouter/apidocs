@@ -52,7 +52,7 @@ When no ISO review is defined on the document, `scheduleDef` will be empty and a
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<root success="false" error="Error message" errorCode="4000" />
 ```
 
 ## isoDef Attributes
@@ -122,6 +122,54 @@ SOAPAction: "http://tempuri.org/GetISOReviewDefinition"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads the ISO review definition on a document.
+
+```javascript
+const root = await call('GetISOReviewDefinition', {
+  authenticationTicket: ticket,
+  documentPath: '/Quality/Procedures/qp-001.pdf'
+});
+
+const definition = root.querySelector('isoDef');
+if (definition.getAttribute('scheduleDef') === '') {
+  console.log('no ISO review on this document');
+} else {
+  console.log(definition.getAttribute('scheduleDef'),
+              definition.getAttribute('nextReviewDate'),
+              definition.getAttribute('reviewByName'),
+              definition.getAttribute('deadlineHours'));
+}
+```
+
+**There is no "no definition" answer.** A document without one still gets an `<isoDef>` element,
+filled with sentinels: an empty `scheduleDef`, `reviewById="0"` and a `nextReviewDate` of
+`1900-01-01`. Test the schedule, as the sample does.
+
+**The root element is not the same on success and on failure** - `<root>` when it worked and
+`<response>` when it did not, the same split as `GetAppliedRDScheduleLogs`. A call with no ticket is
+answered rather than refused.
+
+All three ISO operations are document only: a folder path is answered "document not found".
+
 ## Notes
 
 - When no ISO review schedule is set, `scheduleDef` is empty and `nextReviewDate` reflects the system base date
@@ -131,3 +179,14 @@ SOAPAction: "http://tempuri.org/GetISOReviewDefinition"
 
 - [`SetISOReviewDefinition`](SetISOReviewDefinition.md) — Set the ISO review schedule on a document
 - [`RemoveISOReviewDefinition`](RemoveISOReviewDefinition.md) — Remove the ISO review schedule from a document
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path |
+| `4030` | the caller may not see that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

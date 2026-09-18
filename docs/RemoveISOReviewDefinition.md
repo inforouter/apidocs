@@ -26,13 +26,13 @@ Removes the ISO review schedule from a document. After removal, no periodic revi
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -74,6 +74,36 @@ SOAPAction: "http://tempuri.org/RemoveISOReviewDefinition"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes the ISO review off a document. It is safe to repeat - a document that has none is a success.
+
+```javascript
+await call('RemoveISOReviewDefinition', {
+  authenticationTicket: ticket,
+  documentPath: '/Quality/Procedures/qp-001.pdf'
+});
+```
+
+Afterwards `GetISOReviewDefinition` answers the sentinel `<isoDef>` again rather than nothing.
+
 ## Notes
 
 - Has no effect if no ISO review schedule is currently set on the document
@@ -83,3 +113,14 @@ SOAPAction: "http://tempuri.org/RemoveISOReviewDefinition"
 
 - [`SetISOReviewDefinition`](SetISOReviewDefinition.md) — Set the ISO review schedule on a document
 - [`GetISOReviewDefinition`](GetISOReviewDefinition.md) — Get the current ISO review schedule definition for a document
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path |
+| `4030` | the caller may not change that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
