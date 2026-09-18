@@ -32,7 +32,7 @@ Creates an association between the specified source folder and a target item (do
 ### Success Response
 
 ```xml
-<response success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
@@ -94,6 +94,36 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`AssociateDocument` from a folder. The far end can be a folder or a document.
+
+```javascript
+await call('AssociateFolder', {
+  authenticationTicket: ticket,
+  FolderPath: '/Finance/Invoices',
+  AssociateWith_ItemPath: '/Finance/Purchase orders',
+  AssociationTypeID: 0
+});
+```
+
 ## Notes
 
 - **Association type is always Related**: Because the source is a folder, the system always overrides `AssociationTypeID` and stores the association as `Related` (0). This applies even when the target is a document. Typed associations (Rendition, Copy, ParentChild, Derivation) are only available when both objects are documents -" use [AssociateDocument](AssociateDocument.md) for those cases.
@@ -119,12 +149,12 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Folder not found.` | `FolderPath` does not resolve to an existing folder. |
-| `[error from path resolution]` | `AssociateWith_ItemPath` does not resolve to any existing document or folder. |
-| `Insufficient rights.` | The calling user does not have the `FolderPropertyChange` permission on the source folder. |
-| `Objects cannot be associated with themselves.` | `FolderPath` and `AssociateWith_ItemPath` resolve to the same object. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no folder at `FolderPath`, or nothing at `AssociateWith_ItemPath` |
+| `4000` | the two paths are the same |
+| `4030` | the caller may not change that folder |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

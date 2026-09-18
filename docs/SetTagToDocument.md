@@ -29,7 +29,7 @@ Applies a tag to the latest version of the specified document. If the document's
 ### Success Response
 
 ```xml
-<response success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
@@ -88,6 +88,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Applies a tag to the version a document is currently on.
+
+```javascript
+await call('SetTagToDocument', {
+  authenticationTicket: ticket,
+  path: '/Finance/Invoices/inv-1001.pdf',
+  tagText: 'Checked'
+});
+```
+
+The text can be anything - it does not have to be one of
+[GetTagDefinitions](GetTagDefinitions.md).
+
+> **Applying the same text twice applies it twice.** Nothing checks whether the document already
+> carries the tag, so you get two rows differing only in their timestamp, and each has to be removed
+> separately with its own date.
+
+The operation is document only: a folder path is answered "document not found".
+
 ## Notes
 
 - **Tag is applied to the latest version**: The tag is always applied to the document's most recent version, regardless of the published version number.
@@ -110,13 +148,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Document not found.` | The `path` does not resolve to an existing document. |
-| `Insufficient rights.` | The calling user does not have the `DocumentPropertyChange` permission on the document. |
-| `Access denied. Only users who checked out the document can tag the checkedout documents.` | The document is checked out by another user. Only the checkout holder may apply tags. |
-| `Operation cannot be performed on a shortcut.` | The path points to a shortcut document, which cannot be tagged. |
-| `[2494] Invalid tag text.` | The `tagText` value contains characters that are not allowed or does not meet the length requirement (1-"128 characters). |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path - including a folder path |
+| `4030` | the caller may not change that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

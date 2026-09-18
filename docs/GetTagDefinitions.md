@@ -98,6 +98,36 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the tags the instance suggests.
+
+```javascript
+const root = await call('GetTagDefinitions', { authenticationTicket: ticket });
+const suggestions = [...root.querySelectorAll('TagDefinition')].map(d => d.textContent);
+```
+
+**The list is a set of suggestions, not a constraint.**
+[SetTagToDocument](SetTagToDocument.md) takes any text, and applying one that is not on the list
+neither fails nor adds to it. Nothing in this API changes the list.
+
 ## Notes
 
 - **Server-Side Configuration:** Tag definitions are loaded from the server-side configuration file `config/tagdefs.xml` when the infoRouter service starts. Changes to the tag list require a server-side configuration update and a service restart; they cannot be managed via the API.
@@ -116,8 +146,8 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred (e.g. tag definitions file is missing or corrupt). |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |

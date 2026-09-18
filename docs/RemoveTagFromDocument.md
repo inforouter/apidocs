@@ -59,7 +59,7 @@ Removes a specific applied tag from a document. Because a document may have the 
 
 ```xml
 
-<response success="true" />
+<response success="true" error="" errorCode="0" />
 
 ```
 
@@ -195,6 +195,48 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes one applied tag. All four identifying values have to match the row exactly - the text alone
+does not identify it, since the same text can be applied more than once.
+
+```javascript
+const tags = await call('GetAppliedTags', {
+  authenticationTicket: ticket, path: '/Finance/Invoices/inv-1001.pdf'
+});
+const applied = tags.querySelector('AppliedTag');
+
+await call('RemoveTagFromDocument', {
+  authenticationTicket: ticket,
+  path: '/Finance/Invoices/inv-1001.pdf',
+  tagText: applied.getAttribute('TagText'),
+  tagDate: applied.getAttribute('TagDate'),           // exactly as it was read, to the millisecond
+  taggedBy: applied.getAttribute('TaggedById'),
+  versionNumber: applied.getAttribute('VersionNumber')
+});
+```
+
+Get any one of the four wrong and nothing is removed: the answer is `4041` "tagged version not
+found" rather than a complaint about which field was wrong. Reading the row first, as the sample
+does, is the way to be sure.
+
 ## Notes
 
 
@@ -233,23 +275,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
-
-
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Document not found.` | The `path` does not resolve to an existing document. |
-| `Tagged version cannot be found` | No tag row matched the given tag text, date, tagger and version number, so nothing was removed. |
-| `Insufficient rights.` | The calling user does not have the `DocumentPropertyChange` permission on the document. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
-
----
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, or no applied tag matching all four values |
+| `4030` | the caller may not change that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

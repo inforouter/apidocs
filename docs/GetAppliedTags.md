@@ -134,6 +134,47 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/TestDomain/TestF
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the tags on a document, with who applied each one, when, and to which version.
+
+```javascript
+const root = await call('GetAppliedTags', {
+  authenticationTicket: ticket, path: '/Finance/Invoices/inv-1001.pdf'
+});
+
+for (const applied of root.querySelectorAll('AppliedTag')) {
+  console.log(applied.getAttribute('TagText'),
+              applied.getAttribute('VersionNumberMultiPart'),   // "1.0.0"
+              applied.getAttribute('TaggedByName'),
+              applied.getAttribute('TagDate'));
+}
+```
+
+The four attributes `TagText`, `TagDate`, `TaggedById` and `VersionNumber` are what
+[RemoveTagFromDocument](RemoveTagFromDocument.md) takes, so a row read here can be handed straight
+back to it.
+
+`WorkFlowId`, `WorkFlowName` and `WorkFlowStepNumber` name the workflow step that applied the tag; a
+tag applied by hand carries zeroes and an empty name.
+
 ## Notes
 
 - Tags are returned across **all versions** of the document, ordered by `TagDate` ascending.
@@ -153,8 +194,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&path=/TestDomain/TestF
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Document not found error | The path does not resolve to a document, or the caller lacks view access. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path |
+| `4030` | the caller may not see that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

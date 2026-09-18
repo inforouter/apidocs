@@ -30,7 +30,7 @@ Removes an existing association between two infoRouter items (documents or folde
 ### Success Response
 
 ```xml
-<response success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
@@ -90,6 +90,51 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes a link. There is one link, seen from two sides, so removing it from either end removes it
+from both.
+
+```javascript
+// From the item the link was made on:
+await call('RemoveAssociation', {
+  authenticationTicket: ticket,
+  ItemPath: '/Finance/Invoices/inv-1001.pdf',
+  AssociationWith_ItemPath: '/Finance/Purchase orders/po-1001.pdf',
+  IsReverseAssociation: false
+});
+
+// From the item it points at - same link, the flag turned round:
+await call('RemoveAssociation', {
+  authenticationTicket: ticket,
+  ItemPath: '/Finance/Purchase orders/po-1001.pdf',
+  AssociationWith_ItemPath: '/Finance/Invoices/inv-1001.pdf',
+  IsReverseAssociation: true
+});
+```
+
+`IsReverseAssociation` says which end `ItemPath` is - it is the value the readers put on the link.
+
+Removing a link that was never made is a **success**, so the answer says nothing about whether
+anything was there.
+
 ## Notes
 
 - **Direction matters**: The `IsReverseAssociation` flag determines which item is the source (the item that owns the association record in the database). You must pass the same direction that was used when the association was created, otherwise the association will not be found and the call will fail.
@@ -113,10 +158,11 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Insufficient rights.` | The calling user does not have the required permission on the source item. |
-| `[error from path resolution]` | One or both of the supplied paths could not be resolved to an existing document or folder. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at `ItemPath` |
+| `4030` | the caller may not change it |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

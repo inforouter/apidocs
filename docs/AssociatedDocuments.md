@@ -139,6 +139,50 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents associated with an item, from either end of the link.
+
+```javascript
+const root = await call('AssociatedDocuments', {
+  authenticationTicket: ticket, ItemPath: '/Finance/Invoices/inv-1001.pdf'
+});
+
+for (const link of root.querySelectorAll('AssociatedDocument')) {
+  console.log(link.getAttribute('AssociationTypeName'),
+              link.getAttribute('IsReverseAssociation'),          // "TRUE" when this is the far end
+              link.querySelector('document').getAttribute('Path'));
+}
+```
+
+`IsReverseAssociation` tells you which end you are looking from: `"FALSE"` on the item the link was
+made on and `"TRUE"` on the item it points at.
+
+> **Read the path from the nested `<document>` element, not from the link.** The `Path` attribute on
+> `<AssociatedDocument>` is built by hand and comes out with its separators doubled -
+> `//Library//Folder//Sub/name.pdf`. The `<document>` element inside carries the path in the usual
+> shape.
+
+An item with no associations answers an empty `<AssociatedDocuments />`. A link to a document that
+has since been deleted is not reported.
+
 ## Notes
 
 - **Source can be a document or folder**: `ItemPath` is first resolved as a document; if not found, it is resolved as a folder. The list of associated documents is returned for whichever is found.
@@ -162,9 +206,11 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Document not found.` | `ItemPath` does not resolve to an existing document or folder. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | nothing at that path |
+| `4030` | the caller may not see it |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

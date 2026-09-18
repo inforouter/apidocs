@@ -40,7 +40,7 @@ Creates an association between the specified source document and a target item (
 ### Success Response
 
 ```xml
-<response success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
@@ -102,6 +102,43 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Links a document to another document or to a folder.
+
+```javascript
+await call('AssociateDocument', {
+  authenticationTicket: ticket,
+  DocumentPath: '/Finance/Invoices/inv-1001.pdf',
+  AssociateWith_ItemPath: '/Finance/Purchase orders/po-1001.pdf',
+  AssociationTypeID: 3            // this one is the parent of that one
+});
+```
+
+Making the same link twice does not create a second one. A document cannot be associated with
+itself - that is refused `4000`.
+
+> **`AssociationTypeID` is not checked against the five.** Any number is accepted and stored, and
+> the readers give it the name of type 0 - so an association can come back labelled "Related" while
+> carrying a type id that means nothing.
+
 ## Notes
 
 - **Document-to-document associations**: When `AssociateWith_ItemPath` resolves to a document, the `AssociationTypeID` is applied as specified. The association is stored bidirectionally in the database.
@@ -128,12 +165,12 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Document not found.` | `DocumentPath` does not resolve to an existing document. |
-| `[error from path resolution]` | `AssociateWith_ItemPath` does not resolve to any existing document or folder. |
-| `Insufficient rights.` | The calling user does not have the `DocumentPropertyChange` permission on the source document. |
-| `Objects cannot be associated with themselves.` | `DocumentPath` and `AssociateWith_ItemPath` resolve to the same object. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at `DocumentPath`, or nothing at `AssociateWith_ItemPath` |
+| `4000` | the two paths are the same |
+| `4030` | the caller may not change that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

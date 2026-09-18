@@ -78,7 +78,7 @@ The response contains a `<response success="true">` root element with an `<Assoc
 ### Error Response
 
 ```xml
-<response success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ---
@@ -123,6 +123,49 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the kinds of link an association can be. There are five and there is no operation that adds
+one.
+
+```javascript
+const root = await call('AssociationTypes', { authenticationTicket: ticket });
+
+for (const type of root.querySelectorAll('AssociationType')) {
+  console.log(type.getAttribute('AssociationTypeID'),
+              type.getAttribute('AssociationTypeName'),      // how the near end reads it
+              type.getAttribute('ReverseNameTypeName'));     // how the far end reads it
+}
+```
+
+| `AssociationTypeID` | Near end | Far end |
+|---:|---|---|
+| `0` | Related | Related |
+| `1` | Rendition | Rendition |
+| `2` | Copy of | Original copy |
+| `3` | Parent document | Child document |
+| `4` | Derived from | Derivation of this document |
+
+The two names are why an association has a direction: the same link reads one way from the item it
+was made on and the other way from the item it points at.
+
 ## Notes
 
 - **Localised names**: `AssociationTypeName` and `ReverseNameTypeName` are looked up from resource strings using the IDs stored in the `ASSOCIATIONTYPES` database table. The actual text returned depends on the language of the authenticated session.
@@ -146,8 +189,8 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
