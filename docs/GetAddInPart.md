@@ -1,4 +1,4 @@
-# GetAddInPart API
+﻿# GetAddInPart API
 
 Downloads the installation package (a ZIP archive) for the specified infoRouter client Add-in. Add-in clients call this API to retrieve the latest version of their installation files so they can self-update. Unlike most infoRouter APIs, the response is **raw binary data** (the contents of `parts.zip`), not an XML document.
 
@@ -54,19 +54,22 @@ the usual way, so a SOAP client gets the file without doing anything special.
 
 ### Not Found / Error Response
 
-When the add-in directory does not exist, `parts.zip` is not present inside it, or any
-server-side error occurs, the API returns **a single byte with value `0x00`** instead of an error
-- which over REST is the six character body `"AA=="`. There is no way to tell "no such add-in"
-from "an add-in whose parts file is empty": callers have to check the decoded length.
+When the add-in directory does not exist, `parts.zip` is not present inside it, or the name holds a
+path, the failure is reported on the HTTP response. The body is the empty JSON string, as for the
+document downloads, and the status and headers say what went wrong.
 
 ```
-HTTP/1.1 200 OK
+HTTP/1.1 404 Not Found
 Content-Type: application/json
+X-InfoRouter-ErrorCode: 4041
+X-InfoRouter-Error: No add-in of that name is installed on this server.
 
-"AA=="
+""
 ```
 
-> **Important:** This API never returns an HTTP error status code, except for an empty `AddInName`, which model binding refuses with HTTP 400. Every other case is HTTP 200, success or not, and the only way to detect failure is to check whether the decoded body is a single zero byte.
+Until 9.0 every one of those was **a single byte with value `0x00`** and HTTP 200 - over REST the
+six character body `"AA=="` - so there was no way to tell "no such add-in" from "an add-in whose
+parts file is empty", and nothing to report to whoever asked.
 
 ---
 
@@ -84,8 +87,8 @@ Content-Type: application/json
 GET /srv.asmx/GetAddInPart?AddInName=WORDADDIN HTTP/1.1
 ```
 
-**Success response:** a JSON string of base64 holding the `parts.zip` contents.  
-**Not-found response:** the JSON string `"AA=="`, a single zero byte.
+**Success response:** a JSON string of base64 holding the `parts.zip` contents, HTTP 200.  
+**Not-found response:** the empty JSON string `""`, HTTP 404, with the error in the headers.
 
 ### POST Request
 
@@ -150,7 +153,7 @@ if (bytes.length <= 1) {
 - **Binary response, not XML**: Unlike all other infoRouter APIs, `GetAddInPart` returns raw binary data. Do not attempt to parse the response as XML.
 - **Case-insensitive name**: `AddInName` is converted to uppercase before lookup. `wordaddin`, `WordAddin`, and `WORDADDIN` all resolve to the same directory.
 - **No authentication ticket**: this endpoint has no `AuthenticationTicket` parameter and is intended to be called before a user session is established. [GetAddIns](GetAddIns.md), which lists the same add-ins, does take one.
-- **Sentinel zero byte on failure**: If the add-in directory or `parts.zip` does not exist -" or if an exception occurs -" the API returns a single `0x00` byte. The HTTP status code is still `200`. Always check the response length before treating the result as a ZIP archive.
+- **Failures are on the HTTP response**: if the add-in directory or `parts.zip` does not exist, the status is `404` and `X-InfoRouter-ErrorCode` is `4041`. Until 9.0 the answer was a single `0x00` byte with HTTP 200, so callers had to check the decoded length.
 - **Server-side file location**: The `parts.zip` file must be present inside a subdirectory named after the add-in (uppercase) within the server's configured add-in path. Use [GetAddInInfo](GetAddInInfo.md) first to verify the add-in is deployed before downloading its parts.
 - **Self-update workflow**: The typical client flow is: (1) call `GetAddInInfo` to read the current server version, (2) compare with the locally installed version, (3) if the server version is newer, call `GetAddInPart` to download and install the update.
 

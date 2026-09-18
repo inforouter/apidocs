@@ -1,4 +1,4 @@
-# SetRdFreezeFlag API
+﻿# SetRdFreezeFlag API
 
 Sets or clears the Retention and Disposition (R&D) freeze flag on a document or folder by path. When frozen, the item is excluded from automatic disposition processing. The path type is auto-detected — document paths update the single document; folder paths recursively update all eligible documents within the folder.
 
@@ -125,9 +125,10 @@ await call('SetRdFreezeFlag', {
 `actionComment` is optional. Each call is written to the item's freeze log, which
 [GetRdFreezeLogs](GetRdFreezeLogs.md) reads back.
 
-**The folder form answers `success="true"` whatever happened.** It walks the contents, logs what it
-could not freeze - "this folder has no retention and disposition schedule", for instance - and
-reports success even when that is everything. The `<log>` entries are the only record.
+**The folder form answers MultiStatus when it could not do all of it.** It walks the contents and
+logs what it could not freeze - "this folder has no retention and disposition schedule", for
+instance - and answers `success="false"` with `errorCode="2070"` when there is at least one such
+entry. Until 9.0 it reported `success="true"` even when that was everything.
 
 ## Notes
 

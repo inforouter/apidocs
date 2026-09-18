@@ -1,4 +1,4 @@
-# GetUser API
+﻿# GetUser API
 
 Returns the detailed properties of the specified infoRouter user, including profile information, authentication source, and notification preferences.
 
@@ -86,6 +86,7 @@ Returns a `<User>` element nested inside the `<response>` element with full user
 | `LastPasswordChangeDate` | Date the user's password was last changed. |
 | `AuthenticationAuthority` | Authentication source: `native`, a Windows domain name, or a configured LDAP/OAuth authority. |
 | `ReadOnlyUser` | `TRUE` if the user is a read-only user; `FALSE` if an author. |
+| `UserType` | The same fact as the number [ChangeUserType](ChangeUserType.md) takes and sets: `1` author, `2` reader, `0` unspecified. New in 9.0 - before it there was no way to read back a type that had just been changed. |
 
 ## Preferences Element Attributes
 

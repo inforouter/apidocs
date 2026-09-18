@@ -1,4 +1,4 @@
-# GetLocalizedResources API
+﻿# GetLocalizedResources API
 
 Returns the localized display strings for the named message resources. infoRouter keeps its UI text, error messages and labels in the `IRBase.Messages` resource set, whose keys are **names** - `AccessDenied`, `Abort`, `DocumentNotFound` - and this operation looks a comma separated list of those names up in the language of the caller's session. Client add-ins and integrations call it so that their own screens read in the same language as the rest of infoRouter. Without a ticket the server's default language is used.
 
@@ -6,12 +6,12 @@ Returns the localized display strings for the named message resources. infoRoute
 > The lookup is done against the `IRBase.Messages` resource set, whose keys are names such as
 > `AccessDenied` and `Abort`. A numeric id resolves to nothing.
 >
-> **"Nothing" is reported as the string `-`, inside a successful response.** A name that does not
-> resolve is still returned, with `-` as its value, which a caller cannot tell from a resource
-> whose text is really a dash.
+> **A name that does not resolve carries `Found=false` and an empty value.** It is still in the
+> answer - leaving it out would lose which name was asked about - but it says so. Until 9.0 it was
+> reported as the string `-`, which a caller cannot tell from a resource whose text is really a dash.
 >
-> **Spaces are not trimmed.** The list is split on commas and nothing else, so
-> `AccessDenied, Abort` looks up `" Abort"` with its leading space and gets `-`.
+> **Spaces are trimmed.** `AccessDenied, Abort` resolves both. Until 9.0 the list was split on commas
+> and nothing else, so the second entry was looked up as `" Abort"` and found nothing.
 
 ## Endpoint
 
@@ -170,7 +170,7 @@ strings.AccessDenied;   // "Access denied." - or "-" if the name is not a resour
 ## Notes
 
 - **Language selection**: The language used to look up resource strings is determined by the authenticated user's session. If no ticket is provided, the server's installed default language is used.
-- **Nothing is filtered out**: a name that does not resolve is returned with the value `-`. Empty entries between commas are dropped, so `Abort,,,Abstract` returns two resources.
+- **Nothing is filtered out**: a name that does not resolve is returned with `Found=false` and an empty value. Empty entries between commas are dropped, so `Abort,,,Abstract` returns two resources.
 - **No deduplication**: a name given twice is returned twice.
 - **Order is kept**: the `<Res>` elements come back in the order the names were given.
 - **Resource names are internal**: they are the keys of `IRBase.Messages`, shipped with the server. There is no operation that lists them; take the ones you need from the SDK or from the source.

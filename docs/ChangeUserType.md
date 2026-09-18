@@ -1,12 +1,13 @@
-# ChangeUserType API
+﻿# ChangeUserType API
 
 Changes the type of the specified infoRouter user account between author and read-only user.
 
-> **The change cannot be read back through the API.** `GetUser` carries no user type attribute
-> at all, so there is no way to confirm what a user's type is now, or what it was before this
-> call. `GetAllUsers2` can filter on it but does not report it either.
+> **The change is read back from [GetUser](GetUser.md)**, which reports `UserType` - the same
+> number this operation takes - beside the older `ReadOnlyUser` boolean, in detail mode. Until 9.0 it
+> carried neither the number nor anything else naming the type, so a change made here could not be
+> confirmed; `GetAllUsers2` can filter on it but still does not report it.
 >
-> `0` (Unspecified) is refused, so a user whose type has been set once cannot be put back.
+> `0` (Unspecified) is refused: a user is an author or a reader. The refusal names both values.
 
 ## Endpoint
 
@@ -26,7 +27,7 @@ Changes the type of the specified infoRouter user account between author and rea
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `userName` | string | Yes | The username of the account whose type will be changed. |
-| `userType` | int | Yes | The new user type. Valid values: `1` = author (can upload and modify documents), `2` = read-only user (can only view documents). |
+| `userType` | int | Yes | The new user type. Valid values: `1` = author (can upload and modify documents), `2` = read-only user (can only view documents). `0`, Unspecified, is refused, and the refusal names the two that are taken. |
 
 ---
 

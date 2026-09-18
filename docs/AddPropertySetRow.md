@@ -113,9 +113,10 @@ Anonymous access is not permitted.
 
 - **System property sets** (managed internally by infoRouter) cannot be applied or removed manually. Attempting to do so returns an error.
 - The property set must be defined in the same infoRouter library as the target document or folder.
-- Only fields defined in the property set definition are accepted. **An unrecognised field
-  name is dropped silently** - the row is written with the fields that do exist and the
-  caller is not told, so a misspelled name looks like a success.
+- Only fields defined in the property set definition are accepted. **An unrecognised field name is
+  refused**, and the refusal names it. Until 9.0 it was dropped silently - the row was written with
+  the fields that do exist and the caller was not told, so a misspelled name looked like a success
+  until the row was read back.
 - A field marked required and left out is refused `4000`, with `SETNAME.FIELDNAME` in the
   message. A value longer than a `CHAR` field is refused the same way.
 - **The `AppliesTo` flags on the definition are not enforced here.** A set created with
@@ -192,8 +193,9 @@ Things worth knowing before you build that document:
   1 up. Naming a row that already exists is **refused** - use `UpdatePropertySetRow` to change one.
   Until 9.0 it was accepted and did nothing at all, so a caller meaning to rewrite a row was told
   the call had worked and nothing had changed.
-- **A field the set does not have is dropped silently.** The row is written with the fields that do
-  exist and the caller is not told about the rest, so a misspelled field name looks like a success.
+- **A field the set does not have is refused**, with `SETNAME.FIELDNAME` in the message and nothing
+  written. Until 9.0 it was dropped silently and the row was written with the fields that do exist,
+  so a misspelled field name looked like a success.
 - **A required field left out is refused**, `4000`, with `SETNAME.FIELDNAME` in the message.
 - **The `AppliesTo` flags are enforced here.** A set created with `AppliestoFolders=false` is
   refused on a folder. Until 9.0 they were recorded on the definition, reported by

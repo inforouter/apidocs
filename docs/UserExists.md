@@ -1,4 +1,4 @@
-# UserExists API
+﻿# UserExists API
 
 Determines whether the given user name refers to an existing infoRouter user.
 
@@ -105,7 +105,9 @@ async function call(action, params) {
 }
 ```
 
-Asks whether a user exists.
+Asks whether a user exists. It is not a boolean: yes is `success="true"` and no is
+`success="false"` with `errorCode="4041"`. The code is what tells "there is no such user", which
+is the answer, from a real error on the same call, which is not - until 9.0 both were `4000`.
 
 ```javascript
 // Not a boolean: the answer is a success or a failure, so catch rather than read.

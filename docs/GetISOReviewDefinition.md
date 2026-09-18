@@ -1,4 +1,4 @@
-# GetISOReviewDefinition API
+﻿# GetISOReviewDefinition API
 
 Returns the ISO review schedule definition currently set on a document. Includes the schedule, reviewer assignment, deadline, task permissions, and task requirements.
 
@@ -160,9 +160,10 @@ if (definition.getAttribute('scheduleDef') === '') {
 }
 ```
 
-**There is no "no definition" answer.** A document without one still gets an `<isoDef>` element,
-filled with sentinels: an empty `scheduleDef`, `reviewById="0"` and a `nextReviewDate` of
-`1900-01-01`. Test the schedule, as the sample does.
+**A document with no definition is `4041`.** Until 9.0 there was no "no definition" answer: a
+document without one was given an `<isoDef>` filled with sentinels - an empty `scheduleDef`,
+`reviewById="0"` and a `nextReviewDate` of `1900-01-01` - inside `success="true"`, so a caller had to
+know which fields were sentinels to tell that from a real definition.
 
 **The root element is not the same on success and on failure** - `<root>` when it worked and
 `<response>` when it did not, the same split as `GetAppliedRDScheduleLogs`. A call with no ticket is

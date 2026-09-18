@@ -1,11 +1,12 @@
-# UpdatePropertySetRowForUser API
+﻿# UpdatePropertySetRowForUser API
 
 Updates an existing property set row for the specified user.
 
 It can only rewrite a row that is already there; use
-[AddPropertySetRowForUser](AddPropertySetRowForUser.md) to create the first one. Asking it to
-update a row the user does not have is a **plain success that stores nothing**, while
-`rownbr="0"` is refused `4000`. Like the other row operations it replaces the whole row
+[AddPropertySetRowForUser](AddPropertySetRowForUser.md) to create the first one. Asking it to update
+a row the user does not have is **refused**, as is `rownbr="0"`. Until 9.0 the first of those was a
+plain success that stored nothing - so the obvious first call to this operation, before any row had
+been created, silently did nothing at all. Like the other row operations it replaces the whole row
 rather than merging into it.
 
 ## Endpoint

@@ -156,10 +156,20 @@ async function download(action, params) {
 }
 ```
 
-**Failure is an empty string.** There is no error document and no `errorCode`: a document that is not
-there, a path naming a folder, a version that does not exist and a refusal all come back as `""`. A
-caller cannot tell them apart, and cannot tell any of them from a file that really is empty. Check
-with [DocumentExists](DocumentExists.md) first when it matters.
+**A failure is reported on the HTTP response.** The body of a byte-returning operation has no room
+for an error document, so it is still the empty answer - but the REST response carries the HTTP
+status the error code bands to (`404` for a missing document, `403` for a refusal, and so on) and
+two headers beside it:
+
+| Header | What it holds |
+|---|---|
+| `X-InfoRouter-ErrorCode` | the infoRouter error code, e.g. `4041` |
+| `X-InfoRouter-Error` | the message, as one line of ASCII |
+
+Until 9.0 every failure was `""` with HTTP 200 and nothing else, so a document that is not there, a
+path naming a folder, a version nobody has, a refusal and a file that really is empty were all the
+same answer. A SOAP caller still gets the empty array and no status: there is nowhere in a SOAP
+envelope to put one.
 
 ```javascript
 const bytes = await download('DownloadZip', {
@@ -169,12 +179,13 @@ const bytes = await download('DownloadZip', {
 ```
 
 **The separator is `|`.** Not a semicolon and not a comma: either of those makes the whole string one
-path, which resolves to nothing, and the answer is the same empty string a real failure gives. Note
-that the document filters elsewhere in the API do split on `;`, which is what makes this worth
-checking twice.
+path, which resolves to nothing - and that is refused `4000` now rather than answered with an empty
+archive. Note that the document filters elsewhere in the API do split on `;`, which is what makes
+this worth checking twice.
 
-A folder is packed with everything in it. Paths that cannot be resolved are dropped silently, so an
-archive built from a list with a typo in it is smaller than expected rather than refused.
+A folder is packed with everything in it. A path that cannot be resolved is still dropped, so an
+archive built from a list with one typo in it is smaller than expected rather than refused; use
+[DownloadZipWithHandler](DownloadZipWithHandler.md) with `partialResult=false` when that matters.
 
 ## Notes
 

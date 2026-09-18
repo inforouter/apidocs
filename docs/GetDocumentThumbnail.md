@@ -1,4 +1,4 @@
-# GetDocumentThumbnail API
+﻿# GetDocumentThumbnail API
 
 Retrieves the thumbnail image bytes for a document. Returns the raw JPEG image data, whether the server generated it from the document or it was uploaded via `UpdateDocumentThumbnail`.
 
@@ -79,11 +79,11 @@ async function call(action, params) {
 }
 ```
 
-> **This returns bytes, not XML, and reports every failure as an empty string.** Like the download
-> operations it is declared to return `byte[]`, so over REST the body is `application/json` - a JSON
-> string holding base64 - and a failure is `""`. A document with no thumbnail, a document that does
-> not exist and a refusal are all the same two bytes, so there is no way to tell them apart. Check
-> with [DocumentExists](DocumentExists.md) first if it matters.
+> **This returns bytes, not XML.** Like the download operations it is declared to return `byte[]`,
+> so over REST the body is `application/json` - a JSON string holding base64 - and a failure is `""`.
+> The failure itself is on the HTTP response: the status, `X-InfoRouter-ErrorCode` and
+> `X-InfoRouter-Error`. Until 9.0 a document with no thumbnail, a document that does not exist and a
+> refusal were all the same two bytes and nothing else; the first two now carry different messages.
 
 ```javascript
 const response = await fetch('/srv.asmx/GetDocumentThumbnail?' + new URLSearchParams({
@@ -121,5 +121,8 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `none` | every failure, and a document with no thumbnail, is an empty string with no error document |
+| `4041` | no document at that path, **or** the document has no thumbnail - the message tells them apart |
+| `4030` | the caller may not read the document |
+
+Both on the HTTP response rather than in the body; see above.
 

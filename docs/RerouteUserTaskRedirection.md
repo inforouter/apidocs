@@ -1,4 +1,4 @@
-# RerouteUserTaskRedirection API
+﻿# RerouteUserTaskRedirection API
 
 Changes the target user of an existing task redirection without modifying the start and end dates. Use this when a user's tasks are already being redirected and you want to point them to a different person.
 
@@ -107,8 +107,9 @@ await call('RerouteUserTaskRedirection', {
 });
 ```
 
-Calling it for a user who has nothing redirected answers `success="false"` `errorCode="4000"` with
-an **empty** `error`, so check `GetUserTaskRedirectionTo` first if you need to tell the two apart.
+Calling it for a user who has nothing redirected answers `4041` and says so. Until 9.0 it answered
+`4000` with an **empty** `error` - the code returned its own *successful* authorization check as a
+failure - so the caller was told it had failed and not why.
 
 ## Notes
 
@@ -131,5 +132,6 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4041` | `userName` or `redirectTasksToUser` is not a user |
-| `4000` | the two names are the same, or that user has no redirection - the latter with no message |
+| `4000` | the two names are the same |
+| `4041` | that user has no redirection to reroute |
 | `4030` | there is no ticket at all |

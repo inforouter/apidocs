@@ -1,12 +1,13 @@
-# UpdatePropertySetRow API
+﻿# UpdatePropertySetRow API
 
 Updates an existing property set row on a document or folder identified by path. The path is
 resolved as a document first; if no document is found, it is resolved as a folder.
 
 **The update replaces the whole row rather than merging into it**: a field the document does
 not name is written back empty, so send every field you want to keep. `rownbr` must name a
-row that exists - `0` is refused `4000`, where `AddPropertySetRow` reads `0` as "a new row" -
-and a `rownbr` that is not there is accepted and changes nothing.
+row that exists - `0` is refused, where `AddPropertySetRow` reads `0` as "a new row", and a
+`rownbr` the object does not have is refused too. Until 9.0 the second one was accepted and changed
+nothing, so the two ends of the same condition were answered differently.
 
 ## Endpoint
 

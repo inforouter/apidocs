@@ -1,4 +1,4 @@
-# DisposeItem API
+﻿# DisposeItem API
 
 Disposes a document or folder by path per its active Retention and Disposition (R&D) schedule. The path type is auto-detected — document paths dispose the single document; folder paths recursively dispose all eligible documents within the folder and the folder itself.
 
@@ -132,12 +132,14 @@ Where the date comes from is worth knowing before building against this:
   there is no operation that puts one on a document. `SetFolderCutoffDate` refuses a folder until
   everything inside it is already cut off, which nothing else in the API can do.
 
-**The folder form answers `success="true"` whatever happened.** It walks the contents, logs one
-`<log><item>…</item><error>…</error></log>` per item it could not dispose, and reports success even
-when that is every one of them - so the log is the only place the outcome is recorded:
+**The folder form answers MultiStatus when it could not do all of it.** It walks the contents and
+logs one `<log><item>…</item><error>…</error></log>` per item it could not dispose; if there is at
+least one, the answer is `success="false"` with `errorCode="2070"` and the log says what was
+refused. Until 9.0 it reported `success="true"` even when that was every item in the folder, so a
+caller branching on `success` concluded the work was done when nothing was.
 
 ```xml
-<root success="true">
+<root success="false" errorCode="2070" error="MultiStatus">
   <log><item>inv-1001.pdf</item><error>No disposition date has been assigned to this document.</error></log>
   <log><item>Invoices</item><error>No disposition date has been assigned to this folder.</error></log>
 </root>
