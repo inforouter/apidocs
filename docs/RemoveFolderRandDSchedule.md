@@ -107,10 +107,6 @@ await call('RemoveFolderRandDSchedule', {
 });
 ```
 
-> **A caller with no ticket can clear a folder's schedule**, the same hole as
-> [SetFolderRandDSchedule](SetFolderRandDSchedule.md) seen from the other side: an unauthenticated
-> request removes a records management control from a folder, and the call reports success.
-
 ## Notes
 
 - If the folder has no schedule assigned, the call succeeds without error (no-op).

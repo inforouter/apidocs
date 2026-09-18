@@ -2,11 +2,6 @@
 
 Permanently deletes all items in the Recycle Bin of the currently authenticated user. Once emptied, the items cannot be recovered. Use this API to programmatically clean up a user's recycle bin as part of maintenance routines or end-of-period housekeeping.
 
-> **A call with no ticket at all is accepted and answers `success="true"`.** The anonymous user
-> has no bin, so nothing is destroyed, but the operation reports that it emptied one where every
-> other operation in this group refuses an unauthenticated caller. An invalid ticket *is* refused
-> with `4010`; it is the absent ticket that gets through.
-
 ## Endpoint
 
 ```

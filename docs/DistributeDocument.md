@@ -105,11 +105,6 @@ await call('DistributeDocument', {
 There is no "already distributed" state - each call distributes again. The operation is document
 only; a folder path is answered "document not found".
 
-> **It accepts a caller with no ticket.** `DocumentServices.DistributeDocumentAsync` looks the
-> document up and distributes it, with no permission check of its own. Any document an anonymous
-> caller can read - one in a library flagged for anonymous access - can be sent out to its
-> distribution list by an unauthenticated request.
-
 ## Notes
 
 - Only subscribers with the **OnChange** subscription type receive the notification email

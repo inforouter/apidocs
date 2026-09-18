@@ -58,7 +58,7 @@ The `AccessListXML` parameter must be a valid XML string with the following stru
 
 - **Global user groups** have an empty `DomainName` attribute or omit it entirely.
 - Omitting `<Anonymous>` or `<DomainMembers>` leaves those entries unchanged or set to no access.
-- Right values outside the range 0-"6 are clamped: values below 0 are treated as 0, values above 6 are treated as 6.
+- Right values outside the range 0 to 6 are refused with `4000` naming the value, and nothing is written. They used to be clamped, which turned a typo like `Right="66"` into a grant of full control.
 
 ---
 
@@ -177,15 +177,9 @@ const written = await call('GetAccessList', { authenticationTicket: ticket, Path
 [GetAccessList](GetAccessList.md) and send it back with the changes. `<AccessList />` is a valid list
 meaning "nobody explicitly", and `ApplyToTree=true` writes the same list down the whole subtree.
 
-> **A holder it cannot find is silently dropped.** A user name nobody has, or a group that does not
-> exist, is answered `success="true"` and simply left out of the list - so a typed or renamed name
-> produces a confident "done" and grants nothing at all. Nothing in the answer says which entries were
-> kept. **Read the list back and check the entries you meant to write are in it.** User names are
-> matched without regard to case, and come back the way the server holds them.
-
-> **A right above 6 is clamped to 6, which is full control.** `Right="7"` and `Right="66"` both grant
-> everything, and a negative value clamps to `0`. The mistake is in the direction that gives away more
-> rather than less, so validate the number before sending it.
+> **A holder it cannot find is refused.** A user name nobody has, or a group that does not
+> exist, is answered `4041` and **nothing at all is written** - the access list is not applied
+> in part. Check the names before sending, and read the list back if you want to be sure.
 
 Malformed `AccessListXML` is refused properly with `4000` here - unlike several other XML parameters
 in this API, which let the exception out as an HTTP 500.

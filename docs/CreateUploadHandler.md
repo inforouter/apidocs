@@ -165,9 +165,9 @@ own minimum and maximum and may return something quite different, and `0` means 
 than zero. Splitting the file by the number you sent rather than the one you were given is the usual
 cause of a chunked upload that fails part-way.
 
-**This one does not check the ticket.** Unlike every other write here, a caller with no ticket is
-handed a handler and a chunk size. Uploading through it is still checked, so a handler on its own
-achieves nothing, but it does let an unauthenticated caller open upload slots.
+A caller with no ticket is refused. This used to hand out a handler and a chunk size without
+authenticating at all - uploading through it was still checked, so a handler on its own achieved
+nothing, but it let an unauthenticated caller open server-side upload slots.
 
 ## Notes
 
@@ -201,7 +201,7 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `none` | a caller with no ticket is served; the operation does not authenticate |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 
 | Error | Description |
 |-------|-------------|

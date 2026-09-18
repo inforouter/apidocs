@@ -114,12 +114,6 @@ await call('SetFolderRandDSchedule', {
 With both flags false only the folder itself is touched. The answer wraps its log in a `<Value>`
 element, where the document form answers a bare success.
 
-> **A caller with no ticket can set a folder's schedule.** `Folder.SetRetentionAndDispositionAsync`
-> runs no permission check before writing the folder itself; the recursion into documents and
-> subfolders *is* checked, so those are refused and the refusals are logged - and the call still
-> answers `success="true"` with the folder written. Treat this endpoint as unauthenticated until
-> that is fixed.
-
 ## Notes
 
 - Assigning a schedule to a folder triggers the calculation of retention and disposition dates for all affected folders and documents.

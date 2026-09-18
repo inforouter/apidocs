@@ -248,8 +248,8 @@ const root = await call('UseFormTemplate', {
 document.getElementById('host').innerHTML = root.textContent;
 ```
 
-[SaveFilledForm](SaveFilledForm.md) writes the result back. Note that this operation answers a caller
-with **no ticket** as readily as an authenticated one, which its neighbours do not.
+[SaveFilledForm](SaveFilledForm.md) writes the result back. A caller with no ticket is refused;
+this used to answer one as readily as an authenticated caller, where its neighbours do not.
 
 ## Notes
 
@@ -276,7 +276,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no document at `templatePath`, or no folder at `targetFolderPath` |
-| `none` | a caller with no ticket is served |
+
 | `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |

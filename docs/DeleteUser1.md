@@ -2,10 +2,12 @@
 
 Deletes the specified infoRouter user account with administrator password confirmation. Use this API instead of `DeleteUser` when the system requires password re-prompting for user deletion.
 
-> **`UserPassword` is only checked when the instance asks for it.** The re-prompt runs only if
-> the password policy has "re-prompt on user delete" switched on. With it off, the parameter is
-> not looked at: a wrong password deletes the user and reports success, and nothing in the answer
-> says which regime was in force. Do not treat this operation as a confirmation step.
+> **`UserPassword` is always checked.** It is the caller's own password, not the password of
+> the user being deleted, and a wrong one refuses the delete with `4030`. Use
+> [DeleteUser](DeleteUser.md) when no confirmation is wanted.
+>
+> With Windows authentication there is no infoRouter password to confirm, and the parameter
+> is not read.
 
 ## Endpoint
 
@@ -24,7 +26,7 @@ Deletes the specified infoRouter user account with administrator password confir
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `UserPassword` | string | Yes | The current password of the calling administrator. Required for identity confirmation when the system has password re-prompting enabled for user deletion. |
+| `UserPassword` | string | Yes | The current password of the **calling** administrator, checked on every call. A wrong one refuses the delete. |
 | `UserName` | string | Yes | The username to delete. |
 
 ---
@@ -122,7 +124,7 @@ await call('DeleteUser1', {
 
 ## Notes
 
-- The `UserPassword` is the password of the **calling administrator**, not the user being deleted - but it is only verified when the instance has password re-prompting switched on for user deletion. With that policy off the parameter is not read at all, and a wrong password deletes the user and reports success.
+- The `UserPassword` is the password of the **calling administrator**, not the user being deleted, and it is verified on every call. Re-prompting is the whole difference between this operation and [DeleteUser](DeleteUser.md).
 - If the system does not require password confirmation (`PasswordRePromptActions.UserDelete = false`), both `DeleteUser` and `DeleteUser1` work; you may use either.
 - Deleting a user is permanent and cannot be undone.
 - Before deleting a user, consider using the `TransferUser*` APIs to reassign the user's data (documents, tasks, subscriptions, memberships) to another user.

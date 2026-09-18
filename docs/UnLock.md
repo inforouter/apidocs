@@ -122,8 +122,8 @@ document that is not checked out is refused `4000` whichever way `force` is set 
 to call blindly the way the other "remove" operations are. `force=true` is what breaks a checkout
 somebody else holds, and needs the rights to do so.
 
-An unticketed caller is told about the document's state - `4000` "This document has not been checked
-out." - rather than refused for having no ticket, and that message is an untranslated English literal.
+An unticketed caller is refused `4010` before the document is read, so nothing about its state is
+disclosed.
 
 ## Notes
 

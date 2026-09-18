@@ -23,7 +23,7 @@ Creates a time-limited WebDAV disk mount URL for the currently authenticated use
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `customExpirationDate` | DateTime | Yes | Expiry date and time for the generated WebDAV session ticket. Pass in ISO 8601 format (e.g. `2026-12-31T23:59:59`). UTC values are automatically converted to server local time. Use a far-future date to create a long-lived mount URL. |
+| `customExpirationDate` | DateTime | Yes | Expiry date and time for the generated WebDAV session ticket. Pass in ISO 8601 format (e.g. `2026-12-31T23:59:59`). UTC values are automatically converted to server local time. Use a far-future date to create a long-lived mount URL. **Must be in the future**: a date already past is refused with `4000`. |
 
 ## Response
 

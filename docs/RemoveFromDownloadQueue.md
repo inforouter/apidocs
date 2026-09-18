@@ -96,9 +96,9 @@ await call('RemoveFromDownloadQueue', {
 Removing something that is not on the list is a success, so this is safe to call without checking
 first. A path that names nothing at all is `4041`.
 
-**An unticketed caller is answered success rather than refused.** The anonymous user has no lists, so
-nothing is removed and nothing is at risk, but a client cannot tell that apart from a removal that
-happened. Every other write in this area refuses an unticketed call with `4010`.
+A caller with no ticket is refused with `4010`, the same as every other write in this area. It
+used to be answered success - the anonymous user has no lists so nothing was removed, but a client
+could not tell that apart from a removal that happened.
 
 ## Notes
 
@@ -115,7 +115,6 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | nothing at that path |
-| `none` | an unticketed caller is answered success |
 
 | Error | Description |
 |-------|-------------|
