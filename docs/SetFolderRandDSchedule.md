@@ -29,13 +29,13 @@ Assigns a Retention and Disposition (R&D) schedule to a folder identified by pat
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Required Permissions
@@ -80,6 +80,46 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports&RDDefId=47&includeFolders=true&includeDocuments=true
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Puts a schedule on a folder, and optionally on what is inside it.
+
+```javascript
+await call('SetFolderRandDSchedule', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Invoices',
+  RDDefId: 18706,
+  includeFolders: true,      // the subfolders, recursively
+  includeDocuments: true     // the documents in them
+});
+```
+
+With both flags false only the folder itself is touched. The answer wraps its log in a `<Value>`
+element, where the document form answers a bare success.
+
+> **A caller with no ticket can set a folder's schedule.** `Folder.SetRetentionAndDispositionAsync`
+> runs no permission check before writing the folder itself; the recursion into documents and
+> subfolders *is* checked, so those are refused and the refusals are logged - and the call still
+> answers `success="true"` with the folder written. Treat this endpoint as unauthenticated until
+> that is fixed.
+
 ## Notes
 
 - Assigning a schedule to a folder triggers the calculation of retention and disposition dates for all affected folders and documents.
@@ -97,10 +137,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports&
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller does not have write access to the folder. |
-| Folder not found | No folder was found at the specified `Path`. |
-| Schedule not found | No R&D schedule with the specified `RDDefId` exists. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no folder at that path, or no schedule by that id |
+| *(none)* | the folder itself is written whoever asks, including a caller with no ticket; only the items inside are permission checked, and their refusals go in the `<Value>` log while the call reports success |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

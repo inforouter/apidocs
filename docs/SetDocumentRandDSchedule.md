@@ -27,13 +27,13 @@ Assigns a Retention and Disposition (R&D) schedule to a document identified by p
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Required Permissions
@@ -63,6 +63,43 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports/Q1-2024.pdf&RDDefId=47
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Puts a schedule on a document, replacing whatever was there.
+
+```javascript
+await call('SetDocumentRandDSchedule', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Invoices/inv-1001.pdf',
+  RDDefId: 18706
+});
+```
+
+`RDDefId="0"` takes the schedule off, which is exactly what
+[RemoveDocumentRandDSchedule](RemoveDocumentRandDSchedule.md) sends internally. Any other id that no
+schedule has is refused `4041`.
+
+The retention and disposition dates are computed from the schedule when it is applied. A schedule
+triggered on create dates from the document's creation date; one triggered on cut off computes
+nothing until the item has a cut-off date.
+
 ## Notes
 
 - Assigning a schedule triggers the calculation of the document's retention end date and disposition date based on the schedule settings and the document's creation date or cutoff date.
@@ -80,10 +117,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports/
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller does not have write access to the document. |
-| Document not found | No document was found at the specified `Path`. |
-| Schedule not found | No R&D schedule with the specified `RDDefId` exists. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, or no schedule by that id |
+| `4030` | the caller may not change that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

@@ -47,7 +47,7 @@ The operation completes but individual items that could not be updated are repor
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<root success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -91,6 +91,44 @@ SOAPAction: "http://tempuri.org/SetRdFreezeFlag"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Freezes an item against disposition, or releases it. The item has to be under a schedule - there is
+nothing to freeze otherwise.
+
+```javascript
+await call('SetRdFreezeFlag', {
+  authenticationTicket: ticket,
+  path: '/Finance/Invoices/inv-1001.pdf',
+  rdFreezeFlag: true,
+  actionComment: 'Held for the audit'
+});
+```
+
+`actionComment` is optional. Each call is written to the item's freeze log, which
+[GetRdFreezeLogs](GetRdFreezeLogs.md) reads back.
+
+**The folder form answers `success="true"` whatever happened.** It walks the contents, logs what it
+could not freeze - "this folder has no retention and disposition schedule", for instance - and
+reports success even when that is everything. The `<log>` entries are the only record.
+
 ## Notes
 
 - The path type is resolved automatically: document paths update the single document; folder paths update all eligible documents within recursively
@@ -103,3 +141,16 @@ SOAPAction: "http://tempuri.org/SetRdFreezeFlag"
 - [`GetRdFreezeLogs`](GetRdFreezeLogs.md) — Get the R&D freeze flag change history for a document or folder
 - [`DisposeItem`](DisposeItem.md) — Dispose a document or folder by path
 - [`GetAppliedRDScheduleLogs`](GetAppliedRDScheduleLogs.md) — Get history of R&D schedules applied to a document or folder
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document and no folder at that path |
+| `4000` | the item has no retention and disposition schedule |
+| `4030` | the caller may not change it |
+| *(none)* | the folder form reports `success="true"` even when every item inside was refused; read the `<log>` entries |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

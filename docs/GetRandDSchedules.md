@@ -25,7 +25,7 @@ Returns a summary list of all Retention and Disposition (R&D) schedule definitio
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <RetentionAndDispositionSchedules>
     <RetentionAndDispositionSchedule
       RDDefID="47"
@@ -44,21 +44,21 @@ Returns a summary list of all Retention and Disposition (R&D) schedule definitio
       DispositionType="0"
       DispositionTypeText="None" />
   </RetentionAndDispositionSchedules>
-</root>
+</response>
 ```
 
 ### No Schedules Defined
 
 ```xml
-<root success="true">
+<response success="true">
   <RetentionAndDispositionSchedules />
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Response Structure
@@ -102,6 +102,42 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists every schedule, as a summary rather than the whole definition.
+
+```javascript
+const root = await call('GetRandDSchedules', { authenticationTicket: ticket });
+
+for (const schedule of root.querySelectorAll('RetentionAndDispositionSchedule')) {
+  console.log(schedule.getAttribute('RDDefID'),
+              schedule.getAttribute('RDName'),
+              schedule.getAttribute('RetentionTypeText'));
+}
+```
+
+**The names are not the ones the single-schedule reader uses.** This list answers
+`<RetentionAndDispositionSchedule RDDefID="…" RDName="…">`, where `GetRandDScheduleInfo` answers
+`<RetentionDispositionSchedule DefId="…" Name="…">`. The list carries the two types and their
+translated text and nothing else - for the triggers and periods, read the schedule by its id.
+
 ## Notes
 
 - Returns a summary list of all schedules including retention and disposition type codes and their localized text labels. For the complete definition with all settings and audit information, call [GetRandDScheduleInfo](GetRandDScheduleInfo.md) with the `RDDefID`.
@@ -118,7 +154,8 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |

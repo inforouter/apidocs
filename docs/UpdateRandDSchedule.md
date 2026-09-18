@@ -55,13 +55,13 @@ The XML must have a root element (element name is not significant) with the foll
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Required Permissions
@@ -92,6 +92,45 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDdefId=47&ApplyToExistingDocumentFolders=true&NewRDDefXML=<RDSchedule Name="10-Year Finance" Description="Updated to 10yr" RetentionType="2" RetentionTrigger="1" RetentionPeriodYears="10" RetentionPeriodMonths="0" RetentionPeriodDays="0" DispositionType="1" DispositionTrigger="3" DispositionPeriodYears="0" DispositionPeriodMonths="0" DispositionPeriodDays="0" CreateTask="true" SendEmail="true"/>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Rewrites a schedule in place, keeping its id. `NewRDDefXML` takes exactly the document
+[CreateRandDSchedule](CreateRandDSchedule.md) describes and runs the same validation.
+
+```javascript
+await call('UpdateRandDSchedule', {
+  authenticationTicket: ticket,
+  RDdefId: 18706,
+  ApplyToExistingDocumentFolders: true,   // recompute the dates on everything already carrying it
+  NewRDDefXML: `
+    <RetentionDispositionSchedule
+        Name="Seven year retention"
+        Description="Keep for seven years, then destroy"
+        RetentionType="1" RetentionTrigger="2" RetentionPeriodYears="7"
+        DispositionType="1" DispositionTrigger="3" DispositionPeriodDays="1" />`
+});
+```
+
+The id survives, and the schedule records who made the change - `GetRandDScheduleInfo` answers
+`LastUpdatedByName` and `LastUpdatedOn`, which a schedule that has never been updated leaves empty.
+
 ## Notes
 
 - When `ApplyToExistingDocumentFolders = true`, all documents and folders currently assigned this schedule have their retention end dates and disposition dates recalculated immediately. For large organizations with many affected objects this operation may take some time.
@@ -111,10 +150,13 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDdefId=47&ApplyToExis
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller is not a Retention & Disposition Manager or System Administrator. |
-| Schedule not found | No schedule with the specified `RDdefId` exists. |
-| Invalid XML | The `NewRDDefXML` is malformed or missing required attributes. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may not manage retention schedules - including a caller with no ticket at all |
+| `4041` | no schedule by that id |
+| `4090` | the new name is already another schedule's |
+| `4000` | any of the validation rules on CreateRandDSchedule, or `NewRDDefXML` is not well formed |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

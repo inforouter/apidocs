@@ -25,14 +25,14 @@ Returns a list of all retention source authorities defined in the system. Retent
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <RetentionSourceAuthorities>
     <Authority Name="SEC - Securities and Exchange Commission" />
     <Authority Name="HIPAA - Health Insurance Portability and Accountability Act" />
     <Authority Name="SOX - Sarbanes-Oxley Act" />
     <Authority Name="GDPR - General Data Protection Regulation" />
   </RetentionSourceAuthorities>
-</root>
+</response>
 ```
 
 ### Response Structure
@@ -45,7 +45,7 @@ Returns a list of all retention source authorities defined in the system. Retent
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -110,7 +110,7 @@ SOAPAction: "http://tempuri.org/GetRetentionSourceAuthorities"
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<root success="true">
+<response success="true">
   <RetentionSourceAuthorities>
     <Authority Name="FDA - Food and Drug Administration" />
     <Authority Name="IRS - Internal Revenue Service" />
@@ -118,7 +118,7 @@ SOAPAction: "http://tempuri.org/GetRetentionSourceAuthorities"
     <Authority Name="ISO 15489 - Records Management Standard" />
     <Authority Name="DoD 5015.2 - Department of Defense Records Management" />
   </RetentionSourceAuthorities>
-</root>
+</response>
 ```
 
 ### Empty List Response
@@ -127,9 +127,9 @@ If no retention source authorities are defined:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<root success="true">
+<response success="true">
   <RetentionSourceAuthorities />
-</root>
+</response>
 ```
 
 ## Related APIs
@@ -150,6 +150,35 @@ If no retention source authorities are defined:
 - `GetFolderRandDSchedule` - Get R&D schedule applied to a folder
 - `SetFolderRandDSchedule` - Apply R&D schedule to a folder
 - `RemoveFolderRandDSchedule` - Remove R&D schedule from folder
+
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the authority names a schedule's `SourceAuthority` can quote. Every instance carries `System`.
+
+```javascript
+const root = await call('GetRetentionSourceAuthorities', { authenticationTicket: ticket });
+const names = [...root.querySelectorAll('Authority')].map(a => a.getAttribute('Name'));
+```
+
+A schedule stores the name it was given rather than a reference to this list, so the two can drift
+apart - see [UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md).
 
 ## Notes
 
@@ -190,15 +219,6 @@ Organizations typically define authorities based on their industry and jurisdict
 - OSHA (Occupational Safety and Health Administration)
 - State-specific regulations
 
-## Error Codes
-
-Common error responses:
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated |
-| `System error accessing retention settings` | Database or configuration access error |
 
 ## Integration Example
 
@@ -257,3 +277,11 @@ using (var client = new SrvSoapClient())
 - Compatible with infoRouter 8.7 and later
 - Supports both synchronous SOAP and REST access patterns
 - Authority management features may require Records Management license
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |

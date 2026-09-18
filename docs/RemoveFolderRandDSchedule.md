@@ -28,13 +28,13 @@ Removes (unassigns) the Retention and Disposition (R&D) schedule from a folder i
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Required Permissions
@@ -77,6 +77,40 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports&includeFolders=true&includeDocuments=true
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes the schedule off a folder, and optionally off what is inside it.
+
+```javascript
+await call('RemoveFolderRandDSchedule', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Invoices',
+  includeFolders: true,
+  includeDocuments: true
+});
+```
+
+> **A caller with no ticket can clear a folder's schedule**, the same hole as
+> [SetFolderRandDSchedule](SetFolderRandDSchedule.md) seen from the other side: an unauthenticated
+> request removes a records management control from a folder, and the call reports success.
+
 ## Notes
 
 - If the folder has no schedule assigned, the call succeeds without error (no-op).
@@ -94,9 +128,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports&
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller does not have write access to the folder. |
-| Folder not found | No folder was found at the specified `Path`. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no folder at that path |
+| *(none)* | the folder itself is cleared whoever asks, including a caller with no ticket |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

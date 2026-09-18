@@ -52,7 +52,7 @@ Updates (renames) a retention source authority in the system. The new authority 
 
 ```xml
 
-<root success="true" />
+<response success="true" />
 
 ```
 
@@ -64,7 +64,7 @@ Updates (renames) a retention source authority in the system. The new authority 
 
 ```xml
 
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 
 ```
 
@@ -184,7 +184,7 @@ SOAPAction: "http://tempuri.org/UpdateRetentionSourceAuthority"
 
 <?xml version="1.0" encoding="utf-8"?>
 
-<root success="true" />
+<response success="true" />
 
 ```
 
@@ -198,7 +198,7 @@ SOAPAction: "http://tempuri.org/UpdateRetentionSourceAuthority"
 
 ```xml
 
-<root success="false" error="Current authority not found." />
+<response success="false" error="Current authority not found." />
 
 ```
 
@@ -208,7 +208,7 @@ SOAPAction: "http://tempuri.org/UpdateRetentionSourceAuthority"
 
 ```xml
 
-<root success="false" error="There is already a Retention Source Authority with same name." />
+<response success="false" error="There is already a Retention Source Authority with same name." />
 
 ```
 
@@ -218,7 +218,7 @@ SOAPAction: "http://tempuri.org/UpdateRetentionSourceAuthority"
 
 ```xml
 
-<root success="false" error="Current authority name cannot be empty" />
+<response success="false" error="Current authority name cannot be empty" />
 
 ```
 
@@ -228,7 +228,7 @@ SOAPAction: "http://tempuri.org/UpdateRetentionSourceAuthority"
 
 ```xml
 
-<root success="false" error="New authority name cannot be empty" />
+<response success="false" error="New authority name cannot be empty" />
 
 ```
 
@@ -238,7 +238,7 @@ SOAPAction: "http://tempuri.org/UpdateRetentionSourceAuthority"
 
 ```xml
 
-<root success="false" error="Character length of the Authority Source Name cannot be greater than 64 character. Please enter shorter name." />
+<response success="false" error="Character length of the Authority Source Name cannot be greater than 64 character. Please enter shorter name." />
 
 ```
 
@@ -376,26 +376,40 @@ Recommended workflow for updating a retention source authority:
 
 
 
-## Error Codes
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
 
-Common error responses:
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
 
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
 
+Renames an authority.
 
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated |
-| `Current authority name cannot be empty` | No current authority name provided |
-| `New authority name cannot be empty` | No new authority name provided |
-| `Current authority not found.` | The specified current authority does not exist |
-| `There is already a Retention Source Authority with same name.` | The new name duplicates an existing authority |
-| `Character length of the Authority Source Name cannot be greater than 64 character.` | New name exceeds maximum length |
-| `Access denied` | User does not have permission to update authorities |
+```javascript
+await call('UpdateRetentionSourceAuthority', {
+  authenticationTicket: ticket,
+  currentAuthorityName: 'NARA',
+  newAuthorityName: 'National Archives'
+});
+```
 
-
+**The rename does not follow the name onto the schedules that quote it.** A schedule stores the
+`SourceAuthority` string it was given rather than a reference, so after a rename it goes on quoting a
+name that is no longer on the list. Fix those with
+[UpdateRandDSchedule](UpdateRandDSchedule.md) if it matters.
 
 ## Notes
 
@@ -879,5 +893,13 @@ Standardize to "CODE - Full Name" format:
 
 - [GetRandDSchedules](./GetRandDSchedules.md) - Get R&D schedules
 
+## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no authority by the name in `currentAuthorityName` |
+| `4090` | `newAuthorityName` is already an authority |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
