@@ -298,7 +298,7 @@ Supported operators per field data type:
 
 ```xml
 
-<root success="true" ranksorted="false" />
+<response success="true" ranksorted="false" />
 
 ```
 
@@ -351,7 +351,7 @@ attribute table and suggested captions.
 
 ```xml
 
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 
 ```
 
@@ -561,6 +561,81 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Runs a search and answers **how many things matched** - not the things themselves. The rows come
+from [GetNextSearchPage](GetNextSearchPage.md), which reads the result your session is holding, so
+the two are always used together.
+
+```javascript
+const criteria = `
+<criteria>
+  <item NAME="FOLDER" OPERATOR="" VALUE="/Finance/Invoices" />
+  <item NAME="INCLUDESUBFOLDERS" OPERATOR="" VALUE="true" />
+  <item NAME="KEYWORDS" OPERATOR="" VALUE="overdue" />
+</criteria>`;
+
+const found = await call('Search', {
+  authenticationTicket: ticket,
+  xmlcriteria: criteria,
+  SortBy: 'DOCUMENTNAME',
+  AscendingOrder: true
+});
+console.log(found.getAttribute('count'), found.getAttribute('ranksorted'));
+
+const page = await call('GetNextSearchPage', {
+  authenticationTicket: ticket,
+  withrules: false, withPropertySets: false,
+  withSecurity: false, withOwner: false, withVersions: false
+});
+for (const document of page.querySelectorAll('document')) {
+  console.log(document.getAttribute('Name'), document.getAttribute('Path'));
+}
+```
+
+### xmlcriteria
+
+A root element whose children each carry `NAME`, `OPERATOR` and `VALUE` attributes. The element
+names themselves are not read. A name the parser does not know is refused `4000` and the message
+quotes it. An **empty** `<criteria />` matches nothing rather than everything.
+
+The names include `SEARCHSCOPE`, `SEARCHFOR`, `KEYWORDS`, `DOCUMENTNAME`, `DOCUMENTID`, `FOLDER`,
+`FOLDERBYID`, `INCLUDESUBFOLDERS`, `FOLDERDESCRIPTION`, `DOCUMENTFORMAT`, `DOCTYPE`, `FOLDERSONLY`,
+`DOCUMENTSONLY`, `OBJECTTYPENAME`, `VIEWCRITERIA`, `CHECKOUTSTATUS`, `USERNAME`, `SIZEIS`,
+`IMPORTANCE`, `CLEVEL`, `DATECRITERIA`, `DOCSRC`, `DOCLANG`, `DOCAUTHOR`, `RDDEFID`,
+`TEMPLATEPATH`, `PUBLISHSTATUS`, `AIENHANCED`, `SUBSCRIPTIONSOF`, `FAVORITESOF`,
+`RECENTDOCUMENTS`, `DOWNLOADQUEOF` and `PROPERTYSETNAME`.
+
+### SortBy
+
+Required - it is a non-nullable string, so it cannot be left out even though the search has a
+default sort of its own. A column it does not know is refused `4000` and the message lists them all:
+`DOCUMENTNAME`, `DOCUMENTSIZE`, `MIMETYPEDESCRIPTION`, `MODIFICATIONDATE`, `STATUSCODE`,
+`FOLDERNAME`, `LASTVERSIONNUMBER`, `PERCENTCOMPLETE`, `CREATIONDATE`, `MODIFIEDBYNAME`,
+`DESCRIPTION`, `OWNERNAME`, `FLOWNAME`, `VIEW`, `CHECKEDOUTBYNAME`, `COMPLETIONDATE`, `IMPORTANCE`,
+`RDDEFID`, `CLEVEL`, `DECLASSIFYON`, `DOWNGRADEON`, `DISPOSITIONDATE`, `LASTISOREVIEW`,
+`NEXTISOREVIEW`, and `PROPERTYSETNAME.FIELDNAME` for a custom field.
+
+A criteria document that is not well formed is a `5000` `XmlException` rather than a `4000`: it is
+loaded before the operation is entered.
+
 ## Notes
 
 
@@ -613,33 +688,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
-
-
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Folder not found` | The path specified in `FOLDER` criterion does not exist or is not accessible. |
-| `Possible values for SEARCHSCOPE: ONLINE, ALL, ARCHIVE, ONLINE-HIDDENS` | Invalid `SEARCHSCOPE` value. |
-| `Possible Sort Options: DOCUMENTNAME, DOCUMENTSIZE, ...` | Invalid `SortBy` field name. |
-| `Possible values for CLEVEL: NOMARKINGS, DECLASSIFIED, CONFIDENTIAL, SECRET, TOPSECRET` | Invalid `CLEVEL` value. |
-| `Possible operators for DATECRITERIA: EQ, EQLT, EQGT, BETWEEN` | Invalid `DATECRITERIA` operator. |
-| `Possible values for PUBLISHSTATUS: 0, 1, 2` | Invalid `PUBLISHSTATUS` value. |
-| `Possible values for AIENHANCED: ANY, ALL, NONE, or a comma separated list of: ...` | Invalid `AIENHANCED` value or attribute name. |
-| `Possible operator values for SIZEIS: EQLT, EQGT` | Invalid `SIZEIS` operator. |
-| `Property set field cannot be found` | The specified property set or field name does not exist. |
-| `CHECKOUTSTATUS: CHECKEDOUTBYUSER requires criteria USERNAME attribute` | Missing `USERNAME` attribute when using `CHECKEDOUTBYUSER`. |
-| `VALUE attribute cannot be blank for SUBSCRIPTIONSOF criteria.` | Missing `VALUE` for `SUBSCRIPTIONSOF`. |
-| `VALUE attribute cannot be blank for FAVORITESOF criteria.` | Missing `VALUE` for `FAVORITESOF`. |
-| `VALUE attribute cannot be blank for DOWNLOADQUEOF criteria.` | Missing `VALUE` for `DOWNLOADQUEOF`. |
-| `Specified user cannot be found specified SUBSCRIPTIONSOF attribute.` | User specified in `SUBSCRIPTIONSOF` does not exist. |
-| `Specified user cannot be found specified FAVORITESOF attribute.` | User specified in `FAVORITESOF` does not exist. |
-| `Specified user cannot be found specified DOWNLOADQUEOF attribute.` | User specified in `DOWNLOADQUEOF` does not exist. |
-
----
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | a criterion name the parser does not know, or a `SortBy` that is not one of the columns |
+| `5000` | `xmlcriteria` is not well formed |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

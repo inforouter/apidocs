@@ -283,7 +283,7 @@ it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienh
 
 ```xml
 
-<response success="false" error="[ErrorCode] Error message" errorcode="4000" />
+<response success="false" error="Error message" errorCode="4000" errorcode="4000" />
 
 ```
 
@@ -427,6 +427,51 @@ loop:
 
 
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Returns the next page of the result of the caller's **last `Search`**. The result lives in the
+session, so a caller that has not searched in this session has nothing to page through.
+
+```javascript
+await call('Search', { authenticationTicket: ticket, xmlcriteria, SortBy: 'DOCUMENTNAME', AscendingOrder: true });
+
+let page = await call('GetNextSearchPage', {
+  authenticationTicket: ticket,
+  withrules: false, withPropertySets: false, withSecurity: false, withOwner: false, withVersions: false
+});
+
+while (page.getAttribute('LastPage') !== 'true') {
+  for (const document of page.querySelectorAll('document')) { console.log(document.getAttribute('Name')); }
+  page = await call('GetNextSearchPage', { authenticationTicket: ticket,
+    withrules: false, withPropertySets: false, withSecurity: false, withOwner: false, withVersions: false });
+}
+```
+
+The answer carries `FirstPage`, `LastPage`, `from` and `to` as attributes, and the matched folders
+and documents as children. The five `with...` flags each add a section to every row.
+
+On a result that fits in one page, calling it again answers the same page rather than an error or an
+empty one. A caller with no search behind it is told **the query expired**, `4000`, rather than that
+there is nothing to page - which is also what an anonymous caller gets, since it has no session
+result of its own.
+
 ## Notes
 
 
@@ -469,21 +514,11 @@ loop:
 
 ---
 
-
-
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `The Query has been expired.` | No active search session found -" `Search` was not called, or the session expired. |
-| `The Query results not found.` | The search result metadata is missing from the session (internal state inconsistency). |
-
-
-
----
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | there is no search result in this session, or it has expired |

@@ -113,12 +113,40 @@ SOAPAction: "http://tempuri.org/GetSavedSearches"
 </soap:Envelope>
 ```
 
-## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `4000` Invalid parameter value in field (searchPageType) | `searchPageType` is not `all`, `searchPage`, `savedSearch` or empty |
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the saved searches or the search pages - one type per call.
+
+```javascript
+const root = await call('GetSavedSearches', {
+  authenticationTicket: ticket, searchPageType: 'savedSearch'
+});
+
+for (const page of root.querySelectorAll('SearchPage')) {
+  console.log(page.getAttribute('id'), page.getAttribute('name'), page.getAttribute('ownerId'));
+}
+```
+
+An `ownerId` of `0` is a system page; anything else is that user's personal one. The list is a
+summary - no criteria and no group names; [GetSavedSearch](GetSavedSearch.md) carries those.
 
 ## Notes
 
@@ -133,3 +161,11 @@ SOAPAction: "http://tempuri.org/GetSavedSearches"
 - [SavedSearchXmlReference](SavedSearchXmlReference.md) — Field reference, JavaScript helper, running a saved search
 - `DeleteSavedSearch` — Delete a saved search or search page by ID
 - `Search` — Execute a search using XML-based criteria
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |

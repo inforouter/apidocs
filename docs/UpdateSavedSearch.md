@@ -184,23 +184,53 @@ renamed.name = 'My Q4 Contract Terminations';
 await ir.updateSavedSearch(savedSearchId, renamed);
 ```
 
-## Error Codes
 
-| `errorcode` | Error (English) | Cause |
-|-------------|-----------------|-------|
-| `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |
-| `4041` | `Search or category page cannot be found.` | No entry with `searchPageId`, or `searchPageType` is not the entry's type |
-| `4030` | `Access denied. Only search administrators can perform this operation.` | A system-wide entry, and the caller lacks the Search Administrator role |
-| `4030` | `Access denied. Only the search page owner can perform this operation.` | Another user's personal entry |
-| `4030` | `Advanced search page cannot be renamed or deleted.` | A new name for the default search page (id `1`) |
-| `4000` | `Invalid parameter value in field (searchPageType). Accepted values are: savedSearch, searchPage` | `searchPageType` is not one of the two |
-| `4000` | `Custom search name must be at least 5 characters.` and other name messages | `name` invalid |
-| `4090` | `A search page with this name already exists. Please choose a different name` | Another entry of the same type has the name |
-| `4041` | `User group not found` | A name in `userGroupNames` does not match a group |
-| `4000` | `Unmatched field value`, `Invalid checkout status: ...`, ... | A value in `searchParametersXml`; see [Errors](SavedSearchXmlReference.md#errors) |
-| `5000` | `System.Xml.XmlException:...` | `searchParametersXml` is not well-formed XML |
+## JavaScript
 
-When an update fails, nothing is changed.
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Rewrites a saved search. Every parameter of
+[CreateSavedSearch](CreateSavedSearch.md) applies, plus the id.
+
+```javascript
+await call('UpdateSavedSearch', {
+  authenticationTicket: ticket,
+  searchPageId: 20800,
+  searchPageType: 'savedSearch',
+  name: 'Overdue invoices',
+  description: 'Anything still open after 30 days',
+  isPersonal: true,
+  anonymousAccess: false,
+  publicAccess: false,
+  userGroupNames: '',
+  searchParametersXml: criteria
+});
+```
+
+Two things the update does **not** do, both on purpose:
+
+- **`isPersonal` is ignored.** The owner is taken from the stored row, so an update can never move a
+  page between personal and system.
+- **The sharing flags are not written onto a personal page.** `anonymousAccess` and `publicAccess`
+  reach a system page only; on a personal one they are left as they are.
+
+`searchPageType` has to match the stored page's type as well as being one of the two literals - a
+mismatch is a `4041`, not a `4000`.
 
 ## Notes
 
@@ -217,3 +247,16 @@ When an update fails, nothing is changed.
 - [GetSavedSearches](GetSavedSearches.md) — List the entries the user may use
 - [DeleteSavedSearch](DeleteSavedSearch.md) — Delete an entry
 - [SavedSearchXmlReference](SavedSearchXmlReference.md) — Field reference, JavaScript helper, running a saved search
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no saved search by that id, or `searchPageType` does not match its type |
+| `4000` | `searchPageType` is not `savedSearch` or `searchPage`, or `name` is empty |
+| `4090` | another page of that name and type already exists |
+| `4030` | the caller neither owns the page nor is a search administrator |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

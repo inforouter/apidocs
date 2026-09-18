@@ -283,7 +283,7 @@ it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienh
 
 ```xml
 
-<response success="false" error="[ErrorCode] Error message" errorcode="4000" />
+<response success="false" error="Error message" errorCode="4000" errorcode="4000" />
 
 ```
 
@@ -433,6 +433,36 @@ page1 = GetPreviousSearchPage(ticket, false, false, false, false, false)  // Fir
 
 
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The other direction of [GetNextSearchPage](GetNextSearchPage.md), with the same parameters, the same
+answer and the same session result behind it.
+
+```javascript
+const page = await call('GetPreviousSearchPage', {
+  authenticationTicket: ticket,
+  withrules: false, withPropertySets: false, withSecurity: false, withOwner: false, withVersions: false
+});
+console.log(page.getAttribute('from'), page.getAttribute('to'), page.getAttribute('FirstPage'));
+```
+
 ## Notes
 
 
@@ -477,21 +507,11 @@ page1 = GetPreviousSearchPage(ticket, false, false, false, false, false)  // Fir
 
 ---
 
-
-
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `The Query has been expired.` | No active search session found -" `Search` was not called, or the session expired. |
-| `The Query results not found.` | The search result metadata is missing from the session (internal state inconsistency). |
-
-
-
----
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | there is no search result in this session, or it has expired |

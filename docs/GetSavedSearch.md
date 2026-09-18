@@ -156,13 +156,43 @@ const visibleFields = Array.from(page.getElementsByTagName('ITEM'))
 
 `getSavedSearch` in the [JavaScript helper](SavedSearchXmlReference.md#javascript-helper) returns the same as an object.
 
-## Error Codes
 
-| `errorcode` | Error (English) | Cause |
-|-------------|-----------------|-------|
-| `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |
-| `4041` | `Search or category page cannot be found.` | No entry with `searchPageId` |
-| `4030` | `Access denied.` | The caller may not read the entry (see [Required Permissions](#required-permissions)) |
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads one saved search, its criteria included.
+
+```javascript
+const root = await call('GetSavedSearch', { authenticationTicket: ticket, searchPageId: 20800 });
+
+const page = root.querySelector('SearchPage');
+console.log(page.getAttribute('name'), page.getAttribute('userGroupNames'));
+
+for (const item of page.querySelectorAll('ITEM')) {
+  if (item.getAttribute('VALUE')) { console.log(item.getAttribute('NAME'), item.getAttribute('VALUE')); }
+}
+```
+
+**The stored form holds every criterion, not only the ones that were sent.** The ones with a value
+are marked `VISIBLE="FALSE"` and the empty ones `VISIBLE="TRUE"` - the flag drives the search form's
+layout, not whether the criterion counts. `userGroupNames` comes back in the shape
+[UpdateSavedSearch](UpdateSavedSearch.md) takes, so a page read here can be written straight back.
 
 ## Notes
 
@@ -177,3 +207,12 @@ const visibleFields = Array.from(page.getElementsByTagName('ITEM'))
 - [CreateSavedSearch](CreateSavedSearch.md) — Create an entry
 - [DeleteSavedSearch](DeleteSavedSearch.md) — Delete an entry
 - [SavedSearchXmlReference](SavedSearchXmlReference.md) — Field reference, JavaScript helper, running a saved search
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no saved search by that id |

@@ -277,22 +277,48 @@ const searchPageId = await ir.createSavedSearch({
 });
 ```
 
-## Error Codes
 
-| `errorcode` | Error (English) | Cause |
-|-------------|-----------------|-------|
-| `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |
-| `4000` | `Invalid parameter value in field (searchPageType). Accepted values are: savedSearch, searchPage` | `searchPageType` is not one of the two |
-| `4000` | `Custom search name cannot be empty.` | Empty `name` |
-| `4000` | `Custom search name must be at least 5 characters.` | `name` shorter than 5 characters |
-| `4000` | A name validation message | `name` longer than 64 characters or with characters a name cannot have |
-| `4090` | `A search page with this name already exists. Please choose a different name` | An entry of the same type has the name |
-| `4030` | `Access denied. Only search administrators can perform this operation.` | `isPersonal=false` from a user without the Search Administrator role |
-| `4041` | `User group not found` | A name in `userGroupNames` does not match a group |
-| `4000` | `Unmatched field value`, `Invalid checkout status: ...`, `Invalid integer list`, ... | A value in `searchParametersXml`; see [Errors](SavedSearchXmlReference.md#errors) |
-| `5000` | `System.Xml.XmlException:...` | `searchParametersXml` is not well-formed XML |
+## JavaScript
 
-Error text follows the calling user's language, apart from the field value errors. Branch on `errorcode`, not on the text.
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Keeps a set of criteria for later, as a saved search or as a search page.
+
+```javascript
+const created = await call('CreateSavedSearch', {
+  authenticationTicket: ticket,
+  searchPageType: 'savedSearch',      // or 'searchPage'
+  name: 'Overdue invoices',
+  description: 'Anything still open',
+  isPersonal: true,                   // false makes it a system page
+  anonymousAccess: false,
+  publicAccess: false,
+  userGroupNames: '',                 // comma separated; "Library\\Group" for a library's own
+  searchParametersXml: criteria       // the same document Search takes
+});
+
+const searchPageId = created.getAttribute('id');
+```
+
+`searchPageType` is declared optional and is not: it is checked against the two literals
+`savedSearch` and `searchPage`, so an empty one is refused `4000` with both names in the message.
+`isPersonal` decides the owner - `true` gives it to the caller, `false` makes it a system page,
+which needs the search administrator role.
 
 ## Notes
 
@@ -310,3 +336,16 @@ Error text follows the calling user's language, apart from the field value error
 - [GetSavedSearches](GetSavedSearches.md) — List the entries the user may use
 - [DeleteSavedSearch](DeleteSavedSearch.md) — Delete an entry
 - [SavedSearchXmlReference](SavedSearchXmlReference.md) — Field reference, JavaScript helper, running a saved search
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | `searchPageType` is not `savedSearch` or `searchPage`, or `name` is empty |
+| `4041` | one of `userGroupNames` is not a group |
+| `4090` | a page of that name and type already exists |
+| `4030` | `isPersonal` was false and the caller is not a search administrator |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

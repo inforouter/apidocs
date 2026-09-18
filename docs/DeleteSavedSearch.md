@@ -76,14 +76,34 @@ SOAPAction: "http://tempuri.org/DeleteSavedSearch"
 </soap:Envelope>
 ```
 
-## Error Codes
 
-| `errorcode` | Error (English) | Cause |
-|-------------|-----------------|-------|
-| `4010` | `[901]Session expired or Invalid ticket` | Missing, invalid or expired ticket |
-| `4041` | `Search or category page cannot be found.` | No entry with `searchPageId` |
-| `4030` | `Access denied. Only search administrators can perform this operation.` | Not the owner of a personal entry, or a system-wide entry, and not a search administrator |
-| `4030` | `Advanced search page cannot be renamed or deleted.` | `searchPageId` is `1` |
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Deletes a saved search.
+
+```javascript
+await call('DeleteSavedSearch', { authenticationTicket: ticket, searchPageId: 20800 });
+```
+
+Deleting one that is not there is `4041`, so the call is not idempotent - unlike most of the delete
+operations in this API.
 
 ## Notes
 
@@ -95,3 +115,13 @@ SOAPAction: "http://tempuri.org/DeleteSavedSearch"
 - `GetSavedSearches` — List all saved searches and search page definitions visible to the current user
 - `CreateSavedSearch` — Create a new saved search or search page definition
 - `UpdateSavedSearch` — Update an existing saved search or search page definition
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no saved search by that id |
+| `4030` | the caller neither owns the page nor is a search administrator |
