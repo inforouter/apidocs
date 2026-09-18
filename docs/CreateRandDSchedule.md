@@ -33,14 +33,14 @@ The XML must have a root element (element name is not significant) with the foll
 | `ReferenceNumber` | string | 20 | No | Regulatory reference or citation number. |
 | `SourceAuthority` | string | 64 | No | Name of the regulatory authority (e.g., `NARA`). |
 | `RecordsSeriesName` | string | 100 | No | Records series name. |
-| `RetentionType` | int | -" | Yes | `0` = None, `1` = Permanent, `2` = Temporary. |
-| `RetentionTrigger` | int | -" | Yes for Temporary | `0` = Custom Date Entry, `1` = On Create, `2` = On Cutoff. Required when `RetentionType=2`. |
-| `RetentionPeriodYears` | int | -" | Yes for Temporary | Years to retain. Must be > 0 combined with months/days when `RetentionType=2`. |
+| `RetentionType` | int | -" | Yes | `0` = None, `1` = **Temporary**, `2` = **Permanent**. |
+| `RetentionTrigger` | int | -" | Yes for Temporary | `1` = On Create, `2` = On Cutoff. Required when `RetentionType=1`, and `0` (Custom Date Entry) is **refused** there. Forced to `1` when `RetentionType=2`. |
+| `RetentionPeriodYears` | int | -" | Yes for Temporary | Years to retain. At least one of years, months and days must be > 0 when `RetentionType=1`. All three are forced to `0` when `RetentionType=2`. |
 | `RetentionPeriodMonths` | int | -" | Yes for Temporary | Additional months to retain. |
 | `RetentionPeriodDays` | int | -" | Yes for Temporary | Additional days to retain. |
 | `DispositionType` | int | -" | Yes | `0` = None, `1` = Final Disposition, `2` = Transfer to External Agency. |
-| `DispositionTrigger` | int | -" | Yes if DispositionType > 0 | `0` = Custom Date Entry, `1` = On Create, `2` = On Cutoff, `3` = On Retention End. |
-| `DispositionPeriodYears` | int | -" | No | Years after retention trigger. |
+| `DispositionTrigger` | int | -" | Yes if DispositionType > 0 | `0` = Custom Date Entry, `1` = On Create, `2` = On Cutoff, `3` = On Retention End. **Must be `3` when `RetentionType=1`**, and `3` is refused when `RetentionType=0`. |
+| `DispositionPeriodYears` | int | -" | Yes if DispositionType > 0 | Years after the disposition trigger. At least one of years, months and days must be > 0. |
 | `DispositionPeriodMonths` | int | -" | No | Additional months. |
 | `DispositionPeriodDays` | int | -" | No | Additional days. |
 | `TransferAgency` | string | 100 | Yes if DispositionType=2 | Agency name for the transfer destination. |
@@ -77,9 +77,9 @@ The XML must have a root element (element name is not significant) with the foll
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <RetentionDispositionSchedule DefId="47" />
-</root>
+</response>
 ```
 
 - `DefId`: Auto-generated integer ID of the new schedule definition. Use this value when assigning the schedule to documents or folders.
@@ -87,7 +87,7 @@ The XML must have a root element (element name is not significant) with the foll
 ### Error Response
 
 ```xml
-<root success="false" error="[error message]" />
+<response success="false" error="[error message]" />
 ```
 
 ## Required Permissions
@@ -116,6 +116,66 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDDefXML=<RDSchedule Name="7-Year Finance" Description="Finance documents 7yr" RetentionType="2" RetentionTrigger="1" RetentionPeriodYears="7" RetentionPeriodMonths="0" RetentionPeriodDays="0" DispositionType="1" DispositionTrigger="3" DispositionPeriodYears="0" DispositionPeriodMonths="0" DispositionPeriodDays="0"/>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a schedule. Every value is an attribute of the root element, and the element's own name is
+never looked at.
+
+```javascript
+const definition = `
+<RetentionDispositionSchedule
+    Name="Seven year retention"
+    Description="Keep for seven years, then destroy"
+    ReferenceNumber="FIN-001"
+    SourceAuthority="IRS"
+    RecordsSeriesName="Finance"
+    RetentionType="1"          <!-- 1 is Temporary, 2 is Permanent -->
+    RetentionTrigger="1"       <!-- 1 On create, 2 On cut off -->
+    RetentionPeriodYears="7"
+    DispositionType="1"        <!-- 1 Final disposition, 2 Transfer -->
+    DispositionTrigger="3"     <!-- must be 3, On retention end, when retention is Temporary -->
+    DispositionPeriodDays="1"
+    CreateTask="false"
+    SendEmail="false" />`;
+
+const root = await call('CreateRandDSchedule', {
+  authenticationTicket: ticket, RDDefXML: definition
+});
+
+const defId = root.querySelector('RetentionDispositionSchedule').getAttribute('DefId');
+```
+
+The rules the server enforces, in the order it checks them:
+
+- `Name` and `Description` are both required. The name is at most 128 characters and takes letters,
+  digits, `_`, `-`, `.`, `,`, `(`, `)` and spaces only.
+- `RetentionType` and `DispositionType` cannot both be `0`.
+- **Temporary retention** (`RetentionType="1"`) needs `RetentionTrigger` of `1` or `2` -
+  `0`, the default, is refused - and at least one of the three retention periods above zero.
+- **Permanent retention** (`RetentionType="2"`) forces the trigger and all three periods to zero and
+  **silently turns the disposition off**, whatever the document asked for. The call still succeeds.
+- A disposition needs at least one of its three periods above zero.
+- `DispositionTrigger="3"`, on retention end, needs a retention type other than `0`.
+- With **Temporary** retention and any disposition, `DispositionTrigger` **must** be `3`. The refusal
+  for that one quotes a stray minutes abbreviation - the string `dk.` - rather than the rule.
+
 ## Notes
 
 - When `RetentionType = 1` (Permanent), all period values are automatically reset to 0 and `RetentionTrigger` is set to `On Create`.
@@ -135,10 +195,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDDefXML=<RDSchedule N
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Invalid XML | The `RDDefXML` is malformed or missing required attributes. |
-| Invalid retention period | `RetentionType=2` but no period values > 0. |
-| Missing transfer agency | `DispositionType=2` but `TransferAgency` is empty. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller may not manage retention schedules - including a caller with no ticket at all |
+| `4090` | a schedule of that name already exists |
+| `4000` | any of the validation rules above, or `RDDefXML` is not well formed |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

@@ -26,13 +26,13 @@ Creates a new retention source authority in the system. Retention source authori
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -89,24 +89,24 @@ SOAPAction: "http://tempuri.org/CreateRetentionSourceAuthority"
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response Examples
 
 **Duplicate Authority:**
 ```xml
-<root success="false" error="Authority with this name already exists" />
+<response success="false" error="Authority with this name already exists" />
 ```
 
 **Empty Name:**
 ```xml
-<root success="false" error="Authority name cannot be empty" />
+<response success="false" error="Authority name cannot be empty" />
 ```
 
 **Invalid Ticket:**
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Related APIs
@@ -171,18 +171,36 @@ FOIA - Freedom of Information Act
 DoD 5015.2 - Department of Defense Records Management
 ```
 
-## Error Codes
 
-Common error responses:
+## JavaScript
 
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated |
-| `Authority name cannot be empty` | No authority name provided or only whitespace |
-| `Authority with this name already exists` | An authority with the same name is already defined |
-| `Invalid authority name` | Authority name contains invalid characters or exceeds length limit |
-| `Access denied` | User does not have permission to create authorities |
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Adds a name to the list of authorities a schedule's `SourceAuthority` can quote.
+
+```javascript
+await call('CreateRetentionSourceAuthority', {
+  authenticationTicket: ticket, authorityName: 'NARA'
+});
+```
+
+The list is read back with [GetRetentionSourceAuthorities](GetRetentionSourceAuthorities.md). A
+schedule stores the name it was given rather than a reference, so the two can drift apart.
 
 ## Notes
 
@@ -314,3 +332,13 @@ using (var client = new SrvSoapClient())
 - [GetRetentionSourceAuthorities](./GetRetentionSourceAuthorities.md) - List all authorities
 - [CreateRandDSchedule](./CreateRandDSchedule.md) - Create retention schedule
 - Control Panel UI: `RetentionSourceAuthority.aspx` - Authority creation form
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4090` | an authority of that name already exists |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

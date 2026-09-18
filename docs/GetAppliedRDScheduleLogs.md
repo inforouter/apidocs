@@ -37,7 +37,7 @@ Returns an empty `<root success="true" />` if no log entries exist.
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<root success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Log Entry Attributes
@@ -89,6 +89,43 @@ SOAPAction: "http://tempuri.org/GetAppliedRDScheduleLogs"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists every schedule that has been put on a document or a folder, with who did it and when.
+
+```javascript
+const root = await call('GetAppliedRDScheduleLogs', {
+  authenticationTicket: ticket, path: '/Finance/Invoices/inv-1001.pdf'
+});
+
+for (const log of root.querySelectorAll('log')) {
+  console.log(log.getAttribute('rdName'),
+              log.getAttribute('appliedByName'),
+              log.getAttribute('dateApplied'));
+}
+```
+
+**The root element is not the same on success and on failure.** A successful read answers `<root>`;
+a failure answers `<response>`, like the rest of the API. A client has to accept either from this one
+operation. A document with no schedule answers an empty `<root success="true" />`.
+
 ## Notes
 
 - The path type is resolved automatically: document paths return the document's log; folder paths return the folder's log
@@ -101,3 +138,14 @@ SOAPAction: "http://tempuri.org/GetAppliedRDScheduleLogs"
 - [`SetFolderRandDSchedule`](SetFolderRandDSchedule.md) — Assign an R&D schedule to a folder
 - [`GetRdFreezeLogs`](GetRdFreezeLogs.md) — Get the R&D freeze flag change history for a document or folder
 - [`DisposeItem`](DisposeItem.md) — Dispose a document or folder by path
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document and no folder at that path |
+| `4030` | the caller may not see it |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

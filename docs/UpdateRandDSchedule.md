@@ -35,8 +35,8 @@ The XML must have a root element (element name is not significant) with the foll
 | `ReferenceNumber` | string | 20 | No | Regulatory reference number. |
 | `SourceAuthority` | string | 64 | No | Regulatory authority name. |
 | `RecordsSeriesName` | string | 100 | No | Records series name. |
-| `RetentionType` | int | -" | Yes | `0`=None, `1`=Permanent, `2`=Temporary. |
-| `RetentionTrigger` | int | -" | Yes for Temporary | `0`=Custom Date Entry, `1`=On Create, `2`=On Cutoff. |
+| `RetentionType` | int | -" | Yes | `0`=None, `1`=**Temporary**, `2`=**Permanent**. |
+| `RetentionTrigger` | int | -" | Yes for Temporary | `1`=On Create, `2`=On Cutoff. Required when `RetentionType=1`, and `0` (Custom Date Entry) is refused there. |
 | `RetentionPeriodYears` | int | -" | Yes for Temporary | Years to retain. |
 | `RetentionPeriodMonths` | int | -" | Yes for Temporary | Additional months. |
 | `RetentionPeriodDays` | int | -" | Yes for Temporary | Additional days. |

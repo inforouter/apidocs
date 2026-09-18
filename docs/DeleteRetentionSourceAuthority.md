@@ -26,13 +26,13 @@ Deletes a retention source authority from the system. The authority must not be 
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -89,29 +89,29 @@ SOAPAction: "http://tempuri.org/DeleteRetentionSourceAuthority"
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response Examples
 
 **Authority Not Found:**
 ```xml
-<root success="false" error="Retention source authority not found" />
+<response success="false" error="Retention source authority not found" />
 ```
 
 **Authority In Use:**
 ```xml
-<root success="false" error="Cannot delete authority because it is referenced by one or more R&D schedules" />
+<response success="false" error="Cannot delete authority because it is referenced by one or more R&D schedules" />
 ```
 
 **Empty Name:**
 ```xml
-<root success="false" error="Authority name cannot be empty" />
+<response success="false" error="Authority name cannot be empty" />
 ```
 
 **Invalid Ticket:**
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Related APIs
@@ -165,18 +165,37 @@ Before deleting a retention source authority:
    - Notify compliance team of authority removal
    - Update retention policy documentation
 
-## Error Codes
 
-Common error responses:
+## JavaScript
 
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated |
-| `Authority name cannot be empty` | No authority name provided or only whitespace |
-| `Retention source authority not found` | No authority with the specified name exists |
-| `Cannot delete authority because it is referenced by one or more R&D schedules` | Authority is in use |
-| `Access denied` | User does not have permission to delete authorities |
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes a name back off the list.
+
+```javascript
+await call('DeleteRetentionSourceAuthority', {
+  authenticationTicket: ticket, authorityName: 'NARA'
+});
+```
+
+Two things it does not do: it does not tell you whether there was anything to remove - a name that
+is not on the list is reported as a success - and it does not check whether a schedule quotes the
+name. A schedule that named the authority keeps naming it afterwards.
 
 ## Notes
 
@@ -397,3 +416,12 @@ using (var client = new SrvSoapClient())
 - [CreateRetentionSourceAuthority](./CreateRetentionSourceAuthority.md) - Create new authority
 - [GetRandDSchedules](./GetRandDSchedules.md) - Get R&D schedules to check dependencies
 - Control Panel UI: `RetentionSourceAuthority.aspx?method=delete` - Authority deletion form
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

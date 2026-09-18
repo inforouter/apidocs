@@ -26,7 +26,7 @@ Returns the full definition of a specific Retention and Disposition (R&D) schedu
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <RetentionDispositionSchedule
     DefId="47"
     Name="Standard 7-Year Retention"
@@ -35,7 +35,7 @@ Returns the full definition of a specific Retention and Disposition (R&D) schedu
     ReferenceNumber="FIN-001"
     SourceAuthority="IRS"
     RecordsSeriesName="Financial Records"
-    RetentionType="2"
+    RetentionType="1"
     RetentionTypeText="Temporary"
     RetentionTrigger="1"
     RetentionTriggerText="On Create"
@@ -60,13 +60,13 @@ Returns the full definition of a specific Retention and Disposition (R&D) schedu
     LastUpdatedById="1"
     LastUpdatedByName="Admin"
     LastUpdatedOn="2024-06-20T14:15:00" />
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Response Structure
@@ -82,7 +82,7 @@ Returns the full definition of a specific Retention and Disposition (R&D) schedu
 | `ReferenceNumber` | Regulatory reference number. |
 | `SourceAuthority` | Regulatory authority name. |
 | `RecordsSeriesName` | Records series name. |
-| `RetentionType` | `0`=None, `1`=Permanent, `2`=Temporary. |
+| `RetentionType` | `0`=None, `1`=**Temporary**, `2`=**Permanent**. |
 | `RetentionTypeText` | Human-readable retention type. |
 | `RetentionTrigger` | `0`=Custom Date Entry, `1`=On Create, `2`=On Cutoff. |
 | `RetentionTriggerText` | Human-readable trigger name. |
@@ -130,6 +130,42 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDDefId=47
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads one schedule in full. Each coded value is answered with a translated `...Text` twin, so a
+client can show the number or the words.
+
+```javascript
+const root = await call('GetRandDScheduleInfo', {
+  authenticationTicket: ticket, RDDefId: 18706
+});
+
+const schedule = root.querySelector('RetentionDispositionSchedule');
+console.log(schedule.getAttribute('Name'),
+            schedule.getAttribute('RetentionType'),       // "1"
+            schedule.getAttribute('RetentionTypeText'),   // the word, in the caller's language
+            schedule.getAttribute('DispositionType'),
+            schedule.getAttribute('CreatedByName'),
+            schedule.getAttribute('CreationDate'));
+```
+
 ## Notes
 
 - To get a summary list of all schedules with their IDs, use [GetRandDSchedules](GetRandDSchedules.md).
@@ -145,8 +181,9 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&RDDefId=47
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Schedule not found | No schedule with the specified `RDDefId` exists. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no schedule by that id |

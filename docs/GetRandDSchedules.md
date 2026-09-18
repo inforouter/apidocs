@@ -32,14 +32,14 @@ Returns a summary list of all Retention and Disposition (R&D) schedule definitio
       RDName="Standard 7-Year Retention"
       Description="Retain documents for 7 years then destroy"
       RetentionType="1"
-      RetentionTypeText="Fixed Date"
+      RetentionTypeText="Temporary"
       DispositionType="2"
       DispositionTypeText="Destroy" />
     <RetentionAndDispositionSchedule
       RDDefID="48"
       RDName="Permanent Legal Hold"
       Description="Permanent retention for legal documents"
-      RetentionType="3"
+      RetentionType="2"
       RetentionTypeText="Permanent"
       DispositionType="0"
       DispositionTypeText="None" />

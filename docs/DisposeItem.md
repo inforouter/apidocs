@@ -46,7 +46,7 @@ The operation completes but individual documents that could not be disposed are 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<root success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -89,6 +89,62 @@ SOAPAction: "http://tempuri.org/DisposeItem"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Carries out the disposition of a document or a folder whose disposition date has passed.
+
+```javascript
+const root = await call('DisposeItem', {
+  authenticationTicket: ticket,
+  path: '/Finance/Invoices/inv-1001.pdf',
+  disposeComments: 'Disposed under FIN-001'
+});
+```
+
+**An item can only be disposed once its disposition date has arrived**, and that date comes from the
+schedule rather than from this call. A document with no disposition date - because it has no
+schedule, because its schedule is permanent, or because the date is still in the future - is refused
+`4000` with "no disposition date has been assigned to this document".
+
+Where the date comes from is worth knowing before building against this:
+
+- `RetentionTrigger="1"` (on create) computes the retention date from the document's creation date,
+  and the disposition date from the end of retention. The shortest period the API accepts is one day,
+  so a document created today cannot be disposed today.
+- `RetentionTrigger="2"` (on cut off) computes nothing until the item has a cut-off date - and
+  there is no operation that puts one on a document. `SetFolderCutoffDate` refuses a folder until
+  everything inside it is already cut off, which nothing else in the API can do.
+
+**The folder form answers `success="true"` whatever happened.** It walks the contents, logs one
+`<log><item>…</item><error>…</error></log>` per item it could not dispose, and reports success even
+when that is every one of them - so the log is the only place the outcome is recorded:
+
+```xml
+<root success="true">
+  <log><item>inv-1001.pdf</item><error>No disposition date has been assigned to this document.</error></log>
+  <log><item>Invoices</item><error>No disposition date has been assigned to this folder.</error></log>
+</root>
+```
+
+`disposeComments` is declared optional, so an empty one reaches the operation.
+
 ## Notes
 
 - Disposal is **permanent and irreversible** — items are purged, not moved to the Recycle Bin
@@ -102,3 +158,16 @@ SOAPAction: "http://tempuri.org/DisposeItem"
 - [`SetDocumentRandDSchedule`](SetDocumentRandDSchedule.md) — Assign an R&D schedule to a document
 - [`SetFolderRandDSchedule`](SetFolderRandDSchedule.md) — Assign an R&D schedule to a folder
 - [`GetDispositionLog`](GetDispositionLog.md) — Get disposition log entries
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document and no folder at that path |
+| `4000` | the item has no disposition date, or the date has not arrived |
+| `4030` | the caller may not dispose it |
+| *(none)* | the folder form reports `success="true"` even when every item inside was refused; read the `<log>` entries |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

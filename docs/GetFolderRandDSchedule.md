@@ -26,7 +26,7 @@ Returns the Retention and Disposition (R&D) schedule assigned to a folder identi
 ### Folder Has a Schedule
 
 ```xml
-<root success="true">
+<response success="true">
   <RetentionDispositionSchedule
     DefId="47"
     Name="Standard 7-Year Retention"
@@ -35,7 +35,7 @@ Returns the Retention and Disposition (R&D) schedule assigned to a folder identi
     ReferenceNumber="FIN-001"
     SourceAuthority="IRS"
     RecordsSeriesName=""
-    RetentionType="2"
+    RetentionType="1"
     RetentionTypeText="Temporary"
     RetentionTrigger="1"
     RetentionTriggerText="On Create"
@@ -52,21 +52,21 @@ Returns the Retention and Disposition (R&D) schedule assigned to a folder identi
     TransferAgency=""
     MoveFolderId="0"
     MoveFolderPath="" />
-</root>
+</response>
 ```
 
 ### Folder Has No Schedule
 
 ```xml
-<root success="true">
+<response success="true">
   <RetentionDispositionSchedule DefId="0" />
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901]Session expired or Invalid ticket" />
+<response success="false" error="[901]Session expired or Invalid ticket" />
 ```
 
 ## Response Structure
@@ -82,7 +82,7 @@ Returns the Retention and Disposition (R&D) schedule assigned to a folder identi
 | `ReferenceNumber` | Regulatory reference number. |
 | `SourceAuthority` | Regulatory authority name. |
 | `RecordsSeriesName` | Records series name. |
-| `RetentionType` | `0`=None, `1`=Permanent, `2`=Temporary. |
+| `RetentionType` | `0`=None, `1`=**Temporary**, `2`=**Permanent**. |
 | `RetentionTypeText` | Human-readable retention type. |
 | `RetentionTrigger` | `0`=Custom Date Entry, `1`=On Create, `2`=On Cutoff. |
 | `RetentionTriggerText` | Human-readable trigger name. |
@@ -122,6 +122,38 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The folder form of `GetDocumentRandDSchedule`, with the same two shapes for "no schedule".
+
+```javascript
+const root = await call('GetFolderRandDSchedule', {
+  authenticationTicket: ticket, Path: '/Finance/Invoices'
+});
+
+const schedule = root.querySelector('RetentionDispositionSchedule');
+console.log(schedule ? schedule.getAttribute('Name') : 'no schedule on this folder');
+```
+
+A call with no ticket is answered here too.
+
 ## Notes
 
 - Returns `DefId="0"` (with no other attributes) when the folder has no R&D schedule assigned.
@@ -140,8 +172,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Finance/Reports
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Folder not found | No folder was found at the specified `Path`. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path |
+| `4030` | the caller may not see that folder |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
