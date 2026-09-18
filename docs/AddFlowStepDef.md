@@ -30,7 +30,7 @@ Use `AddFlowStepDef1` if you also need to specify a folder where documents are m
 ### Success Response
 
 ```xml
-<root success="true" StepNumber="2" />
+<response success="true" StepNumber="2" />
 ```
 
 | Attribute | Description |
@@ -41,7 +41,7 @@ Use `AddFlowStepDef1` if you also need to specify a folder where documents are m
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -72,7 +72,40 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 ### Success Response
 
 ```xml
-<root success="true" StepNumber="3" />
+<response success="true" StepNumber="3" />
+```
+
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Adds a step and answers with the number it was given. Step numbers start at 1 and go up in the order
+the steps are added; names are not checked for uniqueness, so two steps can share one.
+
+```javascript
+const root = await call('AddFlowStepDef', {
+  authenticationTicket: ticket,
+  DomainName: 'Public',
+  FlowName: 'Invoice approval',
+  StepName: 'Review'
+});
+
+const stepNumber = root.getAttribute('StepNumber');   // "1"
 ```
 
 ## Notes
@@ -94,11 +127,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Workflow active error | Cannot add steps to an active workflow definition. Deactivate first using `DeactivateFlowDef`. |
-| Name validation error | Step name exceeds 32 characters or contains invalid characters. |
-| Workflow not found | The specified `DomainName`/`FlowName` combination does not exist. |
-| Permission error | Calling user does not have workflow management permissions for this domain. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no definition by that name in the library, or the definition is active |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

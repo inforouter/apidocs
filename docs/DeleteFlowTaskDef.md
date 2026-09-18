@@ -29,13 +29,13 @@ Deletes a task definition from the specified workflow step. The workflow definit
 ### Success Response
 
 ```xml
-<response success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -93,22 +93,52 @@ SOAPAction: "http://tempuri.org/DeleteFlowTaskDef"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes one task definition from a step. `TaskDefId` is the `TaskDefId` attribute `GetFlowDef`
+reports, and the definition has to be inactive.
+
+```javascript
+const flow = await call('GetFlowDef', {
+  authenticationTicket: ticket, DomainName: 'Public', WorkflowName: 'Invoice approval'
+});
+const taskDefId = flow.querySelector('TaskDef').getAttribute('TaskDefId');
+
+await call('DeactivateFlowDef', {
+  authenticationTicket: ticket, domainName: 'Public', flowName: 'Invoice approval'
+});
+await call('DeleteFlowTaskDef', {
+  authenticationTicket: ticket,
+  DomainName: 'Public',
+  FlowName: 'Invoice approval',
+  StepNumber: 1,
+  TaskDefId: taskDefId
+});
+```
+
 ## Notes
 
 - The workflow definition must be inactive before a task definition can be deleted. If the workflow is active, deactivate it first using `DeactivateFlowDef`.
 - The step must exist within the workflow definition; otherwise an error is returned.
 - If the specified `TaskDefId` does not exist within the step, an error is returned.
 
-## Error Codes
-
-Common error responses:
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `Step not found` | The specified step number does not exist in the workflow definition |
-| Workflow not found | The specified domain/flow combination does not exist |
-| Workflow is active | The workflow definition is currently active and must be deactivated first |
 
 ## Related APIs
 
@@ -121,3 +151,14 @@ Common error responses:
 ## Version History
 
 - **New**: Added to provide programmatic access to workflow task definition deletion previously only available through the Control Panel UI
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no definition by that name, no task definition by that id, or the definition is still active |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

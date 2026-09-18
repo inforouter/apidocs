@@ -31,13 +31,13 @@ Unlike [RemoveCurrentWorkflow](RemoveCurrentWorkflow.md), this operation:
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Access Denied" />
+<response success="false" error="Access denied." errorCode="4030" />
 ```
 
 ## Required Permissions
@@ -88,6 +88,36 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&path=/Cabinet/ProjectDocs/proposal.pdf
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Ends the workflow a document is in and leaves it in the document's history.
+
+```javascript
+await call('StopCurrentWorkflow', {
+  authenticationTicket: ticket,
+  path: '/Public/Invoices/inv-1001.pdf'
+});
+```
+
+Use `RemoveCurrentWorkflow` instead to take the workflow off the document altogether.
+
 ## Notes
 
 - After a successful call, the document is no longer associated with an active workflow and can be submitted to a new workflow via [SubmitDocumentToFlow](SubmitDocumentToFlow.md).
@@ -103,10 +133,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&path=/Cabinet/ProjectD
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Document not found | No document exists at the specified path. |
-| Document not in workflow | The document does not have an active running workflow. |
-| Access Denied | Calling user is not the workflow submitter or a workflow supervisor. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document at that path |
+| `4000` | the document is not in a workflow |
+| `4030` | the caller may not change that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

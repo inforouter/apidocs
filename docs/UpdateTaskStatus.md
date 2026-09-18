@@ -28,12 +28,12 @@ Updates the status, finish date, and comment of a workflow task in a single call
 
 ### Success Response
 ```xml
-<root success="true"/>
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 ```xml
-<root success="false" error="[ErrorCode] Error message"/>
+<response success="false" error="Error message" errorCode="4000"/>
 ```
 
 ## Required Permissions
@@ -62,9 +62,53 @@ authenticationTicket=abc123&taskId=42&taskStatus=30&finishDate=2026-04-15T10:00:
 GET /srv.asmx/UpdateTaskStatus?authenticationTicket=abc123&taskId=42&taskStatus=30&finishDate=2026-04-15T10:00:00&comments=Review+complete
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sets a task's status and, when it is given, its comment. `taskStatus` is the numeric `TaskStatusX`
+value: `-2` reassigned, `-1` dropped, `0` not started, `10` in progress, `20` due date changed,
+`30` completed. A task that is already completed or reassigned is refused.
+
+```javascript
+await call('UpdateTaskStatus', {
+  authenticationTicket: ticket,
+  taskId: 7328,
+  taskStatus: 10,
+  finishDate: '2098-01-01',
+  comments: 'Started the review.'
+});
+```
+
 ## Related APIs
 
 - `CompleteTask` — shorthand for setting status to Completed with no explicit finish date
 - `SetTaskComment` — sets only the comment without changing task status
 - `UpdateTaskFinishDate` — updates the finish date of an already-completed task
 - `TestTaskCompletion` — validates all task requirements before completing
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no task by that id, or it is already completed or reassigned |
+| `4030` | there is no ticket at all |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

@@ -29,13 +29,13 @@ All task requirements (e.g. Approval, Sign, ISOReview) configured on the task de
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -68,8 +68,40 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=8821&comments=D
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
+
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Closes a task and records the assignee's closing comment. Completing a task twice is refused.
+
+```javascript
+await call('CompleteTask', {
+  authenticationTicket: ticket,
+  taskId: 7328,
+  comments: 'Approved, matches the purchase order.'
+});
+```
+
+`comments` is a required string: an empty one is refused by model binding with HTTP 400. Call
+`TestTaskCompletion` first to find out whether the task's requirements have been met.
 
 ## Notes
 
@@ -99,15 +131,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=8821&comments=D
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not found | No task with the given `taskId` exists or the user does not have access to it. |
-| Access denied | The calling user is not the task assignee. |
-| Task not started | The task is in NotStarted status -" it must be started (InProgress) before it can be completed. |
-| Task already completed | The task has already been marked as completed. |
-| Task dropped | The task has been dropped and can no longer be completed. |
-| Task reassigned | The task has been reassigned to another user and can no longer be completed by the original assignee. |
-| Requirements not met | One or more task requirements (e.g. Approval, Sign, ISOReview) have not been fulfilled. |
-| Document offline | The document associated with the task is in Offline/archived state. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no task by that id, it is already complete, or a requirement has not been met |
+| `4030` | there is no ticket at all |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

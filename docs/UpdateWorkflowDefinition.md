@@ -75,7 +75,7 @@ To specify no supervisors, use empty elements:
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ---
@@ -140,6 +140,53 @@ HTTP/1.1
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Rewrites a definition from an XML document. The root element is **`<WorkflowDefinitionRequest>`**,
+not the class name - sending `<WorkflowDefinitionRequestModel>` is a 5000 "error in XML document
+(1, 2)". It is also the only operation that can attach supervisors, since `CreateFlowDef2` and
+`CreateFlowDef3` discard the one they are given.
+
+```javascript
+const definition = `
+<WorkflowDefinitionRequest>
+  <NewFlowName>Invoice approval</NewFlowName>
+  <ActiveFolderPath>/Public/Invoices</ActiveFolderPath>
+  <Active>false</Active>
+  <OnEndMoveToPath />
+  <OnEndEventUrl />
+  <Hide>false</Hide>
+  <SupervisorUserNames><string>jsmith</string></SupervisorUserNames>
+  <SupervisorUsergroupNames />
+</WorkflowDefinitionRequest>`;
+
+await call('UpdateWorkflowDefinition', {
+  authenticationTicket: ticket,
+  domainName: 'Public',
+  workflowName: 'Invoice approval',
+  xmlParameters: definition
+});
+```
+
+Putting a different name in `<NewFlowName>` renames the definition.
+
 ## Notes
 
 - Identify the workflow to update by `domainName` + `workflowName` (the current name). Use `GetFlowDef` to retrieve current values before calling this API.
@@ -154,23 +201,6 @@ HTTP/1.1
 
 ---
 
-## Error Codes
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Invalid XML format | `xmlParameters` could not be deserialized into `WorkflowDefinitionRequestModel`. |
-| Workflow not found | The `domainName` + `workflowName` combination does not exist. |
-| Access denied | The calling user is not an administrator or supervisor of this workflow. |
-| Flow with this name already exists | `NewFlowName` is already used by another workflow in the same domain. |
-| Workflow cannot be activated | `Active=true` was requested but the workflow has no steps or tasks defined. |
-| Folder not found | `ActiveFolderPath` or `OnEndMoveToPath` does not resolve to an existing folder. |
-| Folder must be in the same domain | `ActiveFolderPath` belongs to a different domain than the workflow. |
-| User not found | A username in `SupervisorUserNames` does not exist. |
-| Group not found | A group name in `SupervisorUsergroupNames` does not exist. |
-
----
 
 ## Related APIs
 
@@ -179,3 +209,15 @@ HTTP/1.1
 - [ActivateFlowDef](ActivateFlowDef.md) - Activate a workflow definition
 - [DeactivateFlowDef](DeactivateFlowDef.md) - Deactivate a workflow definition
 - [DeleteWorkflow](DeleteWorkflow.md) - Delete a workflow definition
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `5000` | `xmlParameters` is not a `<WorkflowDefinitionRequest>` document |
+| `4000` | no definition by that name, no folder at `ActiveFolderPath`, or a supervisor name that is not a user |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

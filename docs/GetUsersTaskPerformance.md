@@ -46,7 +46,7 @@ Returns a list of users with their task performance statistics, including due an
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## UserTaskStatisticModel Properties
@@ -314,6 +314,37 @@ updateTaskDashboard();
 </script>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Counts what every assignee has outstanding. It takes nothing but the ticket.
+
+```javascript
+const root = await call('GetUsersTaskPerformance', { authenticationTicket: ticket });
+
+for (const row of root.querySelectorAll('Value > UserTaskStatisticModel')) {
+  console.log(row.querySelector('AssigneeName').textContent,
+              row.querySelector('DueCount').textContent,
+              row.querySelector('OverdueCount').textContent);
+}
+```
+
 ## Notes
 
 - **DueCount**: Total number of active (started but not finished) tasks assigned to the user
@@ -335,14 +366,6 @@ updateTaskDashboard();
   - All DueCount conditions apply
   - Task due date is before the current date (DUEDATE < current date)
 
-## Error Codes
-
-Common error responses:
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated |
 
 ## Best Practices
 
@@ -378,3 +401,11 @@ Common error responses:
 - [GetWorkflowStatistics](./GetWorkflowStatistics.md) - Get workflow statistics
 - [getTasks](./getTasks.md) - Get workflow tasks
 - Control Panel UI: `UserTaskReport.aspx` - User task performance report
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |

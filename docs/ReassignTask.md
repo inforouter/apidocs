@@ -44,7 +44,7 @@ Reassigns an active workflow task to a different user with a new due date and in
 ### Error Response
 
 ```xml
-<response success="false" error="Access Denied" />
+<response success="false" error="Access denied." errorCode="4030" />
 ```
 
 ## Response Field Reference
@@ -113,6 +113,45 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&reassignTo=alice.jones&newDueDate=2024-04-15T17:00:00&newInstructions=Please+review+and+approve+by+end+of+month.&sendTaskNotice=true
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Hands a task to somebody else. It does not move the task: it closes the original as reassigned and
+opens a **new one with a new id**, which the answer reports.
+
+```javascript
+const root = await call('ReassignTask', {
+  authenticationTicket: ticket,
+  taskId: 7328,
+  reassignTo: 'ajones',
+  newDueDate: '2098-06-01',
+  newInstructions: 'Please look at this instead.',
+  sendTaskNotice: false
+});
+
+const newTaskId = root.querySelector('Value > TaskId').textContent;
+console.log(newTaskId, root.querySelector('AssigneeFullName').textContent);
+```
+
+The original id stops accepting changes afterwards - `UpdateTaskStatus` on it answers 4000
+"this task has been reassigned".
+
 ## Notes
 
 - The `reassignTo` parameter is a **login name**, not a display name or user ID.
@@ -131,13 +170,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&reassignTo
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not found | No task with the specified `taskId` exists. |
-| User not found | The specified `reassignTo` login name does not exist. |
-| Access Denied | Calling user is not the task assignee or a workflow supervisor. |
-| Invalid status | Task is in `NotStarted`, `Completed`, `Dropped`, or `Reassigned` state. |
-| Past due date | `newDueDate` is in the past. |
-| Document offline | The associated document is currently offline. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no task by that id, or `reassignTo` is not a user |
+| `4000` | the task is already complete |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

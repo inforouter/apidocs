@@ -26,7 +26,7 @@ Returns the full details of a single workflow task by its task ID.
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <Task>
     <TaskID>4812</TaskID>
     <TaskName>LegalReview</TaskName>
@@ -108,13 +108,13 @@ Returns the full details of a single workflow task by its task ID.
       </Attachment>
     </Attachments>
   </Task>
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Response Field Reference
@@ -267,6 +267,41 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads one task in full.
+
+```javascript
+const root = await call('GetTask', { authenticationTicket: ticket, taskId: 7328 });
+
+const task = root.querySelector('Task');
+console.log(task.querySelector('TaskStatus').textContent,       // NotStarted | InProgress | Completed | ...
+            task.querySelector('ApprovalStatus').textContent,   // NoResult | Approved | Rejected
+            task.querySelector('Priority').textContent,         // NoPriortySetting | Low | Normal | High | Urgent
+            task.querySelector('DueDate').textContent,
+            task.querySelector('AssigneeName').textContent);
+```
+
+The answer carries a misspelled `<StartDtae>` next to `<StartDate>` with the same value. Read
+`<StartDate>`; the typo is kept only so older callers do not break.
+
 ## Notes
 
 - Task IDs are available from [getTasks](getTasks.md) and [GetDueTaskDocuments](GetDueTaskDocuments.md).
@@ -284,9 +319,9 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not found | No task with the specified `taskId` exists. |
-| Permission error | Anonymous access is not permitted. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no task by that id, or one the caller may not see |

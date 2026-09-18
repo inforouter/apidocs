@@ -29,13 +29,13 @@ Pass an empty string to clear an existing comment.
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Access Denied" />
+<response success="false" error="Access denied." errorCode="4030" />
 ```
 
 ## Required Permissions
@@ -80,6 +80,37 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&comments=Reviewed+the+document.+All+sections+look+correct.
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Replaces the assignee's comment on a task.
+
+```javascript
+await call('SetTaskComment', {
+  authenticationTicket: ticket,
+  taskId: 7328,
+  comments: 'Checked against the purchase order.'
+});
+```
+
+`comments` is a required string: an empty one is refused by model binding with HTTP 400.
+
 ## Notes
 
 - Comments are stored in two places: a database field (truncated to 255 characters) and a warehouse XML file (full length). Retrieving the task via [GetTask](GetTask.md) returns the full-length comment from the warehouse.
@@ -96,14 +127,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&comments=R
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not found | No task with the specified `taskId` exists. |
-| Access Denied | Calling user is not the task assignee. |
-| Document offline | The associated document is currently offline. |
-| Task dropped | The task has been dropped. |
-| Task reassigned | The task has been reassigned. |
-| Task completed | The task has already been completed. |
-| Task not started | The task is in `NotStarted` state. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no task by that id, or the caller may not comment on it |
+| `4030` | there is no ticket at all |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

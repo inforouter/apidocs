@@ -168,13 +168,13 @@ Valid `Name` values for requirements:
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -212,6 +212,39 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Replaces a task definition in place, keeping its `TaskDefId`. `taskDefXML` takes exactly the shape
+`AddFlowTaskDef` documents, six `<Permission>` rows included.
+
+```javascript
+await call('UpdateWorkflowTaskDef', {
+  authenticationTicket: ticket,
+  domainName: 'Public',
+  flowName: 'Invoice approval',
+  stepNumber: 1,
+  taskDefId: 7331,
+  taskDefXML: taskDef            // the document AddFlowTaskDef shows
+});
+```
+
 ## Notes
 
 - The workflow definition must be **inactive** before task definitions can be updated. Use [DeactivateFlowDef](DeactivateFlowDef.md) if the workflow is currently active.
@@ -233,17 +266,12 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Invalid XML | `taskDefXML` could not be parsed as valid XML. |
-| Workflow not found | The specified `domainName`/`flowName` combination does not exist. |
-| Step not found | `stepNumber` does not match any step in the workflow. |
-| Task definition not found | `taskDefId` does not match any task definition in the specified step. |
-| Task name empty | `TaskName` attribute is missing or empty. |
-| Name validation error | `TaskName` exceeds 32 characters or contains invalid characters. |
-| Deadline zero | `DeadLine` must be greater than 0. |
-| Instruction empty | `instruction` child element is missing or empty. |
-| Notification exceeds deadline | `SupervisorNotificationOnDue` or `ReminderTimeSpan` exceeds the `DeadLine`. |
-| Permission error | Calling user does not have workflow management permissions for this domain. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `5000` | `<Permissions>` is missing, or one of the six `<Permission>` rows has no `Value` |
+| `4000` | no definition by that name, no task definition by that id, `DeadLine` is 0, or `taskDefXML` is not well formed |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

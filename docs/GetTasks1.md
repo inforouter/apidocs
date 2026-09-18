@@ -204,7 +204,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Response Attributes
@@ -332,6 +332,43 @@ SOAPAction: "http://tempuri.org/GetTasks1"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`getTasks` with paging. `startingRow` is zero based and `rowCount` caps the page; `taskCount` in the
+answer is the size of the whole match, not of the page.
+
+```javascript
+const root = await call('GetTasks1', {
+  authenticationTicket: ticket,
+  xmlcriteria: '<criteria><item NAME="TASKCOMPLETIONSTATUS" VALUE="Due" /></criteria>',
+  startingRow: 0,
+  rowCount: 25,
+  SortBy: 'DueDate',
+  AscendingOrder: true
+});
+
+console.log(root.getAttribute('taskCount'),     // everything that matched
+            root.getAttribute('startingRow'),
+            root.getAttribute('rowCount'));     // what came back in this page
+```
+
 ## Notes
 
 - When `rowCount` is `0` or negative the server defaults to `100` rows per page.
@@ -343,19 +380,19 @@ SOAPAction: "http://tempuri.org/GetTasks1"
 - The response includes both `<StartDate>` (correct spelling, use this) and `<StartDtae>` (legacy typo, deprecated).
 - Task requirements and attachments are dynamically loaded for each task in the result set.
 
-## Error Codes
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated (anonymous) |
-| `[SortBy] error:...` | Invalid `SortBy` value — must be a valid `TaskSortOption` enum name |
-| `xmlcriteria parsing error:...` | The `xmlcriteria` parameter is not valid XML |
-| `[PARAMETER_NAME] error:...` | Invalid value for a specific filter parameter |
-| `[PARAMETER_NAME] Parameter not found` | Unrecognized parameter name in `xmlcriteria` |
 
 ## Related APIs
 
 - [getTasks](getTasks.md) - Same API without paging (returns all matching tasks)
 - [GetTask](GetTask.md) - Get a single task by task ID with full instruction and comment text
 - [GetUsersTaskPerformance](GetUsersTaskPerformance.md) - Get user task performance statistics
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | `SortBy` is not a `TaskSortOption` name, a criterion value is not valid for its `NAME`, or `xmlcriteria` is not well formed |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

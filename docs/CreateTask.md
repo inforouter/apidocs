@@ -151,7 +151,7 @@ Multiple `<TaskRequirement>` entries may be added; each represents a distinct ac
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -178,6 +178,56 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123&documentPath=/MyDomain/MyLibrary/report.pdf&xmlParameters=<TaskCreationRequestModel><RequestedAssigneeName>jdoe</RequestedAssigneeName><Instructions>Please review</Instructions><DueDate>2026-05-01T00:00:00</DueDate><Priority>Normal</Priority><RightType>READ</RightType><PermissionChangeDueDate>false</PermissionChangeDueDate><PermissionEnableEdit>false</PermissionEnableEdit><PermissionChangePriority>false</PermissionChangePriority><PermissionChangeFinishDate>false</PermissionChangeFinishDate><TaskRequirements /><AllowedStartTimeSpan>0</AllowedStartTimeSpan><ReminderTimeSpan>0</ReminderTimeSpan><SendTaskNotice>true</SendTaskNotice><OnCompleteNotification>false</OnCompleteNotification></TaskCreationRequestModel>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Assigns one task on a document, outside any workflow. The root element is
+`<TaskCreationRequestModel>`; `CreateRelatedTask` takes a different one.
+
+```javascript
+const task = `
+<TaskCreationRequestModel>
+  <RequestedAssigneeName>jsmith</RequestedAssigneeName>
+  <Instructions>Please review.</Instructions>
+  <DueDate>2099-12-31T00:00:00</DueDate>
+  <Priority>Normal</Priority>
+  <RightType>READ</RightType>
+  <PermissionChangeDueDate>false</PermissionChangeDueDate>
+  <PermissionEnableEdit>false</PermissionEnableEdit>
+  <PermissionChangePriority>false</PermissionChangePriority>
+  <PermissionChangeFinishDate>false</PermissionChangeFinishDate>
+  <TaskRequirements />
+  <AllowedStartTimeSpan>0</AllowedStartTimeSpan>
+  <ReminderTimeSpan>0</ReminderTimeSpan>
+  <SendTaskNotice>false</SendTaskNotice>
+  <OnCompleteNotification>false</OnCompleteNotification>
+</TaskCreationRequestModel>`;
+
+const root = await call('CreateTask', {
+  authenticationTicket: ticket,
+  documentPath: '/Public/Invoices/inv-1001.pdf',
+  xmlParameters: task
+});
+
+const taskId = root.querySelector('TaskId').textContent;
+```
+
 ## Notes
 
 - If the specified assignee has an active task redirection, the task is silently redirected to the configured target user and `Value/RedirectedUserName` contains the actual assignee login name.
@@ -189,3 +239,15 @@ authenticationTicket=abc123&documentPath=/MyDomain/MyLibrary/report.pdf&xmlParam
 - The `RequirementNumber` field is managed internally and should be omitted from the XML input.
 - Shortcut documents cannot have tasks assigned to them; the API returns an error for shortcuts.
 - Offline documents cannot have tasks assigned to them; the API returns an error for offline documents.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document at that path, or `RequestedAssigneeName` is not a user |
+| `5000` | `xmlParameters` is not a `<TaskCreationRequestModel>` document |
+| `4030` | the caller may not assign tasks on that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

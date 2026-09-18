@@ -28,13 +28,13 @@ If the user has no active task redirection, the call succeeds silently with no e
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Access Denied" />
+<response success="false" error="Access denied." errorCode="4030" />
 ```
 
 ## Required Permissions
@@ -68,6 +68,32 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=john.smith
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Cancels a user's redirection. Calling it when there is nothing to cancel is accepted, so it is safe
+to run unconditionally.
+
+```javascript
+await call('RemoveUserTaskRedirection', { authenticationTicket: ticket, userName: 'jsmith' });
+```
+
 ## Notes
 
 - If the user currently has no task redirection configured, the call still returns `success="true"` (idempotent delete).
@@ -85,9 +111,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=john.smith
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| User not found | The specified `userName` does not exist. |
-| Access Denied | Calling user is not the target user, a User Manager, or a Library Manager. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no user by that name |
+| `4030` | there is no ticket at all |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

@@ -27,7 +27,7 @@ Returns the complete definition of a workflow, including all step definitions an
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <FlowDef
     FlowDefID="126"
     FlowName="ContractApproval"
@@ -83,13 +83,13 @@ Returns the complete definition of a workflow, including all step definitions an
       <User id="7" />
     </Supervisors>
   </FlowDef>
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## FlowDef Attributes
@@ -188,6 +188,46 @@ Content-Type: application/x-www-form-urlencoded
 AuthenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&WorkflowName=ContractApproval
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads one definition with its steps and their task definitions. This is where the `FlowDefID` and
+`TaskDefId` values the other operations take come from.
+
+```javascript
+const root = await call('GetFlowDef', {
+  authenticationTicket: ticket,
+  DomainName: 'Public',
+  WorkflowName: 'Invoice approval'
+});
+
+const flowDef = root.querySelector('FlowDef');
+console.log(flowDef.getAttribute('FlowDefID'), flowDef.getAttribute('Active'));
+
+for (const step of root.querySelectorAll('StepDef')) {
+  console.log(step.getAttribute('StepNumber'), step.getAttribute('StepName'));
+  for (const taskDef of step.querySelectorAll('TaskDef')) {
+    console.log('  ', taskDef.getAttribute('TaskDefId'), taskDef.getAttribute('TaskName'));
+  }
+}
+```
+
 ## Notes
 
 - The response always includes the full set of step and task definitions.
@@ -207,10 +247,11 @@ AuthenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&W
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Domain not found | The specified `DomainName` does not exist. |
-| Workflow not found | No workflow named `WorkflowName` exists in the specified domain. |
-| Permission error | Anonymous access is not permitted; a valid authenticated ticket is required. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no definition by that name in the library |
+| `4030` | the caller may not see that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

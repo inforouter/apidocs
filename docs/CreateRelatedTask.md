@@ -131,7 +131,7 @@ Multiple `<TaskRequirement>` entries may be added; each represents a distinct ac
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -158,6 +158,52 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123&taskId=456&xmlParameters=<RelatedTaskRequestModel><RequestedAssigneeName>jdoe</RequestedAssigneeName><Instructions>Please review</Instructions><DueDate>2026-05-15T00:00:00</DueDate><Priority>Normal</Priority><TaskRequirements /><ReminderTimeSpan>0</ReminderTimeSpan><AllowedStartTimeSpan>0</AllowedStartTimeSpan><SendToNotice>true</SendToNotice></RelatedTaskRequestModel>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Opens a second task linked to an existing one. The root element is **`<RelatedTaskRequestModel>`**
+and it carries fewer fields than `CreateTask` - sending the `CreateTask` document is a 5000.
+
+```javascript
+const related = `
+<RelatedTaskRequestModel>
+  <RequestedAssigneeName>jsmith</RequestedAssigneeName>
+  <Instructions>Please countersign.</Instructions>
+  <DueDate>2099-12-31T00:00:00</DueDate>
+  <Priority>Normal</Priority>
+  <TaskRequirements />
+  <ReminderTimeSpan>0</ReminderTimeSpan>
+  <AllowedStartTimeSpan>0</AllowedStartTimeSpan>
+  <SendToNotice>false</SendToNotice>
+</RelatedTaskRequestModel>`;
+
+const root = await call('CreateRelatedTask', {
+  authenticationTicket: ticket,
+  taskId: 7328,
+  xmlParameters: related
+});
+
+console.log(root.querySelector('Value > TaskId').textContent);
+```
+
+The new task's `<LinkedTaskID>` points back at the task it was created from.
+
 ## Notes
 
 - The related task is linked to the parent task and inherits its document context.
@@ -170,3 +216,16 @@ authenticationTicket=abc123&taskId=456&xmlParameters=<RelatedTaskRequestModel><R
 - `AllowedStartTimeSpan` and `ReminderTimeSpan` are in **hours**, not days.
 - The `RequirementNumber` field is managed internally and should be omitted from the XML input.
 - Passing `taskId = 0` or a non-existent task ID returns an error.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `5000` | `xmlParameters` is not a `<RelatedTaskRequestModel>` document |
+| `4000` | no task by that id |
+| `4041` | `RequestedAssigneeName` is not a user |
+| `4030` | the caller may not assign tasks on that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

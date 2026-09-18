@@ -31,13 +31,13 @@ If the user already has a task redirection configured, it is atomically replaced
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Task redirection end date cannot be in the past." />
+<response success="false" error="Task redirection end date cannot be in the past." />
 ```
 
 ## Required Permissions
@@ -85,6 +85,41 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=john.smith&redirectTasksToUser=alice.jones&startOn=2024-04-01T00%3A00%3A00&endOn=2024-04-30T23%3A59%3A59
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Sends one user's new tasks to another for a period - a holiday cover. The two users have to be
+different.
+
+```javascript
+await call('SetUserTaskRedirection', {
+  authenticationTicket: ticket,
+  userName: 'jsmith',
+  redirectTasksToUser: 'ajones',
+  startOn: '2026-07-01',
+  endOn: '2026-07-31'
+});
+```
+
+`endOn` is declared optional, but the operation insists on a date after `startOn`: a redirection
+with no end is not something this API can express.
+
 ## Notes
 
 - If the user already has a redirection configured, it is replaced (not stacked). There can only be one active redirection per user at a time.
@@ -102,15 +137,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=john.smith&re
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| User not found | The specified `userName` or `redirectTasksToUser` does not exist. |
-| Access Denied | Calling user is not the target user, a User Manager, or a Library Manager. |
-| End date in the past | `endOn` is before the current date and time. |
-| Invalid date range | `endOn` is not after `startOn`. |
-| Self-redirect | `redirectTasksToUser` is the same as `userName`. |
-| Target user disabled | The specified `redirectTasksToUser` account is disabled. |
-| Overlapping period | The date window overlaps with an existing inbound redirection to `userName`. |
-| Target already redirecting | The `redirectTasksToUser` user has their own active redirection during the specified period. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | `userName` or `redirectTasksToUser` is not a user |
+| `4000` | the two names are the same, or `endOn` is empty or not after `startOn` |
+| `4030` | there is no ticket at all |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

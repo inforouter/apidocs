@@ -28,7 +28,7 @@ If no redirection is active, the response contains no `<TaskRedirection>` elemen
 ### Success Response -" redirection active
 
 ```xml
-<root success="true">
+<response success="true">
   <TaskRedirection>
     <UserId>15</UserId>
     <UserName>alice.jones</UserName>
@@ -37,19 +37,19 @@ If no redirection is active, the response contains no `<TaskRedirection>` elemen
     <StartDate>2024-03-01</StartDate>
     <EndDate>2024-03-31</EndDate>
   </TaskRedirection>
-</root>
+</response>
 ```
 
 ### Success Response -" no redirection configured
 
 ```xml
-<root success="true" />
+<response success="true" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Response Field Reference
@@ -91,6 +91,42 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=john.smith
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reports where a user's tasks are going.
+
+```javascript
+const root = await call('GetUserTaskRedirectionTo', { authenticationTicket: ticket, userName: 'jsmith' });
+
+const redirection = root.querySelector('TaskRedirection');
+if (redirection) {
+  console.log(redirection.querySelector('UserName').textContent,
+              redirection.querySelector('StartDate').textContent,
+              redirection.querySelector('EndDate').textContent);
+}
+```
+
+With nothing redirected the answer carries **no child element at all** - not an empty wrapper - so
+test for `<TaskRedirection>` before reading it. A call with no ticket is the anonymous user rather
+than an error, and it discloses nothing.
+
 ## Notes
 
 - A task redirection causes all new tasks assigned to `userName` to be forwarded to another user for the duration of the active date range.
@@ -108,8 +144,9 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=john.smith
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| User not found | The specified `userName` does not exist. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no user by that name |

@@ -30,13 +30,13 @@ Updates the display name and on-start folder move of an existing workflow step d
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Error message" />
+<response success="false" error="Error message" />
 ```
 
 ## Required Permissions
@@ -70,6 +70,39 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Renames a step and sets the folder the document moves to when the step starts.
+`onStartMoveToFolderPath` is declared optional, so an empty value clears the move.
+
+```javascript
+await call('UpdateWorkflowStepDef', {
+  authenticationTicket: ticket,
+  domainName: 'Public',
+  workflowName: 'Invoice approval',
+  stepNumber: 1,
+  newStepName: 'Checked',
+  onStartMoveToFolderPath: ''
+});
+```
+
 ## Notes
 
 - To clear the on-start folder move without setting a new one, pass an empty string for `onStartMoveToFolderPath`.
@@ -87,10 +120,12 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Workflow not found | No workflow definition matching `domainName` and `workflowName` exists. |
-| Step not found | No step with the specified `stepNumber` exists in the workflow. |
-| Folder not found | The path supplied for `onStartMoveToFolderPath` does not exist. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | `stepNumber` names no step of that definition |
+| `4000` | no definition by that name, or `onStartMoveToFolderPath` names no folder |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

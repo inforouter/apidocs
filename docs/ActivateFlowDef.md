@@ -28,13 +28,13 @@ Activates a workflow definition, allowing documents to be submitted to the workf
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -94,14 +94,14 @@ SOAPAction: "http://tempuri.org/ActivateFlowDef"
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response Example
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<root success="false" error="Workflow must have at least one step defined" />
+<response success="false" error="Workflow must have at least one step defined" />
 ```
 
 ## Related APIs
@@ -118,6 +118,36 @@ SOAPAction: "http://tempuri.org/ActivateFlowDef"
 - `SubmitDocumentToFlow` - Submit a document to active workflow
 - `SubmitDocumentToFlow1` - Submit with player assignments
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Turns a definition on so documents can be submitted to it. Every step must have at least one task
+definition; a step without one is refused and the message names the step number.
+
+```javascript
+await call('ActivateFlowDef', {
+  authenticationTicket: ticket,
+  domainName: 'Public',
+  flowName: 'Invoice approval'
+});
+```
+
 ## Notes
 
 - Once activated, documents can be submitted to the workflow using `SubmitDocumentToFlow` API
@@ -127,21 +157,6 @@ SOAPAction: "http://tempuri.org/ActivateFlowDef"
 - Workflows can be re-activated after being deactivated
 - Active workflows appear in the workflow submission UI for users with appropriate permissions
 
-## Error Codes
-
-Common error responses:
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated |
-| `Domain not found` | The specified domain does not exist |
-| `Workflow definition not found` | The specified workflow does not exist in the domain |
-| `Workflow must have at least one step defined` | Cannot activate workflow without steps |
-| `Step [N] must have at least one task` | A workflow step is missing task definitions |
-| `Task [N] in step [M] must have at least one player` | A task has no assigned users or groups |
-| `Active folder path is not valid` | The workflow's active folder path is invalid or inaccessible |
-| `User does not have permission to activate workflows` | User lacks workflow management permissions |
 
 ## Workflow Lifecycle
 
@@ -162,3 +177,14 @@ Created (Inactive)
 3. **Permission Review**: Verify that all assigned players (users/groups) have appropriate access to the active folder
 4. **Notification Setup**: Configure task notification settings before activation
 5. **Version Control**: Consider naming conventions for workflow versions (e.g., "DocumentReview_v2")
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no definition by that name, or a step has no task definition - the message names the step |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

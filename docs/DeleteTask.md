@@ -26,13 +26,13 @@ Deletes an active workflow task by its task ID. All task attachments are also re
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -71,6 +71,31 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Deletes a task.
+
+```javascript
+await call('DeleteTask', { authenticationTicket: ticket, taskId: 7328 });
+```
+
 ## Notes
 
 - The `taskId` is the unique numeric identifier for the task, available from APIs such as [GetTask](GetTask.md) or [getTasks](getTasks.md).
@@ -88,10 +113,9 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not found | No task with the specified `taskId` exists. |
-| Permission error | Calling user does not have the Remove Task permission on the document. |
-| Workflow mismatch | Regular (non-ad-hoc) task whose workflow definition has changed cannot be deleted. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no task by that id, or the caller may not delete it |

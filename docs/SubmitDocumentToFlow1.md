@@ -33,13 +33,13 @@ To submit with the default assignees from the workflow definition, use [SubmitDo
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Workflow submission failed. Document is currently checked out." />
+<response success="false" error="Workflow submission failed. Document is currently checked out." />
 ```
 
 ## Required Permissions
@@ -100,6 +100,38 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Cabinet/ProjectDocs/proposal.pdf&FlowDefID=42&StepPlayerIDs=15%2C23&StepGroupIDs=
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`SubmitDocumentToFlow` with the assignees for the steps that need choosing. `StepPlayerIDs` and
+`StepGroupIDs` are comma separated lists and both are optional.
+
+```javascript
+await call('SubmitDocumentToFlow1', {
+  authenticationTicket: ticket,
+  Path: '/Public/Invoices/inv-1001.pdf',
+  FlowDefID: flowDefId,
+  StepPlayerIDs: '101,102',
+  StepGroupIDs: ''
+});
+```
+
 ## Notes
 
 - `StepPlayerIDs` contains **user IDs** (numeric), not login names. To get a user's ID, use [GetUser](GetUser.md).
@@ -120,17 +152,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Cabinet/ProjectD
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Document not found | No document exists at the specified path. |
-| Access Denied | Calling user does not have Submit to Workflow permission. |
-| Document offline | The document is currently offline. |
-| Document checked out | The document is currently checked out. |
-| Already in workflow | The document is already in an active workflow. |
-| Document is shortcut | Shortcuts cannot be submitted to workflows. |
-| Workflow not found | No active workflow definition with the specified `FlowDefID` exists. |
-| Workflow inactive | The workflow definition is not active. Activate it with [ActivateFlowDef](ActivateFlowDef.md). |
-| Library mismatch | The workflow definition does not belong to the same library as the document. |
-| License required | The server does not have a Workflow license. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document at that path |
+| `4000` | the definition is not active, or the document is already in a workflow |
+| `4030` | the caller may not submit that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

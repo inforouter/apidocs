@@ -2,6 +2,11 @@
 
 Creates a new workflow definition on the specified domain/library. The workflow is created in **inactive** state -" steps and tasks must be added with `AddFlowStepDef` and `AddFlowTaskDef` before activating it with `ActivateFlowDef`.
 
+> **This overload cannot succeed on the current release.** The service tests whether the
+> supervisor name is *empty* and then looks that empty name up, so a call that carries no
+> supervisor always fails with `errorCode="4041"` "User not found". Use `CreateFlowDef3` with a
+> real `Supervisor` until the condition is corrected.
+
 This is the minimal variant. Use the numbered variants for additional configuration:
 
 | Variant | Extra parameters |
@@ -37,7 +42,7 @@ This is the minimal variant. Use the numbered variants for additional configurat
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <FlowDef
     FlowDefID="123"
     FlowName="ContractApproval"
@@ -51,7 +56,7 @@ This is the minimal variant. Use the numbered variants for additional configurat
     Hide="False">
     <Supervisors />
   </FlowDef>
-</root>
+</response>
 ```
 
 | Attribute | Description |
@@ -71,7 +76,7 @@ This is the minimal variant. Use the numbered variants for additional configurat
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -102,6 +107,39 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&FlowName=ContractApproval&ActiveFolderPath=/Corporate/Contracts
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a workflow definition over a folder. **This overload cannot succeed today**: the service
+looks the supervisor up when the name is *empty*, so a call that carries none always fails 4041
+"User not found". Use `CreateFlowDef3` with a `Supervisor` until that is fixed.
+
+```javascript
+// Fails with 4041 on every release that still has the inverted check.
+await call('CreateFlowDef', {
+  authenticationTicket: ticket,
+  DomainName: 'Public',
+  FlowName: 'Invoice approval',
+  ActiveFolderPath: '/Public/Invoices'
+});
+```
+
 ## Notes
 
 - The workflow is created in **inactive** state. No documents can be submitted to it until it is activated with `ActivateFlowDef`.
@@ -124,13 +162,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Domain not found | The specified `DomainName` does not exist. |
-| Folder not found | The specified `ActiveFolderPath` does not exist. |
-| Empty active folder | `ActiveFolderPath` cannot be empty. |
-| Name validation error | `FlowName` exceeds 32 characters or contains invalid characters. |
-| Duplicate name | A workflow with the same name already exists in this domain. |
-| Permission error | Calling user is not a domain manager or administrator. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | always - the supervisor lookup is run against an empty name (see Notes) |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

@@ -29,7 +29,7 @@ Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowD
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <FlowDefs>
     <FlowDef
       FlowDefID="126"
@@ -48,21 +48,21 @@ Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowD
     </FlowDef>
     <FlowDef ... />
   </FlowDefs>
-</root>
+</response>
 ```
 
 An empty result (no workflows on the folder) returns:
 
 ```xml
-<root success="true">
+<response success="true">
   <FlowDefs />
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## FlowDef Attributes
@@ -109,6 +109,42 @@ Content-Type: application/x-www-form-urlencoded
 AuthenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&FolderPath=/Corporate/Contracts&IncludeInheritedFlows=false
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the definitions whose active folder this is. With `IncludeInheritedFlows=true` the definitions
+of the folders above it are listed too.
+
+```javascript
+const root = await call('GetFolderFlows', {
+  authenticationTicket: ticket,
+  FolderPath: '/Public/Invoices',
+  IncludeInheritedFlows: false
+});
+
+for (const flowDef of root.querySelectorAll('FlowDef')) {
+  console.log(flowDef.getAttribute('FlowName'), flowDef.getAttribute('Active'));
+}
+```
+
+A call with no ticket is the anonymous user rather than an error, and it answers with an empty list.
+
 ## Notes
 
 - Step and task definitions are **not** included. To get the full workflow definition with all steps and tasks, call [GetFlowDef](GetFlowDef.md) with the `FlowName` and `DomainName` from the response.
@@ -125,8 +161,10 @@ AuthenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&FolderPath=/Corporate/
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Folder not found | The specified `FolderPath` does not exist. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at that path, or one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

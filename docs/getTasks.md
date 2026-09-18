@@ -202,7 +202,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Response Attributes
@@ -467,6 +467,55 @@ using (var client = new SrvSoapClient())
 }
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Searches tasks. `xmlcriteria` is a root element whose children each carry a `NAME` and a `VALUE`
+attribute; `SortBy` is a `TaskSortOption` name. This overload returns every row it matches - it
+takes no paging parameters at all. Use `GetTasks1` for a page.
+
+```javascript
+const criteria = `
+<criteria>
+  <item NAME="TASKCOMPLETIONSTATUS" VALUE="Due" />
+  <item NAME="PRIORITY" VALUE="Urgent" />
+</criteria>`;
+
+const root = await call('getTasks', {
+  authenticationTicket: ticket,
+  xmlcriteria: criteria,
+  SortBy: 'DueDate',
+  AscendingOrder: true
+});
+
+console.log(root.getAttribute('taskCount'));
+for (const task of root.querySelectorAll('Task')) {
+  console.log(task.querySelector('TaskID').textContent,
+              task.querySelector('DueDate').textContent);
+}
+```
+
+`NAME` may be `TASKCOMPLETIONSTATUS`, `PRIORITY`, `STARTDATE`, `ENDDATE`, `LIBRARYID`, `DOMAINID`,
+`ASSIGNEDBYID`, `ASSIGNEEID`, `SUPERVISORID`, `DOCUMENTTYPE`, `WORKFLOWDEFID`, `DOCUMENTID` or
+`FLOWID`. A value that is not one of the enum names is refused and the message lists the ones that
+are.
+
 ## Notes
 
 - The `xmlcriteria` parameter must be valid XML. An empty criteria element `<criteria></criteria>` returns all tasks visible to the authenticated user.
@@ -477,18 +526,6 @@ using (var client = new SrvSoapClient())
 - Task requirements and attachments are dynamically loaded for each task in the result set.
 - Version numbers are returned in external format (e.g., `1.0`, `2.0`).
 
-## Error Codes
-
-Common error responses:
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated (anonymous) |
-| `[SortBy] error:...` | Invalid `SortBy` value - must be a valid `TaskSortOption` enum name |
-| `xmlcriteria parsing error:...` | The `xmlcriteria` parameter is not valid XML |
-| `[PARAMETER_NAME] error:...` | Invalid value for a specific filter parameter |
-| `[PARAMETER_NAME] Parameter not found` | Unrecognized parameter name in `xmlcriteria` |
 
 ## Related APIs
 
@@ -503,3 +540,13 @@ Common error responses:
 
 - Available to all authenticated users
 - Supports comprehensive filtering via XML criteria for flexible task queries
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | `SortBy` is not a `TaskSortOption` name, a criterion value is not valid for its `NAME`, or `xmlcriteria` is not well formed |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

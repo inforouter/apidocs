@@ -37,13 +37,13 @@ Sets the priority of a workflow task. Priority helps assignees and supervisors g
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Access Denied" />
+<response success="false" error="Access denied." errorCode="4030" />
 ```
 
 ## Required Permissions
@@ -81,6 +81,32 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&taskPriority=10
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Changes a task's priority. `taskPriority` is the number, not the name: 0 no priority, 1 Low,
+5 Normal, 10 High, 11 Urgent.
+
+```javascript
+await call('SetTaskPriority', { authenticationTicket: ticket, taskId: 7328, taskPriority: 10 });
+```
+
 ## Notes
 
 - The **Change Priority** permission is configured on the workflow task definition. If the assignee does not have this permission, only the supervisor can change the priority.
@@ -96,10 +122,10 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&taskPriori
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not found | No task with the specified `taskId` exists. |
-| Access Denied | Calling user is not the task assignee with Change Priority permission, or a supervisor. |
-| Task completed | Priority cannot be changed for a completed task. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no task by that id, or the caller may not change its priority |
+| `4030` | there is no ticket at all |

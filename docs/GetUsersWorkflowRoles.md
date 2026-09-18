@@ -37,7 +37,7 @@ Returns all workflow roles assigned to a specified user, including supervisor an
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## WorkflowRole Attributes
@@ -202,6 +202,37 @@ using (var client = new SrvSoapClient())
 }
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the task definitions a user is an assignee of, across every workflow definition.
+
+```javascript
+const root = await call('GetUsersWorkflowRoles', { authenticationTicket: ticket, userName: 'jsmith' });
+
+for (const role of root.querySelectorAll('WorkflowRole')) {
+  console.log(role.getAttribute('FlowName'),
+              role.getAttribute('StepNumber'),
+              role.getAttribute('TaskName'));
+}
+```
+
 ## Notes
 
 - A user appears in the results if they are a **direct assignee**, assigned through **group membership**, or designated as the **task supervisor**.
@@ -209,14 +240,6 @@ using (var client = new SrvSoapClient())
 - The response includes roles from all active workflow definitions across all domains.
 - The `WorkflowRoles` element will be empty if the user has no workflow role assignments.
 
-## Error Codes
-
-Common error responses:
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `[921]Insufficient rights` | Caller does not have `ListingUserOwnerships` admin permission for the target user |
 
 ## Related APIs
 
@@ -229,3 +252,14 @@ Common error responses:
 ## Version History
 
 - **New**: Added to provide programmatic access to user workflow role information previously only available through the Control Panel UI
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no user by that name |
+| `4030` | there is no ticket at all |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

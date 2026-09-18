@@ -29,7 +29,7 @@ Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowD
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <FlowDefs>
     <FlowDef
       FlowDefID="12"
@@ -60,21 +60,21 @@ Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowD
       <Supervisors />
     </FlowDef>
   </FlowDefs>
-</root>
+</response>
 ```
 
 An empty result (no workflow definitions exist) returns:
 
 ```xml
-<root success="true">
+<response success="true">
   <FlowDefs />
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## FlowDef Attributes
@@ -150,6 +150,42 @@ SOAPAction: "http://tempuri.org/GetWorkflowDefinitions"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the definitions of a library, or of every library the caller can see when `domainName` is
+left empty.
+
+```javascript
+const root = await call('GetWorkflowDefinitions', {
+  authenticationTicket: ticket,
+  domainName: 'Public',
+  activeWorkflowOnly: true
+});
+
+for (const flowDef of root.querySelectorAll('FlowDef')) {
+  console.log(flowDef.getAttribute('FlowDefID'),
+              flowDef.getAttribute('FlowName'),
+              flowDef.getAttribute('ActiveFolderPath'));
+}
+```
+
 ## Notes
 
 - Step and task definitions are **not** included. To get the full workflow definition with all steps and tasks, call [GetFlowDef](GetFlowDef.md) with the `FlowName` and `DomainName` from the response.
@@ -169,8 +205,10 @@ SOAPAction: "http://tempuri.org/GetWorkflowDefinitions"
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed - invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| `[2730]` | Insufficient rights - system administrator role required. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no library by that name |
+| `4000` | there is no ticket at all |

@@ -1,6 +1,14 @@
 # GetDocumentTasks API
 
-Returns all workflow tasks associated with a document, with optional filtering by completion status. Tasks are sorted by due date ascending.
+Returns the **standalone** tasks of a document - the ones `CreateTask` and `CreateRelatedTask`
+made - with optional filtering by completion status. Tasks are sorted by due date ascending.
+
+Tasks that belong to a running workflow are **not** included: the service asks for standalone
+tasks only. Use `getTasks` with a `FLOWID` criterion for a workflow's tasks.
+
+> **This operation always answers `success="false"` with an empty `error` and no `errorCode`,**
+> even when it worked - it builds its answer without ever setting the flag. Read the `<tasks>`
+> list and ignore `success`; a genuine failure carries an `errorCode` and a message.
 
 ## Endpoint
 
@@ -154,7 +162,7 @@ When the document has no matching tasks the `<Value>` element is present but emp
 ### Error Response
 
 ```xml
-<response success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -196,6 +204,48 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the **standalone** tasks of a document - the ones `CreateTask` made. Tasks that belong to a
+running workflow are left out; `getTasks` with a `FLOWID` criterion finds those.
+
+```javascript
+const response = await fetch(
+  `/srv.asmx/GetDocumentTasks?${new URLSearchParams({
+    authenticationTicket: ticket,
+    documentPath: '/Public/Invoices/inv-1001.pdf',
+    filter: ''
+  })}`);
+const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+
+// Do not branch on success here - see the note below.
+for (const task of root.querySelectorAll('Task')) {
+  console.log(task.querySelector('TaskID').textContent,
+              task.querySelector('TaskStatus').textContent);
+}
+```
+
+**This operation always answers `success="false"` with an empty `error`,** even when it worked: it
+builds its answer without ever setting the flag. Read the `<tasks>` list and ignore `success`; a
+real failure carries an `errorCode` and a message. `filter` takes `current_tasks` and `task_history`.
+
 ## Notes
 
 - `filter` is case-sensitive. Only `"current_tasks"` and `"task_history"` are treated specially; any other value (including omitting the parameter) returns all tasks.
@@ -214,8 +264,11 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Document not found | `documentPath` does not refer to an existing document. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document at that path |
+| `4030` | the caller may not see that document |
+| *(none)* | `success="false"` with an empty `error` and no `errorCode` is the **success** answer |

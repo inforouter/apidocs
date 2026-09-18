@@ -29,13 +29,13 @@ To override the task assignees for the first step at submission time, use [Submi
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Workflow submission failed. Document is currently checked out." />
+<response success="false" error="Workflow submission failed. Document is currently checked out." />
 ```
 
 ## Required Permissions
@@ -79,6 +79,41 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Cabinet/ProjectDocs/proposal.pdf&FlowDefID=42
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Starts a workflow over a document. `FlowDefID` is the numeric id `CreateFlowDef3` or `GetFlowDef`
+reports - not the workflow name - and the definition has to be active.
+
+```javascript
+const flow = await call('GetFlowDef', {
+  authenticationTicket: ticket, DomainName: 'Public', WorkflowName: 'Invoice approval'
+});
+const flowDefId = flow.querySelector('FlowDef').getAttribute('FlowDefID');
+
+await call('SubmitDocumentToFlow', {
+  authenticationTicket: ticket,
+  Path: '/Public/Invoices/inv-1001.pdf',
+  FlowDefID: flowDefId
+});
+```
+
 ## Notes
 
 - The `FlowDefID` is the ID of the workflow **definition** (created with [CreateFlowDef](CreateFlowDef.md)), not the ID of a running workflow instance.
@@ -98,17 +133,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/Cabinet/ProjectD
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Document not found | No document exists at the specified path. |
-| Access Denied | Calling user does not have Submit to Workflow permission. |
-| Document offline | The document is currently offline. |
-| Document checked out | The document is currently checked out. |
-| Already in workflow | The document is already in an active workflow. |
-| Document is shortcut | Shortcuts cannot be submitted to workflows. |
-| Workflow not found | No active workflow definition with the specified `FlowDefID` exists. |
-| Workflow inactive | The workflow definition is not active. Activate it with [ActivateFlowDef](ActivateFlowDef.md). |
-| Library mismatch | The workflow definition does not belong to the same library as the document. |
-| License required | The server does not have a Workflow license. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document at that path |
+| `4000` | `FlowDefID` is not a positive integer, the definition is not active, or the document is already in a workflow |
+| `4030` | the caller may not submit that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

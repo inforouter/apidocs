@@ -59,7 +59,7 @@ Response includes all-time statistics PLUS date range specific data:
 ### All-Time Statistics (No Dates)
 
 ```xml
-<root success="true">
+<response success="true">
   <WorkflowStatistics>
     <DomainName>Engineering</DomainName>
     <WorkflowName>DocumentReview</WorkflowName>
@@ -70,13 +70,13 @@ Response includes all-time statistics PLUS date range specific data:
     <TotalCompleted>892</TotalCompleted>
     <TotalOverdue>2</TotalOverdue>
   </WorkflowStatistics>
-</root>
+</response>
 ```
 
 ### With Date Range Statistics
 
 ```xml
-<root success="true">
+<response success="true">
   <WorkflowStatistics>
     <DomainName>Engineering</DomainName>
     <WorkflowName>DocumentReview</WorkflowName>
@@ -94,13 +94,13 @@ Response includes all-time statistics PLUS date range specific data:
     <TotalCompleted>892</TotalCompleted>
     <TotalOverdue>2</TotalOverdue>
   </WorkflowStatistics>
-</root>
+</response>
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## WorkflowStatistics Properties
@@ -190,7 +190,7 @@ SOAPAction: "http://tempuri.org/GetWorkflowStatistics"
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<root success="true">
+<response success="true">
   <WorkflowStatistics>
     <DomainName>Quality</DomainName>
     <WorkflowName>QualityApproval</WorkflowName>
@@ -201,7 +201,7 @@ SOAPAction: "http://tempuri.org/GetWorkflowStatistics"
     <TotalCompleted>892</TotalCompleted>
     <TotalOverdue>7</TotalOverdue>
   </WorkflowStatistics>
-</root>
+</response>
 ```
 
 ## Integration Examples
@@ -395,6 +395,45 @@ updateDashboard("Engineering", "DocumentReview");
 </script>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Counts what a definition has done. Without a date range the three `...InRange` counters come back as
+`xsi:nil`; with one they carry a number.
+
+```javascript
+const root = await call('GetWorkflowStatistics', {
+  authenticationTicket: ticket,
+  domainName: 'Public',
+  workflowName: 'Invoice approval',
+  startDate: '2026-01-01',
+  endDate: '2026-12-31'
+});
+
+const value = root.querySelector('Value');
+console.log(value.querySelector('TotalPending').textContent,
+            value.querySelector('TotalCompleted').textContent,
+            value.querySelector('TotalOverdue').textContent,
+            value.querySelector('SubmittedInRange').textContent,
+            value.querySelector('AverageTimeSpanInHours').textContent);
+```
+
 ## Notes
 
 - **TotalCompleted**: All workflow instances that have reached completion
@@ -442,17 +481,6 @@ updateDashboard("Engineering", "DocumentReview");
 - **Date Range Impact**: Date range queries may take slightly longer
 - **Recommended**: For bulk reporting, call API multiple times for different workflows
 
-## Error Codes
-
-Common error responses:
-
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid authentication ticket |
-| `[2730]Insufficient rights. Anonymous users cannot perform this action` | User is not authenticated |
-| `Workflow definition not found` | No workflow with specified name in domain |
-| `Domain not found` | Specified domain does not exist |
-| `Access denied` | User does not have access to the domain |
 
 ## Benefits
 
@@ -485,3 +513,14 @@ Common error responses:
 - [GetDomainFlows](./GetDomainFlows.md) - List all workflows in domain
 - [getTasks](./getTasks.md) - Get workflow tasks
 - Control Panel UI: `WorkflowReport.aspx` - Workflow statistics report
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no definition by that name in the library |
+| `4030` | the caller may not see that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

@@ -25,7 +25,7 @@ Returns the list of documents that have active (due) workflow tasks currently as
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <document
     id="1024"
     name="ContractDraft.pdf"
@@ -48,13 +48,13 @@ Returns the list of documents that have active (due) workflow tasks currently as
     domainname="Corporate"
     domainid="45" />
   <document ... />
-</root>
+</response>
 ```
 
 An empty result set (no due tasks) returns:
 
 ```xml
-<root success="true" />
+<response success="true" />
 ```
 
 Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
@@ -66,12 +66,44 @@ it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienh
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
 
 Any authenticated user may call this API. Only tasks assigned to the calling user are returned.
+
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the documents the caller has a task due on. It takes nothing but the ticket.
+
+```javascript
+const root = await call('GetDueTaskDocuments', { authenticationTicket: ticket });
+
+for (const document of root.querySelectorAll('Document')) {
+  console.log(document.getAttribute('Path'));
+}
+```
+
+When the caller has nothing due it answers 4041 "document not found" rather than an empty list, so
+treat that code as "nothing due" instead of a fault.
 
 ## Notes
 
@@ -91,7 +123,9 @@ Any authenticated user may call this API. Only tasks assigned to the calling use
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | the caller has no task due - a normal answer, not a fault |

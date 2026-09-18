@@ -29,7 +29,7 @@ Use [GetDocumentWorkflows](GetDocumentWorkflows.md) to list all workflow instanc
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <Workflow>
     <WorkflowId>42</WorkflowId>
     <WorkflowName>Document Approval</WorkflowName>
@@ -59,7 +59,7 @@ Use [GetDocumentWorkflows](GetDocumentWorkflows.md) to list all workflow instanc
       </Groups>
     </Supervisors>
   </Workflow>
-</root>
+</response>
 ```
 
 ### Response Fields
@@ -87,7 +87,7 @@ Use [GetDocumentWorkflows](GetDocumentWorkflows.md) to list all workflow instanc
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -119,6 +119,40 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads one workflow of a document by its id.
+
+```javascript
+const root = await call('GetDocumentWorkflow', {
+  authenticationTicket: ticket,
+  documentPath: '/Public/Invoices/inv-1001.pdf',
+  workflowId: 7332
+});
+
+const workflow = root.querySelector('Workflow');
+console.log(workflow.querySelector('SubmittedByName').textContent,   // the full name, not the login
+            workflow.querySelector('StartDate').textContent,
+            workflow.querySelector('DueDate').textContent);
+```
+
 ## Notes
 
 - `FinishDate` returns `0001-01-01T00:00:00Z` when the workflow is still running.
@@ -134,9 +168,12 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Document not found | `documentPath` does not refer to an existing document. |
-| Workflow not found | `workflowId` does not match a workflow instance on the document. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document at that path |
+| `4000` | no workflow by that id on that document |
+| `4030` | the caller may not see that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

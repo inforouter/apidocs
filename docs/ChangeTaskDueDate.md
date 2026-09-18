@@ -30,13 +30,13 @@ The task must be in **InProgress** or **DueDateChanged** status -" the due date 
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -73,7 +73,38 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=8821&newDueDate
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
+```
+
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Moves a task's due date. `allowedStartTimeSpan` is the number of hours after assignment in which
+the assignee has to start; `0` means no restriction.
+
+```javascript
+await call('ChangeTaskDueDate', {
+  authenticationTicket: ticket,
+  taskId: 7328,
+  newDueDate: '2098-01-01',
+  allowedStartTimeSpan: 0
+});
 ```
 
 ## Notes
@@ -101,11 +132,10 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=8821&newDueDate
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not active | The task is not in InProgress or DueDateChanged status. Due date can only be changed on active tasks. |
-| Due date in the past | `newDueDate` is earlier than the current server date/time. |
-| Access denied | The calling user is not the assignee with postpone permission, and is not a workflow supervisor for this task. |
-| Task not found | No task with the given `taskId` exists or the calling user does not have access to it. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no task by that id, or the caller may not move its due date |
+| `4030` | there is no ticket at all |

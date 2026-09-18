@@ -2,6 +2,11 @@
 
 Creates a new workflow definition on the specified domain/library with the full set of configuration options: on-end destination folder, supervisor, webhook event URL, and visibility. The workflow is created in **inactive** state.
 
+> **`Supervisor` is required in practice and then discarded.** An empty name fails with
+> `errorCode="4041"`, and a real one is accepted but not attached: the new definition comes back
+> with `<Supervisors />` empty. `UpdateWorkflowDefinition` is the only operation that actually
+> sets supervisors.
+
 This is the most complete variant of the CreateFlowDef family. Use it when you need to configure `OnEndEventUrl` or `Hide`.
 
 | Variant | Parameters |
@@ -41,7 +46,7 @@ This is the most complete variant of the CreateFlowDef family. Use it when you n
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <FlowDef
     FlowDefID="126"
     FlowName="ContractApproval"
@@ -57,7 +62,7 @@ This is the most complete variant of the CreateFlowDef family. Use it when you n
       <User id="7" />
     </Supervisors>
   </FlowDef>
-</root>
+</response>
 ```
 
 See [CreateFlowDef](CreateFlowDef.md) for a full description of all response attributes.
@@ -65,7 +70,7 @@ See [CreateFlowDef](CreateFlowDef.md) for a full description of all response att
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -100,6 +105,46 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&FlowName=ContractApproval&ActiveFolderPath=/Corporate/Contracts&OnEndMoveToPath=/Corporate/Archive&Supervisor=john.smith&OnEndEventUrl=https%3A%2F%2Ferp.example.com%2Fworkflow-complete&Hide=false
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The overload to use: it takes the supervisor, the end-of-workflow URL and the hidden flag. The
+supervisor must be a real user name even though the definition does not keep it.
+
+```javascript
+const root = await call('CreateFlowDef3', {
+  authenticationTicket: ticket,
+  DomainName: 'Public',
+  FlowName: 'Invoice approval',
+  ActiveFolderPath: '/Public/Invoices',
+  OnEndMoveToPath: '/Public/Invoices/Approved',
+  Supervisor: 'jsmith',
+  OnEndEventUrl: '',
+  Hide: false
+});
+
+const flowDef = root.querySelector('FlowDef');
+console.log(flowDef.getAttribute('FlowDefID'),
+            flowDef.getAttribute('Active'),   // "false" - a new definition starts off
+            flowDef.getAttribute('Hide'));    // "False" - this one is capitalised
+```
+
 ## Notes
 
 - `Supervisor` is a **login name** (username), not a display name or user ID. The user must exist in the infoRouter system.
@@ -125,14 +170,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainName=Corporate&F
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Domain not found | The specified `DomainName` does not exist. |
-| Folder not found | `ActiveFolderPath` or `OnEndMoveToPath` does not exist. |
-| Empty active folder | `ActiveFolderPath` cannot be empty. |
-| Supervisor not found | The specified `Supervisor` username does not exist. |
-| Name validation error | `FlowName` exceeds 32 characters or contains invalid characters. |
-| Duplicate name | A workflow with the same name already exists in this domain. |
-| Permission error | Calling user is not a domain manager or administrator. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no folder at `ActiveFolderPath`, or no user by the name in `Supervisor` - including an empty one |
+| `4090` | a definition of that name already exists in the library |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

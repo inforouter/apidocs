@@ -37,13 +37,13 @@ Any other value returns an error.
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Access Denied" />
+<response success="false" error="Access denied." errorCode="4030" />
 ```
 
 ## Required Permissions
@@ -88,6 +88,37 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&approvalDecision=6
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Records the approval decision on a task. `approvalDecision` takes three values and nothing else:
+`0` no status, `5` reject, `6` approve.
+
+```javascript
+await call('SetTaskApprovalStatus', { authenticationTicket: ticket, taskId: 7328, approvalDecision: 6 });
+
+const root = await call('GetTask', { authenticationTicket: ticket, taskId: 7328 });
+console.log(root.querySelector('ApprovalStatus').textContent);   // "Approved"
+```
+
+`GetTask` reports the decision as `NoResult`, `Rejected` or `Approved`.
+
 ## Notes
 
 - Setting the approval status does **not** complete the task. Call [CompleteTask](CompleteTask.md) after setting the approval status to advance the workflow.
@@ -104,14 +135,10 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&taskId=4812&approvalDe
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Task not found | No task with the specified `taskId` exists. |
-| Access Denied | Calling user is not the task assignee. |
-| Invalid decision | `approvalDecision` is not 0, 5, or 6. |
-| Task dropped | The task has been dropped and cannot be updated. |
-| Task reassigned | The task has been reassigned and cannot be updated. |
-| Task completed | The task has already been completed. |
-| Task not started | The task is in `NotStarted` state and cannot be updated. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | `approvalDecision` is not 0, 5 or 6, or no task by that id |
+| `4030` | there is no ticket at all |

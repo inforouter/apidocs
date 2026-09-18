@@ -27,7 +27,7 @@ Returns all workflow instances (current and historical) for a document, with opt
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <Workflows>
     <Workflow>
       <WorkflowId>42</WorkflowId>
@@ -59,15 +59,15 @@ Returns all workflow instances (current and historical) for a document, with opt
       </Supervisors>
     </Workflow>
   </Workflows>
-</root>
+</response>
 ```
 
 When the document has no matching workflow instances the `<Workflows>` element is present but empty:
 
 ```xml
-<root success="true">
+<response success="true">
   <Workflows />
-</root>
+</response>
 ```
 
 ### Response Fields
@@ -95,7 +95,7 @@ When the document has no matching workflow instances the `<Workflows>` element i
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -137,6 +137,44 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the workflows a document has been through. `filter` takes the two literals `current` and
+`history`; anything else, an empty value included, means all of them.
+
+```javascript
+const root = await call('GetDocumentWorkflows', {
+  authenticationTicket: ticket,
+  documentPath: '/Public/Invoices/inv-1001.pdf',
+  filter: 'current'
+});
+
+for (const workflow of root.querySelectorAll('Workflow')) {
+  console.log(workflow.querySelector('WorkflowId').textContent,
+              workflow.querySelector('WorkflowName').textContent,
+              workflow.querySelector('FinishDate').textContent);   // empty while running
+}
+```
+
+`WorkflowId` is an element, not an attribute, and it is what `GetDocumentWorkflow` takes.
+
 ## Notes
 
 - `filter` is case-sensitive. Only `"current"` and `"history"` are treated specially; any other value (including omitting the parameter) returns all instances.
@@ -153,8 +191,11 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Document not found | `documentPath` does not refer to an existing document. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document at that path |
+| `4030` | the caller may not see that document |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

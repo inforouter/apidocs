@@ -27,13 +27,13 @@ Permanently deletes a workflow definition and all of its associated steps and ta
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -78,19 +78,41 @@ SOAPAction: "http://tempuri.org/DeleteWorkflow"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Deletes a workflow definition. Unlike every other edit, this one does **not** need the definition to
+be inactive: an active definition is deleted where it stands, and documents running under it lose
+the definition behind their workflow.
+
+```javascript
+await call('DeleteWorkflow', {
+  authenticationTicket: ticket, domainName: 'Public', flowName: 'Invoice approval'
+});
+```
+
 ## Notes
 
 - This operation is **irreversible**. All workflow steps and task definitions associated with the workflow are permanently deleted.
 - The workflow definition must belong to a domain for which the caller has domain manager rights.
 - Both `domainName` and `flowName` are case-insensitive.
 
-## Error Codes
-
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `Flow definition cannot be found in this domain` | No workflow with the given name exists in the specified domain |
-| `Insufficient rights` | Caller is not a domain manager of the workflow's library |
 
 ## Related APIs
 
@@ -98,3 +120,14 @@ SOAPAction: "http://tempuri.org/DeleteWorkflow"
 - `DeleteFlowStepDef` - Delete a single step from a workflow
 - `DeleteFlowTaskDef` - Delete a task definition from a workflow step
 - `GetWorkflowStatistics` - Get performance statistics for a workflow
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no definition by that name in the library |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

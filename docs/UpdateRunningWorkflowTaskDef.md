@@ -168,13 +168,13 @@ Valid `Name` values for requirements:
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -212,6 +212,40 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Rewrites a task definition of a workflow that is already running. The caller needs a task in an
+earlier step carrying `EditNextStep` or `EditAllSteps` - without one even the system administrator
+who submitted the document is refused with 4030.
+
+```javascript
+await call('UpdateRunningWorkflowTaskDef', {
+  authenticationTicket: ticket,
+  documentPath: '/Public/Invoices/inv-1001.pdf',
+  workflowId: 7332,
+  stepNumber: 2,
+  taskDefId: 7331,
+  taskDefXML: taskDef            // the document AddFlowTaskDef shows
+});
+```
+
 ## Notes
 
 - The document must have an **actively running** workflow. Use [UpdateWorkflowTaskDef](UpdateWorkflowTaskDef.md) to modify task definitions on inactive workflow definitions.
@@ -230,14 +264,13 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed — invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Invalid XML | `taskDefXML` could not be parsed as valid XML or has no root element. |
-| Document not found | `documentPath` does not refer to an existing document. |
-| Workflow not found | `workflowId` does not match a running workflow on the document. |
-| Step not found | `stepNumber` does not match any executing step in the running workflow. |
-| Task definition not found | `taskDefId` does not match any task definition in the specified step. |
-| Deadline zero | `DeadLine` must be greater than 0. |
-| Permission error | Calling user does not have workflow supervisor or submitter permissions. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller holds no earlier task with `EditNextStep` or `EditAllSteps` |
+| `4041` | no document at that path, `stepNumber` names no step, or `taskDefId` names no task definition |
+| `4230` | the document is marked offline |
+| `4170` | `DeadLine` is 0 - checked before anything else |
+| `5000` | `<Permissions>` is missing, or one of the six `<Permission>` rows has no `Value` |

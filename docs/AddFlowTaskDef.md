@@ -54,8 +54,12 @@ Contains the plain-text instructions shown to the assignee.
 <instruction>Please review and approve the document before the deadline.</instruction>
 ```
 
-**`<Permissions>`** (optional)
+**`<Permissions>`** (required)
 Grants the assignee additional task-level permissions beyond simple completion.
+
+All six rows below must be present and each must carry a `Value`. The server reads them with
+`Convert.ToBoolean` without checking that the node is there, so a missing row - or a missing
+`Value` - is a `FormatException` and the call answers `errorCode="5000"`.
 
 ```xml
 <Permissions>
@@ -167,13 +171,13 @@ Valid `Name` values for requirements:
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Required Permissions
@@ -209,6 +213,56 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Adds one task definition to a step. Every value is an attribute of the root element; the instruction
+and the permissions are child elements. **All six permissions have to be present with a `Value`** -
+a missing one is read as an empty string and the server answers 5000 with a `FormatException`.
+
+```javascript
+const taskDef = `
+<TaskDef TaskName="ReviewTask" DeadLine="72" RequiredAssigneeCount="0" SuperVisorId="0"
+         SupervisorNotificationOnDue="0" Priority="5" AllowedStartTimeSpan="0"
+         ReminderTimeSpan="24" righttype="2" OnCompleteNotice="false">
+  <instruction>Please review the invoice.</instruction>
+  <Permissions>
+    <Permission Name="EditDocument" Value="false" />
+    <Permission Name="Postpone" Value="false" />
+    <Permission Name="ChangeFinishdate" Value="false" />
+    <Permission Name="ChangePriority" Value="false" />
+    <Permission Name="EditNextStep" Value="false" />
+    <Permission Name="EditAllSteps" Value="false" />
+  </Permissions>
+  <Requirements />
+  <AssigneeList><Users><User UserID="101" /></Users></AssigneeList>
+</TaskDef>`;
+
+await call('AddFlowTaskDef', {
+  authenticationTicket: ticket,
+  DomainName: 'Public',
+  FlowName: 'Invoice approval',
+  StepNumber: 1,
+  TaskDefXML: taskDef
+});
+```
+
 ## Notes
 
 - The workflow definition must be **inactive** before task definitions can be added. Use `DeactivateFlowDef` if the workflow is currently active.
@@ -217,7 +271,7 @@ Host: yourserver
 - `DeadLine` is required and must be greater than `0`. The API will return an error if `DeadLine` is `0`.
 - `instruction` is required and must not be empty.
 - `SupervisorNotificationOnDue` (in hours) combined with `ReminderTimeSpan` must not exceed the `DeadLine` value, otherwise validation will fail.
-- If `StepNumber` does not match any existing step, the API returns success but no task is added (the loop finds no matching step). Always verify step numbers with `GetFlowDef` first.
+- If `StepNumber` does not match any existing step the call fails with `errorCode="4041"` and the message "this step has been deleted". Verify step numbers with `GetFlowDef` first.
 - Multiple tasks can be added to the same step by calling this API repeatedly.
 
 ## Related APIs
@@ -231,15 +285,13 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Invalid XML | `TaskDefXML` could not be parsed as valid XML. |
-| Workflow not found | The specified `DomainName`/`FlowName` combination does not exist. |
-| Task name empty | `TaskName` attribute is missing or empty. |
-| Name validation error | `TaskName` exceeds 32 characters or contains invalid characters. |
-| Deadline zero | `DeadLine` must be greater than 0. |
-| Instruction empty | `instruction` child element is missing or empty. |
-| Notification exceeds deadline | `SupervisorNotificationOnDue` or `ReminderTimeSpan` exceeds the `DeadLine`. |
-| Permission error | Calling user does not have workflow management permissions for this domain. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `5000` | `<Permissions>` is missing, or one of the six `<Permission>` rows has no `Value` |
+| `4041` | `StepNumber` names no step of that definition |
+| `4000` | no definition by that name, the definition is active, `DeadLine` is 0, `TaskName` is empty or too long, or `TaskDefXML` is not well formed |
+| `4030` | the caller may not manage workflows in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
