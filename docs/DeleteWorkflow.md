@@ -1,4 +1,4 @@
-# DeleteWorkflow API
+﻿# DeleteWorkflow API
 
 Permanently deletes a workflow definition and all of its associated steps and task definitions from the system.
 
@@ -97,9 +97,10 @@ async function call(action, params) {
 }
 ```
 
-Deletes a workflow definition. Unlike every other edit, this one does **not** need the definition to
-be inactive: an active definition is deleted where it stands, and documents running under it lose
-the definition behind their workflow.
+Deletes a workflow definition. Like every other edit of one, it needs the definition to be
+**inactive**: call [DeactivateFlowDef](DeactivateFlowDef.md) first. Until 9.0 an active definition
+was deleted where it stood, and documents running under it lost the definition behind their
+workflow.
 
 ```javascript
 await call('DeleteWorkflow', {

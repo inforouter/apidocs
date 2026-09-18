@@ -154,9 +154,10 @@ await call('SetVersionTextOnlyContent', {
 ```
 
 [SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md) does the same for the published version.
-The difference worth knowing: **this one cannot clear the text.** Its `ContentText` is a non-nullable
-string, so an empty one is refused by model binding with HTTP 400, where the document-level operation
-declares its value nullable and treats an empty one as "clear it".
+**An empty `ContentText` clears the version's text**, the same as the document-level operation.
+Until 9.0 this one's `ContentText` was declared without a question mark, so an empty one was refused
+by model binding with HTTP 400 and the version-level operation could not clear what the
+document-level one could.
 
 ## Notes
 
@@ -193,7 +194,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no document at that path, or no version carries that number |
 | `4030` | the caller may not change this document |
-| `HTTP 400` | `ContentText` was empty; there is no way to clear it here |
+| `HTTP 400` | a required string parameter was empty; `ContentText` is not one of them |
 
 | Error | Description |
 |-------|-------------|

@@ -1,4 +1,4 @@
-# AddFlowStepDef API
+﻿# AddFlowStepDef API
 
 Adds a new step to an existing workflow definition. Steps are numbered sequentially starting at 1; the new step receives the next available number automatically. The workflow definition must be in **inactive** (deactivated) state -" you cannot add steps to an active workflow.
 
@@ -111,6 +111,7 @@ const stepNumber = root.getAttribute('StepNumber');   // "1"
 ## Notes
 
 - The workflow definition must be **inactive** before steps can be added. If the workflow is currently active, first call `DeactivateFlowDef` to deactivate it.
+- **Step names are unique within a definition**, compared without regard to case: a second step called `Review` is refused `4090`. Until 9.0 it was accepted, and since [DeleteFlowStepDef](DeleteFlowStepDef.md) finds a step by name, one of the two was unreachable - and which one was a matter of row order.
 - Step numbers are assigned automatically as `MAX(existing step number) + 1`. There is no way to insert a step at a specific position.
 - `StepName` must consist of alphanumeric characters only (letters and digits); spaces and special characters are not allowed.
 - This variant always creates the step **without** an "on-start move-to" folder (the folder where documents are relocated when this step begins). To specify such a folder, use `AddFlowStepDef1` and provide the folder ID in `OnStartMoveTo`.
@@ -133,5 +134,6 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4000` | no definition by that name in the library, or the definition is active |
+| `4090` | the definition already has a step of that name |
 | `4030` | the caller may not manage workflows in that library |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

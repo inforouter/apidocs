@@ -1,4 +1,4 @@
-# AssociatedDocuments API
+﻿# AssociatedDocuments API
 
 Returns the list of documents that are associated with the specified document or folder. Both forward associations (where the specified item is the source) and reverse associations (where the specified item is the target) are returned. Use this API to discover all documents linked to an item, regardless of which side created the association.
 
@@ -175,10 +175,11 @@ for (const link of root.querySelectorAll('AssociatedDocument')) {
 `IsReverseAssociation` tells you which end you are looking from: `"FALSE"` on the item the link was
 made on and `"TRUE"` on the item it points at.
 
-> **Read the path from the nested `<document>` element, not from the link.** The `Path` attribute on
-> `<AssociatedDocument>` is built by hand and comes out with its separators doubled -
-> `//Library//Folder//Sub/name.pdf`. The `<document>` element inside carries the path in the usual
-> shape.
+> **The link and the nested element spell the path differently.** The `Path` attribute on
+> `<AssociatedDocument>` is the full path to the document with forward slashes -
+> `/Library/Folder/Sub/name.pdf` - and the `<document>` element inside carries the path of its
+> *folder* with backslashes, as every other `<document>` element in the API does. Until 9.0 the
+> link's own attribute came out with its separators doubled, `//Library//Folder//Sub/name.pdf`.
 
 An item with no associations answers an empty `<AssociatedDocuments />`. A link to a document that
 has since been deleted is not reported.

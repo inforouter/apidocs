@@ -1,4 +1,4 @@
-# UpdateDocumentKeywords API
+﻿# UpdateDocumentKeywords API
 
 Updates the user-defined keywords of the specified document. Keywords are free-text tags that help categorize and search for documents. This API replaces the entire existing keyword string with the new value. To append keywords, first retrieve the current keywords using `GetDocumentKeywords`, then append the new keywords and call this API.
 
@@ -128,11 +128,11 @@ await call('UpdateDocumentKeywords', {
 to survive. What comes back afterwards is **sorted**, not in the order it was sent, and a keyword may
 contain spaces - so split on the comma and never on the space.
 
-**There is no way to remove every keyword with this operation.** `Keywords` is a non-nullable string,
-so an empty one is refused by model binding with HTTP 400 - unlike
+**An empty `Keywords` removes them all**, the same way it does for
 [SetDocumentSummary](SetDocumentSummary.md) and
-[SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md), which both take an empty value precisely
-so that one can be cleared.
+[SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md). Until 9.0 the parameter was declared
+without a question mark, so an empty one was refused by model binding with HTTP 400 and there was no
+way to clear a document's keywords at all.
 
 ## Notes
 
@@ -160,7 +160,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no document at that path - including a folder path, and one the caller may not see |
 | `4030` | the caller may not change this document |
-| `HTTP 400` | `Keywords` was empty; there is no way to clear them here |
+| `HTTP 400` | a required string parameter was empty; `Keywords` is not one of them |
 
 | Error | Description |
 |-------|-------------|

@@ -1,4 +1,4 @@
-# GetAllUsers2 API
+﻿# GetAllUsers2 API
 
 Returns a paged and filtered list of infoRouter users with full detail, supporting all filters from `GetAllUsers1` plus an additional user type filter (author vs read-only).
 
@@ -204,8 +204,11 @@ Every filter has to be present - they are declared as plain strings, so an omitt
 HTTP 400 rather than "no filter". Send an empty string for the ones you do not want, `-1` for the
 status and type filters.
 
-`sortBy` is not checked. A number no sort column has is accepted without a word and the list comes
-back in whatever order the default gives, where [GetCoWorkers1](GetCoWorkers1.md) refuses the same
-value with `4000`.
+`sortBy` is one of the eight: `1` user name, `2` first name then last, `3` last name then first,
+`4` email, `5` status, `6` authentication source, `7` library, `8` user type. Anything else is
+refused `4000`, as [GetCoWorkers1](GetCoWorkers1.md) and
+[GetUserGroupMembers1](GetUserGroupMembers1.md) have always refused it. Until 9.0 this one accepted
+any number without a word and answered the list in whatever order the default gives, so a caller
+asking for a sort that does not exist was given one it had not asked for.
 
 ---
