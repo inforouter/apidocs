@@ -35,7 +35,7 @@ Removes the specified user group from the specified domain/library member list.
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ---
@@ -86,6 +86,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes a **global** group out of a library's membership.
+
+```javascript
+await call('RemoveUserGroupFromDomainMembership', {
+  authenticationTicket: ticket, DomainName: 'Finance', GroupName: 'AllStaff'
+});
+```
+
+> **It cannot act on a group that belongs to the library.** The group is looked up with an empty
+> library name - `GetUserGroupIdAsync(cn, threadInfo, "", groupName)` - so only a global group is
+> ever found. Ask it to remove one of the library's own groups and it answers `4041` "user group not
+> found" while the group sits in `GetDomainGroups` before and after. Use
+> [DeleteUsergroup](DeleteUsergroup.md) to remove a library's own group.
+
 ## Notes
 
 - Removes the group's **membership** in the domain. The group itself is not deleted.
@@ -104,14 +137,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `[115] Domain not found` | The specified domain/library does not exist. |
-| Group not found | The specified group does not exist. |
-| Group not a member | The group is not a member of this domain. |
-| Access denied | The calling user is not a manager of this domain. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
 
----
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may not manage groups - including a caller with no ticket at all |
+| `4041` | no library by that name, or the group is not a global group |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

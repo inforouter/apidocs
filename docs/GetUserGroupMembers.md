@@ -61,7 +61,7 @@ Returns a `<users>` collection with one `<User>` element per member with full us
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ---
@@ -112,6 +112,40 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the people in a group, each as the full `<User>` element `GetUser` answers.
+
+```javascript
+const root = await call('GetUserGroupMembers', {
+  authenticationTicket: ticket, DomainName: 'Finance', GroupName: 'Approvers'
+});
+
+for (const user of root.querySelectorAll('users > User')) {
+  console.log(user.getAttribute('UserName'), user.getAttribute('Email'));
+}
+```
+
+A group with nobody in it answers an empty `<users />`. Unlike `GetUserGroup`, an empty
+`DomainName` is accepted here.
+
 ## Notes
 
 - Returns members sorted by first name then last name, ascending. Full user detail including `<Preferences>` is always returned.
@@ -131,11 +165,10 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Group not found | The specified group does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
 
----
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no group by that name in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

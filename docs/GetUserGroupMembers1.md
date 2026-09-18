@@ -78,7 +78,7 @@ Returns a list of members of the specified user group with configurable sort ord
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ---
@@ -138,6 +138,54 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`GetUserGroupMembers` with sorting and a brief form.
+
+```javascript
+const root = await call('GetUserGroupMembers1', {
+  authenticationTicket: ticket,
+  domainName: 'Finance',
+  groupName: 'Approvers',
+  sortBy: 1,              // see the table below
+  sortAscending: true,
+  detailMode: false       // true adds the preferences and property sets
+});
+```
+
+`sortBy` takes 1 to 8 and nothing else - `0` included:
+
+| `sortBy` | Sorts by |
+|---:|---|
+| `1` | user name |
+| `2` | first name, then last name |
+| `3` | last name, then first name |
+| `4` | email |
+| `5` | status |
+| `6` | authentication source |
+| `7` | library |
+| `8` | user type |
+
+With `detailMode=false` each `<User>` carries the name fields and nothing else; with `true` it
+carries the whole element, `<Preferences>` and `<Propertysets>` included.
+
 ## Notes
 
 - Use `detailMode=false` for a lighter response when only basic user identity is needed.
@@ -157,11 +205,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Group not found | The specified group does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
 
----
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no group by that name in that library |
+| `4000` | `sortBy` is outside 1 to 8; the message lists the eight |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

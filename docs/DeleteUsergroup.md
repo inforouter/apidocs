@@ -35,7 +35,7 @@ Deletes the specified infoRouter user group.
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ---
@@ -96,6 +96,35 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Deletes a group and every membership of it.
+
+```javascript
+await call('DeleteUsergroup', {
+  authenticationTicket: ticket, DomainName: 'Finance', GroupName: 'Approvers'
+});
+```
+
+An empty `DomainName` deletes a global group. Deleting a group that is not there is `4041`.
+
 ## Notes
 
 - Deleting a user group removes all its memberships and any folder/document permissions assigned to the group. This action cannot be undone.
@@ -115,12 +144,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Group not found | The specified group does not exist. |
-| Access denied | The calling user lacks permission to delete this group. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
 
----
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may not manage groups - including a caller with no ticket at all |
+| `4041` | no group by that name in that library |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

@@ -48,7 +48,7 @@ Returns a `<usergroups>` collection with one `<usergroup>` element per global gr
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ---
@@ -105,6 +105,40 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the global groups: the ones created with an empty `DomainName`, and the built-in roles, whose
+names are in square brackets.
+
+```javascript
+const root = await call('GetGlobalGroups', { authenticationTicket: ticket });
+
+for (const group of root.querySelectorAll('usergroups > usergroup')) {
+  const name = group.getAttribute('GroupName');
+  const builtIn = name.startsWith('[');   // [Administrators], [User Managers], ...
+  console.log(name, builtIn ? '(built in)' : '');
+}
+```
+
+A global group answers `DomainID="0"` and `DomainName="*"`.
+
 ## Notes
 
 - Global groups are not tied to a specific domain/library and can be added as members of any domain.
@@ -123,11 +157,8 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `[2730] Insufficient rights. Anonymous users cannot perform this action.` | The calling user is not authenticated. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
 
----
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |

@@ -36,7 +36,7 @@ Adds the specified user to the member list of the specified user group.
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ---
@@ -101,6 +101,37 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Puts a user in a group. Adding somebody who is already in it is accepted and does not duplicate the
+membership.
+
+```javascript
+await call('AddUsergroupMember', {
+  authenticationTicket: ticket,
+  DomainName: 'Finance',
+  GroupName: 'Approvers',
+  UserName: 'jsmith'
+});
+```
+
 ## Notes
 
 - For global groups, pass an empty string for `DomainName`.
@@ -119,14 +150,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Group not found | The specified group does not exist. |
-| User not found | The specified username does not exist. |
-| User already a member | The user is already a member of this group. |
-| Access denied | The calling user lacks permission to manage this group. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
 
----
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may not manage groups - including a caller with no ticket at all |
+| `4041` | no group by that name in that library, or no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

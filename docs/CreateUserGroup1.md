@@ -28,13 +28,13 @@ Creates a new user group with control over member visibility. If a domain/librar
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -78,6 +78,46 @@ SOAPAction: "http://tempuri.org/CreateUserGroup1"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`CreateUserGroup` with the `showMembers` flag.
+
+```javascript
+await call('CreateUserGroup1', {
+  authenticationTicket: ticket,
+  DomainName: 'Finance',
+  GroupName: 'Approvers',
+  showMembers: true
+});
+```
+
+> **The flag is stored inverted.** A group created with `showMembers=true` is read back by
+> `GetUserGroup` as `public="False"`, and one created with `showMembers=false` as `public="True"` -
+> which is also what plain `CreateUserGroup`, sending no flag at all, produces. Send the opposite of
+> what you mean until this is fixed, or use `CreateUserGroup` and set the flag with
+> `UpdateUserGroupName1`, which inverts it in the same direction.
+
+A group belongs to a library when `DomainName` names one, and is **global** when `DomainName` is
+left empty. The two live in different lists: `GetDomainGroups` and `GetLocalGroups` answer a
+library's own groups, `GetGlobalGroups` the global ones.
+
 ## Notes
 
 - This API is identical to `CreateUserGroup` but adds the `showMembers` parameter to control member visibility
@@ -85,3 +125,16 @@ SOAPAction: "http://tempuri.org/CreateUserGroup1"
 - When `DomainName` is specified, a local user group is created within that domain/library
 - The `showMembers` setting determines whether other users can see who belongs to this group
 - Group names must be unique within their scope (global or domain-level)
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may not manage groups - including a caller with no ticket at all |
+| `4041` | no library by that name |
+| `4090` | a group of that name already exists |
+| `4000` | the name uses a character object names may not have |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

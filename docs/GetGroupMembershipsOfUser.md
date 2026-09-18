@@ -26,13 +26,13 @@ Returns the user group memberships of the specified user, including both global 
 ### Success Response
 
 ```xml
-<root success="true">
+<response success="true">
   <UserGroups>
     <usergroup GroupID="1" GroupName="Editors" DomainID="0" DomainName="" public="True" />
     <usergroup GroupID="5" GroupName="Reviewers" DomainID="3" DomainName="MyLibrary" public="False" />
     <!-- ... additional usergroup elements ... -->
   </UserGroups>
-</root>
+</response>
 ```
 
 ### Response Attributes
@@ -50,7 +50,7 @@ Each `<usergroup>` element contains the following attributes:
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -92,8 +92,52 @@ SOAPAction: "http://tempuri.org/GetGroupMembershipsOfUser"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists the groups a user is in.
+
+```javascript
+const root = await call('GetGroupMembershipsOfUser', {
+  authenticationTicket: ticket, userName: 'jsmith'
+});
+
+for (const group of root.querySelectorAll('UserGroups > usergroup')) {
+  console.log(group.getAttribute('GroupName'), group.getAttribute('DomainName'));
+}
+```
+
+A user in no group answers an empty `<UserGroups />`. A user nobody is answers **`4000`**, where the
+rest of the family answers `4041` for the same condition with the same message.
+
 ## Notes
 
 - The response includes both global groups (`DomainID="0"`) and domain-level (local) groups
 - If the user has no group memberships, the `<UserGroups>` element will be empty
 - The `public` attribute corresponds to the `showMembers` setting configured when the group was created
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name - its neighbours call this `4041` |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

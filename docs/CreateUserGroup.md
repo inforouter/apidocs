@@ -27,13 +27,13 @@ Creates a new user group. If a domain/library name is specified, a local user gr
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Error message" errorCode="4000" />
 ```
 
 ## Required Permissions
@@ -76,9 +76,59 @@ SOAPAction: "http://tempuri.org/CreateUserGroup"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a user group.
+
+```javascript
+// One that belongs to a library:
+await call('CreateUserGroup', {
+  authenticationTicket: ticket, DomainName: 'Finance', GroupName: 'Approvers'
+});
+
+// A global one, usable from every library:
+await call('CreateUserGroup', {
+  authenticationTicket: ticket, DomainName: '', GroupName: 'AllStaff'
+});
+```
+
+A group belongs to a library when `DomainName` names one, and is **global** when `DomainName` is
+left empty. The two live in different lists: `GetDomainGroups` and `GetLocalGroups` answer a
+library's own groups, `GetGlobalGroups` the global ones.
+
 ## Notes
 
 - When `DomainName` is empty or omitted, a global user group is created
 - When `DomainName` is specified, a local user group is created within that domain/library
 - This API does not include a `showMembers` parameter; members are hidden by default. Use `CreateUserGroup1` if you need to control member visibility.
 - Group names must be unique within their scope (global or domain-level)
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may not manage groups - including a caller with no ticket at all |
+| `4041` | no library by that name |
+| `4090` | a group of that name already exists |
+| `4000` | the name uses a character object names may not have |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
