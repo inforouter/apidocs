@@ -151,13 +151,10 @@ if (owner.querySelector('User').getAttribute('UserName') !== 'jsmith') {
 }
 ```
 
-> **It reports `success="false" error="MultiStatus"` even when it worked.** The answer is built by the
-> multi-status helper, which always writes that pair, and the helper is reached on every call - so a
-> successful change looks exactly like a failed one. There is no `errorCode` and no `<log>` either:
-> the answer carries nothing at all to branch on. **Confirm with [GetOwner](GetOwner.md).**
->
-> The one thing it does report properly is a user nobody is, which is `4041` - so a `4041` means the
-> name was wrong, and a `MultiStatus` means anything else, including success.
+> **A change that worked answers a plain success.** When some of a tree could not be changed
+> the answer is `success="false"`, `error="MultiStatus"` and `errorCode="2070"`, with the
+> reasons in the log. It used to answer MultiStatus on every call, with no `errorCode` and no
+> log, so a successful change looked exactly like a failed one.
 
 `ApplytoTree=true` changes the owner of everything below a folder as well. Note the spelling of that
 parameter: a lower-case `t` in `ApplytoTree`, unlike `ApplyToTree` on

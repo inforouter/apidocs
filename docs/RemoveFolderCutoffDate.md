@@ -148,10 +148,9 @@ await call('RemoveFolderCutoffDate', {
 ```
 
 **A refusal can arrive as a MultiStatus.** When the operation could not do everything it was asked,
-the answer is `success="false"` with `error="MultiStatus"`, the reasons inside `<log>` elements, and
-**no `errorCode` at all**. That is also the shape of a partial success, so `success="false"` here does
-not mean nothing happened - read the `<log>` to find out what did. A client that branches on
-`errorCode` sees nothing to branch on.
+the answer is `success="false"`, `error="MultiStatus"` and `errorCode="2070"`, with the real reasons
+in the `<log>` elements. When everything was done the answer is a plain success. Read the log rather
+than the `error` attribute, which only ever says the word.
 
 The commonest case: a folder may only be cut off once everything inside it already is. Asking for one
 that still holds uncut subfolders or documents, without `includeSubFolders` and `includeDocuments`, is

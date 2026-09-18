@@ -6,10 +6,6 @@ made - with optional filtering by completion status. Tasks are sorted by due dat
 Tasks that belong to a running workflow are **not** included: the service asks for standalone
 tasks only. Use `getTasks` with a `FLOWID` criterion for a workflow's tasks.
 
-> **This operation always answers `success="false"` with an empty `error` and no `errorCode`,**
-> even when it worked - it builds its answer without ever setting the flag. Read the `<tasks>`
-> list and ignore `success`; a genuine failure carries an `errorCode` and a message.
-
 ## Endpoint
 
 ```

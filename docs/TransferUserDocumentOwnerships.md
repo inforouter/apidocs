@@ -2,15 +2,10 @@
 
 Transfers document ownerships from one user to another. All documents owned by the source user are reassigned to the target user.
 
-> **The thirteen `TransferUser...` operations carry no `errorCode`.** They answer
-> `<root success="true"/>` or `<root success="false" error="..."/>` and no code attribute at all,
-> and an expired ticket comes back as the legacy text `[901]Session expired or Invalid ticket`
-> rather than `4010`. `success` is the only thing a client can branch on here.
->
-> **A transfer to the same user is accepted.** `fromUserName` and `toUserName` may name one
-> account, and the call reports success - having moved everything away from that account and
-> handed it to nobody. This is not reversible and there is no report of what went. Check the two
-> names are different before calling.
+> **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may
+> not name one account: the call is refused with `4000`, because moving everything away from an
+> account and handing it to nobody is not a transfer. It used to be accepted and reported as a
+> success.
 
 ## Endpoint
 
@@ -163,15 +158,13 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `*none*` | this family answers no `errorCode` at all - see the warning at the top of the page |
+| `4010` | the ticket is expired or unknown |
+| `4030` | there is no ticket at all |
+| `4041` | no user by either name |
+| `4000` | `fromUserName` and `toUserName` name the same account |
 | `HTTP 400` | `fromUserName` or `toUserName` was empty; refused by model binding, so there is no error document |
 
-The failures this operation reports, all of them with `success="false"` and no code:
-
-| Message | When |
-|---|---|
-| user not found | `fromUserName` or `toUserName` names no user |
-| access denied, coworker/administrator/library manager/user manager required | there is no ticket at all |
-| `[901]Session expired or Invalid ticket` | the ticket is expired or unknown |
+Every answer carries an `errorCode` now, including a `0` on success. The family used to write
+none at all, so `success` was the only thing a client could branch on.
 
 ---

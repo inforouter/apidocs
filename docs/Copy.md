@@ -190,7 +190,7 @@ await call('Copy', {
 A folder is copied with everything under it. The original is left where it was - that is the only
 difference from `Move`.
 
-**A successful copy carries no `errorCode` at all**, where most operations report `errorCode="0"`. A
+**A successful copy carries no `errorCode` at all**, where most operations report `errorCode="0"`. This is G5 in the defect log, left as it is. A
 client reading `errorCode` before checking `success` sees nothing and must not treat that as a
 failure.
 
