@@ -73,6 +73,57 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJECTMETA&FieldName=CATEGORY&SQLSERVER_ServerName=dbserver.example.com&SQLSERVER_UserName=ir_reader&SQLSERVER_Password=secret&SQLSERVER_DataBasename=project_db&sqlSentence=SELECT+CategoryCode%2CCategoryName+FROM+dbo.Categories+ORDER+BY+CategoryName
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Points a field at a SQL Server query. The parameters are written to
+`config/lookup_<propertySetId>_<FIELDNAME>.xml` and **the connection is never tested**, so a server
+that does not exist and a sentence that is not SQL are both accepted.
+
+```javascript
+await call('SetPropertySetLookupFieldParametersForSQLServer', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA',
+  FieldName: 'SUPPLIER',
+  SQLSERVER_ServerName: 'sqlbox',
+  SQLSERVER_UserName: 'reader',
+  SQLSERVER_Password: 'secret',
+  SQLSERVER_DataBasename: 'Vendors',
+  sqlSentence: 'SELECT NAME FROM SUPPLIERS ORDER BY NAME'
+});
+```
+
+`GetPropertySetDefinition` reads them back with the password masked as `****`:
+
+```xml
+<lookupparams looktype="database">
+  <dbconnectionparams dbtype="SQLSERVER" servername="sqlbox" username="reader"
+                      password="****" databasename="Vendors" />
+  <sqlsentence>SELECT NAME FROM SUPPLIERS ORDER BY NAME</sqlsentence>
+</lookupparams>
+```
+
+The three setters overwrite one another - a field has one set of lookup parameters and the last call
+wins. The control type is not checked either: a `TEXT BOX` accepts parameters, and then nothing ever
+reads them, because the definition only reports `<lookupparams>` for a field whose control type is
+`LOOKUP`.
+
 ## Notes
 
 - The target field **must have control type `LOOKUP`**. Calling this API on a field with any other control type (TEXT BOX, COMBO BOX, etc.) returns an error.
@@ -93,11 +144,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJEC
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| Field not found | No field with the specified `FieldName` exists in the property set. |
-| Invalid field type | The specified field is not a `LOOKUP` control type. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no set by that name, or the set has no such field |
+| `4200` | the caller is not a system administrator - the message says so, the code does not |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

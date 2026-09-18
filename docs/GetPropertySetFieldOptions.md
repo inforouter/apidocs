@@ -1,6 +1,15 @@
 # GetPropertySetFieldOptions API
 
-Returns the available option values for a property set field. For static fields (`COMBO BOX`, `LIST BOX`, `RADIO BUTTON`), returns the list of stored option values. For `LOOKUP` fields, executes the configured external database query and returns the live results. An optional `OptionFilter` string can be used to narrow down lookup results.
+Returns the available option values for a property set field. For static fields (`COMBO BOX`,
+`LIST BOX`, `RADIO BUTTON`), returns the list of stored option values, sorted alphabetically
+rather than in the order they were added. For `LOOKUP` fields, executes the configured
+external database query and returns the live results.
+
+**`OptionFilter` only reaches a `LOOKUP` query.** A stored list never looks at it, so a
+`COMBO BOX` returns all of its values whatever the filter says.
+
+A field whose control type has no options - a `TEXT BOX` or a `CHECK BOX` - answers a
+successful empty `<options />`, although adding an option to one of those is refused `4000`.
 
 ## Endpoint
 
@@ -112,6 +121,47 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=ProjectMetadata&PropertyFieldName=STATUS&OptionFilter=
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads the values a field offers: the stored list for a `COMBO BOX`, a `LIST BOX` or a
+`RADIO BUTTON`, and the live result of the configured query for a `LOOKUP`.
+
+```javascript
+const root = await call('GetPropertySetFieldOptions', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA',
+  PropertyFieldName: 'REGION',
+  OptionFilter: ''
+});
+
+const values = [...root.querySelectorAll('option')].map(o => o.getAttribute('value'));
+console.log(values);   // ["AMER", "APAC", "EMEA"] - alphabetical, not the order they were added
+```
+
+**`OptionFilter` does nothing for a stored list.** It is put on the field before the values are
+read, and only a `LOOKUP` query looks at it; a `COMBO BOX` returns all of its values whatever the
+filter says.
+
+A field whose control type has no options - a `TEXT BOX` or a `CHECK BOX` - answers a successful
+empty `<options />`, although *adding* an option to one of those is refused `4000`.
+
 ## Notes
 
 - `PropertyFieldName` lookup is **case-insensitive** -" the field name is matched against the uppercase field names stored in the property set.
@@ -129,11 +179,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Property set is private and the caller is anonymous. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| Field not found | No field with the specified `PropertyFieldName` exists in the property set. |
-| Lookup error | The external database query for a LOOKUP field failed. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no set by that name, or the set has no such field |
+| `4200` | the field is a `LOOKUP` and has no parameters configured, or the query against the external database failed |
+| `4010` | the set is private and the caller has no ticket |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

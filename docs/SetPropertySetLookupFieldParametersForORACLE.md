@@ -1,6 +1,15 @@
 # SetPropertySetLookupFieldParametersForORACLE API
 
-Configures a `LOOKUP` field in a custom property set to query an external **Oracle** database. After calling this API the field will execute the specified SQL sentence against the Oracle server whenever [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) is called for it.
+> **This operation does not configure an Oracle lookup.** The adapter builds a
+> `SqlServerConnectionParameters` from the Oracle arguments, so `ORACLE_ServiceName` is stored
+> as a SQL Server **server name**, the record is written with `dbtype="SQLSERVER"` and no
+> database name, and the query is later opened with a SQL Server driver. The call answers
+> `success="true"`, so nothing tells the caller. There is no way to point a lookup field at
+> Oracle through this API today.
+
+Intended to configure a `LOOKUP` field in a custom property set to query an external
+**Oracle** database, so that the field executes the specified SQL sentence whenever
+[GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) is called for it.
 
 ## Endpoint
 
@@ -71,6 +80,54 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJECTMETA&FieldName=DEPARTMENT&ORACLE_ServiceName=ORCL&ORACLE_UserName=ir_reader&ORACLE_Password=secret&sqlSentence=SELECT+DEPT_CODE%2CDEPT_NAME+FROM+DEPARTMENTS+ORDER+BY+DEPT_NAME
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+> **This operation does not configure an Oracle lookup.** The adapter builds a
+> `SqlServerConnectionParameters` from the Oracle arguments, so `ORACLE_ServiceName` is stored as a
+> SQL Server **server name**, the record is written with `dbtype="SQLSERVER"` and no database name,
+> and the query is later opened with a SQL Server driver. There is no way to point a lookup field at
+> Oracle through this API today.
+
+```javascript
+await call('SetPropertySetLookupFieldParametersForORACLE', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA',
+  FieldName: 'SUPPLIER',
+  ORACLE_ServiceName: 'ORCL',
+  ORACLE_UserName: 'reader',
+  ORACLE_Password: 'secret',
+  sqlSentence: 'SELECT NAME FROM SUPPLIERS ORDER BY NAME'
+});
+```
+
+What `GetPropertySetDefinition` reports afterwards - note `dbtype`, `servername` and the empty
+`databasename`:
+
+```xml
+<dbconnectionparams dbtype="SQLSERVER" servername="ORCL" username="reader"
+                    password="****" databasename="" />
+```
+
+The call itself answers `success="true"`, so nothing tells the caller. The connection is never
+tested at save time either.
+
 ## Notes
 
 - The target field **must have control type `LOOKUP`**. Calling this API on a field with any other control type (TEXT BOX, COMBO BOX, etc.) returns an error.
@@ -91,11 +148,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJEC
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| Field not found | No field with the specified `FieldName` exists in the property set. |
-| Invalid field type | The specified field is not a `LOOKUP` control type. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no set by that name, or the set has no such field |
+| `4200` | the caller is not a system administrator - the message says so, the code does not |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

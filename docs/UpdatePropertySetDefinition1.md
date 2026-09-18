@@ -87,6 +87,44 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJECTMETA&NewPropertySetName=PROJMETADATA&PropertySetCaption=Project+Metadata&AppliestoDocuments=true&AppliestoFolders=true&AppliestoUsers=false&DomainNames=Engineering%2CFinance&PrivatePropertySet=true
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`UpdatePropertySetDefinition` with the private flag, which it sets in both directions.
+
+```javascript
+await call('UpdatePropertySetDefinition1', {
+  authenticationTicket: ticket,
+  PropertySetName: 'SALARYBAND',
+  NewPropertySetName: 'SALARYBAND',
+  PropertySetCaption: 'Salary band',
+  AppliestoDocuments: false,
+  AppliestoFolders: false,
+  AppliestoUsers: true,
+  DomainNames: '',
+  PrivatePropertySet: true
+});
+```
+
+The overload without the flag passes -1 internally, which is read as "leave it as it is", so a set
+made private here stays private through later calls to `UpdatePropertySetDefinition`.
+
 ## Notes
 
 - The only difference from [UpdatePropertySetDefinition](UpdatePropertySetDefinition.md) is the addition of the `PrivatePropertySet` parameter. Use [UpdatePropertySetDefinition](UpdatePropertySetDefinition.md) if you want to leave `PrivatePropertySet` unchanged.
@@ -103,14 +141,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJEC
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| System property sets cannot be changed or deleted | The property set is system-managed. |
-| Name already exists | Another property set already uses the `NewPropertySetName`. |
-| Caption already exists | Another property set already uses the `PropertySetCaption`. |
-| Invalid name format | `NewPropertySetName` contains invalid characters or exceeds the maximum length. |
-| Document type restriction | Property set is linked to a document type; cannot restrict to domains or unset AppliestoDocuments. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller is not a system administrator - including a caller with no ticket at all |
+| `4041` | no set by that name |
+| `4090` | `NewPropertySetName` is already the name of another set |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

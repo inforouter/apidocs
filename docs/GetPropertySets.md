@@ -120,6 +120,52 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/MyLibrary/Projects/Proposal.pdf
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads the property set rows a document or a folder carries. `Path` resolves to a document first and
+to a folder if there is no document there.
+
+```javascript
+const root = await call('GetPropertySets', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Projects/proposal.pdf'
+});
+
+for (const set of root.querySelectorAll('Propertysets > propertyset')) {
+  for (const row of set.querySelectorAll('propertyrow')) {
+    console.log(set.getAttribute('Name'),
+                row.getAttribute('RowNbr'),
+                row.getAttribute('PROJECTCODE'),
+                row.querySelector('Log').getAttribute('AppliedBy'),
+                row.querySelector('Log').getAttribute('DateApplied'));
+  }
+}
+```
+
+Every field of the set is present on the row, and one that was never written comes back as an empty
+attribute rather than a missing one. An object with no rows answers an empty `<Propertysets />`.
+
+The element names here are not the ones `GetPropertySetDefinition` uses: rows live under
+`<Propertysets><propertyset Name="..."><propertyrow RowNbr="...">`, while the definition reader
+answers `<PropertySet Name="..."><Fields><field FieldName="...">`.
+
 ## Notes
 
 - The `Path` resolves to a **document** first; if not found, it is resolved as a **folder**. If neither is found, an error is returned.
@@ -137,8 +183,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/MyLibrary/Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Path not found | No document or folder was found at the specified `Path`. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document and no folder at `Path` |
+| `4000` | the ticket is unknown - this operation reports 4000 where its neighbours report 4010 |
+| `4030` | the caller may not see that document or folder |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

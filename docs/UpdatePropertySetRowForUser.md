@@ -2,6 +2,12 @@
 
 Updates an existing property set row for the specified user.
 
+It can only rewrite a row that is already there; use
+[AddPropertySetRowForUser](AddPropertySetRowForUser.md) to create the first one. Asking it to
+update a row the user does not have is a **plain success that stores nothing**, while
+`rownbr="0"` is refused `4000`. Like the other row operations it replaces the whole row
+rather than merging into it.
+
 ## Endpoint
 
 ```
@@ -78,6 +84,45 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=jsmith&xmlpset=<psets><pset name="HRDATA"><row rownbr="1" DEPARTMENT="Engineering" LOCATION="HQ"/></pset></psets>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`UpdatePropertySetRow` against a user account rather than a path.
+
+```javascript
+await call('UpdatePropertySetRowForUser', {
+  authenticationTicket: ticket,
+  userName: 'jsmith',
+  xmlpset: `
+    <propertysets>
+      <propertyset name="EMPLOYEEDETAILS">
+        <row rownbr="1" COSTCENTRE="4400" />
+      </propertyset>
+    </propertysets>`
+});
+```
+
+It can only rewrite a row that is already there - use
+[AddPropertySetRowForUser](AddPropertySetRowForUser.md) to create the first one. Asking it to update
+a row the user does not have is a **plain success that stores nothing**, while `rownbr="0"` is
+refused `4000`.
+
 ## Notes
 
 - The `rownbr` attribute is required and must match an existing row number for the property set on that user.
@@ -95,11 +140,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&userName=jsmith&xmlpse
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller does not have permission to manage the target user's property sets. |
-| User not found | No user with the specified `userName` exists. |
-| Property set not found | The property set named in `xmlpset` does not exist or is not applied to the user. |
-| Row not found | The specified `rownbr` does not exist for this property set on this user. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no user by that name - including for a caller with no ticket |
+| `4000` | no set by that name, `rownbr` is 0, or `xmlpset` is not well formed |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

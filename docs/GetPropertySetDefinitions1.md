@@ -1,6 +1,14 @@
 # GetPropertySetDefinitions1 API
 
-Returns a filtered list of property set definitions. Supports filtering by library (domain) name and by which object types the property set applies to. Private property sets are excluded for anonymous callers.
+Returns a filtered list of property set definitions, **without** their field definitions.
+
+The three `AppliesTo` flags are an **OR**, not an AND: a set is listed when it applies to any
+of the types asked for. All three false does not mean "nothing" - it means "do not filter by
+type", and every definition comes back.
+
+`DomainNameFilter` leaves out the sets restricted to some other library; a global set belongs
+to every library, so no filter ever hides one, and an empty filter does not filter by library
+at all. Private property sets are excluded for anonymous callers.
 
 This is an extended version of [GetPropertySetDefinitions](GetPropertySetDefinitions.md) with filtering capabilities.
 
@@ -101,6 +109,49 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainNameFilter=Engineering&AppliesToDocuments=true&AppliesToFolders=false&AppliesToUsers=false
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`GetPropertySetDefinitions` with filters. Like it, the list carries no field definitions.
+
+```javascript
+const root = await call('GetPropertySetDefinitions1', {
+  authenticationTicket: ticket,
+  DomainNameFilter: 'Finance',   // empty means every library
+  AppliesToDocuments: true,
+  AppliesToFolders: false,
+  AppliesToUsers: false
+});
+
+for (const set of root.querySelectorAll('PropertySets > PropertySet')) {
+  console.log(set.getAttribute('Name'), set.getAttribute('Caption'));
+}
+```
+
+**The three flags are an OR, not an AND.** A set is listed when it applies to *any* of the types
+asked for, so `AppliesToDocuments=true` alone lists every set a document can carry, whatever else it
+also applies to. **All three false does not mean "nothing"** - it means "do not filter by type", and
+every definition comes back.
+
+`DomainNameFilter` leaves out the sets restricted to some other library. A global set belongs to
+every library, so no filter ever hides one; an empty filter does not filter by library at all.
+
 ## Notes
 
 - `DomainNameFilter` is matched **case-insensitively** against library names.
@@ -115,7 +166,8 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DomainNameFilter=Engin
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |

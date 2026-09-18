@@ -75,6 +75,52 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJECTMETA&FieldName=CATEGORY&MYSQL_ServerName=db.example.com&MYSQL_PortNumber=3306&MYSQL_UserName=ir_reader&MYSQL_Password=secret&MYSQL_DataBasename=project_db&sqlSentence=SELECT+CategoryCode%2CCategoryName+FROM+categories+ORDER+BY+CategoryName
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The MySQL form. `MYSQL_PortNumber` is a **string**: a value that is not a number is replaced with
+`3306` rather than refused.
+
+```javascript
+await call('SetPropertySetLookupFieldParametersForMYSQL', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA',
+  FieldName: 'SUPPLIER',
+  MYSQL_ServerName: 'mysqlbox',
+  MYSQL_PortNumber: '3307',
+  MYSQL_UserName: 'reader',
+  MYSQL_Password: 'secret',
+  MYSQL_DataBasename: 'vendors',
+  sqlSentence: 'SELECT NAME FROM SUPPLIERS ORDER BY NAME'
+});
+```
+
+Read back, the database name is under `database` where the SQL Server form puts it under
+`databasename`:
+
+```xml
+<dbconnectionparams dbtype="MYSQL" servername="mysqlbox" portnumber="3307"
+                    username="reader" password="****" database="vendors" />
+```
+
+The connection is never tested at save time, and the three setters overwrite one another.
+
 ## Notes
 
 - The target field **must have control type `LOOKUP`**. Calling this API on a field with any other control type (TEXT BOX, COMBO BOX, etc.) returns an error.
@@ -94,11 +140,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=PROJEC
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Caller is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| Field not found | No field with the specified `FieldName` exists in the property set. |
-| Invalid field type | The specified field is not a `LOOKUP` control type. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no set by that name, or the set has no such field |
+| `4200` | the caller is not a system administrator - the message says so, the code does not |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
