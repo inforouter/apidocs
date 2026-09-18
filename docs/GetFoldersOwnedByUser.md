@@ -1,4 +1,4 @@
-# GetFoldersOwnedByUser API
+﻿# GetFoldersOwnedByUser API
 
 Returns a paged list of folders owned by the specified user. Supports offset-based paging via `startingRow` and `rowCount`.
 
@@ -214,7 +214,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4000` | no user by that name |
-| `4010` | the caller has no ticket. The message is "User has been deleted.", which describes neither the caller nor the user asked about |
+| `4010` | the caller has no ticket; the list is about the signed-in user and there is not one |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |

@@ -272,7 +272,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |-------|-------------|
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Invalid download handler. (guid)` | `DownloadHandler` is not a valid GUID string. |
+| The download handler is not a handler. | `DownloadHandler` is not a valid GUID string. The message is a translated one; it used to be the untranslated literal `Invalid download handler. (guid)`. |
 | Handler not found | The handler file does not exist (deleted or expired). |
 
 ---

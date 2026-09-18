@@ -153,10 +153,9 @@ await call('DeleteDocumentVersion', {
 [SetDocumentPublishingRule](SetDocumentPublishingRule.md) - and then delete the old one. On a document
 with a single version there is nothing this operation can do.
 
-**A version number nothing uses is reported as a locking problem.** The answer is `4000` "the version
-file is in use, try again later", which describes neither the missing version it actually is nor
-anything a retry will fix. Read the version list from
-[GetDocument](GetDocument.md) with `withVersions=true` rather than guessing.
+**A version number nothing uses is `4041`.** Read the version list from
+[GetDocument](GetDocument.md) with `withVersions=true` rather than guessing. This used to answer
+`4000` "the version file is in use, try again later", which invited a retry that could never work.
 
 ## Notes
 
@@ -193,8 +192,8 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4000` | the version is the published one, or no version carries that number - the message says the file is in use in both cases |
-| `4041` | no document at that path - including a folder path, and one the caller may not see |
+| `4000` | the version is the published one, or `VersionNumber` is below 1,000,000 |
+| `4041` | no document at that path, or no version of it carries that number |
 | `4030` | the caller may not delete versions here |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 

@@ -1,4 +1,4 @@
-# EditFilledForm API
+﻿# EditFilledForm API
 
 Returns the rendered HTML form for an existing HTML document, pre-filled with its current saved values, and automatically checks the document out for editing. This is the edit counterpart to `UseFormTemplate`.
 
@@ -217,12 +217,10 @@ const root = await call('EditFilledForm', {
 document.getElementById('host').innerHTML = root.textContent;   // the HTML arrives as CDATA
 ```
 
-> **It checks the document out first, and does not put it back when it fails.** The operation checks
-> the document out before rendering it, and returns the rendering failure without releasing the
-> checkout. A document that is not a filled form - an ordinary HTML document, say - is therefore left
-> locked by whoever asked, while the answer says only `4041` "document not found", which is wrong
-> twice over: the document is there, and it is now checked out. Release it with
-> [UnLock](UnLock.md) (`force=true`) if this happens.
+**It checks the document out first, and puts it back when it fails.** The operation checks the
+document out before rendering it. If the rendering fails - the document is not a filled form, say -
+the checkout this call took is released before the failure is returned, and the answer is `4000`
+"this document is not a filled form". A checkout the caller already held is left alone.
 
 Pass the route of your own page as `submitUrl` to intercept the submission; leave it empty to post to
 the built-in handler.
@@ -250,7 +248,8 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4041` | no document at that path - **and also** what a document that is not a filled form is told, after it has been checked out |
+| `4041` | no document at that path |
+| `4000` | the document is there but is not a filled form |
 | `4230` | the document is checked out by somebody else |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
@@ -259,6 +258,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | Document not found | The `documentPath` does not resolve to an existing document. |
+| This document is not a filled form. | The document exists but was not created from an HTML form template. |
 | Document template cannot be found | The document has no associated template (not created from an HTML form template). |
 | Checked out by another user | The document is already checked out by a different user. |
 | Access denied | The user lacks Read or Check Out permission on the document. |

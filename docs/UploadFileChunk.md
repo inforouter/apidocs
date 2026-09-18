@@ -1,4 +1,4 @@
-# UploadFileChunk API
+﻿# UploadFileChunk API
 
 Uploads a single binary chunk to a server-side upload handler as part of a chunked large-file upload workflow. Each chunk is verified against its CRC32 checksum before being appended. When `lastChunk=true`, the handler is marked as complete and ready for finalization.
 
@@ -63,7 +63,7 @@ N+1. UploadDocumentWithHandler[X] -' finalize and create the document
 ### Error Response
 
 ```xml
-<root success="false" error="Invalid upload handler." />
+<root success="false" errorCode="4000" error="The upload handler is not a handler. It is the GUID CreateUploadHandler answered with." />
 ```
 
 ---
@@ -209,7 +209,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |-------|-------------|
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Invalid upload handler.` | The GUID is not a valid GUID format. |
+| The upload handler is not a handler. | The value is not a valid GUID. The message is a translated one; it used to be the untranslated literal `Invalid upload handler.`. |
 | Handler not found / expired | The handler file does not exist -" it may have expired or been deleted. |
 | `tryagain="true"` | Chunk checksum mismatch -" resend the chunk. |
 | `SystemError:...` | An unexpected server-side error occurred. |

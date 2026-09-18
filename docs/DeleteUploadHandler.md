@@ -151,9 +151,9 @@ await call('DeleteUploadHandler', {
 ```
 
 Deleting the same handler twice is a success, not a `4041` - the operation is safe to call in a
-`finally`. A value that is not a GUID is refused before anything is looked up, with the untranslated
-literal `bad Request`, which reads the same in every language and matches no other message in the
-API.
+`finally`. A value that is not a GUID is refused `4000` before anything is looked up, with a message
+that says so and arrives in the caller's language. It used to be the untranslated literal
+`bad Request`.
 
 ## Notes
 
@@ -186,13 +186,13 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4000` | `UploadHandler` is not a GUID: "bad Request" |
+| `4000` | `UploadHandler` is not a GUID |
 
 | Error | Description |
 |-------|-------------|
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `bad Request` | `UploadHandler` is not a valid GUID string. |
+| The upload handler is not a handler. | `UploadHandler` is not a valid GUID string. |
 
 ---
 

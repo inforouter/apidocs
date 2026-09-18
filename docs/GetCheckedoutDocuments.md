@@ -400,7 +400,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4010` | there is no ticket at all; the message is "User has been deleted.", which describes nobody |
+| `4010` | there is no ticket at all; the list is about the signed-in user and there is not one |
 
 | Error | Description |
 |-------|-------------|

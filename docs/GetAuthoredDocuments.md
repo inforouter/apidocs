@@ -144,6 +144,6 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4000` | no user by that name |
-| `4010` | there is no ticket at all; the message is "User has been deleted." |
+| `4010` | there is no ticket at all; the list is about the signed-in user and there is not one |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 

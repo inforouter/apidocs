@@ -189,7 +189,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [SetDocumentCompletionStatus](SetDocumentCompletionStatus.md) - Set the completion status (PercentComplete and CompletionDate) of a document
 - [SetDocumentCutoffDate](SetDocumentCutoffDate.md) - Apply a cutoff date to a document, blocking check-out and new versions
 - [SetDocumentImportance](SetDocumentImportance.md) - Set the importance level (NoMarkings/Low/Normal/High/Vital) of a document
-- [SetDocumentPublishingRule](SetDocumentPublishingRule.md) - Set the publishing rule on a document (LATEST, LASTAPPROVED, TAGGED, SPESIFICVERSION, UNPUBLISHED)
+- [SetDocumentPublishingRule](SetDocumentPublishingRule.md) - Set the publishing rule on a document (LATEST, LASTAPPROVED, TAGGED, SPECIFICVERSION, UNPUBLISHED)
 - [SetDocumentRetention](SetDocumentRetention.md) - **[Obsolete since 8.1.155]** Disabled -" always returns an error, use SetDocumentRandDSchedule instead
 - [SetDocumentSummary](SetDocumentSummary.md) - Store or overwrite a document's summary
 - [SetDocumentTextOnlyContent](SetDocumentTextOnlyContent.md) - Update the stored plain-text alternative content of the latest document version

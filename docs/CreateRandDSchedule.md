@@ -1,4 +1,4 @@
-# CreateRandDSchedule API
+﻿# CreateRandDSchedule API
 
 Creates a new Retention and Disposition (R&D) schedule definition. Once created, the schedule can be assigned to documents and folders via [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md) and [SetFolderRandDSchedule](SetFolderRandDSchedule.md).
 
@@ -174,7 +174,8 @@ The rules the server enforces, in the order it checks them:
 - A disposition needs at least one of its three periods above zero.
 - `DispositionTrigger="3"`, on retention end, needs a retention type other than `0`.
 - With **Temporary** retention and any disposition, `DispositionTrigger` **must** be `3`. The refusal
-  for that one quotes a stray minutes abbreviation - the string `dk.` - rather than the rule.
+  names the rule: "When 'Temporary retention' is selected, the required disposition trigger is 'Upon
+  retention end'." It used to quote a stray minutes abbreviation instead.
 
 ## Notes
 

@@ -1,4 +1,4 @@
-# SetDocumentPublishingRule API
+﻿# SetDocumentPublishingRule API
 
 Sets the publishing rule on a document, controlling which version is served as the released (published) version.
 
@@ -21,7 +21,7 @@ Sets the publishing rule on a document, controlling which version is served as t
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentPath` | string | Yes | Full infoRouter path of the document (e.g. `/Finance/Reports/Q1Summary.pdf`). |
 | `publishingRule` | string | Yes | Publishing rule to apply. See Publishing Rule Values below. Case-insensitive. |
-| `publishedVersionNumber` | integer | Conditional | Internal version number to pin. Required only when `publishingRule` is `SPESIFICVERSION`; pass `0` for all other rules. |
+| `publishedVersionNumber` | integer | Conditional | Internal version number to pin. Required only when `publishingRule` is `SPECIFICVERSION`; pass `0` for all other rules. |
 | `releaseTag` | string | Conditional | Tag name identifying the version to publish. Required only when `publishingRule` is `TAGGED`; pass empty string for all other rules. |
 
 ## Publishing Rule Values
@@ -31,7 +31,7 @@ Sets the publishing rule on a document, controlling which version is served as t
 | `LATEST` | Always serve the most recent version (default behavior). |
 | `LASTAPPROVED` | Serve the most recently approved version. |
 | `TAGGED` | Pin to the version that carries the tag specified in `releaseTag`. |
-| `SPESIFICVERSION` | Pin to the exact internal version number in `publishedVersionNumber`. |
+| `SPECIFICVERSION` | Pin to the exact internal version number in `publishedVersionNumber`. The misspelling `SPESIFICVERSION` is accepted as well, and is the spelling the enum uses. |
 | `UNPUBLISHED` | Hide the document from read-only users (no version is published). |
 
 ## Response
@@ -73,7 +73,7 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
 GET /srv.asmx/SetDocumentPublishingRule
     ?authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c
     &documentPath=%2FCorporate%2FContracts%2Fagreement.pdf
-    &publishingRule=SPESIFICVERSION
+    &publishingRule=SPECIFICVERSION
     &publishedVersionNumber=3000001
     &releaseTag=
 HTTP/1.1
@@ -137,11 +137,13 @@ await call('SetDocumentPublishingRule', {
 });
 ```
 
-The rule is one of `LATEST`, `LASTAPPROVED`, `TAGGED`, `SPESIFICVERSION`, `UNPUBLISHED`, and anything
+The rule is one of `LATEST`, `LASTAPPROVED`, `TAGGED`, `SPECIFICVERSION`, `UNPUBLISHED`, and anything
 else is refused `4000` with those five in the message.
 
-**Note the spelling: `SPESIFICVERSION`.** The correctly spelled `SPECIFICVERSION` is refused. The
-message is an untranslated English literal, so it reads the same in every language.
+**Both spellings of `SPECIFICVERSION` are accepted.** The enum behind this parameter is misspelled
+`SPESIFICVERSION`, and for a long time that was the only spelling the operation took - a caller who
+wrote the word correctly was refused and told to write it the same wrong way. Both are taken now, and
+the message names the correct one.
 
 **`releaseTag` cannot be empty over REST.** It is declared as a non-nullable string, so model binding
 refuses an empty one with HTTP 400 before the operation runs - even for `LATEST`, which has no tag and

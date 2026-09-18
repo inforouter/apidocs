@@ -1,4 +1,4 @@
-# DocumentAccessAllowed API
+﻿# DocumentAccessAllowed API
 
 Returns whether the currently authenticated user is allowed to perform the specified action on a given document.
 
@@ -26,6 +26,7 @@ Returns whether the currently authenticated user is allowed to perform the speci
 
 | ActionId | Action |
 |----------|--------|
+| `1` | Delete document |
 | `4` | Check out document |
 | `5` | Add/Change metadata |
 | `6` | Remove metadata |

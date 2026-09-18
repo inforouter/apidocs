@@ -1,4 +1,4 @@
-# PruneDocumentVersions API
+﻿# PruneDocumentVersions API
 
 Deletes old versions of a document, retaining the N most recent published and M most recent unpublished versions. All older versions are permanently deleted.
 
@@ -100,9 +100,9 @@ await call('PruneDocumentVersions', {
 });
 ```
 
-**Both counts must be 1 or greater.** `0` and negative values are refused with `4000` and the
-untranslated literal "keepPublished must be 1 or greater." - so there is no way to ask this operation
-to leave a document with no versions, which is the point of it.
+**Both counts must be 1 or greater.** `0` and negative values are refused with `4000` - there is no
+way to ask this operation to leave a document with no versions, which is the point of it. The refusal
+is a translated message; it used to be an untranslated English literal.
 
 A document with fewer versions than the counts allow is a success that removes nothing.
 

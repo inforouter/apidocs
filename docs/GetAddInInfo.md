@@ -1,4 +1,4 @@
-# GetAddInInfo API
+﻿# GetAddInInfo API
 
 Returns version and description information for the specified infoRouter client Add-in. Add-in clients (such as the Microsoft Word or Outlook add-ins) call this API at startup to check whether their installed version is current. You can also call it programmatically to verify whether a particular add-in has been deployed to the server and to read its published version metadata.
 
@@ -52,8 +52,13 @@ Returns a `<response>` element with `success="true"` and the add-in metadata as 
 ### Error Response -" Add-in Not Found
 
 ```xml
-<response success="false" error="A request to check for a newer version of the infoRouter Add-in failed.\r\nThe add-in information could not be found on the server.\r\nPlease contact your Administrator." />
+<response success="false" errorCode="4041" error="A request to check for a newer version of the infoRouter Add-in failed.
+The add-in information could not be found on the server.
+Please contact your Administrator." />
 ```
+
+The three sentences are separated by real line breaks. They used to be the literal characters
+backslash-r backslash-n, so a client that showed the message showed the backslashes.
 
 ### Error Response -" Server Error
 
@@ -141,7 +146,7 @@ cased before the folder is looked for, so case does not matter.
 - **Case-insensitive name**: The `AddInName` parameter is converted to uppercase before the server looks up the add-in directory. `wordaddin`, `WordAddin`, and `WORDADDIN` all resolve to the same directory.
 - **No authentication ticket**: unlike nearly all other infoRouter APIs, this endpoint has no `AuthenticationTicket` parameter at all, so the installed add-ins and their versions can be read by anybody who can reach the server. It is designed to be called by the add-in before a user has logged in. [GetAddIns](GetAddIns.md), which lists the same facts, does take a ticket.
 - **Server-side file location**: The add-in metadata is read from an `info.ini` file inside a subdirectory named after the add-in (uppercase) within the server's configured add-in path. If the directory or file does not exist the API returns the "not found" error message.
-- **Non-standard error message**: When the add-in is not found, the error string is a literal multi-line message (using `\r\n` as line separators) intended to be displayed directly to the end user, rather than a numeric error code.
+- **Non-standard error message**: when the add-in is not found, the error string is a three-line message intended to be shown to the end user as it stands. The `errorCode` is `4041` as everywhere else.
 - **Version fields may be empty**: If `Version`, `DLLVersion`, or `Description` keys are absent from `info.ini` the corresponding attributes are returned as empty strings.
 
 ---
@@ -160,7 +165,9 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4041` | no add-in folder by that name |
 | `4000` | `AddInName` contains a path - a name holding `..` or a separator is refused |
+
+A name that tries to walk out of the add-in folder is refused with two sentences: "Invalid file or
+directory name." and what was wrong with it. They used to be concatenated with no separator at all.
 | `HTTP 400` | `AddInName` was empty; refused by model binding, so there is no error document |
 
-The not-found message carries its line breaks as the literal characters `\r\n` rather than as
-line breaks, so a client that shows it shows the backslashes.
+The not-found message is three sentences on three lines, meant to be shown to the user as it is.

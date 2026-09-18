@@ -343,8 +343,9 @@ for (const document of root.querySelectorAll(':scope > document')) {
 An empty queue is a success with an empty root rather than an error.
 
 These three answer for **the calling user only** - there is no `userName` - so a caller with no ticket
-is refused rather than answered for the anonymous user. The message is "User has been deleted.", which
-describes neither the caller nor anybody else; read the `4010`, not the text.
+is refused rather than answered for the anonymous user. The refusal says that the list belongs to the
+signed-in user and there is not one; it used to say "User has been deleted.", about nobody in
+particular.
 
 ## Notes
 
@@ -384,14 +385,14 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `4010` | the caller has no ticket; the message is "User has been deleted.", which describes nobody |
+| `4010` | the caller has no ticket; the list is about the signed-in user and there is not one |
 | `4010` | the ticket is expired or unknown |
 
 | Error | Description |
 |-------|-------------|
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User has been deleted | The authenticated user account no longer exists. |
+| This list belongs to the signed-in user... | There is no signed-in user: the call arrived with no ticket. |
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
