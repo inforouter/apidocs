@@ -83,6 +83,40 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DocumentPath=/Finance/Reports/Q1.pdf&UserName=jdoe&ON_READ=true&ON_CHANGE=true&ON_UPDATE=true&ON_CHECKOUT=false&ON_APPROVE=false&ON_REJECT=false&ON_COMMENT=true&ON_MOVE=false&ON_DELETE=false&ON_CHECKIN=false
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Subscribes one user to one document.
+
+```javascript
+await call('AddUserToDocumentSubscribers', {
+  authenticationTicket: ticket,
+  DocumentPath: '/Public/Reports/q3.pdf',
+  UserName: 'jsmith',
+  ON_READ: true, ON_CHANGE: true, ON_UPDATE: false, ON_CHECKOUT: false, ON_APPROVE: false,
+  ON_REJECT: false, ON_COMMENT: false, ON_MOVE: false, ON_DELETE: true, ON_CHECKIN: false,
+});
+```
+
+Calling it again for the same user is not an error and does not subscribe them twice - the second
+call rewrites the ten flags, so send the whole set you want rather than only the ones to change.
+
 ## Notes
 
 - At least one event flag should be set to `true`; subscribing with all flags `false` creates a subscription that never generates notifications.
@@ -101,9 +135,15 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&DocumentPath=/Finance/
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| User not found | No user with the specified `UserName` exists. |
-| Document not found | No document was found at the specified `DocumentPath`. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, including one the caller may not see |
+| `4041` | no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+The ten event flags are the same on every add operation, and all ten have to be sent: they are
+declared as plain booleans, so a missing one is a model binding failure rather than a default.
+`ON_NEWDOC` is the eleventh, and belongs to the folder forms only.

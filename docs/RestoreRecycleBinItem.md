@@ -1,14 +1,8 @@
 ﻿# RestoreRecycleBinItem API
 
-
-
 Restores a single document or folder from the Recycle Bin back into the infoRouter folder hierarchy. The item is identified by its `Handler` value, which is obtained from `GetRecycleBinContent`. Optionally, a different target folder can be specified; if omitted the item is restored to its original location. Use this API to recover accidentally deleted content programmatically.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Restores a single document or folder from the Recycle Bin back into the infoRout
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/RestoreRecycleBinItem?AuthenticationTicket=...&ItemHandler=...&RestorePath=...`
 
@@ -28,11 +18,7 @@ Restores a single document or folder from the Recycle Bin back into the infoRout
 
 - **SOAP** Action: `http://tempuri.org/RestoreRecycleBinItem`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -40,19 +26,11 @@ Restores a single document or folder from the Recycle Bin back into the infoRout
 | `ItemHandler` | string | Yes | Handler string identifying the recycled item to restore. Obtained from the `Handler` attribute returned by `GetRecycleBinContent`. Format: `D{id}` for a document (e.g. `D9871`), `F{id}` for a folder (e.g. `F4312`). Case-insensitive. |
 | `RestorePath` | string | No | Full infoRouter path of the target folder to restore the item into (e.g. `/Finance/Archive`). If omitted or empty, the item is restored to its original location at the time it was deleted. The target folder must already exist and the caller must have create rights within it. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -60,11 +38,7 @@ Restores a single document or folder from the Recycle Bin back into the infoRout
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -72,15 +46,9 @@ Restores a single document or folder from the Recycle Bin back into the infoRout
 
 ```
 
-
-
 ---
 
-
-
 ## Required Permissions
-
-
 
 - **Any authenticated user** may restore items they personally deleted (the item's `DeletedById` must match the calling user).
 
@@ -88,19 +56,11 @@ Restores a single document or folder from the Recycle Bin back into the infoRout
 
 - The calling user must also have **create document** (or **create folder**) rights in the target restore folder.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request -" restore to original location
-
-
 
 ```
 
@@ -114,11 +74,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" restore to an alternate location
-
-
 
 ```
 
@@ -134,19 +90,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/RestoreRecycleBinItem HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -156,11 +106,7 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -186,15 +132,49 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes one item out of the bin and puts it back.
+
+```javascript
+// Back where it was:
+await call('RestoreRecycleBinItem', {
+  authenticationTicket: ticket,
+  ItemHandler: 'D4512',
+  RestorePath: '',
+});
+
+// Or somewhere else:
+await call('RestoreRecycleBinItem', {
+  authenticationTicket: ticket,
+  ItemHandler: 'D4512',
+  RestorePath: '/Public/Recovered',
+});
+```
+
+An empty `RestorePath` means the folder the item was deleted from. `RestorePath` must still be
+sent - it is declared as a plain string, so leaving it out is an HTTP 400.
 
 ## Notes
-
-
 
 - **Handler Source**: The `ItemHandler` value must be obtained from the `Handler` attribute of a recycled item returned by `GetRecycleBinContent` or `SearchRecycledItems`. Format is `D{id}` for documents and `F{id}` for folders.
 
@@ -212,15 +192,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **Invalid Handler**: If the `ItemHandler` string cannot be parsed or refers to an unsupported object type, `"Invalid ItemHandler"` is returned.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List recycled items (use to obtain the `Handler` value)
 
@@ -230,31 +204,23 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's Recycle Bin
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4000` | the item is no longer in the recycle bin - which is also what a second restore of the same handler reports |
+| `4000` | `ItemHandler` is not a handler: the letter and the id are checked before the lookup, and the message naming the parameter is an English literal that is not translated |
+| `4000` | there is no ticket at all - this operation reports a bad request rather than 4010 |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Invalid ItemHandler` | The `ItemHandler` string is empty, cannot be parsed, or refers to an unsupported object type. |
-| `Document is no longer in the recycle bin.` | The document has already been purged or previously restored. |
-| `Folder is no longer in the recycle bin.` | The folder has already been purged or previously restored. |
-| `Access denied.` | The calling user did not delete this item and is not a system administrator. |
-| `The original location no longer exists.` | `RestorePath` was not specified and the original folder has since been deleted. |
-| `Target folder not found` | The specified `RestorePath` does not resolve to an existing folder. |
-| `Insufficient rights` | The caller does not have create rights in the target restore folder. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
+An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter
+`F` and a folder id - `D4512`, `F183`. It is read off the `Handler` attribute of an item returned
+by [GetRecycleBinContent](GetRecycleBinContent.md) or
+[SearchRecycledItems](SearchRecycledItems.md); there is no other way to build one, because the ids
+are not the ones a caller sees anywhere else.
 
 ---
-
-

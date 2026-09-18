@@ -111,6 +111,41 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Renames a user and sets their first and last name.
+
+```javascript
+await call('UpdateUserProfile', {
+  authenticationTicket: ticket,
+  UserName: 'jsmith',          // who to change
+  NewUserName: 'jsmith2',      // send the same name again to change only the rest
+  NewFirstName: 'Jane',
+  NewLastName: 'Smith-Garcia',
+  AuthenticateSource: 'INFOROUTER',
+});
+```
+
+`NewUserName` is the account name, and changing it takes effect at once: the old name stops
+resolving and every later call has to use the new one. Send the existing name to leave it alone.
+
 ## Notes
 
 - To keep the current username, pass the same value in both `UserName` and `NewUserName`.
@@ -132,13 +167,15 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User not found | The specified username does not exist. |
-| Username already exists | The specified `NewUserName` conflicts with an existing user. |
-| Access denied | The calling user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4030` | there is no ticket at all |
+| `4010` | the ticket is expired or unknown |
+| `4041` | no user by that name |
+| `4090` | `NewUserName` is a name another account already has |
+| `4000` | `AuthenticateSource` names an authority this instance does not have |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---

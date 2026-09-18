@@ -2,6 +2,11 @@
 
 Deletes the specified infoRouter user account with administrator password confirmation. Use this API instead of `DeleteUser` when the system requires password re-prompting for user deletion.
 
+> **`UserPassword` is only checked when the instance asks for it.** The re-prompt runs only if
+> the password policy has "re-prompt on user delete" switched on. With it off, the parameter is
+> not looked at: a wrong password deletes the user and reports success, and nothing in the answer
+> says which regime was in force. Do not treat this operation as a confirmation step.
+
 ## Endpoint
 
 ```
@@ -86,9 +91,38 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Deletes a user, re-prompting for the caller's own password first.
+
+```javascript
+await call('DeleteUser1', {
+  authenticationTicket: ticket,
+  UserPassword: callersOwnPassword,
+  UserName: 'jsmith',
+});
+```
+
 ## Notes
 
-- This method performs administrator password verification before proceeding with deletion. The `UserPassword` is the password of the **calling administrator**, not the user being deleted.
+- The `UserPassword` is the password of the **calling administrator**, not the user being deleted - but it is only verified when the instance has password re-prompting switched on for user deletion. With that policy off the parameter is not read at all, and a wrong password deletes the user and reports success.
 - If the system does not require password confirmation (`PasswordRePromptActions.UserDelete = false`), both `DeleteUser` and `DeleteUser1` work; you may use either.
 - Deleting a user is permanent and cannot be undone.
 - Before deleting a user, consider using the `TransferUser*` APIs to reassign the user's data (documents, tasks, subscriptions, memberships) to another user.
@@ -106,13 +140,13 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `[900] Authentication failed` | The provided `UserPassword` is incorrect. |
-| User not found | The specified username does not exist. |
-| Access denied | The calling user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4000` | no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---

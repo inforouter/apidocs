@@ -1,14 +1,12 @@
 ﻿# SearchRecycledItems API
 
-
-
 Searches documents and folders across the entire infoRouter Recycle Bin (all users) using optional filter criteria. Returns matching recycled items with the same attributes as `GetRecycleBinContent`, including the `Handler` value needed to purge or restore individual items. This is an administrator-only API that provides system-wide visibility into all recycled content. Use it to audit deletion activity, identify items to recover, or build administrative cleanup tooling.
 
-
+> **This reads the whole instance's recycled items**, not the caller's own. Four of its six
+> filters do not narrow the result the way their names read - see the table under the error codes
+> before relying on one.
 
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +14,7 @@ Searches documents and folders across the entire infoRouter Recycle Bin (all use
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/SearchRecycledItems?authenticationTicket=...&objectName=...&dateDeletedMinDate=...&dateDeletedMaxDate=...&minSize=...&maxSize=...&deletedByUsername=...`
 
@@ -28,15 +22,9 @@ Searches documents and folders across the entire infoRouter Recycle Bin (all use
 
 - **SOAP** Action: `http://tempuri.org/SearchRecycledItems`
 
-
-
 ## Parameters
 
-
-
 All filter parameters are optional. When all filters are omitted the API returns all recycled items across all users.
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -48,23 +36,13 @@ All filter parameters are optional. When all filters are omitted the API returns
 | `maxSize` | long | No | Filter to items whose total size is at most this many bytes. `0` or omitted means no maximum size filter. |
 | `deletedByUsername` | string | No | Filter to items deleted by the specified username. Leave empty to include items deleted by any user. The username must match an existing infoRouter user. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<response>` element with `success="true"` containing zero or more `<document>` and `<folder>` child elements matching the filter criteria.
-
-
 
 ```xml
 
@@ -118,11 +96,7 @@ Returns a `<response>` element with `success="true"` containing zero or more `<d
 
 ```
 
-
-
 ### Response Attribute Reference
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -137,15 +111,9 @@ Returns a `<response>` element with `success="true"` containing zero or more `<d
 | `RecycledItemStatus` | Localized string label for the status. |
 | `Handler` | Item handler for use with `PurgeRecycleBinItem` and `RestoreRecycleBinItem`. Format: `D{id}` for documents, `F{id}` for folders (e.g. `D9871`, `F4312`). |
 
-
-
 ### No Results Response
 
-
-
 When no items match the filter criteria the response contains no child elements:
-
-
 
 ```xml
 
@@ -153,11 +121,7 @@ When no items match the filter criteria the response contains no child elements:
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -165,31 +129,17 @@ When no items match the filter criteria the response contains no child elements:
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 **System administrators only.** Regular users and domain managers cannot call this API. Attempting to call it as a non-administrator immediately returns a permission error without performing any search.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request -" all recycled items (no filters)
-
-
 
 ```
 
@@ -201,11 +151,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" items deleted by a specific user in a date range
-
-
 
 ```
 
@@ -223,19 +169,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request -" filter by name and size
-
-
 
 ```
 
 POST /srv.asmx/SearchRecycledItems HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -245,11 +185,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -283,15 +219,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Searches every recycled item on the instance.
+
+```javascript
+// All six filters have to be present - they are declared as plain strings, so an omitted one is
+// an HTTP 400 rather than "no filter". Send an empty string for the ones you do not want.
+const root = await call('SearchRecycledItems', {
+  authenticationTicket: ticket,
+  objectName: 'q3.pdf',
+  dateDeletedMinDate: '',
+  dateDeletedMaxDate: '',
+  minSize: '',
+  maxSize: '',
+  deletedByUsername: '',
+});
+```
 
 ## Notes
-
-
 
 - **Admin Only**: The authenticated user must be a system administrator. The check is enforced server-side.
 
@@ -309,15 +274,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **Handler for Actions**: The `Handler` attribute in each result can be passed directly to `PurgeRecycleBinItem` or `RestoreRecycleBinItem`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List all items in the current user's own Recycle Bin (no filters, non-admin)
 
@@ -327,26 +286,36 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's Recycle Bin
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4030` | there is no ticket at all - this operation reports access denied where GetRecycleBinContent, reading the same bin, reports 4010 |
+| `4041` | no user by the name given in deletedByUsername |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Only the system administrator can perform this operation` | The authenticated user is not a system administrator. |
-| User not found | The `deletedByUsername` value does not match any existing infoRouter user. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter
+`F` and a folder id - `D4512`, `F183`. It is read off the `Handler` attribute of an item returned
+by [GetRecycleBinContent](GetRecycleBinContent.md) or
+[SearchRecycledItems](SearchRecycledItems.md); there is no other way to build one, because the ids
+are not the ones a caller sees anywhere else.
 
+### Filters that do not do what they say
 
+| Filter | What actually happens |
+|---|---|
+| `dateDeletedMinDate` | accepted, changes nothing |
+| `dateDeletedMaxDate` | accepted, changes nothing |
+| `minSize` | accepted, changes nothing |
+| `maxSize` | narrows the result, but leaves out small items: a 208 byte document is excluded by `maxSize=999999` |
+| `objectName` | works |
+| `deletedByUsername` | works, and is the only filter that refuses an unknown value |
+
+Use `objectName` and `deletedByUsername`, and filter the rest client-side from the `DateDeleted`
+and `TotalSize` attributes on each item.
 
 ---
-
-

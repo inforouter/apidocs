@@ -108,6 +108,34 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The users that belong to one library.
+
+```javascript
+const root = await call('GetLocalUsers', { authenticationTicket: ticket, DomainName: 'Finance' });
+```
+
+These are the library's **own** users - the ones created with that `DomainName` - not everybody
+with access to it. Every `<User>` returned carries that library in its `Domain` attribute.
+
 ## Notes
 
 - Returns only accounts whose home library is this one. Global users who are members of the library, whether added directly or through a user group, are not included.
@@ -128,12 +156,12 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `[115] Domain not found` | The specified domain/library does not exist. |
-| Access denied | The caller is anonymous; the call requires a signed-in user. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no library by that name, including one the caller cannot see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---

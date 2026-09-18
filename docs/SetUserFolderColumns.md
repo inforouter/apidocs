@@ -2,6 +2,16 @@
 
 Saves the column layout and custom property set preference for the authenticated user on the specified folder. The setting applies only to the calling user and does not affect other users.
 
+> **Wrong values are accepted silently.** A column name that is not a column, a `sortBy` that is
+> not a column and a `sortVector` that is not exactly `asc` or `desc` are each dropped without a
+> word, and the call still answers `success="true"`. If every column name is wrong the saved list
+> is empty, which reads back as the three default columns - so the caller is shown a list it never
+> asked for. Neither `propertySetId` nor `sortByPropertySetId` is checked against the property sets
+> that exist.
+>
+> **A call with no ticket reports success and saves nothing.** The anonymous user's id is 0, the
+> insert fails, and the failure is swallowed. Send a ticket.
+
 ## Endpoint
 
 ```
@@ -20,10 +30,10 @@ Saves the column layout and custom property set preference for the authenticated
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `folderPath` | string | Yes | Full infoRouter path of the folder (e.g. `/Domain/Folder`) |
-| `columnNames` | string | Yes | Comma-separated list of column names to display (e.g. `"ItemName,DocumentSize,ModificationDate"`). Pass an empty string to revert to the system/user global default |
+| `columnNames` | string | Yes | Comma-separated list of column names to display (e.g. `"ItemName,DocumentSize,ModificationDate"`). Required: an empty string is refused with HTTP 400 before the operation is reached. A name that is not a column is dropped silently. |
 | `propertySetId` | int | Yes | ID of the custom property set to display alongside the standard columns. Pass `0` for none |
-| `sortBy` | string | Yes | Column name to sort by (e.g. `"ModificationDate"`). Pass an empty string for the default sort |
-| `sortVector` | string | Yes | Sort direction: `"asc"`, `"desc"`, or empty string for the system default |
+| `sortBy` | string | Yes | Column name to sort by (e.g. `"ModificationDate"`). Required: an empty string is refused with HTTP 400. A name that is not a column is ignored and the sort stays on the default. Not looked at at all when `sortByPropertySetId` is non-zero. |
+| `sortVector` | string | Yes | Sort direction: `"asc"` or `"desc"`, **lower case only**. Required: an empty string is refused with HTTP 400. Anything else - including `"ASC"` - is stored as no sort direction. |
 | `sortByPropertySetId` | int | Yes | Property set ID when sorting by a custom property field. Pass `0` when not sorting by a custom property |
 | `sortByPropertySetColumnName` | string | Yes | Custom property field name when sorting by a custom property. Pass an empty string otherwise |
 
@@ -121,10 +131,81 @@ SOAPAction: "http://tempuri.org/SetUserFolderColumns"
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| Folder not found | The specified `folderPath` does not exist |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no folder at that path, including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+### Column names
+
+`columnNames` is a comma separated list of these, matched without regard to case and trimmed of
+spaces:
+
+```
+ItemName            ItemId              DocumentSize        DocumentFormat
+ModificationDate    ApprovalStatus      ParentFolderName    LastVersionNumber
+PercentComplete     CreationDate        ModifiedByName      OwnerName
+FlowName            CheckedOutByName    StepNumber          StepName
+CompletionDate      Importance          RetentionDefId      ClassificationLevel
+DeclassifyOn        DowngradeOn         DispositionDate     LastIsoReview
+NextIsoReview       DocumentTypeName    DocumentSource      DocumentLanguage
+DocumentAuthor      ExpirationDate      ReleasedVersion     RegisterDate
+CutOffDate          RetainUntil
+```
+
+Nothing else is a column, including several names that are in the `ColumnList` enum but have no
+column definition behind them: `Description`, `CheckOutBy`, `Thumbnail`, `FolderID`, `TemplateID`,
+`ViewDate`, `AssociatedDocumentCount`, `CustomPropertySet` and `Rank`. A name that is not on the
+list above is dropped without a word.
+
+`sortBy` takes a name from the same list. `sortVector` is `asc` or `desc`, **in lower case** -
+`ASC` is not recognised and is stored as no sort direction at all.
+
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Saves the caller's own column and sort settings for one folder.
+
+```javascript
+await call('SetUserFolderColumns', {
+  authenticationTicket: ticket,
+  folderPath: '/Public/Reports',
+  columnNames: 'ItemName,DocumentSize,ModificationDate',
+  propertySetId: 0,
+  sortBy: 'DocumentSize',
+  sortVector: 'desc',                 // lower case only
+  sortByPropertySetId: 0,
+  sortByPropertySetColumnName: '-',   // required even when unused; any non-empty value
+});
+```
+
+All five string parameters are declared without a question mark, so every one has to carry
+something - including `sortByPropertySetColumnName` when there is no property set sort. The list
+replaces what was saved rather than adding to it, and the column order is kept as given.
+
+To sort by a property set column, set `sortByPropertySetId` to the property set and
+`sortByPropertySetColumnName` to the field. That takes precedence: `sortBy` is not looked at, and
+the answer from [GetUserFolderColumns](GetUserFolderColumns.md) reports `sortBy` as
+`CustomPropertySet`.
 
 ## Notes
 
@@ -133,7 +214,7 @@ SOAPAction: "http://tempuri.org/SetUserFolderColumns"
 - The column order in the response of `GetUserFolderColumns` reflects the order of names supplied here.
 - Pass `propertySetId=0` to remove any previously saved property set association.
 - When `sortByPropertySetId` is non-zero it takes precedence over `sortBy`; the sort column is treated as a custom property field.
-- Pass `sortVector` as an empty string to use the system default sort direction.
+- `sortVector` cannot be empty: the parameter is declared without a question mark. To store no sort direction, send a value that is neither `asc` nor `desc`.
 
 ## Related APIs
 

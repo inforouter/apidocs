@@ -105,6 +105,46 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Rewrites one user's preferences block, whole.
+
+```javascript
+const xmlPreferences = `<Preferences>
+  <Language>en</Language>
+  <DefaultPortal />
+  <ShowArchives>FALSE</ShowArchives>
+  <ShowHiddens>TRUE</ShowHiddens>
+  <NotificationType>DAILY</NotificationType>
+  <EmailType>TEXT</EmailType>
+  <AttachDocumentToEmail>TRUE</AttachDocumentToEmail>
+</Preferences>`;
+
+await call('UpdateUserPreferences', { authenticationTicket: ticket, UserName: 'jsmith', xmlPreferences });
+```
+
+This replaces the block rather than merging into it, and the values are written in capitals -
+`TRUE`, `FALSE`, `DAILY`, `TEXT`. Read the current block from
+[GetUser](GetUser.md)'s `<Preferences>` element, change what you mean to change, and send the whole
+thing back.
+
 ## Notes
 
 - Only the attributes present in the `<Preferences>` XML are updated; omitted attributes retain their current values.
@@ -123,12 +163,14 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User not found | The specified username does not exist. |
-| Access denied | The calling user lacks permission to update these preferences. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4030` | there is no ticket at all |
+| `4010` | the ticket is expired or unknown |
+| `4041` | no user by that name |
+| `4000` | `xmlPreferences` is not well-formed XML; the message quotes the parser, in English, and gives the line and position |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---

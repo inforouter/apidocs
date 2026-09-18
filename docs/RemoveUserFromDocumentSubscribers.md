@@ -1,14 +1,8 @@
 ﻿# RemoveUserFromDocumentSubscribers API
 
-
-
 Removes a specified user from the subscription list of a document. After removal, the user will no longer receive email notifications for any events on that document. Use this API to clean up subscriptions when a user no longer needs to track a document, or as part of a user offboarding workflow.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Removes a specified user from the subscription list of a document. After removal
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/RemoveUserFromDocumentSubscribers?authenticationTicket=...&documentPath=...&userName=...`
 
@@ -28,11 +18,7 @@ Removes a specified user from the subscription list of a document. After removal
 
 - **SOAP** Action: `http://tempuri.org/RemoveUserFromDocumentSubscribers`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -40,19 +26,11 @@ Removes a specified user from the subscription list of a document. After removal
 | `documentPath` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`). Supports short document ID paths (`~D{id}` or `~D{id}.ext`). |
 | `userName` | string | Yes | Login name of the user to remove from the subscription list. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -60,11 +38,7 @@ Removes a specified user from the subscription list of a document. After removal
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -72,31 +46,17 @@ Removes a specified user from the subscription list of a document. After removal
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 The calling user must be authenticated. To remove another user from the subscription list, the calling user must have **write access** or **manage access** to the document. A user may remove themselves if they have read access.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -112,19 +72,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/RemoveUserFromDocumentSubscribers HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -134,11 +88,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -164,15 +114,40 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Unsubscribes one user from one document.
+
+```javascript
+await call('RemoveUserFromDocumentSubscribers', {
+  authenticationTicket: ticket,
+  DocumentPath: '/Public/Reports/q3.pdf',
+  UserName: 'jsmith',
+});
+```
+
+Safe to repeat: removing a subscription that is not there is a success, not an error.
 
 ## Notes
-
-
 
 - **Not Subscribed**: If the specified user is not currently subscribed to the document, the API returns `success="true"` -" it does not treat this as an error.
 
@@ -184,15 +159,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **Folder Subscriptions**: This API operates on document subscriptions only. To manage folder subscriptions, use `RemoveUserFromFolderSubscribers` (currently listed separately). Note: the underlying `RemoveSubscriber` implementation also supports folders but this endpoint is intended for documents.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [AddUserToDocumentSubscribers](AddUserToDocumentSubscribers.md) - Add a user to a document's subscription list
 
@@ -202,27 +171,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetSubscriptions](GetSubscriptions.md) - Get all subscriptions for the current user
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Document not found | The specified documentPath does not resolve to an existing document. |
-| User not found | The specified userName does not match an existing user account. |
-| Insufficient rights | The calling user does not have permission to manage subscriptions for this document. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document at that path, including one the caller may not see |
+| `4041` | no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---
-
-

@@ -128,6 +128,43 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Creates a user.
+
+```javascript
+const root = await call('CreateUser', {
+  authenticationTicket: ticket,
+  DomainName: 'Finance',          // may be empty: the user is then outside every library
+  UserName: 'jsmith',
+  FirstName: 'Jane',
+  LastName: 'Smith',
+  EmailAddress: 'jsmith@example.com',
+  Password: 'Passw0rd!x',         // may be empty: nothing insists on one
+  ReadOnlyUser: false,
+  AuthenticationSource: 'INFOROUTER',
+});
+```
+
+The new user starts enabled. `GetUser` reports `Enabled="TRUE"` and `ReadOnlyUser` in capitals.
+
 ## Notes
 
 - The response includes the new user's numeric `id` attribute, which can be used to reference the user in subsequent API calls.
@@ -149,12 +186,18 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Username already exists | The specified `UserName` conflicts with an existing user. |
-| Access denied | The calling user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4000` | a user of that name already exists - reported as a bad request rather than 4090 |
+| `4000` | `AuthenticationSource` names an authority this instance does not have; the message lists the ones it does |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+`EmailAddress` is stored as given and is **not** checked: `notanemail` is accepted and read
+back. Validate it before sending if it matters - the welcome email and every later notice go to
+whatever was stored.
 
 ---

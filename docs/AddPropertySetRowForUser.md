@@ -115,6 +115,41 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Puts a property set row on a user.
+
+```javascript
+const xmlpset = `<propertysets>
+  <propertyset name="HR_DETAILS">
+    <row rownbr="0" COSTCENTRE="4400" />
+  </propertyset>
+</propertysets>`;
+
+await call('AddPropertySetRowForUser', { authenticationTicket: ticket, userName: 'jsmith', xmlpset });
+```
+
+The row comes back on [GetUser](GetUser.md) as a `<propertyrow>` with `RowNbr="1"` and a `<Log>`
+recording who applied it. [UpdatePropertySetRowForUser](UpdatePropertySetRowForUser.md) can only
+rewrite a row that exists, so this is the call that has to come first.
+
 ## Notes
 
 - Use `RowNbr="0"` to add a new row. The system assigns the actual row number.
@@ -134,12 +169,32 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User not found | The specified username does not exist. |
-| Property set not found | A property set named in the XML does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+The `xmlpset` parameter is a property set document:
+
+```xml
+<propertysets>
+  <propertyset name="HR_DETAILS">
+    <row rownbr="0" COSTCENTRE="4400" />
+  </propertyset>
+</propertysets>
+```
+
+`rownbr="0"` means "a new row" on the add; on the update and the delete it is the `RowNbr` the row
+came back with, which starts at 1. The property set must be one defined with
+`AppliestoUsers=true`.
+
+On success this operation answers `<response success="true" error=""/>` with **no** `errorCode`
+attribute, where most operations answer `errorCode="0"`. The same is true of
+[UpdatePropertySetRowForUser](UpdatePropertySetRowForUser.md) and
+[DeletePropertySetRowForUser](DeletePropertySetRowForUser.md).
 
 ---

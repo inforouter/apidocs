@@ -1,14 +1,8 @@
 ﻿# PurgeRecycleBinItem API
 
-
-
 Permanently and irreversibly deletes a single document or folder from the system Recycle Bin. The item is identified by its `Handler` value, which is obtained from `GetRecycleBinContent`. Use this API to selectively remove individual items rather than emptying the entire bin. This is an administrator-only operation.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Permanently and irreversibly deletes a single document or folder from the system
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/PurgeRecycleBinItem?AuthenticationTicket=...&ItemHandler=...`
 
@@ -28,30 +18,18 @@ Permanently and irreversibly deletes a single document or folder from the system
 
 - **SOAP** Action: `http://tempuri.org/PurgeRecycleBinItem`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. The authenticated user must be a system administrator. |
 | `ItemHandler` | string | Yes | Handler string identifying the recycled item to purge. Obtained from the `Handler` attribute of a `<document>` or `<folder>` element returned by `GetRecycleBinContent`. Format: `D{id}` for a document (e.g. `D9871`), `F{id}` for a folder (e.g. `F4312`). Case-insensitive. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -59,11 +37,7 @@ Permanently and irreversibly deletes a single document or folder from the system
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -71,15 +45,9 @@ Permanently and irreversibly deletes a single document or folder from the system
 
 ```
 
-
-
 ### Partial Failure Response
 
-
-
 If the item cannot be purged (e.g. a storage error for one file within a folder), a log response is returned:
-
-
 
 ```xml
 
@@ -91,31 +59,17 @@ If the item cannot be purged (e.g. a storage error for one file within a folder)
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 **System administrators only.** Regular users and domain managers cannot call this API. Attempting to call it as a non-administrator returns a permission error.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -129,11 +83,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -141,19 +91,13 @@ POST /srv.asmx/PurgeRecycleBinItem HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &ItemHandler=D9871
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -177,15 +121,38 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Destroys one item in the bin for good. There is no undo.
+
+```javascript
+await call('PurgeRecycleBinItem', { authenticationTicket: ticket, ItemHandler: 'D4512' });
+```
+
+Purging a handler that is no longer in the bin is a success, where restoring the same handler is
+refused with `4000` - the two neighbours answer the same condition differently, so do not read a
+success here as proof that something was destroyed by this call.
 
 ## Notes
-
-
 
 - **Admin Only**: The authenticated user must be a system administrator. The check is enforced server-side regardless of how the API is called.
 
@@ -203,15 +170,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **EmptyRecycleBin vs PurgeRecycleBinItem**: `EmptyRecycleBin` removes all items for a specific user but requires the user themselves (not admin). `PurgeRecycleBinItem` removes a single item and requires admin rights.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List recycled items (use to obtain the `Handler` value)
 
@@ -221,28 +182,22 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's Recycle Bin
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4000` | `ItemHandler` is not a handler: the letter and the id are checked before the lookup, and the message naming the parameter is an English literal that is not translated |
+| `4000` | there is no ticket at all - this operation reports a bad request rather than 4010 |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Invalid ItemHandler` | The `ItemHandler` string is empty, cannot be parsed, or refers to an unsupported object type. |
-| `Document is no longer in the recycle bin.` | The document identified by the handler has already been purged or restored. |
-| `Folder is no longer in the recycle bin.` | The folder identified by the handler has already been purged or restored. |
-| `Only the system administrator can perform this operation` | The authenticated user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
+An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter
+`F` and a folder id - `D4512`, `F183`. It is read off the `Handler` attribute of an item returned
+by [GetRecycleBinContent](GetRecycleBinContent.md) or
+[SearchRecycledItems](SearchRecycledItems.md); there is no other way to build one, because the ids
+are not the ones a caller sees anywhere else.
 
 ---
-
-

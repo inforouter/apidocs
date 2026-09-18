@@ -208,11 +208,13 @@ using (var client = new SrvSoapClient())
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `[921]Insufficient rights` | User does not have permission to view another user's subscriptions |
-| `User not found` | The specified username does not exist |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name - this pair answers 4000 where the add operations answer 4041 for the same name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ## Notes
 

@@ -136,6 +136,50 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+A page of users, filtered.
+
+```javascript
+const root = await call('GetAllUsers1', {
+  authenticationTicket: ticket,
+  StartingRowNumber: 0,
+  NumbeOfRow: 50,                 // spelled this way on the wire
+  firstNameFilter: '',
+  lastNameFilter: '',
+  userNameFilter: 'jsmith',
+  emailFilter: '',
+  authenticationSourceFilter: '',
+  domainNameFilter: '',
+  StatusFilter: -1,               // -1 any, 0 disabled, 1 enabled
+  SortBy: 1,
+  SortAscending: true,
+});
+
+const total = Number(root.getAttribute('totalusercount'));  // the whole match, not the page
+```
+
+`NumbeOfRow` is spelled without the `r`; that is the parameter name the service takes.
+[GetAllUsers2](GetAllUsers2.md) is the same call with a user type filter added and the names
+tidied.
+
 ## Notes
 
 - The `totalusercount` attribute on the `<response>` element shows the total count of matching users across all pages, not just the current page.
@@ -157,11 +201,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Access denied | The calling user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+Every filter has to be present - they are declared as plain strings, so an omitted one is an
+HTTP 400 rather than "no filter". Send an empty string for the ones you do not want, `-1` for the
+status and type filters.
 
 ---

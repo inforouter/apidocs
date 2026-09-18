@@ -1,14 +1,8 @@
 ﻿# GetSubscriptions API
 
-
-
 Returns the list of documents and folders that the current authenticated user is subscribed to. Subscriptions are created via the `AddUserToDocumentSubscribers` and `AddUserToFolderSubscribers` APIs. The response uses the same full-detail folder and document element format as `GetFoldersAndDocuments`. Optional flags control whether additional detail (folder rules, property sets, security, owner, version history) is included for each item.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Returns the list of documents and folders that the current authenticated user is
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetSubscriptions?authenticationTicket=...&withrules=...&withpropertysets=...&withsecurity=...&withOwner=...&withVersions=...`
 
@@ -28,11 +18,7 @@ Returns the list of documents and folders that the current authenticated user is
 
 - **SOAP** Action: `http://tempuri.org/GetSubscriptions`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -43,33 +29,19 @@ Returns the list of documents and folders that the current authenticated user is
 | `withOwner` | bool | Yes | If `true`, include owner user information for each item. |
 | `withVersions` | bool | Yes | If `true`, include document version history (`<Versions>` child element) for each document. Has no effect on folder items. |
 
-
-
 > **Performance tip:** Pass `false` for all boolean flags for the fastest, most compact response. Enable only the flags your application actually needs.
-
-
 
 ---
 
-
-
 ## Response
-
-
 
 ### Success Response
 
-
-
 Returns a `<root>` element with `success="true"` containing `<folder>` and `<document>` child elements -" subscribed folders first, then subscribed documents, both sorted by name ascending. If the user has no subscriptions, an empty root element is returned (not an error).
-
-
 
 ```xml
 
 <root success="true">
-
-
 
   <!-- Subscribed folder items -->
 
@@ -105,8 +77,6 @@ Returns a `<root>` element with `success="true"` containing `<folder>` and `<doc
 
           CutoffDate="">
 
-
-
     <!-- Included only when withrules=true -->
 
     <Rules>
@@ -129,27 +99,19 @@ Returns a `<root>` element with `success="true"` containing `<folder>` and `<doc
 
     </Rules>
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
 
-
-
     <!-- Included only when withsecurity=true -->
 
     <AccessList DateApplied="2024-01-15" AppliedBy="admin" InheritedSecurity="false"> ... </AccessList>
-
-
 
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" />
 
   </folder>
-
-
 
   <!-- Subscribed document items -->
 
@@ -241,25 +203,17 @@ Returns a `<root>` element with `success="true"` containing `<folder>` and `<doc
 
             UserViewStatus="2">
 
-
-
     <!-- Included only when withpropertysets=true -->
 
     <PropertySets> ... </PropertySets>
-
-
 
     <!-- Included only when withsecurity=true -->
 
     <AccessList DateApplied="2024-01-15" AppliedBy="admin" InheritedSecurity="false"> ... </AccessList>
 
-
-
     <!-- Included only when withOwner=true -->
 
     <User UserID="7" UserName="jsmith" FullName="John Smith" />
-
-
 
     <!-- Included only when withVersions=true -->
 
@@ -267,25 +221,17 @@ Returns a `<root>` element with `success="true"` containing `<folder>` and `<doc
 
   </document>
 
-
-
 </root>
 
 ```
 
-
-
 ### Empty Result (No Subscriptions)
-
-
 
 ```xml
 
 <root success="true" />
 
 ```
-
-
 
 Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
 `AIExtractConfidence`. The first says which of the document's attributes infoRouter Connect
@@ -295,39 +241,23 @@ it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienh
 
 ### Error Response
 
-
-
 ```xml
 
 <response success="false" error="[900] Authentication failed." />
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any **authenticated user** can call this API. The response always contains subscriptions for the user associated with the provided `authenticationTicket`. It is not possible to retrieve subscriptions for another user via this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -349,19 +279,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/GetSubscriptions HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -377,11 +301,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -413,15 +333,44 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The caller's own subscriptions. It takes no user name - the ticket decides whose list it is.
+
+```javascript
+const root = await call('GetSubscriptions', {
+  authenticationTicket: ticket,
+  withrules: false,
+  withpropertysets: false,
+  withsecurity: false,
+  withOwner: false,
+  withVersions: false,
+});
+```
+
+The five `with...` flags each add a block to every document returned, so leave them false unless
+the extra detail is wanted - they cost a query per document.
 
 ## Notes
-
-
 
 - **Current User Only**: This API always returns subscriptions for the authenticated user. It is not possible to retrieve subscriptions for a different user.
 
@@ -437,15 +386,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **UserViewStatus**: Each `<document>` element includes a `UserViewStatus` integer attribute: `0` = never viewed, `1` = viewed but the published version has since changed, `2` = viewed the current published version.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [AddUserToDocumentSubscribers](AddUserToDocumentSubscribers.md) - Subscribe a user to a document
 
@@ -457,25 +400,14 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetFavorites](GetFavorites.md) - Get the current user's favorites list (same response structure)
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `[347] User has been deleted` | The user account associated with the ticket no longer exists. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 
 ---
-
-

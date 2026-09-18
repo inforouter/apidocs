@@ -1,14 +1,12 @@
 ﻿# GetRecycleBinContent API
 
-
-
 Returns the list of all documents and folders currently in the Recycle Bin of the authenticated user. Each item includes its original path, deletion date, size, the user who deleted it, and a handler value that can be used with `PurgeRecycleBinItem` or `RestoreRecycleBinItem`. Use this API to inspect the contents of a user's Recycle Bin before deciding whether to restore or permanently delete items.
 
-
+> This reads **the caller's own** recycled items.
+> [SearchRecycledItems](SearchRecycledItems.md) with no filters reads everything recycled on the
+> instance, which is a very much larger list. The two are not different views of the same set.
 
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +14,7 @@ Returns the list of all documents and folders currently in the Recycle Bin of th
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetRecycleBinContent?AuthenticationTicket=...`
 
@@ -28,33 +22,19 @@ Returns the list of all documents and folders currently in the Recycle Bin of th
 
 - **SOAP** Action: `http://tempuri.org/GetRecycleBinContent`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. The recycle bin returned is always that of the user who owns this ticket. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<response>` element with `success="true"` containing zero or more `<document>` and `<folder>` child elements, one per recycled item.
-
-
 
 ```xml
 
@@ -108,11 +88,7 @@ Returns a `<response>` element with `success="true"` containing zero or more `<d
 
 ```
 
-
-
 ### Response Attribute Reference
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -127,15 +103,9 @@ Returns a `<response>` element with `success="true"` containing zero or more `<d
 | `RecycledItemStatus` | Localized string label for the status. |
 | `Handler` | Item handler used to reference this item in `PurgeRecycleBinItem` and `RestoreRecycleBinItem`. Format: `D{id}` for documents, `F{id}` for folders (e.g. `D9871`, `F4312`). |
 
-
-
 ### Empty Recycle Bin Response
 
-
-
 When the bin is empty, the response contains no child elements:
-
-
 
 ```xml
 
@@ -143,11 +113,7 @@ When the bin is empty, the response contains no child elements:
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -155,31 +121,17 @@ When the bin is empty, the response contains no child elements:
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user can retrieve their own Recycle Bin contents. The API always returns items belonging to the user identified by the authentication ticket -" it cannot be used to query another user's Recycle Bin.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -191,11 +143,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -203,17 +151,11 @@ POST /srv.asmx/GetRecycleBinContent HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -235,15 +177,47 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The caller's own recycled items.
+
+```javascript
+const root = await call('GetRecycleBinContent', { authenticationTicket: ticket });
+
+for (const item of root.children) {
+  console.log(item.tagName,                          // document or folder
+              item.getAttribute('Name'),
+              item.getAttribute('DeletePath'),        // where it was, in backslashes
+              item.getAttribute('DateDeleted'),
+              item.getAttribute('Handler'));          // what the writers take
+}
+```
+
+Each item is a `<document>` or a `<folder>` element directly under the root, carrying `Name`,
+`DeletePath`, `DeletedByName`, `DateDeleted`, `TotalSize`, `OriginalFolderId`,
+`RecycledItemStatusId`, `RecycledItemStatus` and `Handler`. `DeletePath` is the folder the item was
+deleted from, written with backslashes.
 
 ## Notes
-
-
 
 - **Current User Only**: Returns only the items belonging to the authenticated user. There is no filter parameter; all of the user's recycled items are always returned.
 
@@ -257,15 +231,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **TotalSize**: Expressed in bytes as a floating-point number rounded to the nearest integer. For folders, this represents the total size of all contents at the time of deletion.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's Recycle Bin
 
@@ -279,25 +247,21 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [DeleteFolder](DeleteFolder.md) - Delete a folder (moves it to the Recycle Bin)
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | the ticket is a well-formed GUID that no session has - an unknown ticket is reported as a bad request here, where the neighbouring operations report 4010 |
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `Insufficient rights. Anonymous users cannot perform this action.` | The ticket resolved to an anonymous (unauthenticated) user. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
+An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter
+`F` and a folder id - `D4512`, `F183`. It is read off the `Handler` attribute of an item returned
+by [GetRecycleBinContent](GetRecycleBinContent.md) or
+[SearchRecycledItems](SearchRecycledItems.md); there is no other way to build one, because the ids
+are not the ones a caller sees anywhere else.
 
 ---
-
-

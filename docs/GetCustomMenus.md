@@ -147,6 +147,45 @@ async function getCustomMenus() {
 }
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The menus this installation adds to the document list, from `config\CustomMenus.xml`.
+
+```javascript
+const root = await call('GetCustomMenus', { authenticationTicket: ticket });
+
+for (const menu of root.querySelectorAll('Menu')) {
+  menu.getAttribute('name');      // FILE, EDIT, TOOLS, ADVANCED, VIEW, POPMENU, or a new one
+  menu.getAttribute('builtIn');   // true when it extends a menu infoRouter already draws
+  menu.getAttribute('popup');     // true for the right-click menu
+
+  for (const item of menu.querySelectorAll('MenuItem')) {
+    console.log(item.getAttribute('caption'), item.getAttribute('action'), item.getAttribute('target'));
+  }
+}
+```
+
+Nothing here is per user: the file is read when settings load and every caller sees the same set.
+`<CustomMenus ignoredEntries="0">` counts the entries that were dropped because they had no name -
+a non-zero count means the installation's file has a mistake in it.
+
 ## Notes
 
 - Menus and items are returned in the order the configuration file lists them.
@@ -157,9 +196,14 @@ async function getCustomMenus() {
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+
+An installation with no `CustomMenus.xml` answers an empty set, which is still a success. A file
+that no longer parses is reported as an error naming it, rather than answered as an empty menu bar.
 
 ## Related APIs
 

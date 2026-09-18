@@ -109,8 +109,45 @@ SOAPAction: "http://tempuri.org/GetCurrentUser"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The account the ticket belongs to. It takes no user name.
+
+```javascript
+const root = await call('GetCurrentUser', { authenticationTicket: ticket });
+console.log(root.querySelector('User').getAttribute('UserName'));
+```
+
+The same `<User>` element [GetUser](GetUser.md) returns, for whoever is signed in, with the logon
+dates filled in.
+
 ## Notes
 
 - This API internally calls the same logic as `GetUser` with the username resolved from the authentication ticket
 - The response includes user preferences and task redirection settings in detail mode
 - See also: `GetUser` to retrieve properties of any user by username
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |

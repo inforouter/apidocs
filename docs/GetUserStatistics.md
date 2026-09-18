@@ -164,6 +164,46 @@ SOAPAction: "http://tempuri.org/GetUserStatistics"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Counts what one user has across the system.
+
+```javascript
+const value = (await call('GetUserStatistics', { authenticationTicket: ticket, userName: 'jsmith' }))
+  .querySelector('Value');
+
+Number(value.querySelector('TotalDocuments').textContent);
+Number(value.querySelector('OverdueTasks').textContent);
+```
+
+The `<Value>` element holds nineteen counters, each as its own child element:
+
+`TotalDocuments`, `CheckedOutDocuments`, `ViewedDocuments`, `SubscribedDocuments`,
+`FavoriteDocuments`, `VotedDocuments`, `DocumentsInDownloadQueue`, `RecycledDocuments`,
+`TotalFolders`, `SubscribedFolders`, `FavoriteFolders`, `FoldersInDownloadQueue`,
+`RecycledFolders`, `QueuedTasks`, `TasksDueToday`, `TasksDueThisWeek`, `OverdueTasks`,
+`TotalTasks`, `TasksAssignedToOthers`.
+
+Every one is `0` for a new account. This is the call to make before
+[DeleteUser](DeleteUser.md) to find out whether there is anything to transfer.
+
 ## Notes
 
 - `TasksDueToday` and `TasksDueThisWeek` counts include only tasks that have not yet been completed or rejected.
@@ -183,8 +223,9 @@ SOAPAction: "http://tempuri.org/GetUserStatistics"
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `User not found` | The specified user name does not exist |
-| `Insufficient rights` | Caller does not have permission to view another user's statistics |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4000` | no user by that name, and also what a caller with no ticket is told |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

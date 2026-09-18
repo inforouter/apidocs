@@ -71,7 +71,47 @@ authenticationTicket=abc123&userName=jdoe
 | User not found | User does not exist |
 | User has no email address on file | User has no e-mail address on file |
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Hands the welcome message for one user to the mail agent.
+
+```javascript
+await call('SendWelcomeEmailForUser', { authenticationTicket: ticket, userName: 'jsmith' });
+```
+
+There is no "already welcomed" state: calling it again sends it again. The answer says the message
+was handed over, not that it was delivered - the address is whatever
+[CreateUser](CreateUser.md) stored, which is not checked.
+
 ## Notes
 
 - The password reset link embedded in native-account welcome emails expires after 48 hours.
 - The SMTP server must be configured in `appsettings.json` for emails to be delivered.
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4030` | there is no ticket at all |
+| `4010` | the ticket is expired or unknown |
+| `4000` | no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

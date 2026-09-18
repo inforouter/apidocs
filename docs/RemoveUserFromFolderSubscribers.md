@@ -78,6 +78,36 @@ SOAPAction: "http://tempuri.org/RemoveUserFromFolderSubscribers"
 </soap:Envelope>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Unsubscribes one user from a folder, and optionally from everything inside it.
+
+```javascript
+await call('RemoveUserFromFolderSubscribers', {
+  authenticationTicket: ticket,
+  FolderPath: '/Public/Reports',
+  UserName: 'jsmith',
+  IncludeSubObjects: true,   // clears the whole tree, matching the add
+});
+```
+
 ## Notes
 
 - The `FolderPath` must point to an existing folder; an error is returned if the path is not found
@@ -85,3 +115,14 @@ SOAPAction: "http://tempuri.org/RemoveUserFromFolderSubscribers"
 - Setting `IncludeSubObjects` to `true` recursively removes the user from all nested folders and documents
 - See also: `RemoveUserFromDocumentSubscribers` for removing a user from a single document's subscription list
 - See also: `RemoveUsergroupFromFolderSubscribers` for removing a user group instead of an individual user
+
+## Error Codes
+
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no folder at that path, including one the caller may not see |
+| `4041` | no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

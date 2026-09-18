@@ -134,6 +134,45 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+A page of users, filtered, with a user type filter.
+
+```javascript
+const root = await call('GetAllUsers2', {
+  authenticationTicket: ticket,
+  startingRowNumber: 0,
+  numberOfRow: 50,
+  firstNameFilter: '',
+  lastNameFilter: '',
+  userNameFilter: '',
+  emailFilter: '',
+  authenticationSourceFilter: '',
+  domainNameFilter: '',
+  userStatusFilter: -1,           // -1 any, 0 disabled, 1 enabled
+  userTypeFilter: -1,             // -1 any, 1 author, 2 reader
+  sortBy: 1,
+  sortAscending: true,
+});
+```
+
 ## Notes
 
 - The `totalusercount` attribute on the `<response>` element shows the total number of matching users across all pages.
@@ -153,11 +192,20 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Access denied | The calling user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+Every filter has to be present - they are declared as plain strings, so an omitted one is an
+HTTP 400 rather than "no filter". Send an empty string for the ones you do not want, `-1` for the
+status and type filters.
+
+`sortBy` is not checked. A number no sort column has is accepted without a word and the list comes
+back in whatever order the default gives, where [GetCoWorkers1](GetCoWorkers1.md) refuses the same
+value with `4000`.
 
 ---

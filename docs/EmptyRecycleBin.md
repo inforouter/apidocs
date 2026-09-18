@@ -1,14 +1,13 @@
 ﻿# EmptyRecycleBin API
 
-
-
 Permanently deletes all items in the Recycle Bin of the currently authenticated user. Once emptied, the items cannot be recovered. Use this API to programmatically clean up a user's recycle bin as part of maintenance routines or end-of-period housekeeping.
 
-
+> **A call with no ticket at all is accepted and answers `success="true"`.** The anonymous user
+> has no bin, so nothing is destroyed, but the operation reports that it emptied one where every
+> other operation in this group refuses an unauthenticated caller. An invalid ticket *is* refused
+> with `4010`; it is the absent ticket that gets through.
 
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +15,7 @@ Permanently deletes all items in the Recycle Bin of the currently authenticated 
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/EmptyRecycleBin?AuthenticationTicket=...`
 
@@ -28,29 +23,17 @@ Permanently deletes all items in the Recycle Bin of the currently authenticated 
 
 - **SOAP** Action: `http://tempuri.org/EmptyRecycleBin`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. The recycle bin emptied is always that of the user who owns this ticket. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -58,11 +41,7 @@ Permanently deletes all items in the Recycle Bin of the currently authenticated 
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -70,31 +49,17 @@ Permanently deletes all items in the Recycle Bin of the currently authenticated 
 
 ```
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user can empty their own Recycle Bin. A user cannot empty another user's Recycle Bin -" the operation is always scoped to the authenticated user identified by the ticket.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -106,11 +71,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -118,17 +79,11 @@ POST /srv.asmx/EmptyRecycleBin HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -150,15 +105,36 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Destroys everything in the caller's recycle bin. There is no undo and no report of what went.
+
+```javascript
+// Read the bin first - this is the only chance to know what is about to be destroyed.
+const doomed = await call('GetRecycleBinContent', { authenticationTicket: ticket });
+await call('EmptyRecycleBin', { authenticationTicket: ticket });
+```
 
 ## Notes
-
-
 
 - **Irreversible**: Once the recycle bin is emptied, all deleted documents and folders are permanently removed and cannot be recovered.
 
@@ -172,15 +148,9 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **Restore Before Empty**: To recover items before emptying, use `RestoreRecycleBinItem` first.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List all items currently in the user's Recycle Bin
 
@@ -190,24 +160,14 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [SearchRecycledItems](SearchRecycledItems.md) - Search for documents and folders in the Recycle Bin
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 
 ---
-
-

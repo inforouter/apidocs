@@ -2,6 +2,13 @@
 
 Returns the detailed properties of the specified infoRouter user, including profile information, authentication source, and notification preferences.
 
+> **The booleans on `<User>` do not agree with each other.** `exists` is `"true"` in lower case;
+> `Enabled` and `ReadOnlyUser` beside it are `"TRUE"` and `"FALSE"` in capitals. Compare them
+> case-insensitively.
+>
+> **There is no user type here.** `<User>` carries no author/reader attribute, so what
+> [ChangeUserType](ChangeUserType.md) sets cannot be read back through this operation.
+
 ## Endpoint
 
 ```
@@ -147,6 +154,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads one user by name.
+
+```javascript
+const root = await call('GetUser', { authenticationTicket: ticket, UserName: 'jsmith' });
+const user = root.querySelector('User');
+
+user.getAttribute('exists');        // "true"  - lower case
+user.getAttribute('Enabled');       // "TRUE"  - capitals, beside it
+user.getAttribute('ReadOnlyUser');  // "TRUE" or "FALSE"
+```
+
+The `<User>` element carries the account, a `<Preferences>` block and a `<Propertysets>` block with
+one `<propertyrow>` per row applied to the user.
+
 ## Notes
 
 - If `UserName` is null or whitespace, the API returns the properties of the currently authenticated user.
@@ -167,11 +207,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User not found | The specified username does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name - reported as a bad request rather than 4041 |
 
 ---

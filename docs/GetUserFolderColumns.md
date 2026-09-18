@@ -137,15 +137,54 @@ SOAPAction: "http://tempuri.org/GetUserFolderColumns"
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| Folder not found | The specified `folderPath` does not exist |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no folder at that path - this operation reports a bad request where SetUserFolderColumns reports 4041 for the same path and the same message |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads the caller's own column and sort settings for one folder.
+
+```javascript
+const root = await call('GetUserFolderColumns', {
+  authenticationTicket: ticket,
+  folderPath: '/Public/Reports',
+});
+
+const columns = [...root.querySelectorAll('columns > column')].map(c => c.textContent);
+root.querySelector('sortBy').textContent;       // a column name
+root.querySelector('sortVector').textContent;   // "asc", "desc", or "" when none is saved
+```
+
+A folder nobody has configured answers the three defaults - `ItemName`, `ItemId`, `OwnerName` -
+with `sortBy` `ItemName` and an empty `sortVector`. The settings belong to one person: two callers
+reading the same folder get their own.
 
 ## Notes
 
 - The returned column list reflects the effective preference: folder-specific user setting → user global setting → system default, in that priority order.
-- When no setting has been saved for the user and folder, the system default columns are returned (`ItemName`, `DocumentSize`, `DocumentFormat`, `ModificationDate`, `OwnerName`).
+- When no setting has been saved for the user and folder, the system default columns are returned. On a stock instance those are `ItemName`, `ItemId` and `OwnerName`; the set is the `(0,0)` row of `USERFOLDSET` and an administrator can change it.
 - `propertySetId="0"` means no custom property set is associated.
 
 ## Related APIs

@@ -143,6 +143,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Every user on the instance, in full, unpaged.
+
+```javascript
+const root = await call('GetAllUsers', { authenticationTicket: ticket });
+
+for (const user of root.querySelectorAll('User')) {
+  console.log(user.getAttribute('UserName'), user.getAttribute('Domain'));
+}
+```
+
+Each `<User>` carries the whole record, property sets included. There are no paging attributes on
+the answer: on an instance with many users prefer [GetAllUsers2](GetAllUsers2.md), which pages and
+filters.
+
 ## Notes
 
 - Returns **all** users in the system including disabled accounts.
@@ -164,11 +197,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Access denied | The calling user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
 
 ---

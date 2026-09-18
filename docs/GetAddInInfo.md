@@ -2,6 +2,10 @@
 
 Returns version and description information for the specified infoRouter client Add-in. Add-in clients (such as the Microsoft Word or Outlook add-ins) call this API at startup to check whether their installed version is current. You can also call it programmatically to verify whether a particular add-in has been deployed to the server and to read its published version metadata.
 
+> **This operation takes no authentication ticket.** There is no parameter for one, so every
+> caller is anonymous and the installed add-ins and their versions can be read by anybody who can
+> reach the server. [GetAddIns](GetAddIns.md), which lists the same facts, does take a ticket.
+
 ## Endpoint
 
 ```
@@ -97,10 +101,45 @@ AddInName=WORDADDIN
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The version and description of one add-in.
+
+```javascript
+// No ticket: this operation has no authenticationTicket parameter.
+const response = await fetch(`/srv.asmx/GetAddInInfo?${new URLSearchParams({ AddInName: 'SCANSTATION' })}`);
+const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+
+root.getAttribute('Name');          // upper cased, whatever case was asked for
+root.getAttribute('Version');
+root.getAttribute('DLLVersion');
+root.getAttribute('Description');
+```
+
+This is what a client calls to find out whether the copy it has is current. The name is upper
+cased before the folder is looked for, so case does not matter.
+
 ## Notes
 
 - **Case-insensitive name**: The `AddInName` parameter is converted to uppercase before the server looks up the add-in directory. `wordaddin`, `WordAddin`, and `WORDADDIN` all resolve to the same directory.
-- **No authentication ticket**: Unlike nearly all other infoRouter APIs, this endpoint does not require an `AuthenticationTicket`. It is designed to be called by the add-in before a user has logged in.
+- **No authentication ticket**: unlike nearly all other infoRouter APIs, this endpoint has no `AuthenticationTicket` parameter at all, so the installed add-ins and their versions can be read by anybody who can reach the server. It is designed to be called by the add-in before a user has logged in. [GetAddIns](GetAddIns.md), which lists the same facts, does take a ticket.
 - **Server-side file location**: The add-in metadata is read from an `info.ini` file inside a subdirectory named after the add-in (uppercase) within the server's configured add-in path. If the directory or file does not exist the API returns the "not found" error message.
 - **Non-standard error message**: When the add-in is not found, the error string is a literal multi-line message (using `\r\n` as line separators) intended to be displayed directly to the end user, rather than a numeric error code.
 - **Version fields may be empty**: If `Version`, `DLLVersion`, or `Description` keys are absent from `info.ini` the corresponding attributes are returned as empty strings.
@@ -115,7 +154,13 @@ AddInName=WORDADDIN
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `A request to check for a newer version of the infoRouter Add-in failed...` | The specified `AddInName` directory was not found on the server. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4041` | no add-in folder by that name |
+| `4000` | `AddInName` contains a path - a name holding `..` or a separator is refused |
+| `HTTP 400` | `AddInName` was empty; refused by model binding, so there is no error document |
+
+The not-found message carries its line breaks as the literal characters `\r\n` rather than as
+line breaks, so a client that shows it shows the backslashes.

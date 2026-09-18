@@ -2,6 +2,10 @@
 
 Determines whether the given user name refers to an existing infoRouter user.
 
+> **"No" is reported as a failure.** A user who exists answers `success="true"`; a user who does
+> not answers `success="false"` with `4000` and "user not found". A client has to treat that
+> refusal as the answer rather than as an error.
+
 ## Endpoint
 
 ```
@@ -82,6 +86,37 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Asks whether a user exists.
+
+```javascript
+// Not a boolean: the answer is a success or a failure, so catch rather than read.
+async function userExists(userName) {
+  const response = await fetch(
+    `/srv.asmx/UserExists?${new URLSearchParams({ authenticationTicket: ticket, UserName: userName })}`);
+  const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+  return root.getAttribute('success') === 'true';
+}
+```
+
 ## Notes
 
 - Returns `success="true"` if the user exists; returns an error response if the user is not found.
@@ -100,12 +135,12 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| `[2730] Insufficient rights. Anonymous users cannot perform this action.` | The calling user is not authenticated. |
-| User not found | The specified username does not exist. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name - this is the "no" answer, not an error |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---

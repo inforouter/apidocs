@@ -1,14 +1,12 @@
 ﻿# GetSubscribers API
 
-
-
 Returns the complete subscriber list of a document or folder at the specified path. The response includes both individual user subscribers and user group subscribers, each with their configured event notification flags. Use this API to audit who is subscribed to a document or folder and which events they are watching.
 
-
+> **This one operation answers `success="TRUE"` in capitals**, where every other operation in the
+> API answers `"true"`. Its event elements are `TRUE`/`FALSE` in capitals too. A client comparing
+> the attribute against the lower case string reads every successful call as a failure.
 
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +14,7 @@ Returns the complete subscriber list of a document or folder at the specified pa
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/GetSubscribers?authenticationTicket=...&path=...`
 
@@ -28,34 +22,20 @@ Returns the complete subscriber list of a document or folder at the specified pa
 
 - **SOAP** Action: `http://tempuri.org/GetSubscribers`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document or folder (e.g. `/Finance/Reports/Q1-Report.pdf` or `/Finance/Reports`). Supports short document ID paths (`~D{id}` or `~D{id}.ext`). The API automatically detects whether the path refers to a document or a folder. |
 
-
-
 ---
-
-
 
 ## Response
 
-
-
 ### Success Response
 
-
-
 Returns a `<response>` element with `success="TRUE"` containing a `<subscribers>` element. The `<subscribers>` element holds zero or more `<usersubscriber>` elements (for individual users) followed by zero or more `<groupsubscriber>` elements (for user groups).
-
-
 
 ```xml
 
@@ -143,11 +123,7 @@ Returns a `<response>` element with `success="TRUE"` containing a `<subscribers>
 
 ```
 
-
-
 ### Empty Result (No Subscribers)
-
-
 
 ```xml
 
@@ -159,11 +135,7 @@ Returns a `<response>` element with `success="TRUE"` containing a `<subscribers>
 
 ```
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -171,15 +143,9 @@ Returns a `<response>` element with `success="TRUE"` containing a `<subscribers>
 
 ```
 
-
-
 ---
 
-
-
 ### usersubscriber Element Fields
-
-
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -204,11 +170,7 @@ Returns a `<response>` element with `success="TRUE"` containing a `<subscribers>
 | `on_checkin` | TRUE/FALSE | Subscribed to check-in events. |
 | `on_newdoc` | TRUE/FALSE | Subscribed to new document events (folder subscriptions only; always FALSE for document subscriptions). |
 
-
-
 ### groupsubscriber Element Fields
-
-
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -216,31 +178,17 @@ Returns a `<response>` element with `success="TRUE"` containing a `<subscribers>
 | `groupname` | string | Name of the subscribed user group. |
 | `on_read` -" `on_newdoc` | TRUE/FALSE | Same event flags as for user subscribers (see table above). |
 
-
-
 ---
-
-
 
 ## Required Permissions
 
-
-
 Any authenticated user with **read access** to the document or folder can call this API.
-
-
 
 ---
 
-
-
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -254,11 +202,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### GET Request -" Folder
-
-
 
 ```
 
@@ -272,11 +216,7 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
@@ -284,19 +224,13 @@ POST /srv.asmx/GetSubscribers HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
 
-
-
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 &path=/Finance/Reports/Q1-2024-Report.pdf
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -320,15 +254,46 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
 
+## JavaScript
 
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads who is subscribed to a document or a folder.
+
+```javascript
+// GetSubscribers answers success="TRUE" in capitals, so compare case-insensitively.
+const response = await fetch(
+  `/srv.asmx/GetSubscribers?${new URLSearchParams({ authenticationTicket: ticket, Path: '/Public/Reports/q3.pdf' })}`);
+const root = new DOMParser().parseFromString(await response.text(), 'text/xml').documentElement;
+
+if (root.getAttribute('success').toLowerCase() !== 'true') {
+  throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+}
+
+for (const subscriber of root.querySelectorAll('usersubscriber')) {
+  console.log(subscriber.querySelector('username').textContent,
+              subscriber.querySelector('on_read').textContent);   // TRUE or FALSE, also in capitals
+}
+```
 
 ## Notes
-
-
 
 - **Document and Folder**: The same API serves both documents and folders. The path is resolved first as a document; if not found, it is resolved as a folder. If neither is found, an error is returned.
 
@@ -346,15 +311,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - **Response Case**: The `success` attribute value is `TRUE` (uppercase) on success, unlike most other APIs which use lowercase `true`.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [AddUserToDocumentSubscribers](AddUserToDocumentSubscribers.md) - Add a user to a document's subscription list
 
@@ -368,26 +327,16 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - [GetSubscriptions](GetSubscriptions.md) - Get all subscriptions for the current user
 
-
-
 ---
-
-
 
 ## Error Codes
 
+The `errorCode` values this operation returns, checked against a running server:
 
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Document not found / Folder not found | The specified path does not resolve to an existing document or folder. |
-| Insufficient rights | The calling user does not have read access to the document or folder. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
-
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4041` | no document or folder at that path, including one the caller may not see |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---
-
-

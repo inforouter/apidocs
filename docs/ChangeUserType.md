@@ -2,6 +2,12 @@
 
 Changes the type of the specified infoRouter user account between author and read-only user.
 
+> **The change cannot be read back through the API.** `GetUser` carries no user type attribute
+> at all, so there is no way to confirm what a user's type is now, or what it was before this
+> call. `GetAllUsers2` can filter on it but does not report it either.
+>
+> `0` (Unspecified) is refused, so a user whose type has been set once cannot be put back.
+
 ## Endpoint
 
 ```
@@ -96,6 +102,32 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Marks a user as an author or a reader.
+
+```javascript
+await call('ChangeUserType', { authenticationTicket: ticket, userName: 'jsmith', userType: 1 }); // author
+await call('ChangeUserType', { authenticationTicket: ticket, userName: 'jsmith', userType: 2 }); // reader
+```
+
 ## Notes
 
 - **Author** users (type `1`) can upload, edit, and manage documents based on their permissions.
@@ -115,12 +147,14 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User not found | The specified username does not exist. |
-| Access denied | The calling user is not a system administrator. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no user by that name |
+| `4000` | `userType` is anything but 1 or 2 - including 0, and the refusal does not say which values are allowed |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---

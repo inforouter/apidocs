@@ -111,6 +111,39 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Takes a property set row off a user.
+
+```javascript
+const xmlpset = `<propertysets>
+  <propertyset name="HR_DETAILS">
+    <row rownbr="1" />
+  </propertyset>
+</propertysets>`;
+
+await call('DeletePropertySetRowForUser', { authenticationTicket: ticket, userName: 'jsmith', xmlpset });
+```
+
+`rownbr` is the `RowNbr` the row was returned with by [GetUser](GetUser.md), which starts at 1.
+
 ## Notes
 
 - Specify the `RowNbr` of the exact row to delete. Use `GetUser` or related APIs to first determine existing row numbers.
@@ -130,13 +163,27 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User not found | The specified username does not exist. |
-| Property set not found | A property set named in the XML does not exist. |
-| Row not found | The specified `RowNbr` does not exist for this user. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator |
+| `4041` | no user by that name |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
+
+The `xmlpset` parameter is a property set document:
+
+```xml
+<propertysets>
+  <propertyset name="HR_DETAILS">
+    <row rownbr="0" COSTCENTRE="4400" />
+  </propertyset>
+</propertysets>
+```
+
+`rownbr="0"` means "a new row" on the add; on the update and the delete it is the `RowNbr` the row
+came back with, which starts at 1. The property set must be one defined with
+`AppliestoUsers=true`.
 
 ---

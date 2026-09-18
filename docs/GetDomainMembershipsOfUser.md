@@ -117,6 +117,38 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ---
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+The libraries one user belongs to.
+
+```javascript
+const root = await call('GetDomainMembershipsOfUser', { authenticationTicket: ticket, userName: 'jsmith' });
+
+for (const domain of root.querySelectorAll('domain')) {
+  console.log(domain.getAttribute('DomainName'),
+              domain.getAttribute('DomainID'),
+              domain.getAttribute('AnonymousDomain'),
+              domain.getAttribute('IsArchive'));
+}
+```
+
 ## Notes
 
 - Results are sorted alphabetically by domain name.
@@ -137,11 +169,11 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| User not found | The specified userName does not exist in the system. |
-| `SystemError:...` | An unexpected server-side error occurred. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4000` | no user by that name, and also what a caller with no ticket is told |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---
