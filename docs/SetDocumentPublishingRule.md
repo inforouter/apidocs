@@ -22,7 +22,7 @@ Sets the publishing rule on a document, controlling which version is served as t
 | `documentPath` | string | Yes | Full infoRouter path of the document (e.g. `/Finance/Reports/Q1Summary.pdf`). |
 | `publishingRule` | string | Yes | Publishing rule to apply. See Publishing Rule Values below. Case-insensitive. |
 | `publishedVersionNumber` | integer | Conditional | Internal version number to pin. Required only when `publishingRule` is `SPECIFICVERSION`; pass `0` for all other rules. |
-| `releaseTag` | string | Conditional | Tag name identifying the version to publish. Required only when `publishingRule` is `TAGGED`; pass empty string for all other rules. |
+| `releaseTag` | string | Conditional | Tag name identifying the version to publish. Required only when `publishingRule` is `TAGGED`; leave it empty for all other rules. Until 9.0 it was declared without a question mark, so an empty one was refused with HTTP 400 even for `LATEST`, which ignores the value - there was no way to call the operation without inventing a tag. |
 
 ## Publishing Rule Values
 
@@ -145,9 +145,9 @@ else is refused `4000` with those five in the message.
 wrote the word correctly was refused and told to write it the same wrong way. Both are taken now, and
 the message names the correct one.
 
-**`releaseTag` cannot be empty over REST.** It is declared as a non-nullable string, so model binding
-refuses an empty one with HTTP 400 before the operation runs - even for `LATEST`, which has no tag and
-ignores the value. Send any non-empty placeholder when the rule does not use it.
+**`releaseTag` may be left empty** for every rule but `TAGGED`, which is the only one that reads
+it. Until 9.0 it was declared as a non-nullable string, so an empty one was refused with HTTP 400
+before the operation ran and a caller had to invent a placeholder tag for `LATEST`.
 
 ## Notes
 

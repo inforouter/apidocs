@@ -1,4 +1,4 @@
-# SetPropertySetLookupFieldParametersForMYSQL API
+﻿# SetPropertySetLookupFieldParametersForMYSQL API
 
 Configures a `LOOKUP` field in a custom property set to query an external **MySQL** database. After calling this API the field will execute the specified SQL sentence against the MySQL server whenever [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) is called for it.
 
@@ -22,7 +22,7 @@ Configures a `LOOKUP` field in a custom property set to query an external **MySQ
 | `PropertySetName` | string | Yes | Internal name of the property set that owns the field. |
 | `FieldName` | string | Yes | Internal name of the `LOOKUP` field to configure. |
 | `MYSQL_ServerName` | string | Yes | Hostname or IP address of the MySQL server. |
-| `MYSQL_PortNumber` | string | Yes | TCP port number the MySQL server listens on. If empty or non-numeric, defaults to `3306`. |
+| `MYSQL_PortNumber` | string | Yes | TCP port number the MySQL server listens on, 1 to 65535. Anything else is refused `4000`. It cannot be left empty: the parameter is declared without a question mark, so model binding refuses an empty one with HTTP 400. Send `3306` for the default. |
 | `MYSQL_UserName` | string | Yes | MySQL user account name used to connect. |
 | `MYSQL_Password` | string | Yes | Password for the MySQL user account. |
 | `MYSQL_DataBasename` | string | Yes | Name of the MySQL database to query. |
@@ -94,8 +94,9 @@ async function call(action, params) {
 }
 ```
 
-The MySQL form. `MYSQL_PortNumber` is a **string**: a value that is not a number is replaced with
-`3306` rather than refused.
+The MySQL form. `MYSQL_PortNumber` is a **string**, and a value that is not a port number from 1
+to 65535 is refused `4000`. Until 9.0 it was silently replaced with `3306`, so a typo became a
+working-looking configuration against the wrong port.
 
 ```javascript
 await call('SetPropertySetLookupFieldParametersForMYSQL', {
@@ -126,7 +127,7 @@ The connection is never tested at save time, and the three setters overwrite one
 - The target field **must have control type `LOOKUP`**. Calling this API on a field with any other control type (TEXT BOX, COMBO BOX, etc.) returns an error.
 - Connection parameters (server name, port, credentials, database) and the SQL sentence are stored in a configuration XML file on the infoRouter server: `lookup_<propertySetId>_<FieldName>.xml`.
 - **Passwords are stored encrypted**. They are never returned in plain text by read APIs such as [GetPropertySetDefinition](GetPropertySetDefinition.md) (shown as `****`).
-- If `MYSQL_PortNumber` is empty or cannot be parsed as a number, the port defaults to `3306`.
+- `MYSQL_PortNumber` must be a number from 1 to 65535. Send `3306` for the MySQL default; an empty value is refused by model binding before the operation runs.
 - To test the lookup configuration, call [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) after saving the parameters.
 - To configure a LOOKUP field for SQL Server, use [SetPropertySetLookupFieldParametersForSQLServer](SetPropertySetLookupFieldParametersForSQLServer.md). For Oracle, use [SetPropertySetLookupFieldParametersForORACLE](SetPropertySetLookupFieldParametersForORACLE.md).
 

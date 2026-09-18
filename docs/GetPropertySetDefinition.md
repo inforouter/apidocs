@@ -1,4 +1,4 @@
-# GetPropertySetDefinition API
+﻿# GetPropertySetDefinition API
 
 Returns the full definition of a single property set, including all field definitions, domain restrictions, and metadata flags. Private property sets are not accessible to anonymous users.
 
@@ -88,6 +88,7 @@ Fields with `ControlType="LOOKUP"` include an additional `<lookupparams>` child 
 
 | Attribute | Values | Description |
 |-----------|--------|-------------|
+| `Id` | int | The internal id. It is what [SetUserFolderColumns](SetUserFolderColumns.md) means by `propertySetId`, and this is the only answer that reports it - before 9.0 a caller had no way to discover one. |
 | `Name` | string | Internal uppercase name (e.g., `PROJECTMETADATA`). |
 | `Caption` | string | Display label shown in the UI. |
 | `AppliesToDocuments` | `TRUE` / `FALSE` | Whether this property set can be applied to documents. |

@@ -1,4 +1,4 @@
-# SetUserTaskRedirection API
+﻿# SetUserTaskRedirection API
 
 Sets or replaces a task redirection for a user. During the configured date window, incoming tasks assigned to `userName` are automatically forwarded to `redirectTasksToUser` instead.
 
@@ -24,7 +24,7 @@ If the user already has a task redirection configured, it is atomically replaced
 | `userName` | string | Yes | Login name of the user whose tasks should be redirected. |
 | `redirectTasksToUser` | string | Yes | Login name of the user to redirect tasks to. Cannot be the same as `userName`. |
 | `startOn` | DateTime | Yes | Start date of the redirection window. If in the past, it is automatically adjusted to the current time. Recommended format: `yyyy-MM-ddTHH:mm:ss`. |
-| `endOn` | DateTime | Yes | End date of the redirection window. Must be a future date and must be greater than `startOn`. Recommended format: `yyyy-MM-ddTHH:mm:ss`. |
+| `endOn` | DateTime | Yes | End date of the redirection window. Must be a future date and must be greater than `startOn`. Recommended format: `yyyy-MM-ddTHH:mm:ss`. Genuinely required: until 9.0 the REST action declared it optional while the operation insisted on it, so an empty value travelled all the way to a refusal. A redirection with no end cannot be expressed - use [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) to end one. |
 
 ## Response
 

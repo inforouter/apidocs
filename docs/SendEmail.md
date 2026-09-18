@@ -1,4 +1,4 @@
-# SendEmail API
+﻿# SendEmail API
 
 Sends one or more infoRouter documents and/or folders to a list of recipients by email. Each item is included as a clickable library link in the email body.
 
@@ -146,9 +146,10 @@ await call('SendEmail', {
 });
 ```
 
-**All four parameters are required.** They are non-nullable strings, so an empty one is refused by
-model binding with HTTP 400 - including `body`, and including `itemPaths`. There is no way to send a
-plain message through this operation: it always carries at least one document.
+**`recipients` and `subject` are required; `body` and `itemPaths` are not.** An empty `itemPaths`
+is a plain message with nothing attached, and an empty `body` is an empty mail. Until 9.0 all four
+were non-nullable strings, so an empty one was refused by model binding with HTTP 400 and there was
+no way to send a message this operation did not attach a document to.
 
 `itemPaths` is a list of **documents**. A folder path among them is not resolved as a folder; the
 whole call is refused `4041`, and the message does not say which entry was the problem. An address

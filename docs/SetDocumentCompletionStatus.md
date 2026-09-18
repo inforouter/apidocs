@@ -164,9 +164,9 @@ await call('SetDocumentCompletionStatus', {
 **A completion date in the future is refused** with `4000`: a document cannot be recorded as finished
 on a day that has not happened.
 
-**A percentage is not checked.** `200` and `-5` are both accepted and both stored, and
-[GetDocument](GetDocument.md) reports them back as given - so a client reading `PercentComplete`
-cannot assume it lies between 0 and 100.
+**A percentage must be one.** `PercentComplete` outside 0 to 100 is refused `4000`. Until 9.0
+`200` and `-5` were both accepted and both stored, so a client reading the value back could not
+assume it meant anything.
 
 ## Notes
 

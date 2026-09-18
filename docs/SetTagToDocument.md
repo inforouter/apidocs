@@ -1,4 +1,4 @@
-# SetTagToDocument API
+﻿# SetTagToDocument API
 
 Applies a tag to the latest version of the specified document. If the document's publishing rule is set to **Tagged** and the supplied tag text matches the rule's configured tag, the latest version is also automatically published. Use this API to mark a document version with a classification or approval label as part of a review or workflow process.
 
@@ -120,9 +120,10 @@ await call('SetTagToDocument', {
 The text can be anything - it does not have to be one of
 [GetTagDefinitions](GetTagDefinitions.md).
 
-> **Applying the same text twice applies it twice.** Nothing checks whether the document already
-> carries the tag, so you get two rows differing only in their timestamp, and each has to be removed
-> separately with its own date.
+**Applying the same text twice is refused** `4090`. Until 9.0 nothing checked whether the version
+already carried the tag, so two rows were left differing only in their timestamp and each had to be
+removed separately with its own date. The same text on a *different* version is still allowed: that
+is how a `TAGGED` publishing rule moves from one version to the next.
 
 The operation is document only: a folder path is answered "document not found".
 
@@ -133,7 +134,7 @@ The operation is document only: a folder path is answered "document not found".
 - **Checked-out documents**: If the document is checked out by another user, the operation fails. Only the user who holds the checkout can apply a tag to the document while it is checked out.
 - **Shortcuts not supported**: Tags cannot be applied to shortcut documents. Calling this API on a shortcut path will return an error.
 - **Tag text validation**: `tagText` must match the pattern `^(\w|[ -]){1,128}$`. This means only Unicode word characters (letters, digits, underscore), hyphens, and spaces are allowed. Any other character will cause the call to fail.
-- **Duplicate tags**: The same tag text can be applied to the same document version more than once (e.g. by different users). Each application creates a separate record. Use `RemoveTagFromDocument` to remove a specific instance.
+- **Duplicate tags**: the same tag text cannot be applied to the same document version twice - the second call is refused `4090`. Applying it to a different version is allowed and creates a separate record.
 - **Tag definitions**: The list of tag definitions configured in the system can be retrieved via `GetTagDefintions`. However, `SetTagToDocument` does not validate `tagText` against the defined tags -" any text matching the character and length rules is accepted.
 
 ---

@@ -1,4 +1,4 @@
-# AddPropertySetField API
+﻿# AddPropertySetField API
 
 Adds a new field to an existing custom property set definition. The field name is stored in uppercase and must be unique within the property set. Fields cannot be added to system-managed property sets.
 
@@ -23,7 +23,7 @@ Adds a new field to an existing custom property set definition. The field name i
 | `FieldName` | string | Yes | Internal name for the field. Alphanumeric and underscore characters only (auto-converted to uppercase). Must not be a reserved name. |
 | `FieldCaption` | string | Yes | Display label shown to users in the UI. |
 | `FieldType` | string | Yes | Data type of the field. See **Field Types** table below. |
-| `FieldLength` | integer | Yes | Maximum length of the field value. For `BOOLEAN`, `NUMBER`, and `DATE` types, this is set automatically and the provided value is ignored. |
+| `FieldLength` | integer | Yes | Maximum length of the field value. `BOOLEAN`, `NUMBER` and `DATE` each fix it - 1, 4 and 8 - and a different value is refused `4000`; send `0` to take the type's own. Until 9.0 whatever was sent was overwritten in silence, so a twenty digit `NUMBER` became a four digit one and the caller was told the call had worked. |
 | `isRequired` | boolean | Yes | `true` if the field must be filled in; `false` if optional. |
 | `ControlSize` | integer | Yes | Display width of the input control in the UI. For `BOOLEAN` and `DATE` types, this is set automatically. |
 | `ControlOrder` | integer | Yes | Display order position of the field within the property set form. |

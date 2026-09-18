@@ -893,6 +893,11 @@ Standardize to "CODE - Full Name" format:
 
 - [GetRandDSchedules](./GetRandDSchedules.md) - Get R&D schedules
 
+**The rename follows the name onto the schedules that quote it.** A schedule stores the
+`SourceAuthority` string it was given rather than a reference, and until 9.0 a rename changed only
+the list - so every schedule quoting the old name went on quoting a name that was no longer an
+authority. Both move together now, inside one transaction.
+
 ## Error Codes
 
 The `errorCode` values this operation returns, checked against a running server:

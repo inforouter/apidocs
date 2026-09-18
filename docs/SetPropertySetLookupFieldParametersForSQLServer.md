@@ -1,4 +1,4 @@
-# SetPropertySetLookupFieldParametersForSQLServer API
+﻿# SetPropertySetLookupFieldParametersForSQLServer API
 
 Configures a `LOOKUP` field in a custom property set to query an external **SQL Server** database. After calling this API the field will execute the specified SQL sentence against the SQL Server instance whenever [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) is called for it.
 
@@ -120,9 +120,9 @@ await call('SetPropertySetLookupFieldParametersForSQLServer', {
 ```
 
 The three setters overwrite one another - a field has one set of lookup parameters and the last call
-wins. The control type is not checked either: a `TEXT BOX` accepts parameters, and then nothing ever
-reads them, because the definition only reports `<lookupparams>` for a field whose control type is
-`LOOKUP`.
+wins. The control type **is** checked: a field that is not a `LOOKUP` is refused `4000`. Until 9.0 a
+`TEXT BOX` accepted parameters and a file was written for it, and then nothing ever read them,
+because the definition only reports `<lookupparams>` for a field whose control type is `LOOKUP`.
 
 ## Notes
 

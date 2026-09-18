@@ -169,8 +169,10 @@ The rules the server enforces, in the order it checks them:
 - `RetentionType` and `DispositionType` cannot both be `0`.
 - **Temporary retention** (`RetentionType="1"`) needs `RetentionTrigger` of `1` or `2` -
   `0`, the default, is refused - and at least one of the three retention periods above zero.
-- **Permanent retention** (`RetentionType="2"`) forces the trigger and all three periods to zero and
-  **silently turns the disposition off**, whatever the document asked for. The call still succeeds.
+- **Permanent retention** (`RetentionType="2"`) forces the trigger and all three periods to zero,
+  and **refuses a disposition**: a retention that never ends has nothing for a disposition to be
+  triggered by. Until 9.0 the whole disposition half of the document was zeroed in silence and the
+  call still reported success, so a caller who asked for one was never told it had gone away.
 - A disposition needs at least one of its three periods above zero.
 - `DispositionTrigger="3"`, on retention end, needs a retention type other than `0`.
 - With **Temporary** retention and any disposition, `DispositionTrigger` **must** be `3`. The refusal
@@ -179,8 +181,9 @@ The rules the server enforces, in the order it checks them:
 
 ## Notes
 
-- When `RetentionType = 1` (Permanent), all period values are automatically reset to 0 and `RetentionTrigger` is set to `On Create`.
-- When `RetentionType = 2` (Temporary), at least one of `RetentionPeriodYears`, `RetentionPeriodMonths`, or `RetentionPeriodDays` must be greater than 0.
+- `RetentionType` is `0` none, `1` **temporary** and `2` **permanent** - these two notes had the names the wrong way round until 9.0.
+- When `RetentionType = 2` (permanent), all period values are automatically reset to 0 and `RetentionTrigger` is set to `On Create`, and a disposition is refused: see below.
+- When `RetentionType = 1` (temporary), at least one of `RetentionPeriodYears`, `RetentionPeriodMonths`, or `RetentionPeriodDays` must be greater than 0.
 - `CreateTask` and `SendEmail` are only meaningful when `DispositionType > 0`. When `DispositionType = 0` (None), both are automatically forced to `false` regardless of the values supplied.
 - If `CreateTask` or `SendEmail` are omitted from the XML, they default to `true` (and will then be subject to the DispositionType rule above).
 - The returned `DefId` is needed for [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md), [SetFolderRandDSchedule](SetFolderRandDSchedule.md), [GetRandDScheduleInfo](GetRandDScheduleInfo.md), [UpdateRandDSchedule](UpdateRandDSchedule.md), and [DeleteRandDSchedule](DeleteRandDSchedule.md).

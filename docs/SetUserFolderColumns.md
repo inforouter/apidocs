@@ -1,13 +1,13 @@
-# SetUserFolderColumns API
+﻿# SetUserFolderColumns API
 
 Saves the column layout and custom property set preference for the authenticated user on the specified folder. The setting applies only to the calling user and does not affect other users.
 
-> **Wrong values are accepted silently.** A column name that is not a column, a `sortBy` that is
-> not a column and a `sortVector` that is not exactly `asc` or `desc` are each dropped without a
-> word, and the call still answers `success="true"`. If every column name is wrong the saved list
-> is empty, which reads back as the three default columns - so the caller is shown a list it never
-> asked for. Neither `propertySetId` nor `sortByPropertySetId` is checked against the property sets
-> that exist.
+> **Wrong values are refused.** A column name that is not a column, a `sortBy` that is not one
+> either, a `sortVector` that is neither `asc` nor `desc`, and a property set id nothing matches are
+> each refused and the stored layout is left alone. Until 9.0 all four were dropped without a word
+> while the call answered `success="true"` - and if every column name was wrong the saved list was
+> empty, which reads back as the three default columns, so the caller was shown a list it never
+> asked for.
 >
 
 ## Endpoint
@@ -28,11 +28,11 @@ Saves the column layout and custom property set preference for the authenticated
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `folderPath` | string | Yes | Full infoRouter path of the folder (e.g. `/Domain/Folder`) |
-| `columnNames` | string | Yes | Comma-separated list of column names to display (e.g. `"ItemName,DocumentSize,ModificationDate"`). Required: an empty string is refused with HTTP 400 before the operation is reached. A name that is not a column is dropped silently. |
-| `propertySetId` | int | Yes | ID of the custom property set to display alongside the standard columns. Pass `0` for none |
-| `sortBy` | string | Yes | Column name to sort by (e.g. `"ModificationDate"`). Required: an empty string is refused with HTTP 400. A name that is not a column is ignored and the sort stays on the default. Not looked at at all when `sortByPropertySetId` is non-zero. |
-| `sortVector` | string | Yes | Sort direction: `"asc"` or `"desc"`, **lower case only**. Required: an empty string is refused with HTTP 400. Anything else - including `"ASC"` - is stored as no sort direction. |
-| `sortByPropertySetId` | int | Yes | Property set ID when sorting by a custom property field. Pass `0` when not sorting by a custom property |
+| `columnNames` | string | Yes | Comma-separated list of column names to display (e.g. `"ItemName,DocumentSize,ModificationDate"`). Required: an empty string is refused with HTTP 400 before the operation is reached. A name that is not a column is refused `4000`, and the refusal names every column there is. |
+| `propertySetId` | int | Yes | ID of the custom property set to display alongside the standard columns. Pass `0` for none. An id no property set has is refused `4041`. The id is the `Id` attribute [GetPropertySetDefinition](GetPropertySetDefinition.md) reports. |
+| `sortBy` | string | Yes | Column name to sort by (e.g. `"ModificationDate"`). Required: an empty string is refused with HTTP 400. A name that is not in `enum_IR.ColumnList` is refused `4000`. Not looked at at all when `sortByPropertySetId` is non-zero. |
+| `sortVector` | string | Yes | Sort direction: `"asc"` or `"desc"`, read without regard to case. Required: an empty string is refused with HTTP 400. Anything else is refused `4000`. Until 9.0 the comparison was case-sensitive, so `"ASC"` was quietly stored as no sort direction at all. |
+| `sortByPropertySetId` | int | Yes | Property set ID when sorting by a custom property field. Pass `0` when not sorting by a custom property. An id no property set has is refused `4041`. |
 | `sortByPropertySetColumnName` | string | Yes | Custom property field name when sorting by a custom property. Pass an empty string otherwise |
 
 ## Response
@@ -157,10 +157,10 @@ CutOffDate          RetainUntil
 Nothing else is a column, including several names that are in the `ColumnList` enum but have no
 column definition behind them: `Description`, `CheckOutBy`, `Thumbnail`, `FolderID`, `TemplateID`,
 `ViewDate`, `AssociatedDocumentCount`, `CustomPropertySet` and `Rank`. A name that is not on the
-list above is dropped without a word.
+list above is refused `4000`, and the refusal carries the whole list.
 
-`sortBy` takes a name from the same list. `sortVector` is `asc` or `desc`, **in lower case** -
-`ASC` is not recognised and is stored as no sort direction at all.
+`sortBy` takes any name from `enum_IR.ColumnList`, including the nine above - it is the sort key
+rather than a column to show. `sortVector` is `asc` or `desc`, read without regard to case.
 
 ## JavaScript
 
@@ -208,11 +208,11 @@ the answer from [GetUserFolderColumns](GetUserFolderColumns.md) reports `sortBy`
 ## Notes
 
 - The setting is saved per-user per-folder. Other users viewing the same folder are not affected.
-- Unrecognised column names are silently ignored. Column name matching is case-insensitive.
+- An unrecognised column name is refused `4000` and nothing is saved. Column name matching is case-insensitive.
 - The column order in the response of `GetUserFolderColumns` reflects the order of names supplied here.
 - Pass `propertySetId=0` to remove any previously saved property set association.
 - When `sortByPropertySetId` is non-zero it takes precedence over `sortBy`; the sort column is treated as a custom property field.
-- `sortVector` cannot be empty: the parameter is declared without a question mark. To store no sort direction, send a value that is neither `asc` nor `desc`.
+- `sortVector` cannot be empty: the parameter is declared without a question mark. There is no way to store "no direction" through this operation - send `asc` or `desc`.
 
 ## Related APIs
 

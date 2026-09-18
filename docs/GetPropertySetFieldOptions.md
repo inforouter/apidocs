@@ -1,12 +1,13 @@
-# GetPropertySetFieldOptions API
+﻿# GetPropertySetFieldOptions API
 
 Returns the available option values for a property set field. For static fields (`COMBO BOX`,
 `LIST BOX`, `RADIO BUTTON`), returns the list of stored option values, sorted alphabetically
 rather than in the order they were added. For `LOOKUP` fields, executes the configured
 external database query and returns the live results.
 
-**`OptionFilter` only reaches a `LOOKUP` query.** A stored list never looks at it, so a
-`COMBO BOX` returns all of its values whatever the filter says.
+**`OptionFilter` only reaches a `LOOKUP` query.** A non-empty filter on a field of any other
+control type is refused `4000`; until 9.0 it was accepted and did nothing, so a `COMBO BOX` returned
+all of its values whatever the filter said.
 
 A field whose control type has no options - a `TEXT BOX` or a `CHECK BOX` - answers a
 successful empty `<options />`, although adding an option to one of those is refused `4000`.
@@ -30,7 +31,7 @@ successful empty `<options />`, although adding an option to one of those is ref
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PropertySetName` | string | Yes | Internal name of the property set. |
 | `PropertyFieldName` | string | Yes | Internal name of the field whose options to retrieve. |
-| `OptionFilter` | string | No | Filter string to narrow results. Used as a SQL `WHERE` clause parameter for `LOOKUP` fields. Ignored for static fields. |
+| `OptionFilter` | string | No | Filter string to narrow results. Used as a SQL `WHERE` clause parameter for `LOOKUP` fields. Refused `4000` on a field of any other control type, which cannot use one. |
 
 ## Response
 
@@ -155,9 +156,9 @@ const values = [...root.querySelectorAll('option')].map(o => o.getAttribute('val
 console.log(values);   // ["AMER", "APAC", "EMEA"] - alphabetical, not the order they were added
 ```
 
-**`OptionFilter` does nothing for a stored list.** It is put on the field before the values are
-read, and only a `LOOKUP` query looks at it; a `COMBO BOX` returns all of its values whatever the
-filter says.
+**`OptionFilter` is only for a `LOOKUP`.** It is put on the field before the values are read, and
+only a `LOOKUP` query looks at it - so a non-empty filter on any other control type is refused
+`4000` rather than accepted and ignored. An empty filter reads the whole list, whatever the type.
 
 A field whose control type has no options - a `TEXT BOX` or a `CHECK BOX` - answers a successful
 empty `<options />`, although *adding* an option to one of those is refused `4000`.

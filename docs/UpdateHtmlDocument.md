@@ -1,4 +1,4 @@
-# UpdateHtmlDocument API
+﻿# UpdateHtmlDocument API
 
 Updates the HTML content (and optionally the description) of an existing HTML document. The document is checked out, a new version is created with the provided HTML body, and then published according to `publishOption`.
 
@@ -121,8 +121,10 @@ await call('UpdateHtmlDocument', {
 **Every call makes a new version.** A document updated three times carries `1000000`, `1000001` and
 `1000002` - it does not overwrite in place, and no checkout is needed.
 
-**`publishOption` is not checked.** `99` is accepted as readily as `0`, so a client sending the wrong
-number is not told.
+**`publishOption` is checked** against the three values it has - `0` server default, `1` publish,
+`2` do not publish - and anything else is refused `4000`. Until 9.0 it was cast straight into the
+enum, so `99` was accepted as readily as `0`. [UpdateURLDocument](UpdateURLDocument.md) had the same
+unchecked cast and checks it too.
 
 Use [UpdateURLDocument](UpdateURLDocument.md) for a `.url` document. Pointing this one at a `.url`
 or a shortcut is refused with `4000`, and the document is not checked out.

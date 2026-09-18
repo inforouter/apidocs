@@ -215,7 +215,7 @@ async function call(action, params) {
 ```
 
 Removes one applied tag. All four identifying values have to match the row exactly - the text alone
-does not identify it, since the same text can be applied more than once.
+does not identify it, since the same text can be applied to more than one version of the document.
 
 ```javascript
 const tags = await call('GetAppliedTags', {

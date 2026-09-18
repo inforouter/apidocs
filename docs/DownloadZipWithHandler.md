@@ -23,8 +23,8 @@ Stages a zip archive of specified documents and folders on the server and return
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `Paths` | string | Yes | Pipe-separated (`\|`) list of infoRouter paths to include in the zip. Each entry can be a full path to a document or folder, or a short ID path (`~D{id}` for a document, `~F{id}` for a folder). Paths that cannot be resolved are silently skipped. |
-| `partialResult` | bool | Yes | Controls behavior when some items cannot be included in the archive. `false` -" fails if any errors occur during zip creation (strict mode). `true` -" succeeds and returns a handler even if some items were skipped, as long as the archive was created (partial mode). |
+| `Paths` | string | Yes | Pipe-separated (`\|`) list of infoRouter paths to include in the zip. Each entry can be a full path to a document or folder, or a short ID path (`~D{id}` for a document, `~F{id}` for a folder). A path that resolves to nothing is reported through `partialResult`. |
+| `partialResult` | bool | Yes | What to do when some of `Paths` cannot be included. `false` - fail, and list what could not be found. `true` - build the archive from the rest and list what was left out. Until 9.0 a path that resolved to nothing was dropped before either branch was reached, so the flag meant nothing: only a list where nothing at all resolved was refused. |
 
 ### Paths Format
 

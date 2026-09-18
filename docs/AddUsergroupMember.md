@@ -1,4 +1,4 @@
-# AddUsergroupMember API
+﻿# AddUsergroupMember API
 
 Adds the specified user to the member list of the specified user group.
 
@@ -19,7 +19,7 @@ Adds the specified user to the member list of the specified user group.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `DomainName` | string | Yes | The domain/library name if the group is a local group. Pass an empty string for global groups. |
+| `DomainName` | string | No | The library name if the group is a local group. Leave it empty for a global group. Until 9.0 it was declared without a question mark on the REST action, so an empty one was refused with HTTP 400 - and nobody could be added to a global group through the API at all. [RemoveUsergroupMember](RemoveUsergroupMember.md) never had the problem. |
 | `GroupName` | string | Yes | The name of the user group to add the user to. |
 | `UserName` | string | Yes | The username to add to the group. Also accepts the short ID format `ID:userid` (e.g., `ID:123`). |
 

@@ -304,18 +304,19 @@ by [GetRecycleBinContent](GetRecycleBinContent.md) or
 [SearchRecycledItems](SearchRecycledItems.md); there is no other way to build one, because the ids
 are not the ones a caller sees anywhere else.
 
-### Filters that do not do what they say
+### The filters
 
-| Filter | What actually happens |
+| Filter | What it does |
 |---|---|
-| `dateDeletedMinDate` | accepted, changes nothing |
-| `dateDeletedMaxDate` | accepted, changes nothing |
-| `minSize` | accepted, changes nothing |
-| `maxSize` | narrows the result, but leaves out small items: a 208 byte document is excluded by `maxSize=999999` |
-| `objectName` | works |
-| `deletedByUsername` | works, and is the only filter that refuses an unknown value |
+| `dateDeletedMinDate` | items deleted on or after this date |
+| `dateDeletedMaxDate` | items deleted on or before this date - the whole of the day named is included |
+| `minSize` | items of at least this many **bytes**, inclusive |
+| `maxSize` | items of at most this many **bytes**, inclusive |
+| `objectName` | matches the item name |
+| `deletedByUsername` | the only filter that refuses an unknown value |
 
-Use `objectName` and `deletedByUsername`, and filter the rest client-side from the `DateDeleted`
-and `TotalSize` attributes on each item.
+Both size bounds were broken until 9.0: they were multiplied by an internal unit that defaulted to
+zero and that nothing ever set, so `minSize` meant "at least 0 bytes", which is every item, and
+`maxSize` meant "at most 0 bytes", which left out a 208 byte document. They count bytes now.
 
 ---

@@ -1,4 +1,4 @@
-# AddPropertySetRow API
+﻿# AddPropertySetRow API
 
 Adds a new property set row to a document or folder. The target object is resolved by path -" the system first checks if the path refers to a document, then a folder. Multiple property sets and multiple rows per property set can be submitted in a single call.
 
@@ -42,8 +42,9 @@ Adds a new property set row to a document or folder. The target object is resolv
 - Each third-level element represents one row. Field names are attributes of that element.
 - Field names are **case-insensitive** during lookup but are stored in uppercase.
 - `rownbr` only ever means "a new row". `0`, or the attribute left out, appends a row and
-  numbers it from 1 up. **Naming a row that already exists is accepted and does nothing** -
-  use [UpdatePropertySetRow](UpdatePropertySetRow.md) to change one.
+  numbers it from 1 up. **Naming a row that already exists is refused** - use
+  [UpdatePropertySetRow](UpdatePropertySetRow.md) to change one. Until 9.0 it was accepted and did
+  nothing at all.
 - Multiple `<pset>` elements may be included in a single call.
 - Multiple `<row>` elements may be included in a single `<pset>` for multi-row property sets.
 
@@ -188,13 +189,15 @@ Things worth knowing before you build that document:
   children and reads only the `name` attribute on the second level and `rownbr` on the third, so
   `<psets><pset>` and `<propertysets><propertyset>` behave identically.
 - **`rownbr` is only ever "new".** `0`, or the attribute left out, appends a row and numbers it from
-  1 up. Naming a row that already exists is **accepted and does nothing** - use
-  `UpdatePropertySetRow` to change one.
+  1 up. Naming a row that already exists is **refused** - use `UpdatePropertySetRow` to change one.
+  Until 9.0 it was accepted and did nothing at all, so a caller meaning to rewrite a row was told
+  the call had worked and nothing had changed.
 - **A field the set does not have is dropped silently.** The row is written with the fields that do
   exist and the caller is not told about the rest, so a misspelled field name looks like a success.
 - **A required field left out is refused**, `4000`, with `SETNAME.FIELDNAME` in the message.
-- **The `AppliesTo` flags are not enforced here.** A set created with `AppliestoFolders=false` is
-  applied to a folder without complaint.
+- **The `AppliesTo` flags are enforced here.** A set created with `AppliestoFolders=false` is
+  refused on a folder. Until 9.0 they were recorded on the definition, reported by
+  `GetPropertySetDefinition` and read by nothing, so they restricted nothing.
 - A `BOOLEAN` written as `true` reads back as `Yes`.
 
 The answer on success is `<response success="true" error="" />` - with **no `errorCode`**, unlike

@@ -1,4 +1,4 @@
-# AssociateDocument API
+﻿# AssociateDocument API
 
 Creates an association between the specified source document and a target item (document or folder). Associations let you link related content together so that users can navigate between items that are conceptually connected. The association type controls the semantic relationship -" for example, marking one document as a rendition or a copy of another. Use this API to build cross-references between documents, or to link documents to folders.
 
@@ -135,9 +135,9 @@ await call('AssociateDocument', {
 Making the same link twice does not create a second one. A document cannot be associated with
 itself - that is refused `4000`.
 
-> **`AssociationTypeID` is not checked against the five.** Any number is accepted and stored, and
-> the readers give it the name of type 0 - so an association can come back labelled "Related" while
-> carrying a type id that means nothing.
+**`AssociationTypeID` is checked against the five** and anything else is refused `4000`. Until 9.0
+any number was accepted and stored, and the readers then gave it the name belonging to type 0 - so an
+association came back labelled "Related" while carrying a type id that means nothing.
 
 ## Notes
 

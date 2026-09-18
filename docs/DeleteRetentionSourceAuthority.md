@@ -1,4 +1,4 @@
-# DeleteRetentionSourceAuthority API
+﻿# DeleteRetentionSourceAuthority API
 
 Deletes a retention source authority from the system. The authority must not be in use by any retention and disposition schedules.
 
@@ -416,6 +416,12 @@ using (var client = new SrvSoapClient())
 - [CreateRetentionSourceAuthority](./CreateRetentionSourceAuthority.md) - Create new authority
 - [GetRandDSchedules](./GetRandDSchedules.md) - Get R&D schedules to check dependencies
 - Control Panel UI: `RetentionSourceAuthority.aspx?method=delete` - Authority deletion form
+
+**An authority a schedule still quotes cannot be deleted.** The name is copied onto the schedule
+rather than referenced, so removing it used to leave the schedule naming something that was no
+longer in the list. The delete is refused `4000` while any schedule quotes it; rename it with
+[UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md), which carries the schedules
+with it, or clear the authority off the schedules first.
 
 ## Error Codes
 

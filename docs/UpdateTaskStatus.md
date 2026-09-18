@@ -1,4 +1,4 @@
-# UpdateTaskStatus API
+﻿# UpdateTaskStatus API
 
 Updates the status, finish date, and comment of a workflow task in a single call. This is the composite operation that mirrors the UPDATESTATUS form submission in the task UI — it saves the comment first, then applies the new status and finish date.
 
@@ -20,7 +20,7 @@ Updates the status, finish date, and comment of a workflow task in a single call
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from AuthenticateUser |
 | `taskId` | integer | Yes | Unique numeric ID of the task to update |
-| `taskStatus` | integer | Yes | New task status: -2=Reassigned, -1=Dropped, 0=NotStarted, 10=InProgress, 20=DueDateChanged, 30=Completed |
+| `taskStatus` | integer | Yes | New task status: -2=Reassigned, -1=Dropped, 0=NotStarted, 10=InProgress, 20=DueDateChanged, 30=Completed. Anything else is refused `4000`. |
 | `finishDate` | DateTime | Yes | Actual finish date. Honoured only when status is Completed or Dropped and the assignee has ChangeFinishDate permission; otherwise the current time is used. Pass `0001-01-01T00:00:00` to omit |
 | `comments` | string | No | User comment to record on the task. Pass an empty string to clear an existing comment |
 
@@ -83,7 +83,9 @@ async function call(action, params) {
 
 Sets a task's status and, when it is given, its comment. `taskStatus` is the numeric `TaskStatusX`
 value: `-2` reassigned, `-1` dropped, `0` not started, `10` in progress, `20` due date changed,
-`30` completed. A task that is already completed or reassigned is refused.
+`30` completed. Any other number is refused `4000`; until 9.0 it was cast straight into the enum, so
+`999` was stored as readily as `10` and the client that sent it was never told. A task that is
+already completed or reassigned is refused.
 
 ```javascript
 await call('UpdateTaskStatus', {
