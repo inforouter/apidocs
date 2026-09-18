@@ -2,11 +2,6 @@
 
 Adds a specified user group to the subscription list of a folder, configuring which events trigger email notifications to all members of that group. Optionally cascades the subscription to all existing sub-folders. This is the user group equivalent of `AddUserToFolderSubscribers` -" it subscribes all members of a group at once rather than individual users.
 
-> **Only a global user group can be subscribed.** The group is looked up with no library name, so
-> a group that belongs to a library is never found and the call is refused with `4041` - reading as
-> though the group does not exist, when it plainly does. Create the group with an empty
-> `DomainName` if it has to be subscribed to anything.
-
 ## Endpoint
 
 ```
@@ -29,7 +24,7 @@ Adds a specified user group to the subscription list of a folder, configuring wh
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `folderPath` | string | Yes | Full infoRouter path to the folder (e.g. `/Finance/Reports`). |
-| `groupName` | string | Yes | Name of the user group to add as a subscriber. Must be a **global** group. A group that belongs to a library is never found - the lookup is done with no library name - and the call is refused as though no such group existed. |
+| `groupName` | string | Yes | Name of the user group. A group belonging to the library the item is in is looked for first, then the global groups, so either kind can be named. |
 | `ON_READ` | bool | Yes | If `true`, notify the group when a document in the folder is read or downloaded. |
 | `ON_CHANGE` | bool | Yes | If `true`, notify the group when a document's properties or metadata are changed. |
 | `ON_UPDATE` | bool | Yes | If `true`, notify the group when a new version of a document is uploaded. |
@@ -232,13 +227,13 @@ async function call(action, params) {
 }
 ```
 
-Subscribes a global user group to a folder, and optionally to everything inside it.
+Subscribes a user group to a folder, and optionally to everything inside it.
 
 ```javascript
 await call('AddUsergroupToFolderSubscribers', {
   authenticationTicket: ticket,
   folderPath: '/Public/Reports',
-  groupName: 'Auditors',
+  groupName: 'Auditors',          // the folder's own library first, then the global groups
   ON_READ: true, ON_CHANGE: true, ON_UPDATE: false, ON_CHECKOUT: false, ON_APPROVE: false,
   ON_REJECT: false, ON_COMMENT: false, ON_MOVE: false, ON_DELETE: true, ON_CHECKIN: false,
   ON_NEWDOC: true,
@@ -260,7 +255,7 @@ await call('AddUsergroupToFolderSubscribers', {
 
 - **Duplicate Notifications**: If a user is both individually subscribed to the folder and a member of a subscribed group, they may receive duplicate notifications for the same event.
 
-- **Global groups only**: a library's own group cannot be subscribed. The group is looked up with an empty library name, so only a global group is ever found and a library group is refused with `4041`.
+- **Either kind of group**: the folder's own library is searched first and then the global groups, so a library group of the same name as a global one wins inside its own library.
 
 - **Notifications by Email**: Subscriptions trigger email notifications when the configured events occur. Email notifications require a properly configured email server in the infoRouter settings.
 
@@ -306,7 +301,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no folder at that path, including one the caller may not see |
-| `4041` | no global user group by that name - including a group that exists but belongs to a library |
+| `4041` | no user group by that name, in the folder's library or among the global groups |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 The ten event flags are the same on every add operation, and all ten have to be sent: they are

@@ -113,11 +113,9 @@ await call('RemoveUserGroupFromDomainMembership', {
 });
 ```
 
-> **It cannot act on a group that belongs to the library.** The group is looked up with an empty
-> library name - `GetUserGroupIdAsync(cn, threadInfo, "", groupName)` - so only a global group is
-> ever found. Ask it to remove one of the library's own groups and it answers `4041` "user group not
-> found" while the group sits in `GetDomainGroups` before and after. Use
-> [DeleteUsergroup](DeleteUsergroup.md) to remove a library's own group.
+> **Either kind of group.** The library's own groups are searched first and then the global
+> groups, so a group belonging to the library can be removed from its membership as well as a
+> global one that was added to it.
 
 ## Notes
 

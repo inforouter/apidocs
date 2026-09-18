@@ -335,9 +335,8 @@ const folders = [...root.querySelectorAll(':scope > folder')];
 const documents = [...root.querySelectorAll(':scope > document')];
 ```
 
-This is the only working way to read favourite **folders**:
-[GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md), which looks like the operation for the job,
-cannot succeed.
+This answers for the calling user. To read another user's favourite folders, and to page through
+them, use [GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md).
 
 These three answer for **the calling user only** - there is no `userName` - so a caller with no ticket
 is refused rather than answered for the anonymous user. The message is "User has been deleted.", which

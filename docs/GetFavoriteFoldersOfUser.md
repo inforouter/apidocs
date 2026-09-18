@@ -97,15 +97,6 @@ async function call(action, params) {
 }
 ```
 
-> **This operation does not work.** Every call fails with `5000` and the text
-> `System.ArgumentException: Invalid FolderListType for folder retrieval (Parameter 'folderListType')`.
-> The controller asks the shared folder-listing method for the `MyFavorites` list, and that method
-> handles only `Subscriptions` and `MyDocuments` - anything else falls into its default branch and
-> throws before a query is ever run. No parameter combination avoids it.
->
-> Use [GetFavorites](GetFavorites.md) instead: it answers for the calling user and returns the
-> favourite folders as `<folder>` elements alongside the documents.
-
 ```javascript
 // What this page would have shown, done the way that works:
 const root = await call('GetFavorites', {

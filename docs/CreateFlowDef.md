@@ -2,11 +2,6 @@
 
 Creates a new workflow definition on the specified domain/library. The workflow is created in **inactive** state -" steps and tasks must be added with `AddFlowStepDef` and `AddFlowTaskDef` before activating it with `ActivateFlowDef`.
 
-> **This overload cannot succeed on the current release.** The service tests whether the
-> supervisor name is *empty* and then looks that empty name up, so a call that carries no
-> supervisor always fails with `errorCode="4041"` "User not found". Use `CreateFlowDef3` with a
-> real `Supervisor` until the condition is corrected.
-
 This is the minimal variant. Use the numbered variants for additional configuration:
 
 | Variant | Extra parameters |
@@ -126,12 +121,11 @@ async function call(action, params) {
 }
 ```
 
-Creates a workflow definition over a folder. **This overload cannot succeed today**: the service
-looks the supervisor up when the name is *empty*, so a call that carries none always fails 4041
-"User not found". Use `CreateFlowDef3` with a `Supervisor` until that is fixed.
+Creates a workflow definition over a folder, with no supervisor. Use
+[CreateFlowDef2](CreateFlowDef2.md) or [CreateFlowDef3](CreateFlowDef3.md) to name one at creation,
+or [UpdateWorkflowDefinition](UpdateWorkflowDefinition.md) to add one later.
 
 ```javascript
-// Fails with 4041 on every release that still has the inverted check.
 await call('CreateFlowDef', {
   authenticationTicket: ticket,
   DomainName: 'Public',

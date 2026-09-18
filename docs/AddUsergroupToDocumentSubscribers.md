@@ -2,11 +2,6 @@
 
 Adds a user group to the subscription list of a document. All members of the group receive email notifications for the selected events.
 
-> **Only a global user group can be subscribed.** The group is looked up with no library name, so
-> a group that belongs to a library is never found and the call is refused with `4041` - reading as
-> though the group does not exist, when it plainly does. Create the group with an empty
-> `DomainName` if it has to be subscribed to anything.
-
 ## Endpoint
 
 ```
@@ -25,7 +20,7 @@ Adds a user group to the subscription list of a document. All members of the gro
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DocumentPath` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1.pdf`). |
-| `groupName` | string | Yes | Name of the user group to subscribe. Must be a **global** group. A group that belongs to a library is never found - the lookup is done with no library name - and the call is refused as though no such group existed. |
+| `groupName` | string | Yes | Name of the user group. A group belonging to the library the item is in is looked for first, then the global groups, so either kind can be named. |
 | `ON_READ` | boolean | Yes | `true` to notify when the document is read/viewed. |
 | `ON_CHANGE` | boolean | Yes | `true` to notify when document metadata changes. |
 | `ON_UPDATE` | boolean | Yes | `true` to notify when a new version is uploaded. |
@@ -107,13 +102,13 @@ async function call(action, params) {
 }
 ```
 
-Subscribes a global user group to one document.
+Subscribes a user group to one document.
 
 ```javascript
 await call('AddUsergroupToDocumentSubscribers', {
   authenticationTicket: ticket,
   DocumentPath: '/Public/Reports/q3.pdf',
-  groupName: 'Auditors',          // must be a global group, not a library's own
+  groupName: 'Auditors',          // the document's own library first, then the global groups
   ON_READ: true, ON_CHANGE: true, ON_UPDATE: false, ON_CHECKOUT: false, ON_APPROVE: false,
   ON_REJECT: false, ON_COMMENT: false, ON_MOVE: false, ON_DELETE: true, ON_CHECKIN: false,
 });
@@ -144,7 +139,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no document at that path, including one the caller may not see |
-| `4041` | no global user group by that name - including a group that exists but belongs to a library |
+| `4041` | no user group by that name, in the document's library or among the global groups |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 The ten event flags are the same on every add operation, and all ten have to be sent: they are

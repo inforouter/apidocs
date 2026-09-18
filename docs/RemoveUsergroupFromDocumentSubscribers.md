@@ -2,12 +2,6 @@
 
 Removes a specified user group from the subscription list of a document. After removal, members of that group will no longer receive email notifications via the group subscription for any events on that document. Use this API to clean up group subscriptions when a group no longer needs to track a document.
 
-> **These two do not remove a group subscription.** `FolderServices.RemoveSubscriberAsync`
-> resolves the group's id and then unsubscribes a *user* with it. The document form finds no such
-> user, changes nothing, and answers `success="true"`; the folder form answers "user not found"
-> about a group that exists. Either way the group stays subscribed, and there is no way through
-> the API to remove it.
-
 ## Endpoint
 
 ```
@@ -30,7 +24,7 @@ Removes a specified user group from the subscription list of a document. After r
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentPath` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`). Supports short document ID paths (`~D{id}` or `~D{id}.ext`). |
-| `groupName` | string | Yes | Name of the user group. Must be a **global** group. A group that belongs to a library is never found - the lookup is done with no library name - and the call is refused as though no such group existed. Removing it does not work in any case - see the warning at the top of this page. |
+| `groupName` | string | Yes | Name of the user group. A group belonging to the library the item is in is looked for first, then the global groups, so either kind can be named. |
 
 ---
 
@@ -141,11 +135,9 @@ async function call(action, params) {
 }
 ```
 
-Intended to unsubscribe a group from a document. It does not - see the warning above.
+Unsubscribes a user group from a document.
 
 ```javascript
-// Reports success and leaves the group subscribed. Read GetSubscribers afterwards rather than
-// trusting the answer.
 await call('RemoveUsergroupFromDocumentSubscribers', {
   authenticationTicket: ticket,
   DocumentPath: '/Public/Reports/q3.pdf',
@@ -187,7 +179,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no document at that path, including one the caller may not see |
-| `4041` | no global user group by that name |
+| `4041` | no user group by that name, in the document's library or among the global groups |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---

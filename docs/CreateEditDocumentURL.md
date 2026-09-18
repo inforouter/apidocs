@@ -147,14 +147,6 @@ async function call(action, params) {
 }
 ```
 
-> **This operation does not currently work.** Every call fails with HTTP 500 and no error document,
-> whether the document exists or not. The adapter builds an app URL from
-> `context.Request.PathBase.ToString().ChopEnd(8)`, and `PathBase` is empty unless the application is
-> hosted under a path base, so the chop runs `Substring(0, -8)` and throws before the document is even
-> looked up. The value it computes is only used to estimate whether the generated URL would be too
-> long, so nothing about the answer depends on it. Use [CreateDiskMountURL](CreateDiskMountURL.md) to
-> open a WebDAV session in the meantime.
-
 When it works, it returns the WebDAV path to one document, with a fresh Office-edit session in it:
 
 ```javascript

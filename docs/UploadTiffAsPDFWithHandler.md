@@ -88,13 +88,9 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## JavaScript
 
-> **This operation does not convert anything.** The conversion runs only when the *new document name*
-> ends in `.tif` or `.tiff` - and both TIFF actions call the shared uploader with that name empty,
-> passing the destination as `Path` instead. The condition can therefore never be true, whatever the
-> caller sends. What actually happens is a plain upload: the bytes are stored verbatim under the name
-> in `Path`, and content that is not a TIFF at all is accepted without complaint.
->
-> Until this is fixed, treat it as [UploadDocument](UploadDocument.md) and convert on the client.
+> **The staged content must really be a TIFF.** The bytes are converted to PDF before anything
+> is stored, and the document is created with a `.pdf` name rather than the `.tif` name in
+> `Path`. Content that is not a TIFF is refused with `4000` and the converter's own message.
 
 Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
 `errorCode` is the number to report.

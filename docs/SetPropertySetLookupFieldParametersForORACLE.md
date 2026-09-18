@@ -1,12 +1,5 @@
 # SetPropertySetLookupFieldParametersForORACLE API
 
-> **This operation does not configure an Oracle lookup.** The adapter builds a
-> `SqlServerConnectionParameters` from the Oracle arguments, so `ORACLE_ServiceName` is stored
-> as a SQL Server **server name**, the record is written with `dbtype="SQLSERVER"` and no
-> database name, and the query is later opened with a SQL Server driver. The call answers
-> `success="true"`, so nothing tells the caller. There is no way to point a lookup field at
-> Oracle through this API today.
-
 Intended to configure a `LOOKUP` field in a custom property set to query an external
 **Oracle** database, so that the field executes the specified SQL sentence whenever
 [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) is called for it.
@@ -98,12 +91,6 @@ async function call(action, params) {
   return root;
 }
 ```
-
-> **This operation does not configure an Oracle lookup.** The adapter builds a
-> `SqlServerConnectionParameters` from the Oracle arguments, so `ORACLE_ServiceName` is stored as a
-> SQL Server **server name**, the record is written with `dbtype="SQLSERVER"` and no database name,
-> and the query is later opened with a SQL Server driver. There is no way to point a lookup field at
-> Oracle through this API today.
 
 ```javascript
 await call('SetPropertySetLookupFieldParametersForORACLE', {

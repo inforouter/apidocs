@@ -1,6 +1,6 @@
 # UploadTiffAsPDF API
 
-Intended to upload a TIFF image and store it as a PDF. **It does not convert** - see the warning below. What it does is a plain upload: a new document if the path is free, a new version if it is not.
+Uploads a TIFF image and stores it as a PDF. The converted document is created with a `.pdf` name rather than the `.tif` name in `Path`: a new document if that path is free, a new version if it is not.
 
 ## Endpoint
 
@@ -88,13 +88,10 @@ Content-Type: image/tiff
 
 ## JavaScript
 
-> **This operation does not convert anything.** The conversion runs only when the *new document name*
-> ends in `.tif` or `.tiff` - and both TIFF actions call the shared uploader with that name empty,
-> passing the destination as `Path` instead. The condition can therefore never be true, whatever the
-> caller sends. What actually happens is a plain upload: the bytes are stored verbatim under the name
-> in `Path`, and content that is not a TIFF at all is accepted without complaint.
->
-> Until this is fixed, treat it as [UploadDocument](UploadDocument.md) and convert on the client.
+> **The content must really be a TIFF.** The uploaded bytes are converted to PDF before
+> anything is stored, and the document is created with a `.pdf` name rather than the `.tif`
+> name in `Path`. Content that is not a TIFF is refused with `4000` and the converter's own
+> message, and nothing is stored under either name.
 
 ```javascript
 // Anything carrying bytes is POST-only: a byte[] cannot be bound from a query string, and a GET is

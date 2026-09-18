@@ -2,10 +2,9 @@
 
 Creates a new workflow definition on the specified domain/library with the full set of configuration options: on-end destination folder, supervisor, webhook event URL, and visibility. The workflow is created in **inactive** state.
 
-> **`Supervisor` is required in practice and then discarded.** An empty name fails with
-> `errorCode="4041"`, and a real one is accepted but not attached: the new definition comes back
-> with `<Supervisors />` empty. `UpdateWorkflowDefinition` is the only operation that actually
-> sets supervisors.
+> **`Supervisor` is optional and is honoured.** A name that is given is attached to the new
+> definition and comes back under `<Supervisors>` as `<User id="..." />`; a name nobody has is
+> refused with `4041`. An empty one is accepted and leaves the definition without a supervisor.
 
 This is the most complete variant of the CreateFlowDef family. Use it when you need to configure `OnEndEventUrl` or `Hide`.
 

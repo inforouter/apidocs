@@ -148,11 +148,10 @@ A **library** and a **domain** are the same thing. The operations are named Doma
 library, and the XML element is `<domain>`. Its flags come back as the words `TRUE` and `FALSE` rather
 than `true`/`false`.
 
-> **Never take your own membership away from a library you still need.**
-> [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) will remove the last member,
-> including the caller, and the library then disappears from that caller's view entirely - every
-> operation on it, `DeleteDomain` included, answers `4041` "library not found", even for a system
-> administrator. The library is still there; nothing in the API can reach it again.
+> **A library must keep a member.** Removing the last one is refused with `4000`: a library
+> is visible only to its members, so one with nobody in it cannot be reached by anyone, a
+> system administrator included, and no operation on it - `DeleteDomain` among them - would
+> work again. A member group counts only for the people in it.
 
 ## Notes
 

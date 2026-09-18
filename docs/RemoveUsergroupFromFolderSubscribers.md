@@ -2,12 +2,6 @@
 
 Removes the specified user group from the subscription list of a folder. After removal, members of that group will no longer receive email notifications via the group subscription for any events on that folder. Optionally removes the group from all sub-folders and documents within the folder as well.
 
-> **These two do not remove a group subscription.** `FolderServices.RemoveSubscriberAsync`
-> resolves the group's id and then unsubscribes a *user* with it. The document form finds no such
-> user, changes nothing, and answers `success="true"`; the folder form answers "user not found"
-> about a group that exists. Either way the group stays subscribed, and there is no way through
-> the API to remove it.
-
 ## Endpoint
 
 ```
@@ -30,7 +24,7 @@ Removes the specified user group from the subscription list of a folder. After r
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `FolderPath` | string | Yes | Full infoRouter path to the folder (e.g. `/Finance/Reports`). The folder must already exist. |
-| `groupName` | string | Yes | Name of the user group. Must be a **global** group. A group that belongs to a library is never found - the lookup is done with no library name - and the call is refused as though no such group existed. Removing it does not work in any case - see the warning at the top of this page. |
+| `groupName` | string | Yes | Name of the user group. A group belonging to the library the item is in is looked for first, then the global groups, so either kind can be named. |
 | `IncludeSubObjects` | bool | Yes | When `true`, also removes the group subscription from all sub-folders and documents nested within the specified folder. When `false`, only the subscription on the specified folder itself is removed. |
 
 ---
@@ -148,10 +142,9 @@ async function call(action, params) {
 }
 ```
 
-Intended to unsubscribe a group from a folder. It does not - see the warning above.
+Unsubscribes a user group from a folder, and optionally from everything inside it.
 
 ```javascript
-// Answers "user not found" about the group, and leaves the subscription in place.
 await call('RemoveUsergroupFromFolderSubscribers', {
   authenticationTicket: ticket,
   FolderPath: '/Public/Reports',
@@ -162,15 +155,15 @@ await call('RemoveUsergroupFromFolderSubscribers', {
 
 ## Notes
 
-- **Not subscribed**: the call fails whether the group is subscribed or not, because the group's id is handed to the unsubscribe as a user id and no user has it.
+- **Not subscribed**: removing a group that is not subscribed is a success, not an error.
 
 - **Group Must Exist**: The `groupName` must match an existing infoRouter user group (local or global). If the group is not found, an error is returned.
 
-- **IncludeSubObjects**: intended to apply the removal to every sub-folder and document. Nothing is removed at any level, so the flag makes no difference today.
+- **IncludeSubObjects**: when `true`, the removal is applied to every sub-folder and document in the tree, matching the add.
 
 - **Individual User Subscriptions Unaffected**: This API only removes the group-level subscription. Individual users who are members of the group and have their own personal subscriptions will continue to receive notifications. Use `RemoveUserFromFolderSubscribers` to remove individual user subscriptions.
 
-- **Global groups only**, and even a global group is not removed. See the warning at the top of this page.
+- **Either kind of group**: the folder's own library is searched first and then the global groups.
 
 - **Document Group Subscriptions**: This API operates on folder subscriptions only. To remove a group from a document subscription, use `RemoveUsergroupFromDocumentSubscribers`.
 
@@ -198,7 +191,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no folder at that path, including one the caller may not see |
-| `4041` | no global user group by that name, and also what a group that does exist is reported as |
+| `4041` | no user group by that name, in the folder's library or among the global groups |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---
