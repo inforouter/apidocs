@@ -22,7 +22,7 @@ Creates a new HTML document in the specified folder. The HTML content is stored 
 | `folderPath` | string | Yes | Full infoRouter path of the destination folder (e.g. `/Finance/Reports`). |
 | `name` | string | Yes | Document name. The `.htm` extension is appended automatically if the name does not already end with `.htm` or `.html`. |
 | `htmlContent` | string | Yes | Raw HTML body text to store as the document content. |
-| `xmlParameters` | string | **Yes** | XML document of upload options. Required by model binding even when empty - send `<parameters />` for none. Malformed XML here fails with HTTP 500. See format below. |
+| `xmlParameters` | string | **Yes** | XML document of upload options. Required by model binding even when empty - send `<parameters />` for none. Malformed XML here is refused with `4000`. See format below. |
 
 ## xmlParameters Format
 
@@ -200,5 +200,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4041` | no folder at `folderPath` |
 | `4000` | a boolean parameter such as `CHECKOUT` carried a value that is not one of the English words listed above |
 | `HTTP 400` | `xmlParameters` was empty; it is required, so send `<parameters />` |
-| `HTTP 500` | `xmlParameters` was not well-formed XML. The parse runs before the operation is entered and outside any handler, so the exception escapes and there is no error document at all - not even a `success="false"` body. It should be a `4000` |
+| `4000` | the document was not well-formed XML; the message carries the parser's own words |
 

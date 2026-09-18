@@ -182,9 +182,8 @@ A comma separated string, not an enum name. The first part is the keyword and th
 | `MONTHLY-ON,<n>,<day>` | every *n* months, on that day of the month |
 | `MONTHLY-THE,<n>,<week>,<weekday>` | every *n* months, on the *week*th *weekday* |
 
-**The numbers are not optional.** The parser reads `parts[1]`, `parts[2]` and `parts[3]` without
-checking how many parts there are, so `DAILY` on its own - or `WEEKLY,1` without the day - is a
-`5000` `IndexOutOfRangeException` rather than the `4000` an unrecognised keyword gets. An empty
+**The numbers are not optional.** `DAILY` on its own, or `WEEKLY,1` without the day, is refused
+with `4000` naming the part that is missing - the same answer an unrecognised keyword gets. An empty
 `ScheduleDef` is refused too.
 
 `StartDate` is used: a date in the future is the first review date, and one in the past is rolled
@@ -210,6 +209,6 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no document at that path, or `ReviewByUserId` is not a user |
 | `4000` | `ScheduleDef` is empty or its keyword is not one of the five |
-| `5000` | `ScheduleDef` is missing the numbers its keyword needs, or `xmlParameters` is not an `<ISOReviewDefinitionModel>` document |
+| `4000` | `ScheduleDef` is missing the numbers its keyword needs, or `xmlParameters` is not an `<ISOReviewDefinitionModel>` document |
 | `4030` | the caller may not change that document |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

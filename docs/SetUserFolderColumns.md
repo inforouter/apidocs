@@ -9,8 +9,6 @@ Saves the column layout and custom property set preference for the authenticated
 > asked for. Neither `propertySetId` nor `sortByPropertySetId` is checked against the property sets
 > that exist.
 >
-> **A call with no ticket reports success and saves nothing.** The anonymous user's id is 0, the
-> insert fails, and the failure is swallowed. Send a ticket.
 
 ## Endpoint
 

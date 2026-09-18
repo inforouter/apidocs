@@ -1,14 +1,8 @@
 # Search API
 
-
-
 Prepares a search result set using criteria provided in XML format. The search is executed server-side and the results are stored in the user's session. Use `GetNextSearchPage` and `GetPreviousSearchPage` to page through the results after calling `Search`.
 
-
-
 ## Endpoint
-
-
 
 ```
 
@@ -16,11 +10,7 @@ Prepares a search result set using criteria provided in XML format. The search i
 
 ```
 
-
-
 ## Methods
-
-
 
 - **GET** `/srv.asmx/Search?authenticationTicket=...&xmlcriteria=...&SortBy=...&AscendingOrder=...`
 
@@ -28,11 +18,7 @@ Prepares a search result set using criteria provided in XML format. The search i
 
 - **SOAP** Action: `http://tempuri.org/Search`
 
-
-
 ## Parameters
-
-
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -41,10 +27,7 @@ Prepares a search result set using criteria provided in XML format. The search i
 | `SortBy` | string | Yes | Field by which results are sorted. See **Sort Field Values** below. Pass an empty string to use the default sort order. |
 | `AscendingOrder` | bool | Yes | `true` to sort ascending, `false` to sort descending. |
 
-
 ### Sort Field Values
-
-
 
 | Value | Description |
 |-------|-------------|
@@ -76,18 +59,11 @@ Prepares a search result set using criteria provided in XML format. The search i
 | `STEPNAME` | Sort by workflow step name |
 | `PROPERTSETNAME.FIELDNAME` | Sort by a custom property set field (use dot notation, e.g. `MyPSet.MyField`) |
 
-
 ---
-
-
 
 ## XML Criteria Reference
 
-
-
 The `xmlcriteria` parameter must be a well-formed XML document. The root element may have any name; each child `<criteria>` element defines one search condition.
-
-
 
 **Envelope:**
 
@@ -103,11 +79,7 @@ The `xmlcriteria` parameter must be a well-formed XML document. The root element
 
 ```
 
-
-
 Each element uses three attributes:
-
-
 
 | Attribute | Description |
 |-----------|-------------|
@@ -115,11 +87,7 @@ Each element uses three attributes:
 | `OPERATOR` | Comparison operator -" only required for criteria that support it. |
 | `VALUE` | The criterion value. |
 
-
-
 ### Supported Criteria Elements
-
-
 
 | NAME | OPERATOR | VALUE | Description |
 |------|----------|-------|-------------|
@@ -153,7 +121,6 @@ Each element uses three attributes:
 | `DOWNLOADQUEOF` | -" | infoRouter username | Returns items currently in the specified user's download queue. |
 | `TEMPLATEPATH` | -" | Full infoRouter document path of the template, or `~D<id>` short form. Use `~D999` for HTML documents. | Filters documents rendered from the specified template. Use `~D999` to find all HTML form documents. |
 | `PROPERTYSETNAME` | -" | Property set name (child elements define field criteria) | Filters by custom property set values. See **Property Set Criteria** below. |
-
 
 ### AI Enhanced Criteria
 
@@ -200,10 +167,7 @@ Notes:
 
 ### Date Criteria Subtypes
 
-
-
 The `DATECRITERIA` element requires a `SUBTYPE` attribute to specify which date field to filter by:
-
 
 | SUBTYPE value | Description |
 |---------------|-------------|
@@ -232,27 +196,15 @@ The `DATECRITERIA` element requires a `SUBTYPE` attribute to specify which date 
 
 ```
 
-
-
 ### Document Language Values
-
-
 
 The `DOCLANG` criterion accepts the following ISO 639-1 language codes:
 
-
-
 `en`, `de`, `es`, `fr`, `da`, `el`, `et`, `he`, `hi`, `hu`, `id`, `it`, `ja`, `ko`, `nl`, `no`, `pl`, `pt`, `ro`, `ru`, `sv`, `tk`, `tr`, `uk`, `ur`, `uz`, `vi`, `zh`
-
-
 
 ### Property Set Criteria
 
-
-
 To filter by a custom property set, use the `PROPERTYSETNAME` element with child elements for each field:
-
-
 
 ```xml
 
@@ -266,11 +218,7 @@ To filter by a custom property set, use the `PROPERTYSETNAME` element with child
 
 ```
 
-
-
 Supported operators per field data type:
-
-
 
 | Data Type | Operators |
 |-----------|-----------|
@@ -279,22 +227,13 @@ Supported operators per field data type:
 | `DATE` | `ANYTIME`, `YESTERDAY`, `TODAY`, `LAST7DAYS`, `NEXT7DAYS`, `LASTWEEK`, `THISWEEK`, `NEXTWEEK`, `LASTMONTH`, `THISMONTH`, `NEXTMONTH`, `EQ`, `EQGT`, `EQLT`, `NULL` |
 | `BOOLEAN` | `EQ`, `NULL`, `NOTNULL` |
 
-
 ---
-
-
 
 ## Response
 
-
-
 `Search` prepares the result set and stores it in the session. The response confirms the query was accepted and includes metadata about the total result counts.
 
-
-
 ### Success Response
-
-
 
 ```xml
 
@@ -302,22 +241,14 @@ Supported operators per field data type:
 
 ```
 
-
-
 | Attribute | Description |
 |-----------|-------------|
 | `success` | `true` if the query was prepared successfully. |
 | `ranksorted` | `true` if results are sorted by full-text relevance rank; `false` otherwise. |
 
-
-
 After a successful `Search` call, use `GetNextSearchPage` to retrieve the first page of results.
 
-
-
 ### Relevance and Where the Term Was Found
-
-
 
 `Search` itself returns no items, so it carries no per-document relevance either - only
 `ranksorted`, which says whether the pages that follow will come back in relevance order. The
@@ -325,15 +256,11 @@ relevance of each document, and which part of it the term was found in, arrive w
 themselves: every document a full-text `KEYWORDS` search ranked carries a `<RankInfo>` child
 element in the `GetNextSearchPage` and `GetPreviousSearchPage` responses.
 
-
-
 ```xml
 
 <RankInfo Rank="95" FoundIn="1" FoundInVersionNumber="3000000" />
 
 ```
-
-
 
 A higher `Rank` is a closer match. `FoundIn` says where the term was found, as a number: `1` the
 text of the document itself (in the version `FoundInVersionNumber` names), `2` its properties or
@@ -343,11 +270,7 @@ engine did not rank - carries no `<RankInfo>` element at all. See
 [GetNextSearchPage](GetNextSearchPage.md#rankinfo-element-full-text-search-results) for the full
 attribute table and suggested captions.
 
-
-
 ### Error Response
-
-
 
 ```xml
 
@@ -355,33 +278,19 @@ attribute table and suggested captions.
 
 ```
 
-
-
 ---
 
-
-
 ## Required Permissions
-
-
 
 Any authenticated user may call this API. Read-only users may also use it.
 
 Results are always limited to libraries the user can view. Whether each hit is also checked against the item's own permissions depends on the server setting `Search:CheckSecurityOnSearch`, which is **off** by default. With it off, a hit in a library the user belongs to is returned even when the item's permissions would deny reading it; opening the item still fails. With it on, every hit is checked for **Read** (documents) or **List** (folders) permission before it is returned.
 
-
-
 ---
-
-
 
 ## Example
 
-
-
 ### GET Request
-
-
 
 ```
 
@@ -397,19 +306,13 @@ HTTP/1.1
 
 ```
 
-
-
 ### POST Request
-
-
 
 ```
 
 POST /srv.asmx/Search HTTP/1.1
 
 Content-Type: application/x-www-form-urlencoded
-
-
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
@@ -431,11 +334,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### SOAP Request
-
-
 
 ```xml
 
@@ -467,11 +366,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### Full Criteria Example -" Advanced Search
-
-
 
 ```xml
 
@@ -507,11 +402,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ### User-Scoped Search Examples
-
-
 
 ```xml
 
@@ -523,8 +414,6 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 </criteria>
 
-
-
 <!-- Items in a user's favorites -->
 
 <criteria>
@@ -533,8 +422,6 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 </criteria>
 
-
-
 <!-- Current user's recent documents -->
 
 <criteria>
@@ -542,8 +429,6 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   <criteria NAME="RECENTDOCUMENTS" />
 
 </criteria>
-
-
 
 <!-- Items in a user's download queue -->
 
@@ -555,11 +440,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-
-
 ---
-
-
 
 ## JavaScript
 
@@ -633,12 +514,10 @@ default sort of its own. A column it does not know is refused `4000` and the mes
 `RDDEFID`, `CLEVEL`, `DECLASSIFYON`, `DOWNGRADEON`, `DISPOSITIONDATE`, `LASTISOREVIEW`,
 `NEXTISOREVIEW`, and `PROPERTYSETNAME.FIELDNAME` for a custom field.
 
-A criteria document that is not well formed is a `5000` `XmlException` rather than a `4000`: it is
-loaded before the operation is entered.
+A criteria document that is not well formed is refused with `4000`, the same as a criterion name
+the parser does not recognise.
 
 ## Notes
-
-
 
 - The `Search` API only **prepares** the result set; it does not return document listings. Call `GetNextSearchPage` immediately after to retrieve the first page.
 
@@ -666,15 +545,9 @@ loaded before the operation is entered.
 
 - The `TEMPLATEPATH` criterion accepts either a full infoRouter document path (e.g. `/Finance/Templates/mytemplate.htm`) or the short-form `~D<id>` notation (e.g. `~D42`). Use `~D999` as the reserved identifier for all HTML form documents — it matches any document whose template is the built-in HTML document type regardless of which specific template file was used.
 
-
-
 ---
 
-
-
 ## Related APIs
-
-
 
 - [GetNextSearchPage](GetNextSearchPage.md) - Retrieves the next page of the prepared search results
 
@@ -683,8 +556,6 @@ loaded before the operation is entered.
 - [GetFoldersAndDocuments](GetFoldersAndDocuments.md) - Lists documents and folders in a specific path without a search query
 
 - [GetDocuments](GetDocuments.md) - Returns documents in a specific folder path
-
-
 
 ---
 
@@ -696,5 +567,5 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4000` | a criterion name the parser does not know, or a `SortBy` that is not one of the columns |
-| `5000` | `xmlcriteria` is not well formed |
+| `4000` | the document was not well-formed XML; the message carries the parser's own words |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

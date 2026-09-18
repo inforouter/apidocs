@@ -237,14 +237,6 @@ async function call(action, params) {
 Files an e-mail as a document, with every field of the message in one XML document instead of as
 separate parameters.
 
-> **It loses the blind-copy address, and writes it into the visible one.**
-> `RegisterEmailModel.ParseFromXml` handles `<BCCAddress>` by assigning the *CC* property - the same
-> one `<CCAddress>` sets - so the last of the two wins and `BCC` is stored empty. A message registered
-> this way with a `<BCCAddress>` ends up with that address in the `CC` field of its `SYSTBL_EMAIL`
-> property set, where anyone who may read the document can see it. Use
-> [RegisterEmail2](RegisterEmail2.md), which takes the two as parameters and stores both correctly,
-> until this is fixed.
-
 ```javascript
 const parametersXml = `
   <email>
@@ -265,9 +257,8 @@ const root = await call('RegisterEmail3', {
 });
 ```
 
-Element names are matched without regard to case. **Malformed XML here is an HTTP 500 with no error
-document at all** - the parse runs before the operation is entered and outside any handler - so
-validate the document before sending it.
+Element names are matched without regard to case. A malformed document is refused with `4000`
+carrying the parser's own message.
 
 ### Which of the four to use
 
@@ -333,7 +324,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4090` | a document of that name is already in the folder |
 | `4041` | no folder at `FolderPath` |
-| `HTTP 500` | `parametersXml` is not well-formed XML; the exception escapes and there is no error document |
+| `4000` | the document was not well-formed XML; the message carries the parser's own words |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |

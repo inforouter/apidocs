@@ -125,7 +125,7 @@ await call('UpdateHtmlDocument', {
 number is not told.
 
 Use [UpdateURLDocument](UpdateURLDocument.md) for a `.url` document. Pointing this one at a `.url`
-answers `5000` carrying a `UriFormatException` rather than a refusal - see the error table below.
+or a shortcut is refused with `4000`, and the document is not checked out.
 
 ## Notes
 
@@ -149,6 +149,6 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no document at that path - including a folder path, and one the caller may not see |
 | `4030` | the caller may not change this document |
-| `5000` | the document is a `.url` rather than an HTML document; a `UriFormatException` escapes where a `4000` was meant |
+| `4000` | the document is a `.url` or a shortcut rather than an HTML document |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 

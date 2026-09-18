@@ -183,7 +183,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4090` | something of that name is already at the destination |
 | `4000` | `DestinationPath` is where the item already is, or `SourcePath` is a library |
 | `4030` | the caller may not take the item out of where it is, or put it where it is going |
-| `5000` | the last segment of `DestinationPath` did not match the source's own name and that name was already taken at the destination; the answer carries a raw unique-key violation. It should be a `4090` |
+| `4090` | an item of that name is already at the destination |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |

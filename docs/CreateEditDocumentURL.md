@@ -188,7 +188,7 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `HTTP 500` | every call, including one naming a document that exists; see the note above |
+| `4041` | no document at that path |
 
 | Error | Description |
 |-------|-------------|

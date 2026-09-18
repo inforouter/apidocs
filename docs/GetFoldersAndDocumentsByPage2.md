@@ -165,9 +165,8 @@ const page = await call('GetNextSearchPage', {
 });
 ```
 
-`filterXml` is optional, but it is parsed as XML when it is not empty: a value that is not
-well-formed is answered `5000` carrying the `XmlException`, where every other malformed-XML input in
-the API is a `4000`. Treat that as something to avoid triggering rather than something to depend on.
+`filterXml` is optional, but it is parsed as XML when it is not empty, and a value that is not
+well-formed is refused with `4000` carrying the parser's own message.
 
 ## Notes
 
@@ -198,7 +197,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown |
 | `4041` | no folder at that path - including one the caller may not see, which is not told apart from one that does not exist |
 | `4000` | `SortBy` is not one of the accepted sort names; the message lists them |
-| `5000` | `filterXml` is not well-formed XML. It should be a `4000`, and may become one |
+| `4000` | the document was not well-formed XML; the message carries the parser's own words |
 | `HTTP 400` | `Path` was empty; refused by model binding, so there is no error document |
 | `HTTP 400` | `SortBy` was empty; also refused by model binding |
 

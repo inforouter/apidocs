@@ -156,10 +156,9 @@ await post('UploadDocument4', {
 });
 ```
 
-The parameter document is the same one [CreateHtmlDocument](CreateHtmlDocument.md) takes, with the
-same two traps: **it is required even when empty** - send `<parameters />` - and a **malformed one is
-answered HTTP 500 with no error document at all**, because the parse runs before the operation is
-entered and outside any handler. Boolean values take English words only (`ON`, `TRUE`, `T`, `YES`,
+The parameter document is the same one [CreateHtmlDocument](CreateHtmlDocument.md) takes:
+**it is required even when empty** - send `<parameters />` - and a malformed one is refused with
+`4000`. Boolean values take English words only (`ON`, `TRUE`, `T`, `YES`,
 `Y`, `1` and their negatives), whatever language the refusal message arrives in.
 
 ### The upload family
@@ -212,7 +211,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4000` | a boolean parameter carried a value that is not one of the English words |
 | `HTTP 415` | the call was a GET; the content can only be posted |
 | `HTTP 400` | `xmlParameters` was empty; it is required, so send `<parameters />` |
-| `HTTP 500` | `xmlParameters` was not well-formed XML; the exception escapes and there is no error document |
+| `4000` | the document was not well-formed XML; the message carries the parser's own words |
 
 | Error | Description |
 |-------|-------------|

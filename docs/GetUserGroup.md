@@ -148,10 +148,8 @@ console.log(group.getAttribute('GroupID'),
             group.getAttribute('public'));      // the showMembers flag, inverted - see CreateUserGroup1
 ```
 
-> **`DomainName` cannot be left empty here.** It is declared optional and every other operation in
-> the family takes an empty one, but this one answers a bare **HTTP 500** with no error document -
-> so there is no code or message to read. To read a global group, list them with
-> `GetGlobalGroups` instead.
+> **An empty `DomainName` reads the global groups**, the same as everywhere else in this family.
+> Use [GetGlobalGroups](GetGlobalGroups.md) to list them all rather than name one.
 
 ## Notes
 
@@ -178,5 +176,5 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no group by that name in that library |
-| `HTTP 500` | `DomainName` was empty; a bare Internal Server Error with no error document |
+| `4041` | no user group by that name; an empty `DomainName` searches the global groups |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

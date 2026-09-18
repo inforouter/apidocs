@@ -67,8 +67,7 @@ The server may respond with `tryagain="true"` on a transient failure for a singl
 
 #Commits content staged with [UploadFileChunk](UploadFileChunk.md), taking the same parameter document
 [UploadDocument4](UploadDocument4.md) does. It is required even when empty - send `<parameters />` -
-and a malformed one is answered HTTP 500 with no error document, because the parse runs before the
-operation is entered and outside any handler.
+and a malformed one is refused with `4000`.
 
 **A handler is consumed by the call that commits it**: committing the same one twice is `4000`
 "upload handler cannot be found".
@@ -310,7 +309,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4041` | no folder at the parent of the path |
 | `4030` | the caller may not add documents there, or the folder rules forbid the file type |
 | `HTTP 400` | `xmlParameters` was empty; it is required, so send `<parameters />` |
-| `HTTP 500` | `xmlParameters` was not well-formed XML; the exception escapes and there is no error document |
+| `4000` | the document was not well-formed XML; the message carries the parser's own words |
 
 | Error | Description |
 |-------|-------------|
