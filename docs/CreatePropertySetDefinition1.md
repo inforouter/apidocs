@@ -94,6 +94,42 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=ConfidentialMeta&PropertySetCaption=Confidential+Metadata&AppliestoDocuments=true&AppliestoFolders=false&AppliestoUsers=false&DomainNames=Legal&PrivatePropertySet=true
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+`CreatePropertySetDefinition` with the private flag. A private set is left out of
+`GetPropertySetDefinitions` for a caller with no ticket, and asking for one by name without a ticket
+is refused.
+
+```javascript
+await call('CreatePropertySetDefinition1', {
+  authenticationTicket: ticket,
+  PropertySetName: 'SALARYBAND',
+  PropertySetCaption: 'Salary band',
+  AppliestoDocuments: false,
+  AppliestoFolders: false,
+  AppliestoUsers: true,
+  DomainNames: '',
+  PrivatePropertySet: true
+});
+```
+
 ## Notes
 
 - `PropertySetName` is stored as the internal key and also forms the database table name (`CUSTOM_<name>`). It cannot be changed after creation without using [UpdatePropertySetDefinition](UpdatePropertySetDefinition.md).
@@ -111,11 +147,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=Confid
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Calling user is not a System Administrator. |
-| Name already exists | A property set with the specified `PropertySetName` already exists. |
-| Caption already exists | A property set with the specified `PropertySetCaption` already exists. |
-| Invalid name | `PropertySetName` is empty, exceeds the maximum length, or contains invalid characters. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller is not a system administrator - including a caller with no ticket at all |
+| `4090` | a set of that name already exists |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

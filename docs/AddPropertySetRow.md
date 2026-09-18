@@ -34,11 +34,16 @@ Adds a new property set row to a document or folder. The target object is resolv
 
 ### XML Structure Rules
 
-- The root element must be `<psets>`.
-- Each `<pset>` child element represents one property set. The `name` attribute specifies the property set name.
-- Each `<row>` child element inside a `<pset>` represents one row to add. Field names are specified as XML attributes of the `<row>` element.
+- **The element names are not checked.** The parser walks the root element's children and
+  their children, so `<psets><pset>` and `<propertysets><propertyset>` behave identically -
+  and so does any other pair of names. Only the attributes below are read.
+- Each second-level element represents one property set; its `name` attribute is the only
+  thing that identifies it.
+- Each third-level element represents one row. Field names are attributes of that element.
 - Field names are **case-insensitive** during lookup but are stored in uppercase.
-- An optional `rownbr` attribute on `<row>` specifies the row number to assign. If omitted or `0`, the system assigns the next available row number automatically.
+- `rownbr` only ever means "a new row". `0`, or the attribute left out, appends a row and
+  numbers it from 1 up. **Naming a row that already exists is accepted and does nothing** -
+  use [UpdatePropertySetRow](UpdatePropertySetRow.md) to change one.
 - Multiple `<pset>` elements may be included in a single call.
 - Multiple `<row>` elements may be included in a single `<pset>` for multi-row property sets.
 
@@ -79,11 +84,15 @@ Adds a new property set row to a document or folder. The target object is resolv
 ### Error Response (multiple errors)
 
 ```xml
-<response success="false" error="[log]">
-  <item name="document.pdf (D123)" error="Access denied." />
-  <item name="ProjectMetadata" error="Property set not found." />
+<response success="false" error="[log]" errorCode="4000">
+  <log><item>NOSUCHSET</item><error>Custom property not found.</error></log>
+  <log><item>OTHERSET</item><error>Custom property not found.</error></log>
 </response>
 ```
+
+A single failure does **not** use this shape: it carries its own message in `error`.
+A document naming several sets is not all-or-nothing either - the rows for the sets that do
+exist are written, and the call still reports `success="false"` because one entry failed.
 
 > **Note**: This API uses `<response>` as the root element, not `<root>`.
 
@@ -103,7 +112,13 @@ Anonymous access is not permitted.
 
 - **System property sets** (managed internally by infoRouter) cannot be applied or removed manually. Attempting to do so returns an error.
 - The property set must be defined in the same infoRouter library as the target document or folder.
-- Only fields defined in the property set definition are accepted. Unrecognized field names are ignored.
+- Only fields defined in the property set definition are accepted. **An unrecognised field
+  name is dropped silently** - the row is written with the fields that do exist and the
+  caller is not told, so a misspelled name looks like a success.
+- A field marked required and left out is refused `4000`, with `SETNAME.FIELDNAME` in the
+  message. A value longer than a `CHAR` field is refused the same way.
+- **The `AppliesTo` flags on the definition are not enforced here.** A set created with
+  `AppliestoFolders=false` is applied to a folder without complaint.
 - After successfully adding a row to a document, infoRouter sends an `ON_UPDATE` notification to all document subscribers.
 
 ## Example
@@ -129,6 +144,73 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/MyLibrary/Projects/Proposal.pdf&xmlpset=<psets><pset name="ProjectMetadata"><row PROJECT_CODE="PRJ-001" STATUS="Draft"/></pset></psets>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Writes one or more rows of a property set onto a document or a folder. `Path` resolves to a document
+first and to a folder if there is no document there.
+
+```javascript
+const rows = `
+<propertysets>
+  <propertyset name="PROJECTMETADATA">
+    <row rownbr="0" PROJECTCODE="PRJ-001" REGION="EMEA" APPROVED="true" />
+    <row rownbr="0" PROJECTCODE="PRJ-002" REGION="APAC" APPROVED="false" />
+  </propertyset>
+</propertysets>`;
+
+await call('AddPropertySetRow', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Projects/proposal.pdf',
+  xmlpset: rows
+});
+```
+
+Things worth knowing before you build that document:
+
+- **The element names are not checked.** The parser walks the root element's children and their
+  children and reads only the `name` attribute on the second level and `rownbr` on the third, so
+  `<psets><pset>` and `<propertysets><propertyset>` behave identically.
+- **`rownbr` is only ever "new".** `0`, or the attribute left out, appends a row and numbers it from
+  1 up. Naming a row that already exists is **accepted and does nothing** - use
+  `UpdatePropertySetRow` to change one.
+- **A field the set does not have is dropped silently.** The row is written with the fields that do
+  exist and the caller is not told about the rest, so a misspelled field name looks like a success.
+- **A required field left out is refused**, `4000`, with `SETNAME.FIELDNAME` in the message.
+- **The `AppliesTo` flags are not enforced here.** A set created with `AppliestoFolders=false` is
+  applied to a folder without complaint.
+- A `BOOLEAN` written as `true` reads back as `Yes`.
+
+The answer on success is `<response success="true" error="" />` - with **no `errorCode`**, unlike
+most operations. A single failure carries its own message; two or more carry the literal `[log]` and
+one `<log>` per failure:
+
+```xml
+<response success="false" error="[log]" errorCode="4000">
+  <log><item>NOSUCHSET</item><error>Custom property not found.</error></log>
+  <log><item>OTHERSET</item><error>Custom property not found.</error></log>
+</response>
+```
+
+A document naming several sets is **not** all-or-nothing: the rows for the sets that do exist are
+written and the call still reports `success="false"` because one entry failed.
+
 ## Notes
 
 - The `Path` parameter resolves to a **document** first; if no document is found at that path, it is resolved as a **folder**.
@@ -149,11 +231,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/MyLibrary/Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | The calling user does not have Change Metadata access on the target. |
-| Path not found | No document or folder was found at the specified `Path`. |
-| Property set not found | No property set with the specified name exists. |
-| System property set | Cannot manually apply a system-managed property set. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document and no folder at `Path` |
+| `4000` | no set by that name, a required field was left out, a value is longer than its field, `xmlpset` is not well formed, or there is no ticket at all |
+| `4030` | the caller may not change the metadata of that document or folder |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

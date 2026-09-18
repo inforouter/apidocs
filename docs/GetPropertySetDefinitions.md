@@ -1,6 +1,11 @@
 # GetPropertySetDefinitions API
 
-Returns a list of all property set definitions in the system. No filtering is applied -" all property sets are returned regardless of which object types they apply to or which libraries they belong to. Private property sets are excluded for anonymous callers.
+Returns the property set definitions the caller may see, **without** their field definitions -
+use [GetPropertySetDefinition](GetPropertySetDefinition.md) for those.
+
+The list is filtered by visibility: a private set is left out for a caller with no ticket, and
+a set restricted to a library is left out for somebody who is not a member of it. The sets
+marked `SystemUseOnly="TRUE"` are included, and no operation may change those.
 
 For filtered results, use [GetPropertySetDefinitions1](GetPropertySetDefinitions1.md).
 
@@ -99,6 +104,41 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Lists every definition the caller may see, **without** the field definitions - use
+`GetPropertySetDefinition` for those.
+
+```javascript
+const root = await call('GetPropertySetDefinitions', { authenticationTicket: ticket });
+
+for (const set of root.querySelectorAll('PropertySets > PropertySet')) {
+  if (set.getAttribute('SystemUseOnly') === 'TRUE') { continue; }   // infoRouter's own, do not edit
+  console.log(set.getAttribute('Name'), set.getAttribute('Caption'));
+}
+```
+
+The list is filtered by what the caller may see: a private set is left out for a caller with no
+ticket, and a set restricted to a library is left out for somebody who is not in it. It does include
+the sets marked `SystemUseOnly="TRUE"`, which no operation may change.
+
 ## Notes
 
 - The result includes all property sets in the system with no filtering by library, object type, or privacy.
@@ -113,7 +153,8 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |

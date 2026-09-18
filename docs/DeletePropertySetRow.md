@@ -127,6 +127,48 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/MyLibrary/Projects/Proposal.pdf&xmlpset=<psets><pset name="ProjectMetadata"><row rownbr="1"/></pset></psets>
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes rows of a property set from a document or a folder. Same document shape as
+`AddPropertySetRow`; only `name` and `rownbr` are read.
+
+```javascript
+// One row.
+await call('DeletePropertySetRow', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Projects/proposal.pdf',
+  xmlpset: '<propertysets><propertyset name="PROJECTMETADATA"><row rownbr="2" /></propertyset></propertysets>'
+});
+
+// Every row of that set: leave rownbr out.
+await call('DeletePropertySetRow', {
+  authenticationTicket: ticket,
+  Path: '/Finance/Projects/proposal.pdf',
+  xmlpset: '<propertysets><propertyset name="PROJECTMETADATA"><row /></propertyset></propertysets>'
+});
+```
+
+A `rownbr` that is not there is **accepted** and removes nothing, so the result does not tell you
+whether there was a row. The answer on success carries no `errorCode`, the same as
+`AddPropertySetRow`.
+
 ## Notes
 
 - The `Path` resolves to a **document** first; if no document is found, it is resolved as a **folder**.
@@ -144,12 +186,12 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&Path=/MyLibrary/Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | The calling user does not have Remove Metadata access on the target. |
-| Path not found | No document or folder was found at the specified `Path`. |
-| Property set not found | No property set with the specified name exists. |
-| System property set | Cannot manually operate on a system-managed property set. |
-| Required property set | Cannot delete the last row of a property set that is required by the document's document type. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no document and no folder at `Path` |
+| `4000` | no set by that name, `xmlpset` is not well formed, or there is no ticket at all |
+| `4030` | the caller may not change the metadata of that document or folder |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

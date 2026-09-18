@@ -60,13 +60,13 @@ The following names cannot be used as `FieldName`:
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Property field already exists." />
+<response success="false" error="Property field already exists." />
 ```
 
 ## Required Permissions
@@ -105,6 +105,54 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=ProjectMetadata&FieldName=PROJECT_CODE&FieldCaption=Project+Code&FieldType=CHAR&FieldLength=20&isRequired=true&ControlSize=20&ControlOrder=1&ControlType=TEXT+BOX
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Adds one field. `FieldType` is one of `BOOLEAN`, `NUMBER`, `CHAR` and `DATE`; `ControlType` one of
+`TEXT BOX`, `COMBO BOX`, `LIST BOX`, `RADIO BUTTON`, `CHECK BOX` and `LOOKUP`. Both are upper cased
+before they are checked, and so is `FieldName`; `FieldCaption` is kept as written.
+
+```javascript
+await call('AddPropertySetField', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA',
+  FieldName: 'PROJECTCODE',
+  FieldCaption: 'Project code',
+  FieldType: 'CHAR',
+  FieldLength: 32,
+  isRequired: true,
+  ControlSize: 20,
+  ControlOrder: 1,
+  ControlType: 'TEXT BOX'
+});
+```
+
+**Only `CHAR` keeps the `FieldLength` and `ControlSize` you send.** The other three overwrite both,
+whatever the caller asked for, and two of them overwrite `ControlType` as well:
+
+| `FieldType` | `FieldLength` | `ControlSize` | `ControlType` |
+|---|---:|---:|---|
+| `CHAR` | as given, 1 to 255 | as given | as given |
+| `NUMBER` | forced to 4 | forced to 10 | as given |
+| `BOOLEAN` | forced to 1 | forced to 0 | forced to `CHECK BOX` |
+| `DATE` | forced to 8 | forced to 12 | forced to `TEXT BOX` |
+
 ## Notes
 
 - `FieldName` is automatically converted to uppercase and trimmed before storage.
@@ -123,15 +171,13 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Calling user is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| System property set | Cannot modify a system-managed property set. |
-| Invalid field name | `FieldName` is empty, contains invalid characters, or is a reserved name. |
-| Invalid field type | `FieldType` is not `BOOLEAN`, `NUMBER`, `CHAR`, or `DATE`. |
-| Invalid field length | `FieldType` is `CHAR` and `FieldLength` is not between 1 and 255. |
-| Invalid control type | `ControlType` is not one of the six valid values. |
-| Field already exists | A field with the specified `FieldName` already exists in the property set. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller is not a system administrator - including a caller with no ticket at all |
+| `4041` | no set by that name |
+| `4090` | the set already has a field of that name |
+| `4000` | `FieldType` or `ControlType` is not one of the accepted names, a `CHAR` `FieldLength` is outside 1 to 255, `FieldName` uses a character outside `0-9A-Z_`, `FieldName` is one of the six reserved names, or `FieldCaption` is empty |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

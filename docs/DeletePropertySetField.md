@@ -79,6 +79,38 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=ProjectMetadata&FieldName=STATUS
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Removes a field from the definition and its column from the table behind it, so every row that
+carried a value for it loses that value. The rows themselves stay.
+
+```javascript
+await call('DeletePropertySetField', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA',
+  FieldName: 'REGION'
+});
+```
+
+There is no confirmation step and no undo.
+
 ## Notes
 
 - `FieldName` is matched case-insensitively -" the system converts it to uppercase before looking it up.
@@ -95,12 +127,11 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Calling user is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| System property set | Cannot modify a system-managed property set. |
-| Field not found | No field with the specified `FieldName` exists in the property set. |
-| Invalid field name | `FieldName` contains characters other than letters, digits, and underscores. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller is not a system administrator - including a caller with no ticket at all |
+| `4041` | no set by that name, or the set has no such field |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

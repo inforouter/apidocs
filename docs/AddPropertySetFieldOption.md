@@ -28,13 +28,13 @@ Adds a static option value to a property set field. Only fields with a `COMBO BO
 ### Success Response
 
 ```xml
-<root success="true" />
+<response success="true" error="" errorCode="0" />
 ```
 
 ### Error Response
 
 ```xml
-<root success="false" error="Property option is already exists." />
+<response success="false" error="Property option is already exists." />
 ```
 
 ## Required Permissions
@@ -80,6 +80,42 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=ProjectMetadata&FieldName=STATUS&OptionValue=In+Progress
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Adds one value to the list a field offers. Only a `COMBO BOX`, a `LIST BOX` and a `RADIO BUTTON`
+have options; a `TEXT BOX` or a `CHECK BOX` is refused.
+
+```javascript
+for (const region of ['EMEA', 'APAC', 'AMER']) {
+  await call('AddPropertySetFieldOption', {
+    authenticationTicket: ticket,
+    PropertySetName: 'PROJECTMETADATA',
+    FieldName: 'REGION',
+    OptionValue: region
+  });
+}
+```
+
+The options come back under the field in `GetPropertySetDefinition`, as
+`<options><option value="EMEA" /></options>`.
+
 ## Notes
 
 - `OptionValue` is case-sensitive and must be unique within the field.
@@ -98,13 +134,13 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Calling user is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| Field not found | No field with the specified `FieldName` exists in the property set. |
-| Wrong control type | The field's control type does not support options (must be COMBO BOX, LIST BOX, or RADIO BUTTON). |
-| Empty option value | `OptionValue` is empty after trimming. |
-| Option already exists | An option with the same value already exists on this field. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4030` | the caller is not a system administrator - including a caller with no ticket at all |
+| `4041` | no set by that name, or the set has no such field |
+| `4090` | the field already offers that value |
+| `4000` | the field's control type does not take options |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

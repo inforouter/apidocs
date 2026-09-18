@@ -133,6 +133,50 @@ HTTP/1.1
 Host: yourserver
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Reads one definition in full: its flags, the libraries it is restricted to, and every field with its
+options.
+
+```javascript
+const root = await call('GetPropertySetDefinition', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA'
+});
+
+const set = root.querySelector('PropertySet');
+console.log(set.getAttribute('Caption'),
+            set.getAttribute('AppliesToDocuments'),   // "TRUE" / "FALSE", upper case
+            set.getAttribute('PrivatePropertySet'));
+
+for (const field of root.querySelectorAll('Fields > field')) {
+  console.log(field.getAttribute('FieldName'),
+              field.getAttribute('DataType'),
+              field.getAttribute('Required'),
+              [...field.querySelectorAll('option')].map(o => o.getAttribute('value')));
+}
+```
+
+The set element is `<PropertySet>` with a capital P and the field elements are `<field>` in lower
+case. Fields come back in their `ControlOrder`. The name is matched case insensitively.
+
 ## Notes
 
 - `PropertySetName` lookup is **case-insensitive**.
@@ -148,9 +192,11 @@ Host: yourserver
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| Access Denied | Property set is private and the caller is anonymous. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4041` | no set by that name |
+| `4010` | the set is private and the caller has no ticket - the message says "Access denied", the code says unauthenticated |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

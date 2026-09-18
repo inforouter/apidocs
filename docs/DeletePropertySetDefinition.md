@@ -83,6 +83,38 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=ProjectMetadata
 ```
 
+## JavaScript
+
+Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
+`errorCode` is the number to report.
+
+```javascript
+async function call(action, params) {
+  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const root = new DOMParser()
+    .parseFromString(await response.text(), 'text/xml')
+    .documentElement;
+
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root;
+}
+```
+
+Deletes the set, its fields, its options and every row of it on every document, folder and user,
+along with the table behind it.
+
+```javascript
+await call('DeletePropertySetDefinition', {
+  authenticationTicket: ticket,
+  PropertySetName: 'PROJECTMETADATA'
+});
+```
+
+There is no undo. A set that is not there is reported `4000`, where `GetPropertySetDefinition`
+reports `4041` for the identical condition.
+
 ## Notes
 
 - All applied property set data for all documents, folders, and users is permanently lost when the definition is deleted.
@@ -98,11 +130,10 @@ authenticationTicket=3f7a1b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c&PropertySetName=Projec
 
 ## Error Codes
 
-| Error | Description |
-|-------|-------------|
-| `[900]` | Authentication failed -" invalid credentials. |
-| `[901]` | Session expired or invalid authentication ticket. |
-| Access Denied | Calling user is not a System Administrator. |
-| Property set not found | No property set with the specified `PropertySetName` exists. |
-| System property set | Cannot delete a system-managed property set. |
-| Document type association | The property set is assigned to one or more document types and cannot be deleted. |
+The `errorCode` values this operation returns, checked against a running server:
+
+| `errorCode` | When |
+|---:|---|
+| `4010` | the ticket is expired or unknown |
+| `4000` | no set by that name, **or** the caller is not a system administrator - the message says which, the code does not |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
