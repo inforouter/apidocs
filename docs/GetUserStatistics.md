@@ -205,7 +205,7 @@ Number(value.querySelector('TotalDocuments').textContent);
 Number(value.querySelector('OverDueTasks').textContent);
 ```
 
-The `<Value>` element holds twenty counters, each as its own child element:
+The `<Value>` element holds twenty-one counters, each as its own child element:
 
 `TotalDocuments`, `CheckedOutDocuments`, `ViewedDocuments`, `SubscribedDocuments`,
 `FavoriteDocuments`, `VotedDocuments`, `DocumentsInDownloadQueue`, `RecycledDocuments`,
@@ -279,5 +279,6 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `4000` | no user by that name, and also what a caller with no ticket is told |
+| `4041` | no user by that name |
+| `4000` | the caller has no ticket - where most operations answer `4010` for that |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
