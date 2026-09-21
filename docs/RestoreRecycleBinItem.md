@@ -190,6 +190,8 @@ sent - it is declared as a plain string, so leaving it out is an HTTP 400.
 
 - **Folder Restore**: Restoring a folder recursively restores all of its contained documents and sub-folders that were in the recycle bin as part of that folder deletion.
 
+- **Purged Items**: An item that has been purged cannot be restored, even while the purge job has not removed it yet. `PurgeRecycleBinItem` only queues the item for the job; from that moment a restore is refused with `4000` "no longer in the recycle bin". This applies to documents and folders.
+
 - **Invalid Handler**: If the `ItemHandler` string cannot be parsed or refers to an unsupported object type, `"Invalid ItemHandler"` is returned.
 
 ---
@@ -212,7 +214,8 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `4000` | the item is no longer in the recycle bin - which is also what a second restore of the same handler reports |
+| `4000` | the item is no longer in the recycle bin - which is also what a second restore of the same handler reports, and what a restore of an item already purged (queued for the purge job) reports |
+| `4090` | an item of the same name appeared in the target folder between the name check and the restore (two requests at the same moment); before 9.0 this surfaced as `5000` "Internal Error" |
 | `4000` | `ItemHandler` is not a handler: the letter and the id are checked before the lookup, and the message naming the parameter is an English literal that is not translated |
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
