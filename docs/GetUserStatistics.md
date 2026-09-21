@@ -1,4 +1,4 @@
-# GetUserStatistics API
+﻿# GetUserStatistics API
 
 Returns activity and membership statistics for a specified user, including document counts, folder counts, task counts, workflow roles, and library memberships.
 
@@ -44,12 +44,21 @@ Returns activity and membership statistics for a specified user, including docum
     <FoldersInDownloadQueue>0</FoldersInDownloadQueue>
     <RecycledFolders>1</RecycledFolders>
     <!-- Task Statistics -->
-    <QueuedTasks>5</QueuedTasks>
-    <TasksDueToday>1</TasksDueToday>
-    <TasksDueThisWeek>3</TasksDueThisWeek>
-    <OverdueTasks>0</OverdueTasks>
-    <TotalTasks>5</TotalTasks>
+    <NotStartedTasks>2</NotStartedTasks>
+    <OverDueTasks>4</OverDueTasks>
+    <DueTodayTasks>1</DueTodayTasks>
+    <DueThisWeekTasks>3</DueThisWeekTasks>
+    <DueLaterTasks>1</DueLaterTasks>
+    <DueTasks>9</DueTasks>
+    <OpenTasks>11</OpenTasks>
     <TasksAssignedToOthers>2</TasksAssignedToOthers>
+    <TaskFilterDates>
+      <DueTodayFrom>2026-09-21T14:32:05</DueTodayFrom>
+      <DueTodayTo>2026-09-22T00:00:00</DueTodayTo>
+      <DueThisWeekFrom>2026-09-22T00:00:00</DueThisWeekFrom>
+      <DueThisWeekTo>2026-09-28T00:00:00</DueThisWeekTo>
+      <DueLaterFrom>2026-09-28T00:00:00</DueLaterFrom>
+    </TaskFilterDates>
     <!-- Workflow and ISO Statistics -->
     <WorkflowRoles>2</WorkflowRoles>
     <IsoReviewerRoles>1</IsoReviewerRoles>
@@ -98,12 +107,15 @@ Returns activity and membership statistics for a specified user, including docum
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `QueuedTasks` | integer | Number of workflow tasks currently queued for the user |
-| `TasksDueToday` | integer | Number of tasks due today |
-| `TasksDueThisWeek` | integer | Number of tasks due this week (including today) |
-| `OverdueTasks` | integer | Number of overdue tasks assigned to the user |
-| `TotalTasks` | integer | Total number of workflow tasks assigned to the user |
-| `TasksAssignedToOthers` | integer | Number of tasks the user has assigned to other users |
+| `NotStartedTasks` | integer | Tasks whose workflow step has not been reached. They carry no due date and nobody can act on them yet |
+| `OverDueTasks` | integer | Open, started, and past their due date |
+| `DueTodayTasks` | integer | Due between now and midnight tonight, and so not yet overdue |
+| `DueThisWeekTasks` | integer | Due after today and before the week is out |
+| `DueLaterTasks` | integer | Due after this week |
+| `DueTasks` | integer | Every open task that has started: the four above added together |
+| `OpenTasks` | integer | `NotStartedTasks` + `DueTasks` |
+| `TasksAssignedToOthers` | integer | Tasks the user assigned. Note this counts tasks assigned to **anyone**, the user included, and unlike every other count here it takes group- and role-assigned tasks too |
+| `TaskFilterDates` | element | The window boundaries the counts were taken with - see below |
 
 ### Workflow and ISO Statistics
 
@@ -190,25 +202,65 @@ const value = (await call('GetUserStatistics', { authenticationTicket: ticket, u
   .querySelector('Value');
 
 Number(value.querySelector('TotalDocuments').textContent);
-Number(value.querySelector('OverdueTasks').textContent);
+Number(value.querySelector('OverDueTasks').textContent);
 ```
 
-The `<Value>` element holds nineteen counters, each as its own child element:
+The `<Value>` element holds twenty counters, each as its own child element:
 
 `TotalDocuments`, `CheckedOutDocuments`, `ViewedDocuments`, `SubscribedDocuments`,
 `FavoriteDocuments`, `VotedDocuments`, `DocumentsInDownloadQueue`, `RecycledDocuments`,
 `TotalFolders`, `SubscribedFolders`, `FavoriteFolders`, `FoldersInDownloadQueue`,
-`RecycledFolders`, `QueuedTasks`, `TasksDueToday`, `TasksDueThisWeek`, `OverdueTasks`,
-`TotalTasks`, `TasksAssignedToOthers`.
+`RecycledFolders`, `NotStartedTasks`, `OverDueTasks`, `DueTodayTasks`, `DueThisWeekTasks`,
+`DueLaterTasks`, `DueTasks`, `OpenTasks`, `TasksAssignedToOthers` - and one element,
+`TaskFilterDates`.
 
-Every one is `0` for a new account. This is the call to make before
+Every count is `0` for a new account. This is the call to make before
 [DeleteUser](DeleteUser.md) to find out whether there is anything to transfer.
+
+## Opening the list behind a count
+
+**Every task count is one [getTasks](getTasks.md) call**, and is named after the
+`TaskCompletionStatus` filter that reproduces it. Pass `AssigneeId` as the user's id in all of them:
+
+| Count | `CompletionStatus` | `StartDate` | `EndDate` |
+|---|---|---|---|
+| `NotStartedTasks` | `NotStarted` | — | — |
+| `OverDueTasks` | `OverDue` | — | — |
+| `DueTodayTasks` | `Due` | `DueTodayFrom` | `DueTodayTo` |
+| `DueThisWeekTasks` | `Due` | `DueThisWeekFrom` | `DueThisWeekTo` |
+| `DueLaterTasks` | `Due` | `DueLaterFrom` | — |
+| `DueTasks` | `Due` | — | — |
+
+`AssigneeId` is load-bearing. Without it - or one of `AssignedById` / `SupervisorId` naming the same
+user - GetTasks widens the query to everything the caller assigned, supervises **or manages**, which
+for a library manager is every task in every library they administer. The number would then open a
+list many times its own size.
+
+`OpenTasks` has no single filter behind it: there is no "every open task" value in
+`TaskCompletionStatus`. It is `NotStartedTasks + DueTasks`, so open it as those two calls, or show
+it as a plain total rather than a link.
+
+The dates to pass come back in the answer, in `TaskFilterDates`:
+
+| | |
+|---|---|
+| `DueTodayFrom` | the moment the counts were taken; anything due before it is overdue |
+| `DueTodayTo` | midnight tonight |
+| `DueThisWeekFrom` | midnight tonight |
+| `DueThisWeekTo` | midnight at the end of the week - the day after the coming Sunday |
+| `DueLaterFrom` | the same moment as `DueThisWeekTo` |
+
+Use them rather than working out "tomorrow" on the client: the client is in its own time zone, and
+the list it opened would not be the one it counted.
 
 ## Notes
 
-- `TasksDueToday` and `TasksDueThisWeek` counts include only tasks that have not yet been completed or rejected.
-- `OverdueTasks` counts tasks whose due date has passed and are not yet completed.
-- `TasksAssignedToOthers` reflects tasks the user created/submitted that are assigned to other users.
+- **The four due counts are disjoint and add up.** `OverDueTasks + DueTodayTasks + DueThisWeekTasks + DueLaterTasks = DueTasks`, and `DueTasks + NotStartedTasks = OpenTasks`. They can be shown side by side without counting a task twice.
+- Before 9.0 they were cumulative - "due today" meant *everything* due before midnight tonight, overdue tasks included, and "due this week" included both - so all three usually read the same number and adding them counted the same task three times. The names changed with the meaning.
+- `NotStartedTasks` was called `QueuedTasks`; `OverdueTasks` is now `OverDueTasks`, spelled as the `TaskCompletionStatus` member is; `TotalTasks` is now `OpenTasks` and counts open work only, which is what it always did.
+- A task can be due today **and** overdue: `OverDueTasks` is measured against the moment of the call, so a task due at 09:00 is overdue by lunchtime. The two counts are still disjoint, because `DueTodayTasks` starts where `OverDueTasks` ends. GetTasks measures `OverDue` against the moment of *its* call, so the boundary moves by the seconds between the two requests.
+- Tasks assigned to a **group** the user belongs to are not in any of these counts, which all ask for tasks assigned to the user themselves. The exception is `TasksAssignedToOthers`, which filters on who assigned the task and not on who it went to.
+- Only tasks on documents in ordinary libraries are counted.
 - `DomainMemberships`, `GlobalGroupMemberships`, and `LocalGroupMemberships` reflect direct and indirect memberships.
 - Statistics are calculated in real-time from the current database state.
 
