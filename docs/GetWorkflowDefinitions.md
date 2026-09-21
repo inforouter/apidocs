@@ -1,4 +1,4 @@
-# GetWorkflowDefinitions API
+﻿# GetWorkflowDefinitions API
 
 Returns all workflow definitions defined in the system, optionally filtered by domain/library and/or active status.
 
@@ -211,4 +211,4 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4041` | no library by that name |
-| `4000` | there is no ticket at all |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |

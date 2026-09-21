@@ -249,7 +249,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4000` | the document is already checked out, by the caller or by somebody else - and an unticketed caller is told this, by name, before being refused for having no ticket |
+| `4000` | the document is already checked out, by the caller or by somebody else |
 | `4041` | nothing at that path |
 | `4030` | the caller may not check documents out here |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

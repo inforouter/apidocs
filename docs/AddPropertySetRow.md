@@ -242,6 +242,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4041` | no document and no folder at `Path` |
-| `4000` | no set by that name, a required field was left out, a value is longer than its field, `xmlpset` is not well formed, or there is no ticket at all |
+| `4000` | no set by that name, a required field was left out, a value is longer than its field, or `xmlpset` is not well formed |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4030` | the caller may not change the metadata of that document or folder |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

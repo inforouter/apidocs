@@ -1,4 +1,4 @@
-# DeletePropertySetRow API
+﻿# DeletePropertySetRow API
 
 Deletes a property set row from a document or folder. The target object is resolved by path -" the system checks for a document first, then a folder. The row to delete is identified by its row number (`rownbr`); omitting it removes **every** row of that property set from the object. Multiple rows and multiple property sets can be targeted in a single call.
 
@@ -192,6 +192,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4041` | no document and no folder at `Path` |
-| `4000` | no set by that name, `xmlpset` is not well formed, or there is no ticket at all |
+| `4000` | no set by that name, or `xmlpset` is not well formed |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4030` | the caller may not change the metadata of that document or folder |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
