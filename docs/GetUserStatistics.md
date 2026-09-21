@@ -280,5 +280,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4041` | no user by that name |
-| `4000` | the caller has no ticket - where most operations answer `4010` for that |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

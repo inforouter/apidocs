@@ -1,4 +1,4 @@
-# GetDomainMembershipsOfUser API
+﻿# GetDomainMembershipsOfUser API
 
 Returns a list of all domain/library memberships for the specified user. Shows every domain the user has access to as a member, sorted alphabetically by domain name.
 
@@ -173,7 +173,8 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `4000` | no user by that name, and also what a caller with no ticket is told |
+| `4041` | no user by that name |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 ---
