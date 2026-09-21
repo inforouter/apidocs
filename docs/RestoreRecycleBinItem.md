@@ -214,7 +214,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4000` | the item is no longer in the recycle bin - which is also what a second restore of the same handler reports |
 | `4000` | `ItemHandler` is not a handler: the letter and the id are checked before the lookup, and the message naming the parameter is an English literal that is not translated |
-| `4000` | there is no ticket at all - this operation reports a bad request rather than 4010 |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter

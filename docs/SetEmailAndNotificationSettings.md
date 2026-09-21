@@ -1,4 +1,4 @@
-# SetEmailAndNotificationSettings API
+﻿# SetEmailAndNotificationSettings API
 
 Updates the email and notification settings for the infoRouter system. Requires system administrator privileges.
 
@@ -145,6 +145,6 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4000` | a caller with no ticket - this one reports a bad request where its siblings report 4030 |
+| `4030` | the caller may not change the application settings - including a caller with no ticket |
 | `4000` | `settingsXml` is not well formed, or does not deserialize into the settings document |
 
