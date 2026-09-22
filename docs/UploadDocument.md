@@ -160,6 +160,7 @@ file this way.
 
 - For large files, use the chunked upload approach: `CreateUploadHandler` -' `UploadFileChunk` (repeat) -' `UploadDocumentWithHandler`.
 - The file extension in `path` determines the document's MIME type and thumbnail behavior.
+- An e-mail file - `.eml`, or an Outlook `.msg` - is not stored as uploaded. The message is taken apart: the document is created with the `.email` extension (so `invoice.msg` becomes `invoice.email`), its content is the message's text and HTML body, the sender, recipients, date and subject go into the `SYSTBL_EMAIL` property set, and every attachment becomes a file of its own next to the document. Downloading the document gives the message back as MIME.
 - If a document already exists at the path, a new version is created automatically. The document ID remains the same.
 - The folder path component of `path` must already exist. Use `CreateFolder` to create missing folders first.
 - For uploads with version comments, use `UploadDocument1`. For post-upload checkout, use `UploadDocument2`. For all options in XML, use `UploadDocument4`.
