@@ -21,10 +21,13 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [ChangePasswordUsingSecretText](ChangePasswordUsingSecretText.md) - Complete a password reset using the one-time token emailed by ForgotPassword
 - [ChangeUserPassword](ChangeUserPassword.md) - Change a user's password (self-service or User Manager)
 - [CreateTicketforUser](CreateTicketforUser.md) - Create an authentication ticket for any user using the server-side trusted password (server-to-server impersonation)
+- [CreateWebDavSession](CreateWebDavSession.md) - Create a WebDAV session ticket for mapping a drive in Windows File Explorer
 - [ForgotPassword](ForgotPassword.md) - Initiate a password reset by sending a one-time token to the user's registered email address
 - [ForgotPasswordByUserName](ForgotPasswordByUserName.md) - Initiate a password reset by login name (sends token to the user's registered email address)
+- [GetWebDavSessions](GetWebDavSessions.md) - List the current user's WebDAV session tickets with their mount paths and expiry dates
 - [isValidTicket](isValidTicket.md) - Check whether an authentication ticket is still valid without supplying credentials or extending the expiration
 - [LogOut](LogOut.md) - Invalidate an authentication ticket and clear the server-side session
+- [RemoveWebDavSession](RemoveWebDavSession.md) - Remove one of the current user's WebDAV session tickets, ending its mapped drive
 - [RenewTicket](RenewTicket.md) - Validate credentials and renew an existing ticket or issue a fresh one
 
 ### Application Settings & Configuration

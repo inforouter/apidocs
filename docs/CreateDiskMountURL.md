@@ -163,10 +163,9 @@ const root = await call('CreateDiskMountURL', {
 const url = location.origin + root.querySelector('Value').textContent;  // https://host/dav/sid-<guid>/
 ```
 
-**The expiry is not checked against today.** A date in the past is accepted without complaint and
-hands back a mount path that looks exactly like a usable one but is already expired. `customExpirationDate`
-binds as a `DateTime`, so a value that is not a date is refused with HTTP 400 before the operation
-runs.
+**The expiry must be in the future.** A date already past is refused with `4000`, rather than
+handing back a mount path that looks usable but is already expired. `customExpirationDate` binds as a
+`DateTime`, so a value that is not a date is refused with HTTP 400 before the operation runs.
 
 ## Notes
 
@@ -188,6 +187,12 @@ runs.
 
 - [CreateEditDocumentURL](CreateEditDocumentURL.md) - Create a WebDAV editing URL for a specific document
 
+- [CreateWebDavSession](CreateWebDavSession.md) - Create the same WebDAV session and get its ticket, expiry and path
+
+- [GetWebDavSessions](GetWebDavSessions.md) - List the WebDAV sessions this API and CreateWebDavSession created
+
+- [RemoveWebDavSession](RemoveWebDavSession.md) - Remove one of them
+
 - [GetDocument](GetDocument.md) - Retrieve document properties including the document path
 
 ---
@@ -198,8 +203,9 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
-| `none` | an expiry date in the past is accepted silently |
+| `4000` | `customExpirationDate` is not in the future |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is signed in anonymously |
 | `HTTP 400` | `customExpirationDate` was not a date; refused by model binding |
 
 | Error | Description |
