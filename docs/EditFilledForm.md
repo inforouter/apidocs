@@ -26,10 +26,10 @@ Returns the rendered HTML form for an existing HTML document, pre-filled with it
 
 ## Response
 
-### Success Response
+### Success Response — filled from an HTML form (`formType="html"`)
 
 ```xml
-<root success="true"><![CDATA[
+<root success="true" formType="html"><![CDATA[
 <!DOCTYPE html>
 <html>
   ...pre-filled form HTML...
@@ -38,6 +38,46 @@ Returns the rendered HTML form for an existing HTML document, pre-filled with it
 ```
 
 The element content is the complete rendered HTML form wrapped in a CDATA section. All form fields are pre-populated with the document's current saved values.
+
+### Success Response — PDF or Word template (`formType="fields"`)
+
+A document filled straight from a PDF or Word template (see [SaveFilledForm](SaveFilledForm.md)) has no HTML form
+to render. For one, the response is the template's fields, each with the value the document was last saved with:
+
+```xml
+<root success="true" formType="fields" templateType="pdf" templateId="123">
+  <field name="Customer" type="text" required="true" maxLength="40" value="Acme Ltd" />
+  <field name="Address" type="multiline" required="false" value="" />
+  <field name="Approved" type="checkbox" required="false" value="false" />
+  <field name="Region" type="radio" required="false" value="EU">
+    <option value="EU" text="EU" />
+    <option value="US" text="US" />
+  </field>
+  <field name="Country" type="choice" required="false" value="TR">
+    <option value="TR" text="Turkey" />
+    <option value="NL" text="Netherlands" />
+  </field>
+</root>
+```
+
+| Attribute | Description |
+|---|---|
+| `formType` | `fields` here; `html` for an HTML form template, whose response is the rendered form in CDATA as above. |
+| `templateType` | `pdf` or `docx`. |
+| `templateId` | The template document. Pass it to [SaveFilledForm](SaveFilledForm.md) as `templatePath=~D<templateId>`. |
+| `field/@name` | The name to give the value in `xmlContent`: `<Prompt Name="Customer">...</Prompt>`. |
+| `field/@type` | `text`, `multiline`, `checkbox`, `radio` or `choice`. |
+| `field/@required` | `true` when the PDF marks the field required. Always `false` for Word. |
+| `field/@maxLength` | The most characters the PDF field takes; absent when there is no limit. |
+| `field/@value` | The value the document's last version was saved with; empty for a field the saved data has no value for. A checkbox is `true` or `false`; a radio or choice field holds an `option/@value`. |
+| `option` | The entries of a `radio` or `choice` field: `value` is what to save, `text` what to show. |
+
+What is listed:
+
+- **Word (`.docx`)**: every `{{placeholder}}` and every name used in a `{?{condition}}`, in the order they first appear (body, then headers and footers). All are `text` with an empty value: a Word template holds no types or defaults. Loops (`{{#Items}}`) and dotted names (`{{Customer.Name}}`) are not listed: no single form value can fill them.
+- **PDF**: the AcroForm fields, by the last part of their name without an index (`form1[0].page1[0].Customer[0]` is `Customer`). Fields with the same short name are filled with the same value, so they are listed once. Read-only fields, signatures and push buttons are not listed.
+
+The fields are read from the template's current published version: a field added to the template since comes back empty, and a saved value for a field the template no longer has is not listed. The document is checked out exactly as for an HTML form. `submitUrl` is ignored.
 
 ### Error Response
 
@@ -258,7 +298,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `[900] Authentication failed` | Invalid or missing authentication ticket. |
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | Document not found | The `documentPath` does not resolve to an existing document. |
-| This document is not a filled form. | The document exists but was not created from an HTML form template. |
+| This document is not a filled form. | The document exists but was not created from a form template. |
 | Document template cannot be found | The document has no associated template (not created from an HTML form template). |
 | Checked out by another user | The document is already checked out by a different user. |
 | Access denied | The user lacks Read or Check Out permission on the document. |

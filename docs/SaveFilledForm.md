@@ -80,6 +80,12 @@ The `xmlContent` parameter must use the `<FORMDATA>` structure. Each template fi
 
 Pass an empty string for `xmlContent` only when the template has no user-defined fields.
 
+### Filling a PDF or Word template directly
+
+`templatePath` can name a PDF or Word document itself, with no HTML form in front of it. The form data fills it the same way as a `render-with` template (below), and the document is stored as the filled `.pdf` or `.docx`. [UseFormTemplate](UseFormTemplate.md) lists such a template's fields (`formType="fields"`), and [EditFilledForm](EditFilledForm.md) lists them again with the saved values; pass the `templateId` they return as `templatePath=~D<templateId>`.
+
+A PDF template's text, multiline, choice, checkbox and radio fields are all filled. A checkbox is ticked by `true`, `yes`, `on`, `1` or its own on value, and cleared by anything else. A radio or choice field takes one of its `option` values; a radio group is left as it is for a value it does not have.
+
 ### Rendering into a PDF or a Word document
 
 A form can name a document to render its data into, with a `render-with` meta tag in its `<head>`:
@@ -88,11 +94,11 @@ A form can name a document to render its data into, with a `render-with` meta ta
 <meta name="render-with" content="/Form Templates/business-letter.docx" />
 ```
 
-When the form at `templatePath` has one, what is stored is not HTML but the filled template, named with the template's extension (`letter` or `letter.htm` becomes `letter.docx`, `letter.pdf`):
+When the form at `templatePath` has one, what is stored is not HTML but the filled template, named with the template's extension (`letter` or `letter.htm` becomes `letter.docx`, `letter.pdf`; a name that already ends `.docx` or `.pdf` is kept as it is):
 
 | Template | How it is filled |
 |---|---|
-| `.pdf` | Its form fields are set from the `<Prompt>` of the same name. |
+| `.pdf` | Its form fields (text, multiline, choice, checkbox, radio) are set from the `<Prompt>` of the same name. |
 | `.docx` | Its `{{placeholders}}` are replaced with the `<Prompt>` of the same name. |
 
 Both match a `<Prompt>` to a field or placeholder without regard to case, and a field the form data does not supply is left blank.
@@ -267,7 +273,7 @@ page before using it.
 
 ## Notes
 
-- This API produces **HTML documents** (`.html` / `.htm`). If the document name in `path` does not end with `.html` or `.htm`, the extension `.htm` is automatically appended to the created file name. The exception is a form with a `render-with` PDF or Word template: the document is then the filled `.pdf` or `.docx`, named with that extension instead (see [Rendering into a PDF or a Word document](#rendering-into-a-pdf-or-a-word-document)).
+- This API produces **HTML documents** (`.html` / `.htm`). If the document name in `path` does not end with `.html` or `.htm`, the extension `.htm` is automatically appended to the created file name. The exception is a PDF or Word template, used directly or as a form's `render-with`: the document is then the filled `.pdf` or `.docx`, named with that extension instead (see [Filling a PDF or Word template directly](#filling-a-pdf-or-word-template-directly)).
 - The destination folder (the parent of `path`) must already exist. It is not created automatically.
 - When creating a **new version** of an existing document that is not currently checked out, the API automatically checks the document out and then publishes the new version (leaving the document checked in).
 - When creating a **new version** of a document that is **already checked out by the current user**, the document remains checked out after the call.
