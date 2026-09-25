@@ -30,6 +30,7 @@ UseFormTemplate / EditFilledForm  →  user fills in the form  →  SaveFilledFo
 | `path` | string | Yes | Full infoRouter path for the document to create or update (e.g. `/MyLibrary/Reports/Summary.htm`). If the path does not yet exist, a new document is created. If it already exists, a new version is created. |
 | `templatePath` | string | Yes | Full infoRouter path of the existing HTML template document to use (e.g. `/Templates/ReportTemplate.htm`), or `~D<id>` short form (e.g. `~D42`). Pass `"999"` to use a blank/empty template. |
 | `xmlContent` | string | Yes | XML-formatted data used to populate the template fields. Must use the `<FORMDATA>` structure described below. Pass an empty string if the template has no fields. |
+| `detachDocumentFromTemplate` | bool | No | Default `false`. When `true`, the document is saved as usual, then left an ordinary document with no link to its form template. See [Detaching from the template](#detaching-from-the-template). |
 
 ## Response
 
@@ -79,6 +80,18 @@ The `xmlContent` parameter must use the `<FORMDATA>` structure. Each template fi
 ```
 
 Pass an empty string for `xmlContent` only when the template has no user-defined fields.
+
+### Detaching from the template
+
+A document saved from a form template stays bound to it: every new version is rendered from the template again, [EditFilledForm](EditFilledForm.md) edits its fields, and a file checked in to it is **not** kept: the check-in succeeds, but what is stored is the template rendered again with no form data. Pass `detachDocumentFromTemplate=true` to save it as usual and then leave it an **ordinary document**, checked out and in as the `.docx`, `.pdf` or `.htm` file it became:
+
+- The document is rendered from the template first, exactly as without the flag.
+- Then its template and dynamic content flag are removed, in the same transaction as the save: a new document is created already detached; for a new version, the version is rendered and the document detached together.
+- The form data stays with the version, as history; nothing reads it once the document is detached.
+- [EditFilledForm](EditFilledForm.md) no longer applies to it (`4000`, not a filled form).
+- A document with dynamic content is no longer rendered on every download; it keeps the content it was saved with.
+- It cannot be re-attached. Detaching needs no right beyond the save itself.
+- As an ordinary document, it is subject to the library's maximum document size on later versions, from which form documents are exempt.
 
 ### Filling a PDF or Word template directly
 

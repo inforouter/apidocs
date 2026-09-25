@@ -20,7 +20,7 @@ Returns the rendered HTML form for an existing HTML document, pre-filled with it
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentPath` | string | Yes | Full infoRouter path of the existing HTML document to edit (e.g. `/Finance/Reports/ExpenseReport.htm`). |
-| `submitUrl` | string | No | URL to set as the HTML form `action` attribute. When empty the form posts to the legacy `IRDOC.ASPX` handler. Pass the route of a React/SPA page to intercept the submission client-side instead. |
+| `submitUrl` | string | No | URL to set as the HTML form `action` attribute. When empty or left out, the form posts to the legacy `IRDOC.ASPX` handler. Pass the route of a React/SPA page to intercept the submission client-side instead. Ignored for a document filled from a PDF or Word template. |
 
 ---
 
@@ -46,31 +46,37 @@ to render. For one, the response is the template's fields, each with the value t
 
 ```xml
 <root success="true" formType="fields" templateType="pdf" templateId="123">
-  <field name="Customer" type="text" required="true" maxLength="40" value="Acme Ltd" />
-  <field name="Address" type="multiline" required="false" value="" />
-  <field name="Approved" type="checkbox" required="false" value="false" />
-  <field name="Region" type="radio" required="false" value="EU">
-    <option value="EU" text="EU" />
-    <option value="US" text="US" />
-  </field>
-  <field name="Country" type="choice" required="false" value="TR">
-    <option value="TR" text="Turkey" />
-    <option value="NL" text="Netherlands" />
-  </field>
+  <FORMDATA>
+    <Prompt Name="Customer" type="text" required="true" maxLength="40">Acme Ltd</Prompt>
+    <Prompt Name="Address" type="multiline" required="false"></Prompt>
+    <Prompt Name="Approved" type="checkbox" required="false">false</Prompt>
+    <Prompt Name="Region" type="radio" required="false">EU</Prompt>
+    <Prompt Name="Country" type="choice" required="false">TR</Prompt>
+  </FORMDATA>
+  <Options Name="Region">
+    <Option value="EU" text="EU" />
+    <Option value="US" text="US" />
+  </Options>
+  <Options Name="Country">
+    <Option value="TR" text="Turkey" />
+    <Option value="NL" text="Netherlands" />
+  </Options>
 </root>
 ```
 
-| Attribute | Description |
+The fields are in the `<FORMDATA>` notation `xmlContent` takes: change the values and post the `<FORMDATA>` to [SaveFilledForm](SaveFilledForm.md) as it is. The `type`, `required` and `maxLength` attributes are passed over when it is saved.
+
+| Item | Description |
 |---|---|
 | `formType` | `fields` here; `html` for an HTML form template, whose response is the rendered form in CDATA as above. |
 | `templateType` | `pdf` or `docx`. |
 | `templateId` | The template document. Pass it to [SaveFilledForm](SaveFilledForm.md) as `templatePath=~D<templateId>`. |
-| `field/@name` | The name to give the value in `xmlContent`: `<Prompt Name="Customer">...</Prompt>`. |
-| `field/@type` | `text`, `multiline`, `checkbox`, `radio` or `choice`. |
-| `field/@required` | `true` when the PDF marks the field required. Always `false` for Word. |
-| `field/@maxLength` | The most characters the PDF field takes; absent when there is no limit. |
-| `field/@value` | The value the document's last version was saved with; empty for a field the saved data has no value for. A checkbox is `true` or `false`; a radio or choice field holds an `option/@value`. |
-| `option` | The entries of a `radio` or `choice` field: `value` is what to save, `text` what to show. |
+| `Prompt/@Name` | The field's name, as `xmlContent` must give it. |
+| `Prompt/@type` | `text`, `multiline`, `checkbox`, `radio` or `choice`. |
+| `Prompt/@required` | `true` when the PDF marks the field required. Always `false` for Word. |
+| `Prompt/@maxLength` | The most characters the PDF field takes; absent when there is no limit. |
+| `Prompt` text | The value the document's last version was saved with; empty for a field the saved data has no value for. A checkbox is `true` or `false`; a radio or choice field holds one of its `Option/@value`s. |
+| `Options` | The entries of the `radio` or `choice` field of the same `Name`: `value` is what to save, `text` what to show. Listed apart from the `<Prompt>`, whose text is its value and nothing else. |
 
 What is listed:
 
