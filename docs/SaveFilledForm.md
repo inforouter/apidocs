@@ -80,6 +80,50 @@ The `xmlContent` parameter must use the `<FORMDATA>` structure. Each template fi
 
 Pass an empty string for `xmlContent` only when the template has no user-defined fields.
 
+### Rendering into a PDF or a Word document
+
+A form can name a document to render its data into, with a `render-with` meta tag in its `<head>`:
+
+```html
+<meta name="render-with" content="/Form Templates/business-letter.docx" />
+```
+
+When the form at `templatePath` has one, what is stored is not HTML but the filled template, named with the template's extension (`letter` or `letter.htm` becomes `letter.docx`, `letter.pdf`):
+
+| Template | How it is filled |
+|---|---|
+| `.pdf` | Its form fields are set from the `<Prompt>` of the same name. |
+| `.docx` | Its `{{placeholders}}` are replaced with the `<Prompt>` of the same name. |
+
+Both match a `<Prompt>` to a field or placeholder without regard to case, and a field the form data does not supply is left blank.
+
+#### Writing a Word template
+
+Type the placeholders into the document in Word, where the value should appear:
+
+```
+{{today}}
+
+{{Recipient_name}}
+{{Recipient_address}}
+
+Dear {{Salutation}},
+
+{{Body}}
+
+{?{Enclosures.Length > 0}}Enclosures: {{Enclosures}}{{/}}
+{?{cc.Length > 0}}cc: {{cc}}{{/}}
+```
+
+- A name is letters, digits and underscores, and matches the form field's `id`/`name`: `{{Recipient_name}}`. A name with a hyphen or a space (`{{customer-name}}`) is not a placeholder and stays in the document as typed.
+- A value with several lines (a `<textarea>`) keeps its lines.
+- `{?{...}}...{{/}}` keeps the text between only when the condition holds; a paragraph that holds nothing but the condition is removed altogether when it does not. `Name.Length > 0` tests that a value was entered. Avoid quotes in conditions: Word turns typed `""` into curly quotes, which are not quotes to the template engine.
+- Placeholders work in the page headers and footers too.
+- Formatting the placeholder (bold, font, colour) formats the value that replaces it.
+- A template the engine cannot read, such as a `{?{...}}` with no closing `{{/}}`, fails the call with an error starting `[00100]WordFunctions.FillWordTemplate()`, and nothing is created.
+
+A stored HTML filled form can also be rendered into a Word template on download, without storing it: `/docs/<library>/<folder>/<document>?RenderLayout=/Form Templates/business-letter.docx`.
+
 ### Obtaining field names from a rendered form
 
 When calling this API after presenting the form to the user via [`UseFormTemplate`](UseFormTemplate.md), the rendered HTML contains a hidden input named `InfoRouter_Fields` that lists all template fields. Its value is a comma-separated array of 4-token groups:
@@ -223,7 +267,7 @@ page before using it.
 
 ## Notes
 
-- This API produces **HTML documents** (`.html` / `.htm`). If the document name in `path` does not end with `.html` or `.htm`, the extension `.htm` is automatically appended to the created file name.
+- This API produces **HTML documents** (`.html` / `.htm`). If the document name in `path` does not end with `.html` or `.htm`, the extension `.htm` is automatically appended to the created file name. The exception is a form with a `render-with` PDF or Word template: the document is then the filled `.pdf` or `.docx`, named with that extension instead (see [Rendering into a PDF or a Word document](#rendering-into-a-pdf-or-a-word-document)).
 - The destination folder (the parent of `path`) must already exist. It is not created automatically.
 - When creating a **new version** of an existing document that is not currently checked out, the API automatically checks the document out and then publishes the new version (leaving the document checked in).
 - When creating a **new version** of a document that is **already checked out by the current user**, the document remains checked out after the call.
@@ -253,6 +297,8 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4090` | a document of that name is already in the folder |
 | `4041` | no folder at the parent of `path`, or no document at `templatePath` |
 | `4030` | the caller may not create documents there |
+| `5000` | a new document: the form's PDF or Word template could not be filled |
+| `4000` | a new version: the form's PDF or Word template could not be filled |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
