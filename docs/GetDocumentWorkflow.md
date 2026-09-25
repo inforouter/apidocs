@@ -1,6 +1,6 @@
 # GetDocumentWorkflow API
 
-Retrieves the details of a specific running workflow instance on a document. Returns workflow metadata including dates, submitter, supervisor lists, and on-end settings.
+Retrieves the details of a specific running workflow instance on a document. Returns workflow metadata including dates, submitter, supervisor lists and on-end settings, and every step of the workflow with each step's tasks in full.
 
 Use [GetDocumentWorkflows](GetDocumentWorkflows.md) to list all workflow instances (current and historical) for a document before calling this API to identify the `workflowId`.
 
@@ -58,6 +58,45 @@ Use [GetDocumentWorkflows](GetDocumentWorkflows.md) to list all workflow instanc
         </Usergroup>
       </Groups>
     </Supervisors>
+    <Steps>
+      <Step>
+        <StepNumber>1</StepNumber>
+        <StepName>Review</StepName>
+        <StepStatus>Active</StepStatus>
+        <StartDate>2026-04-01T08:00:00Z</StartDate>
+        <DueDate>2026-04-01T13:00:00Z</DueDate>
+        <FinishDate />
+        <OnStartMoveToFolderId>0</OnStartMoveToFolderId>
+        <Tasks>
+          <Task>
+            <TaskID>50772</TaskID>
+            <TaskName>ReviewTask</TaskName>
+            <StepNumber>1</StepNumber>
+            <TaskStatus>InProgress</TaskStatus>
+            <AssigneeName>Jane Smith</AssigneeName>
+            <!-- ...every other task field, as GetDocumentTasks writes a task -->
+          </Task>
+        </Tasks>
+      </Step>
+      <Step>
+        <StepNumber>2</StepNumber>
+        <StepName>Approve</StepName>
+        <StepStatus>Future</StepStatus>
+        <StartDate />
+        <DueDate />
+        <FinishDate />
+        <OnStartMoveToFolderId>0</OnStartMoveToFolderId>
+        <Tasks>
+          <Task>
+            <TaskID>50773</TaskID>
+            <TaskName>ApproveTask</TaskName>
+            <StepNumber>2</StepNumber>
+            <TaskStatus>NotStarted</TaskStatus>
+            <!-- ... -->
+          </Task>
+        </Tasks>
+      </Step>
+    </Steps>
   </Workflow>
 </response>
 ```
@@ -83,6 +122,15 @@ Use [GetDocumentWorkflows](GetDocumentWorkflows.md) to list all workflow instanc
 | `Supervisors/Groups/Usergroup/GroupId` | integer | Group ID of a supervisor group. |
 | `Supervisors/Groups/Usergroup/GroupName` | string | Name of a supervisor group. |
 | `Supervisors/Groups/Usergroup/DomainName` | string | Domain/library that owns the supervisor group. |
+| `Steps/Step` | element | One per step of the workflow — past, active and future — in step order. |
+| `Steps/Step/StepNumber` | integer | The step's position, from 1. |
+| `Steps/Step/StepName` | string | The step's name. |
+| `Steps/Step/StepStatus` | string | `Past` (finished), `Active` (running now) or `Future` (not started). |
+| `Steps/Step/StartDate` | datetime (UTC) | When the step started. Empty for a future step. |
+| `Steps/Step/DueDate` | datetime (UTC) | When the step is due. Empty until the step is given one (the first step gets it on submit). |
+| `Steps/Step/FinishDate` | datetime (UTC) | When the step finished. Empty while it is active or future. |
+| `Steps/Step/OnStartMoveToFolderId` | integer | Folder the document moves to when the step starts. `0` if not configured. |
+| `Steps/Step/Tasks/Task` | element | Every task of the step, finished or not, in full: the same fields as [GetDocumentTasks](GetDocumentTasks.md) returns, including instructions, comments, permissions, requirements and attachments. A future step's tasks are there too, with `TaskStatus` `NotStarted`. |
 
 ### Error Response
 
@@ -155,7 +203,9 @@ console.log(workflow.querySelector('SubmittedByName').textContent,   // the full
 
 ## Notes
 
-- `FinishDate` returns `0001-01-01T00:00:00Z` when the workflow is still running.
+- `FinishDate` is empty while the workflow is still running.
+- Every step and every task is included: all of them are created when the document is submitted, so a future step already lists its tasks (`NotStarted`). The UI can draw the whole workflow from this one call.
+- Step and workflow dates are ISO 8601 UTC (`2026-04-01T08:00:00Z`); task dates are written as GetDocumentTasks writes them (`2026-04-01 08:00:00`, server time).
 - The `Supervisors` element is always present; the `Users` and `Groups` child lists may be empty if no supervisors are configured.
 - Use [GetDocumentWorkflows](GetDocumentWorkflows.md) first to discover the `workflowId` of a document's current or historical workflow.
 
