@@ -179,7 +179,13 @@ Valid `Name` values for requirements:
 
 ## Required Permissions
 
-The calling user must be a **workflow supervisor** or the **workflow submitter**.
+The calling user must be one of:
+
+- the **supervisor of the task definition** being edited (its `SuperVisorId`);
+- a **library manager** of the document's library;
+- an assignee with an **open task** in this workflow that carries `EditNextStep` (for the step right after that task's step) or `EditAllSteps` (for any later step).
+
+Anyone else is refused with `4030`. Being the workflow's supervisor, its submitter, or the system administrator does not by itself allow the edit; the system administrator can make it where they manage the library.
 
 ## Example
 
