@@ -207,7 +207,7 @@ A holiday whose year is any other value is a **one-time holiday** that applies o
 
 1. Call `GetGeneralAppSettings` to retrieve the current settings.
 2. Modify only the values you need to change; keep the structure intact.
-3. Validate business rules (e.g., recycle bin values between `0-36`, document max size ? `1 GB`). The server does not validate these values; the client must.
+3. Validate business rules before sending (e.g., document max size ≤ `1 GB`). The two recycle bin values must be 0–36 months: the server refuses others with `4000`, naming the setting (e.g. `SystemRecycleBinAutoPurgeOption: Valid month range is 1 to 36`; 0 = off is also accepted).
 4. Submit the updated XML via `SetGeneralAppSettings`.
 5. On success, settings are refreshed in memory automatically and take effect immediately.
 
@@ -265,4 +265,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown |
 | `4030` | a caller with no ticket, or one who may not update settings |
 | `4000` | `settingsXml` is not well formed, or does not deserialize into the settings document |
+| `4000` | `SystemRecycleBinAutoPurgeOption` or `MoveUsersRecycleBinToSystemRecycleBinIn` is outside 0–36; the error names the setting and nothing is saved |
 

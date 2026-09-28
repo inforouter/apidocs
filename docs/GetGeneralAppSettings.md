@@ -88,8 +88,8 @@ Returns the general application settings including upload limits, work days conf
 | `WebDav` | boolean | Whether WebDAV protocol is enabled |
 | `DisplayAddIns` | boolean | Whether to display add-ins in the UI |
 | `MinYearInDateControls` | integer | Minimum year allowed in date picker controls |
-| `SystemRecycleBinAutoPurgeOption` | integer | Months an item stays in the system recycle bin before it is automatically purged. 0 = off. The server does not enforce a range; keep it within 0–36. |
-| `MoveUsersRecycleBinToSystemRecycleBinIn` | integer | Months after which items in users' recycle bins are moved to the system recycle bin (daily job). 0 = never. No range is enforced. |
+| `SystemRecycleBinAutoPurgeOption` | integer | Months an item stays in the system recycle bin before it is automatically purged. 0 = off. 0–36; other values are refused by SetGeneralAppSettings (4000). |
+| `MoveUsersRecycleBinToSystemRecycleBinIn` | integer | Months after which items in users' recycle bins are moved to the system recycle bin (daily job). 0 = never. 0–36; other values are refused by SetGeneralAppSettings (4000). |
 | `RerouteRedirections` | boolean | Legacy flag. Stored and returned, but not used by the server: changing it has no effect. |
 | `SendDiagnosticsAndStatistics` | boolean | Whether the server sends its daily status report to crm.inforouter.com: license company name, machine name, version, database type/name/server, object counts and OS version, no document content or user names. `false` stops it. Default `true`. |
 | `Workdays` | object | Work days and hours configuration |
@@ -300,7 +300,7 @@ using (var client = new SrvSoapClient())
 
 - **DocumentMaxSize**: Value in bytes. Default is 75 MB (78643200). Maximum is 1 GB (1073741824). 0 means the 75 MB default. Values above 1 GB are clamped to 1 GB; values below 1 MB are currently stored as sent. Administrators are not limited by it.
 - **DefaultUploadFileChunkSize**: Minimum 256 KB (262144), maximum 32 MB (33554432). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings.
-- **SystemRecycleBinAutoPurgeOption**: 0 (or negative) means disabled; any positive value is a number of months. The server does not clamp it; keep it within 0–36.
+- **SystemRecycleBinAutoPurgeOption** and **MoveUsersRecycleBinToSystemRecycleBinIn**: months; 0 means disabled. SetGeneralAppSettings refuses values outside 0–36 with 4000.
 - **Workdays**: Used for business day calculations in workflows and due dates.
 - **Recurring Holidays**: A `HolidayDate` with year `2000` means the holiday recurs on that month/day every year.
 
