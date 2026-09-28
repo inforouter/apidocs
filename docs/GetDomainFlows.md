@@ -43,7 +43,7 @@ Returns a `<FlowDefs>` collection with one `<FlowDef>` element per workflow defi
              OnEndEventUrl=""
              Hide="False">
       <Supervisors>
-        <User id="101" />
+        <User id="101" UserName="john.smith" FullName="John Smith" />
       </Supervisors>
     </FlowDef>
     <FlowDef FlowDefID="11"
@@ -61,6 +61,8 @@ Returns a `<FlowDefs>` collection with one `<FlowDef>` element per workflow defi
   </FlowDefs>
 </response>
 ```
+
+The `<Supervisors>` element lists the workflow-level supervisors: `<User id="..." UserName="..." FullName="..."/>` and `<Group id="..." GroupName="..." DomainName="..."/>`. Send a user back to UpdateWorkflowDefinition by its `UserName` (or as `~U<id>`).
 
 If the domain has no workflow definitions, the `<FlowDefs>` element is empty:
 

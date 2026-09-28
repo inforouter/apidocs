@@ -43,7 +43,7 @@ Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowD
       OnEndEventUrl=""
       Hide="False">
       <Supervisors>
-        <User id="7" />
+        <User id="7" UserName="john.smith" FullName="John Smith" />
       </Supervisors>
     </FlowDef>
     <FlowDef ... />
@@ -80,7 +80,7 @@ An empty result (no workflows on the folder) returns:
 | `OnEndEventUrl` | Webhook URL called when the workflow completes. Empty string if disabled. Called with an HTTP POST when the workflow ends; see [CreateFlowDef3](CreateFlowDef3.md). |
 | `Hide` | `True` if the workflow is hidden from the folder UI. |
 
-The `<Supervisors>` child element lists workflow-level supervisors as `<User id="..."/>` and `<Group id="..."/>` entries. `id` is a user or group id; pass a user back to UpdateWorkflowDefinition as `~U<id>`.
+The `<Supervisors>` element lists the workflow-level supervisors: `<User id="..." UserName="..." FullName="..."/>` and `<Group id="..." GroupName="..." DomainName="..."/>`. Send a user back to UpdateWorkflowDefinition by its `UserName` (or as `~U<id>`).
 
 ## Required Permissions
 

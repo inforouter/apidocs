@@ -82,7 +82,7 @@ Returns the complete definition of a workflow, including all step definitions an
       </TaskDefs>
     </StepDef>
     <Supervisors>
-      <User id="7" />
+      <User id="7" UserName="john.smith" FullName="John Smith" />
     </Supervisors>
   </FlowDef>
 </response>
@@ -109,7 +109,7 @@ Returns the complete definition of a workflow, including all step definitions an
 | `OnEndEventUrl` | Webhook URL called when the workflow completes. Empty string if disabled. See [CreateFlowDef3](CreateFlowDef3.md) for how the URL is called. |
 | `Hide` | `True` if the workflow is hidden from the folder UI. |
 
-The `<Supervisors>` element lists the workflow supervisors as `<User id="..."/>`. `id` is a user or group id; pass a user back to UpdateWorkflowDefinition as `~U<id>`.
+The `<Supervisors>` element lists the workflow-level supervisors: `<User id="..." UserName="..." FullName="..."/>` and `<Group id="..." GroupName="..." DomainName="..."/>`. Send a user back to UpdateWorkflowDefinition by its `UserName` (or as `~U<id>`).
 
 ## StepDef Attributes
 
