@@ -91,7 +91,7 @@ Returns the general application settings including upload limits, work days conf
 | `SystemRecycleBinAutoPurgeOption` | integer | Months an item stays in the system recycle bin before it is automatically purged. 0 = off. The server does not enforce a range; keep it within 0–36. |
 | `MoveUsersRecycleBinToSystemRecycleBinIn` | integer | Months after which items in users' recycle bins are moved to the system recycle bin (daily job). 0 = never. No range is enforced. |
 | `RerouteRedirections` | boolean | Legacy flag. Stored and returned, but not used by the server: changing it has no effect. |
-| `SendDiagnosticsAndStatistics` | boolean | Intended to switch off the daily status report to crm.inforouter.com. Currently not honoured: the report (license company name, machine name, version, database type/name/server, object counts, OS version) is sent every 24 hours regardless. |
+| `SendDiagnosticsAndStatistics` | boolean | Whether the server sends its daily status report to crm.inforouter.com: license company name, machine name, version, database type/name/server, object counts and OS version, no document content or user names. `false` stops it. Default `true`. |
 | `Workdays` | object | Work days and hours configuration |
 | `HolidayList` | array | List of Holiday objects — see Holiday Properties below |
 | `ZipDownloadSetting` | object | ZIP download configuration |
