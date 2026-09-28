@@ -138,7 +138,7 @@ Returns activity and membership statistics for a specified user, including docum
 
 - The caller must be authenticated.
 - A user may call this API for themselves.
-- Allowed for yourself; for system administrators and User Managers; for library managers of the user's home library; and for any user who shares a library with the target (coworker). Otherwise refused with 4000 'Access denied. You need to be a coworker, administrator, library manager, or user manager to access this information.'
+- Allowed for yourself; for system administrators and User Managers; for library managers of the user's home library; and for any user who shares a library with the target (coworker). Otherwise refused with 4030 'Access denied. You need to be a coworker, administrator, library manager, or user manager to access this information.'
 
 ## Example
 
@@ -281,5 +281,5 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4041` | no user by that name |
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4000` | the caller is not the user, a coworker, an administrator, a library manager of the user's home library, or a User Manager: "Access denied. You need to be a coworker, administrator, library manager, or user manager to access this information." |
+| `4030` | the caller is not the user, a coworker, an administrator, a library manager of the user's home library, or a User Manager: "Access denied. You need to be a coworker, administrator, library manager, or user manager to access this information." |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
