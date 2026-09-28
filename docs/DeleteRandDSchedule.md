@@ -5,10 +5,8 @@
 Deletes an existing Retention and Disposition (R&D) schedule definition. The schedule cannot be
 deleted if it is currently assigned to any documents or folders.
 
-> **An id that matches no schedule is reported as a success.** Nothing checks that the
-> schedule is there, so a caller cannot tell a delete that happened from one that did not.
-> `RDdefId="0"` is not "no schedule" either: zero is what an item with no schedule carries,
-> so the in-use check counts every one of them.
+> A missing id answers 4041 'The selected retention and disposition schedule cannot be found…';
+> RDdefId 0 or less answers 4000 'A retention and disposition schedule id is required…'.
 
 ## Endpoint
 
@@ -40,7 +38,7 @@ deleted if it is currently assigned to any documents or folders.
 ### Error Response
 
 ```xml
-<response success="false" error="There are documents or folders uses this Retention and Disposition schedule that cannot be deleted. Document count: 3 Folder count: 1" />
+<response success="false" errorCode="4170" error="This retention and disposition schedule has been applied to documents/folders and cannot be deleted. Document count: 3 Folder count: 1" />
 ```
 
 ## Required Permissions
@@ -99,15 +97,8 @@ try {
 }
 ```
 
-Two things to know before calling it:
-
-- **An id that matches no schedule is reported as a success.** Nothing checks that the schedule is
-  there: the delete statements run against an id that matches no row and the call answers
-  `success="true"`, where `GetRandDScheduleInfo` answers `4041` for the same id. A caller cannot tell
-  a delete that happened from one that did not.
-- **`RDdefId="0"` is not "no schedule", it is a value the in-use check counts.** Zero is what a
-  document or folder with no schedule carries, so the check finds every one of them and the refusal
-  quotes a number that has nothing to do with any schedule.
+A missing id answers 4041 'The selected retention and disposition schedule cannot be found…';
+RDdefId 0 or less answers 4000 'A retention and disposition schedule id is required…'.
 
 ## Notes
 
@@ -132,3 +123,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown |
 | `4030` | the caller may not manage retention schedules - including a caller with no ticket at all |
 | `4170` | the schedule is applied to documents or folders; the message counts them |
+| `4041` | no schedule has that id: "The selected retention and disposition schedule cannot be found…" |
+| `4000` | `RDdefId` is 0 or less: "A retention and disposition schedule id is required…" |

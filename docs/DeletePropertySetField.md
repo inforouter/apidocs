@@ -115,6 +115,7 @@ There is no confirmation step and no undo.
 
 - `FieldName` is matched case-insensitively -" the system converts it to uppercase before looking it up.
 - All previously stored values for this field across all objects are permanently lost when the column is dropped.
+- Deleting a field drops its column and every value stored in it, permanently. Adding a field of the same name afterwards starts empty.
 - To delete just the option values from a dropdown/list/radio field without removing the field itself, use [DeletePropertySetFieldOption](DeletePropertySetFieldOption.md).
 - To delete the entire property set, use [DeletePropertySetDefinition](DeletePropertySetDefinition.md).
 

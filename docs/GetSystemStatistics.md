@@ -49,7 +49,7 @@ Retrieves system-wide statistics including user counts, document counts, total d
 | Field | Type | Description |
 |-------|------|-------------|
 | `TotalUserCount` | int | Total number of user accounts (active + disabled), excluding the system admin account |
-| `ActiveUserCount` | int | Number of active (non-disabled) users (authors + read-only users) |
+| `ActiveUserCount` | int | Number of active (non-disabled) users (authors + read-only users). Enabled accounts, not signed-in users; excludes the system administrator. To check seats, compare authors with LicenseCount and readers with ReadonlyUserCount; readers above ReadonlyUserCount use author seats. |
 | `DisabledUserCount` | int | Number of disabled user accounts |
 | `TotalDocumentCount` | int | Total number of documents stored in the system |
 | `TotalDocumentSize` | long | Total size of all document versions in bytes |

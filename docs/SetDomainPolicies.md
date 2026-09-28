@@ -82,7 +82,7 @@ Sets the policies for a domain/library.
 | `RightAnonymous` | boolean | Allow anonymous users to perform this action |
 | `RightDomainManager` | boolean | Allow domain managers to perform this action. Also accepted: `RightDomainmanager` |
 | `RightObjectOwner` | boolean | Allow object owners to perform this action. Also accepted: `RightObjectowner` |
-| `RightSubobjectOwner` | boolean | Allow sub-object owners to perform this action. Also accepted: `RightSubobjectowner` |
+| `RightSubobjectOwner` | boolean | Allow sub-object owners to perform this action. Also accepted: `RightSubobjectowner`. Sub-object owner = the user who checked the document out (Check In), the author of the comment (Change/Delete Comments), or the user who assigned the task (Remove Task). Only honoured where `SubObjectOwnerApplies` is true; ignored on other actions. It has no effect on Remove Workflow, where the submitter is always allowed. |
 | `RightRequired` | string | Required right level (see valid values below) |
 | `LogAction` | boolean | Enable audit logging for this action |
 

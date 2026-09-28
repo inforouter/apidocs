@@ -20,7 +20,7 @@ Returns the rendered HTML form for an existing HTML document, pre-filled with it
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentPath` | string | Yes | Full infoRouter path of the existing HTML document to edit (e.g. `/Finance/Reports/ExpenseReport.htm`). |
-| `submitUrl` | string | No | URL to set as the HTML form `action` attribute. When empty or left out, the form posts to the legacy `IRDOC.ASPX` handler. Pass the route of a React/SPA page to intercept the submission client-side instead. Ignored for a document filled from a PDF or Word template. |
+| `submitUrl` | string | No | URL to set as the HTML form `action` attribute. When empty or left out, the form `action` defaults to `IRDOC.ASPX`, which has no handler in the current server: always intercept the submit and call SaveFilledForm. Pass the route of a React/SPA page to intercept the submission client-side instead. Ignored for a document filled from a PDF or Word template. |
 
 ---
 
@@ -274,7 +274,7 @@ the built-in handler.
 ## Notes
 
 - The rendered HTML is returned inside a CDATA section. Extract the element's text content before rendering it in a browser.
-- When `submitUrl` is empty or omitted, the form `action` defaults to `IRDOC.ASPX` (legacy handler). This parameter is only needed for non-React integrations where a server-side route must receive the POST. In a React app using `<iframe srcdoc>`, leave `submitUrl` empty and intercept submit via `contentDocument` instead.
+- When `submitUrl` is empty or omitted, the form `action` defaults to `IRDOC.ASPX`, which has no handler in the current server: always intercept the submit and call SaveFilledForm. This parameter is only needed for non-React integrations where a server-side route must receive the POST. In a React app using `<iframe srcdoc>`, leave `submitUrl` empty and intercept submit via `contentDocument` instead.
 - The `InfoRouter_Ticket` hidden field inside the rendered form is always empty. The React app must inject the live session ticket in the iframe `onLoad` handler.
 - If the document has no associated template (it was not created from an HTML form template), this API will return an error. Use `GetDocument` to check the `TemplateId` field before calling.
 

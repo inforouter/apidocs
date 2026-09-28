@@ -95,7 +95,7 @@ Returns the full definition of a specific Retention and Disposition (R&D) schedu
 | `TransferAgency` | Agency name for external transfer (when DispositionType=2). |
 | `MoveFolderId` | Target folder ID for transfer. `0` if not set. |
 | `MoveFolderPath` | Target folder path for transfer. |
-| `CreateTask` | `true` if a workflow task is created when disposition is triggered; `false` otherwise. Always `false` when `DispositionType=0`. |
+| `CreateTask` | `true` if a workflow task is created when disposition is triggered; `false` otherwise. Always `false` when `DispositionType=0`. The daily disposition job creates a Dispose (or Transfer) task for a member of the R&D Managers group (the system administrator if none), due 3 days after the disposition date. Documents only; ignored for folders. Nothing is deleted until someone runs DisposeItem. |
 | `SendEmail` | `true` if an email notification is sent when disposition is triggered; `false` otherwise. Always `false` when `DispositionType=0`. |
 | `CreatedById` | User ID of the creator. |
 | `CreatedByName` | Username of the creator. |

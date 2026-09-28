@@ -45,7 +45,7 @@ The XML must have a root element (element name is not significant) with the foll
 | `DispositionPeriodDays` | int | -" | No | Additional days. |
 | `TransferAgency` | string | 100 | Yes if DispositionType=2 | Agency name for the transfer destination. |
 | `MoveFolderId` | int | -" | No | Folder ID for transfer destination folder. |
-| `CreateTask` | boolean | -" | No | `true` to create a workflow task when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
+| `CreateTask` | boolean | -" | No | `true` to create a workflow task when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. The daily disposition job creates a Dispose (or Transfer) task for a member of the R&D Managers group (the system administrator if none), due 3 days after the disposition date. Documents only; ignored for folders. Nothing is deleted until someone runs DisposeItem. |
 | `SendEmail` | boolean | -" | No | `true` to send an email notification when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
 
 **Example XML:**

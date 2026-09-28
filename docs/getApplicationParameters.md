@@ -129,7 +129,7 @@ These parameters are returned for all authenticated users.
 | `SYSTEMEMAILADDRESS` | string | System email address used for notifications |
 | `INDEXSRV` | TRUE/FALSE | Whether full-text search indexing is enabled |
 | `SEARCHPAGESIZE` | integer | Default number of results per search page |
-| `FILEUPLOADLIMIT` | long | Maximum file upload size in bytes |
+| `FILEUPLOADLIMIT` | long | Same value as GeneralSettings.UploadSettings.DocumentMaxSize (bytes): the maximum document size for non-administrators. Administrators are not limited by it. |
 | `ALLOWPARTIALEMAILUPLOADS` | TRUE/FALSE | Whether partial email uploads are allowed |
 
 ## Administrator-Only Parameters
@@ -142,7 +142,7 @@ These additional parameters are returned only when the authenticated user is a s
 |-----------|------|-------------|
 | `INDEXCATALOG` | string | Name of the search index catalog |
 | `LOGLOGINS` | TRUE/FALSE | Whether user logins are logged |
-| `FILEUPLOADTIMEOUT` | integer | File upload timeout in seconds |
+| `FILEUPLOADTIMEOUT` | integer | Upload timeout in seconds (default 900). Stored for clients; the server does not currently enforce it. |
 | `ALLOWOWNERSHIPTRANSFER` | TRUE/FALSE | Whether document ownership transfer is allowed |
 | `SUBSCRIPTIONNOTIFICATIONS` | TRUE/FALSE | Whether subscription email notifications are enabled |
 | `SENDEMAIL` | TRUE/FALSE | Whether the Send To email feature is enabled |
@@ -327,7 +327,7 @@ using (var client = new SrvSoapClient())
 - **SMTPSENDPASSWORD** is always returned as `****` for security. The actual password is never exposed through this API.
 - **WarehousePaths** contains 100 warehouse path entries (00 through 99), each mapping to a physical storage directory.
 - **IPAddressList** includes both IPv4 and IPv6 addresses of the server.
-- **FILEUPLOADLIMIT** is in bytes. The default maximum is approximately 1 GB (1072693248 bytes).
+- **FILEUPLOADLIMIT** is in bytes. Default is 75 MB (78643200 bytes); the largest allowed value is 1 GB (1073741824 bytes).
 - **ATTACHMENTSIZELIMIT** of 0 means no size limit for email attachments.
 - **PWDEXPIRES** value is in days. A value of 0 means passwords never expire.
 - The method name uses camelCase (`getApplicationParameters`) unlike most other APIs that use PascalCase. This is a legacy naming convention maintained for backward compatibility.

@@ -21,7 +21,7 @@ Returns the rendered HTML form for a content template. The response is the compl
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `targetFolderPath` | string | For an HTML form | Full infoRouter path of the destination folder where the new document will be created (e.g. `/Finance/Reports`). Required for an HTML form template; optional for a PDF or Word template, whose fields are returned with no form to point at a folder. A folder that is given must exist. |
 | `templatePath` | string | Yes | Full infoRouter path of the template document (e.g. `/Templates/ExpenseForm.htm`), or `~D<id>` short form (e.g. `~D42`). Use `~D999` for the built-in HTML document type. |
-| `submitUrl` | string | No | URL to set as the HTML form `action` attribute. When empty or left out, the form posts to the default legacy `IRDOC.ASPX` handler. Pass the route of a React/SPA page to intercept the submission client-side instead. Ignored for a PDF or Word template. |
+| `submitUrl` | string | No | URL to set as the HTML form `action` attribute. When empty or left out, the form `action` defaults to `IRDOC.ASPX`, which has no handler in the current server: always intercept the submit and call SaveFilledForm. Pass the route of a React/SPA page to intercept the submission client-side instead. Ignored for a PDF or Word template. |
 
 ---
 
@@ -170,6 +170,23 @@ const renderedHtml = xml.querySelector('root').textContent;
 ```jsx
 import { useRef } from 'react';
 
+// The value to send for one form field name:
+// - a single checkbox: its value when ticked, '' otherwise
+// - a checkbox group (several checkboxes sharing the name): the ticked values joined with ';'
+// - a radio group or any other control: el.value
+function fieldValue(el) {
+  if (!el) return '';
+  if (!el.tagName) {                                  // RadioNodeList: several inputs share the name
+    const items = Array.from(el);
+    if (items.every(i => i.type === 'checkbox')) {
+      return items.filter(i => i.checked).map(i => i.value).join(';');
+    }
+    return el.value;                                  // radio group: the checked one's value
+  }
+  if (el.type === 'checkbox') return el.checked ? el.value : '';
+  return el.value;
+}
+
 function InfoRouterForm({ renderedHtml, authTicket, targetFolderPath, documentName }) {
   const iframeRef = useRef(null);
 
@@ -188,11 +205,14 @@ function InfoRouterForm({ renderedHtml, authTicket, targetFolderPath, documentNa
       // Parse InfoRouter_Fields to discover field names and build xmlContent
       const fieldsInput = doc.getElementById('InfoRouter_Fields');
       const tokens = fieldsInput ? fieldsInput.value.split(',') : [];
+      const seen = new Set();                         // a checkbox/radio group repeats its name
       let xmlContent = '<FORMDATA>';
       for (let i = 0; i + 3 < tokens.length; i += 4) {
         const raw   = tokens[i].trim();                 // e.g. "'IR_title'"
         const name  = raw.slice(4, raw.length - 1);    // strip 'IR_ prefix and trailing '
-        const value = (form.elements[name]?.value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        if (seen.has(name)) continue;
+        seen.add(name);
+        const value = fieldValue(form.elements[name]).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         xmlContent += `<Prompt Name="${name}">${value}</Prompt>`;
       }
       xmlContent += '</FORMDATA>';
@@ -234,7 +254,7 @@ function InfoRouterForm({ renderedHtml, authTicket, targetFolderPath, documentNa
 
 ### The `InfoRouter_Fields` hidden input
 
-The rendered HTML always contains a hidden input named `InfoRouter_Fields`. Its value is a comma-separated list of 4-token descriptors — one group per template field:
+The rendered HTML always contains a hidden input named `InfoRouter_Fields`. Its value is a comma-separated list of 4-token descriptors — one group per `<input>`, `<textarea>` and `<select>` element; a checkbox or radio group whose inputs share a name produces one group per input, so the same name can appear several times. De-duplicate names before building `xmlContent`.
 
 ```
 'IR_title','CHAR','N','N','IR_author','CHAR','Y','N','IR_duedate','DATE','Y','N'
@@ -301,7 +321,7 @@ this used to answer one as readily as an authenticated caller, where its neighbo
 
 - The `templatePath` accepts either a full document path or the `~D<id>` short form. `~D999` is the reserved identifier for the built-in HTML document type and does not correspond to a physical document in the repository.
 - The rendered HTML is returned inside a CDATA section. Extract the element's text content before rendering it in a browser.
-- `submitUrl` must always be present in the request. When passed as an empty string `""`, the form `action` defaults to `IRDOC.ASPX` (legacy handler). This parameter is only meaningful for non-React integrations where a server-side route must receive the POST. In a React app using `<iframe srcdoc>`, pass `submitUrl=""` and intercept submit via `contentDocument` instead.
+- `submitUrl` must always be present in the request. When passed as an empty string `""`, the form `action` defaults to `IRDOC.ASPX`, which has no handler in the current server: always intercept the submit and call SaveFilledForm. This parameter is only meaningful for non-React integrations where a server-side route must receive the POST. In a React app using `<iframe srcdoc>`, pass `submitUrl=""` and intercept submit via `contentDocument` instead.
 - The `InfoRouter_Ticket` hidden field inside the rendered form is always empty. The React app must inject the live session ticket in the iframe `onLoad` handler.
 - Use this API to embed infoRouter form templates inside custom applications or portals.
 
@@ -355,6 +375,23 @@ function escapeXml(s) {
     .replace(/'/g, '&apos;');
 }
 
+// The value to send for one form field name:
+// - a single checkbox: its value when ticked, '' otherwise
+// - a checkbox group (several checkboxes sharing the name): the ticked values joined with ';'
+// - a radio group or any other control: el.value
+function fieldValue(el) {
+  if (!el) return '';
+  if (!el.tagName) {                                  // RadioNodeList: several inputs share the name
+    const items = Array.from(el);
+    if (items.every(i => i.type === 'checkbox')) {
+      return items.filter(i => i.checked).map(i => i.value).join(';');
+    }
+    return el.value;                                  // radio group: the checked one's value
+  }
+  if (el.type === 'checkbox') return el.checked ? el.value : '';
+  return el.value;
+}
+
 // Parse the InfoRouter_Fields hidden input from a rendered form inside an iframe.
 // Returns an array of { name, value, dataType, required }.
 // InfoRouter_Fields format: 'IR_field1','CHAR','N','N','IR_field2','DATE','Y','N',...
@@ -367,10 +404,11 @@ function parseInfoRouterFields(iframeDoc, form) {
     const raw      = tokens[i].trim();                       // e.g. "'IR_title'"
     if (raw.length < 5) continue;
     const name     = raw.slice(4, raw.length - 1);           // strip 'IR_ prefix + trailing '
+    if (fields.some(f => f.name === name)) continue;         // a checkbox/radio group repeats its name
     const dataType = tokens[i + 1].trim().replace(/'/g, ''); // CHAR | DATE | NUMBER | BOOLEAN
     const required = tokens[i + 2].trim() === "'Y'";
     const el       = form.elements[name];
-    const value    = el ? el.value : '';
+    const value    = fieldValue(el);
     fields.push({ name, value, dataType, required });
   }
   return fields;

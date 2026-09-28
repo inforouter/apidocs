@@ -39,7 +39,7 @@ The `taskDefXML` parameter uses the same XML format as `AddFlowTaskDef`. The roo
 | `DeadLine` | integer | Yes | Task deadline in **hours** from the time the task is assigned. Must be greater than 0. |
 | `RequiredAssigneeCount` | integer | No | Controls how the system selects and completes tasks among multiple assignees. Valid values: `0` = All assignees must complete (default), `1` = System picks one assignee automatically, `2` = All are assigned but only one needs to complete. |
 | `SuperVisorId` | integer | No | User ID of the task supervisor. `0` = no supervisor. |
-| `SupervisorNotificationOnDue` | integer | No | Number of hours **before** the deadline when the supervisor is notified. `0` = no notification. Must not exceed the `DeadLine` value. |
+| `SupervisorNotificationOnDue` | integer | No | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks. |
 | `Priority` | integer | No | Task priority. Valid values: `0` = No priority (default), `1` = Low, `5` = Normal, `10` = High, `11` = Urgent. |
 | `AllowedStartTimeSpan` | integer | No | Number of hours after assignment in which the assignee must start the task. `0` = no restriction. |
 | `ReminderTimeSpan` | integer | No | Number of hours before the deadline when a reminder is sent to the assignee. `0` = no reminder. Must not exceed `DeadLine`. |
@@ -252,7 +252,7 @@ await call('UpdateRunningWorkflowTaskDef', {
 - The `DeadLine` field in `taskDefXML` is required and must be greater than `0`.
 - `taskDefId` must refer to a task definition in the specified `stepNumber` of the running workflow. Use the running workflow data to identify valid IDs.
 - The entire task definition is replaced by the supplied `taskDefXML`. Any attributes or child elements omitted from the XML will revert to their defaults.
-- `SupervisorNotificationOnDue` and `ReminderTimeSpan` must not exceed the `DeadLine` value.
+- `SupervisorNotificationOnDue` is in days relative to the task due date (negative = before due, `0` = at the due date, positive = after); it is not limited by `DeadLine`. `ReminderTimeSpan` must not exceed the `DeadLine` value.
 
 ## Related APIs
 

@@ -90,7 +90,7 @@ If the domain has no workflow definitions, the `<FlowDefs>` element is empty:
 | `RequiresStartUpPlayers` | bool | If `true`, task assignees must be specified when a document is submitted to the workflow. |
 | `Active` | bool | `true` if the workflow definition is active and can accept new submissions; `false` if deactivated. |
 | `OnEndMoveToPath` | string | Folder path where documents are moved when the workflow completes. Empty if no move-on-completion is configured. |
-| `OnEndEventUrl` | string | URL of the external event handler called when the workflow completes. Empty if not configured. |
+| `OnEndEventUrl` | string | URL of the external event handler called when the workflow completes. Empty if not configured. Called with an HTTP POST when the workflow ends; see [CreateFlowDef3](CreateFlowDef3.md). |
 | `Hide` | bool | If `true`, the workflow is hidden from the user submission list. |
 
 ---

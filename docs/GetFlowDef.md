@@ -47,8 +47,8 @@ Returns the complete definition of a workflow, including all step definitions an
           DeadLine="48"
           RequiredAssigneeCount="0"
           SuperVisorId="7"
-          SuperVisorName="john.smith"
-          SupervisorNotificationOnDue="24"
+          SuperVisorName="John Smith"
+          SupervisorNotificationOnDue="-1"
           Priority="5"
           AllowedStartTimeSpan="0"
           ReminderTimeSpan="0">
@@ -67,13 +67,13 @@ Returns the complete definition of a workflow, including all step definitions an
           <instruction>Please review the contract carefully.</instruction>
           <AssigneeList>
             <Users>
-              <user id="12" login="jane.doe" fullname="Jane Doe" />
+              <User exists="true" UserID="12" Domain="" UserName="jane.doe" FirstName="Jane" LastName="Doe" Email="jane.doe@example.com" />
             </Users>
             <UserGroups>
               <group id="3" name="Legal" />
             </UserGroups>
             <SpecialUserRoles>
-              <SpecialUserRole RoleId="-1" RoleDescription="DocumentOwner" />
+              <SpecialUserRole RoleId="-5" RoleDescription="DocumentOwner" />
             </SpecialUserRoles>
           </AssigneeList>
         </TaskDef>
@@ -104,8 +104,10 @@ Returns the complete definition of a workflow, including all step definitions an
 | `RequiresStartUpPlayers` | `true` if the workflow requires startup players to be assigned at submission time. |
 | `Active` | `true` if the workflow is currently active and accepting new submissions. |
 | `OnEndMoveToPath` | Path documents are moved to when the workflow completes. Empty string if disabled. |
-| `OnEndEventUrl` | Webhook URL called when the workflow completes. Empty string if disabled. |
+| `OnEndEventUrl` | Webhook URL called when the workflow completes. Empty string if disabled. See [CreateFlowDef3](CreateFlowDef3.md) for how the URL is called. |
 | `Hide` | `True` if the workflow is hidden from the folder UI. |
+
+The `<Supervisors>` element lists the workflow supervisors as `<User id="..."/>`. `id` is a user or group id; pass a user back to UpdateWorkflowDefinition as `~U<id>`.
 
 ## StepDef Attributes
 
@@ -113,6 +115,8 @@ Returns the complete definition of a workflow, including all step definitions an
 |-----------|-------------|
 | `StepNumber` | Numeric order of the step (1-based). |
 | `StepName` | Display name of the step. |
+
+The step's on-start folder is not returned.
 
 ## TaskDef Attributes
 
@@ -123,11 +127,13 @@ Returns the complete definition of a workflow, including all step definitions an
 | `DeadLine` | Number of hours from task creation until the task is due. `0` means no deadline. |
 | `RequiredAssigneeCount` | Assignee selection mode: `0` = all must complete, `1` = auto-select one, `2` = assign to all, one is enough. |
 | `SuperVisorId` | User ID of the task supervisor. `0` if none. |
-| `SuperVisorName` | Login name of the task supervisor. |
-| `SupervisorNotificationOnDue` | Hours before due date when the supervisor is notified. `0` to disable. |
+| `SuperVisorName` | Full name of the task supervisor. |
+| `SupervisorNotificationOnDue` | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks. |
 | `Priority` | Task priority: `0` = none, `1` = low, `5` = normal, `10` = high, `11` = urgent. |
 | `AllowedStartTimeSpan` | Hours before due date that define the earliest the task can be started. `0` means no restriction. |
 | `ReminderTimeSpan` | Hours before due date when the assignee receives a reminder notification. `0` to disable. |
+
+`OnCompleteNotice` and `righttype` are not returned.
 
 ## TaskDef Child Elements
 
@@ -157,9 +163,9 @@ Free-text instruction for the task assignee.
 
 ### `<AssigneeList>`
 Contains three sub-elements:
-- `<Users>` -" Individual users (`<user id="..." login="..." fullname="..."/>`).
+- `<Users>` -" Individual users (`<User exists="true" UserID="..." Domain="..." UserName="..." FirstName="..." LastName="..." Email="..." .../>`).
 - `<UserGroups>` -" User groups (`<group id="..." name="..."/>`).
-- `<SpecialUserRoles>` -" Special roles such as document owner or submitter (`<SpecialUserRole RoleId="..." RoleDescription="..."/>`).
+- `<SpecialUserRoles>` -" Special roles such as document owner or submitter (`<SpecialUserRole RoleId="..." RoleDescription="..."/>`). RoleId `-5` = DocumentOwner (the document owner at submit time), `-8` = Submitter.
 
 ## Required Permissions
 

@@ -47,7 +47,7 @@ The XML must have a root element (element name is not significant) with the foll
 | `DispositionPeriodDays` | int | -" | No | Additional days. |
 | `TransferAgency` | string | 100 | Yes if DispositionType=2 | Agency name for transfer destination. |
 | `MoveFolderId` | int | -" | No | Target folder ID for transfer. |
-| `CreateTask` | boolean | -" | No | `true` to create a workflow task when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
+| `CreateTask` | boolean | -" | No | `true` to create a workflow task when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. The daily disposition job creates a Dispose (or Transfer) task for a member of the R&D Managers group (the system administrator if none), due 3 days after the disposition date. Documents only; ignored for folders. Nothing is deleted until someone runs DisposeItem. |
 | `SendEmail` | boolean | -" | No | `true` to send an email notification when disposition is triggered. Defaults to `true` if omitted; automatically forced to `false` when `DispositionType=0`. |
 
 ## Response
@@ -133,7 +133,7 @@ The id survives, and the schedule records who made the change - `GetRandDSchedul
 
 ## Notes
 
-- When `ApplyToExistingDocumentFolders = true`, all documents and folders currently assigned this schedule have their retention end dates and disposition dates recalculated immediately. For large organizations with many affected objects this operation may take some time.
+- When `ApplyToExistingDocumentFolders = true`, all documents and folders currently assigned this schedule have their retention end dates and disposition dates recalculated immediately. Only the dates change in this call: open disposition tasks and disposition-status flags for this schedule are cleared. Items whose new disposition date is already past are picked up by the daily disposition job (up to about 24 hours later), which then creates the task or flag. Nothing is disposed by this call. For large organizations with many affected objects this operation may take some time.
 - When `ApplyToExistingDocumentFolders = false`, existing dates are left unchanged; only the schedule definition itself is updated.
 - Changes that trigger recalculation include: RetentionType, RetentionTrigger, any RetentionPeriod values, DispositionType, DispositionTrigger, any DispositionPeriod values, and MoveFolderId.
 - `CreateTask` and `SendEmail` are only meaningful when `DispositionType > 0`. When `DispositionType = 0` (None), both are automatically forced to `false` regardless of the values supplied.

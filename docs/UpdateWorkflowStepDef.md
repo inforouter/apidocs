@@ -23,7 +23,7 @@ Updates the display name and on-start folder move of an existing workflow step d
 | `workflowName` | string | Yes | Name of the workflow definition containing the step to update. |
 | `stepNumber` | integer | Yes | 1-based number of the step to update. |
 | `newStepName` | string | Yes | New display name for the step. |
-| `onStartMoveToFolderPath` | string | No | Full infoRouter folder path where documents are automatically moved when this step starts. Pass an empty string to remove the on-start folder move. |
+| `onStartMoveToFolderPath` | string | No | Full infoRouter folder path where documents are automatically moved when this step starts. Pass an empty string to remove the on-start folder move. Omitting the parameter has the same effect as an empty string: the on-start folder is cleared. To keep it, resend the current path. GetFlowDef does not currently return it. |
 
 ## Response
 
@@ -43,7 +43,7 @@ Updates the display name and on-start folder move of an existing workflow step d
 
 Requires workflow supervisor, domain/library manager, or system administrator role.
 
-The workflow definition must be **inactive** before it can be modified. Use [DeactivateFlowDef](DeactivateFlowDef.md) first if the workflow is currently active.
+This operation is accepted on an active definition as well. Changes apply to documents submitted afterwards; running workflows keep the folder they started with.
 
 ## Example
 

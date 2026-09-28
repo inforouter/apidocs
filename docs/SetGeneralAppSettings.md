@@ -207,7 +207,7 @@ A holiday whose year is any other value is a **one-time holiday** that applies o
 
 1. Call `GetGeneralAppSettings` to retrieve the current settings.
 2. Modify only the values you need to change; keep the structure intact.
-3. Validate business rules (e.g., recycle bin values between `0-36`, document max size ? `1 GB`).
+3. Validate business rules (e.g., recycle bin values between `0-36`, document max size ? `1 GB`). The server does not validate these values; the client must.
 4. Submit the updated XML via `SetGeneralAppSettings`.
 5. On success, settings are refreshed in memory automatically and take effect immediately.
 
@@ -249,7 +249,7 @@ await call('SetGeneralAppSettings', {
 ## Notes
 
 - All numeric values are expressed in *bytes* unless the property name indicates minutes/hours.
-- Upload limits must stay within the server's IIS `maxRequestLength` and execution timeout settings.
+- infoRouter does not set a request-size limit of its own. A single-request (non-chunked) upload is limited by the host's request-size limit (Kestrel / IIS requestFiltering maxAllowedContentLength). Use chunked upload for large files.
 - Holidays are serialized through `HolidayList` (dictionary values are not serialized directly).
 - A `HolidayDate` with year `2000` marks a recurring annual holiday (matched by month/day only). Any other year marks a one-time holiday matched by exact date.
 - Failure responses always include a localized message in the `error` attribute.

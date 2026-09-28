@@ -36,14 +36,14 @@ The `TaskDefXML` parameter must be a valid XML document whose root element carri
 |-----------|------|----------|-------------|
 | `TaskName` | string | Yes | Display name of the task. Maximum 32 alphanumeric characters. |
 | `DeadLine` | integer | Yes | Task deadline in **hours** from the time the task is assigned. Must be greater than 0. |
-| `RequiredAssigneeCount` | integer | No | Controls how the system selects and completes tasks among multiple assignees. Valid values: `0` = All assignees must complete (default), `1` = System picks one assignee automatically, `2` = All are assigned but only one needs to complete. |
+| `RequiredAssigneeCount` | integer | No | Controls how the system selects and completes tasks among multiple assignees. Valid values: `0` = All assignees must complete (default), `1` = System picks one assignee automatically, `2` = All are assigned but only one needs to complete. This is a mode, not a count. Any other value (including values above 2) is accepted without error and behaves as `0`. `1` picks the assignee with the fewest open tasks when the step starts; `2` drops the other assignees' unfinished tasks for this task definition as soon as one completes. |
 | `SuperVisorId` | integer | No | User ID of the task supervisor. `0` = no supervisor. |
-| `SupervisorNotificationOnDue` | integer | No | Number of hours **before** the deadline when the supervisor is notified (stored as a negative value, e.g. `-24` means 24 hours before due). `0` = no notification. Must not exceed the `DeadLine` value. |
+| `SupervisorNotificationOnDue` | integer | No | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks. |
 | `Priority` | integer | No | Task priority. Valid values: `0` = No priority (default), `1` = Low, `5` = Normal, `10` = High, `11` = Urgent. |
 | `AllowedStartTimeSpan` | integer | No | Number of hours after assignment in which the assignee must start the task. `0` = no restriction. |
 | `ReminderTimeSpan` | integer | No | Number of hours before the deadline when a reminder is sent to the assignee. `0` = no reminder. Must not exceed `DeadLine`. |
-| `righttype` | integer | No | Document access right level granted to the assignee for the duration of the task. Valid values: `0` = No access, `1` = List, `2` = Read, `3` = Add, `4` = Add + Read, `5` = Change, `6` = Full control. |
-| `OnCompleteNotice` | string | No | Whether to send a notification to the document owner and supervisor when the task is completed. Valid values: `"True"` or `"False"` (default `"False"`). |
+| `righttype` | integer | No | Document access right level for the assignee. Evaluated at access time and never written to the document's permissions: it raises the assignee's right on the document (not the folder) while their task is started and open, and ends when the task is completed, dropped or reassigned. It does not override an explicit No Access, and Read-only users stay at Read. Valid values: `0` = No access, `1` = List, `2` = Read, `3` = Add, `4` = Add + Read, `5` = Change, `6` = Full control. |
+| `OnCompleteNotice` | string | No | When true, sends ON_TASKCOMPLETED to the task's assigner (for workflow tasks, the user who submitted the document) and the workflow submitter, and adds the assigner to the workflow's approved/rejected/finished notices. Case-insensitive `true`/`false` (default `false`). |
 
 ### Child elements
 
@@ -54,12 +54,10 @@ Contains the plain-text instructions shown to the assignee.
 <instruction>Please review and approve the document before the deadline.</instruction>
 ```
 
-**`<Permissions>`** (required)
+**`<Permissions>`** (optional)
 Grants the assignee additional task-level permissions beyond simple completion.
 
-All six rows below must be present and each must carry a `Value`. The server reads them with
-`Convert.ToBoolean` without checking that the node is there, so a missing row - or a missing
-`Value` - is a `FormatException` and the call answers `errorCode="5000"`.
+Rows that are omitted, or have an unreadable `Value`, are treated as not granted.
 
 ```xml
 <Permissions>
@@ -94,10 +92,12 @@ Specifies users, user groups, and/or special roles assigned to the task.
     <group GroupID="55" />
   </UserGroups>
   <SpecialUserRoles>
-    <role RoleId="1" />
+    <SpecialUserRole RoleId="-5" />
   </SpecialUserRoles>
 </AssigneeList>
 ```
+
+Only `-5` (document owner at submit time) and `-8` (submitter) are accepted; other ids are silently ignored. Only children of `<SpecialUserRoles>` are read; the element name does not matter.
 
 **`<Requirements>`** (optional)
 Specifies additional actions the assignee must complete before the task can be marked as done.
@@ -233,8 +233,8 @@ async function call(action, params) {
 ```
 
 Adds one task definition to a step. Every value is an attribute of the root element; the instruction
-and the permissions are child elements. **All six permissions have to be present with a `Value`** -
-a missing one is read as an empty string and the server answers 5000 with a `FormatException`.
+and the permissions are child elements. Permission rows that are omitted, or have an unreadable
+`Value`, are treated as not granted.
 
 ```javascript
 const taskDef = `
@@ -270,7 +270,7 @@ await call('AddFlowTaskDef', {
 - `TaskName` follows the same validation rules as step names: alphanumeric only, maximum 32 characters.
 - `DeadLine` is required and must be greater than `0`. The API will return an error if `DeadLine` is `0`.
 - `instruction` is required and must not be empty.
-- `SupervisorNotificationOnDue` (in hours) combined with `ReminderTimeSpan` must not exceed the `DeadLine` value, otherwise validation will fail.
+- `SupervisorNotificationOnDue` is in days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks.
 - If `StepNumber` does not match any existing step the call fails with `errorCode="4041"` and the message "this step has been deleted". Verify step numbers with `GetFlowDef` first.
 - Multiple tasks can be added to the same step by calling this API repeatedly.
 
@@ -290,7 +290,6 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `5000` | `<Permissions>` is missing, or one of the six `<Permission>` rows has no `Value` |
 | `4041` | `StepNumber` names no step of that definition |
 | `4000` | no definition by that name, the definition is active, `DeadLine` is 0, `TaskName` is empty or too long, or `TaskDefXML` is not well formed |
 | `4030` | the caller may not manage workflows in that library |

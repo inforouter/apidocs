@@ -58,12 +58,12 @@ This API does not require any parameters.
 | `UTC_Offset` | decimal | Server's UTC offset in hours (e.g., "-5" for EST) |
 | `Company` | string | Licensed company name from license file |
 | `ServerName` | string | Windows machine/server name |
-| `LicenseCount` | integer | Number of licensed users |
-| `SubscriptionEndDate` | datetime | License subscription end date in universal format |
+| `LicenseCount` | integer | Number of licensed author (full) seats (license `<LicenseCount>`); read-only seats are licensed separately. |
+| `SubscriptionEndDate` | datetime | Maintenance-contract (subscription) end date from the license (`<SubscriptionEndingDate>`), in universal format. Informational only: the server does not switch any feature off when it passes. |
 | `WindowsAuthenticationIsOn` | boolean | Whether Windows Authentication is enabled ("true"/"false") |
 | `WorkflowIsOn` | boolean | Whether this server may run workflows ("true"/"false"). Hide workflow actions when it is false - they will be refused. |
 | `AnonymousAccessIsOn` | boolean | Whether this server allows anonymous access ("true"/"false"). A sign-in page can read this before anybody has signed in, which is the point of it being on an unauthenticated call. |
-| `ComplianceModuleIsOn` | boolean | Whether this server has the compliance module ("true"/"false"). Currently reports `true` on every instance; it will be read from the license, so read it rather than assuming. |
+| `ComplianceModuleIsOn` | boolean | Whether this server has the compliance module ("true"/"false"). Currently reports `true` on every instance. Not enforced by the server; it will be read from the license, so read it rather than assuming. |
 
 ## Required Permissions
 

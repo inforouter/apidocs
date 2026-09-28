@@ -124,7 +124,7 @@ async function call(action, params) {
 ```
 
 The overload to use: it takes the supervisor, the end-of-workflow URL and the hidden flag. The
-supervisor must be a real user name even though the definition does not keep it.
+supervisor is attached; an empty value is accepted.
 
 ```javascript
 const root = await call('CreateFlowDef3', {
@@ -149,8 +149,8 @@ console.log(flowDef.getAttribute('FlowDefID'),
 - `Supervisor` is a **login name** (username), not a display name or user ID. The user must exist in the infoRouter system.
 - Pass an empty string for `Supervisor` to create the workflow without a supervisor.
 - `OnEndMoveToPath` must refer to an existing folder if non-empty. An invalid path returns an error.
-- `OnEndEventUrl` is a plain URL string stored against the workflow. The server calls this URL via HTTP when the workflow ends. Pass an empty string to disable the webhook.
-- `Hide=true` hides the workflow from the folder-level workflow list in the document library UI, but administrators and managers can still see it.
+- `OnEndEventUrl` is a plain URL string stored against the workflow. When the workflow ends (completed, rejected, or stopped) the server POSTs JSON `{WorkflowId, WorkflowDefId, FinishDate, FinishStatus, DocumentId, FinishedWithTaskId}` with `Content-Type: application/json`; `FinishStatus` is `Approved`, `Rejected`, `NoResult` or `Stop`. Only HTTP 200 counts as success; failures are written to the server error log and not retried. The call is synchronous, with the default 100-second timeout. The URL in force when the document was submitted is used. Pass an empty string to disable the webhook.
+- `Hide=true` marks the workflow hidden. The server does not enforce Hide: GetFolderFlows, GetDomainFlows and GetWorkflowDefinitions return hidden definitions to any caller, and SubmitDocumentToFlow accepts them. Clients are expected to leave hidden workflows out of their submit lists.
 - `FlowName` must be alphanumeric, maximum 32 characters, and unique within the domain/library.
 - `ActiveFolderPath` must refer to an existing infoRouter folder and cannot be empty.
 - The workflow is created in **inactive** state. The typical build sequence is: **CreateFlowDef3 -' AddFlowStepDef -' AddFlowTaskDef -' ActivateFlowDef**.

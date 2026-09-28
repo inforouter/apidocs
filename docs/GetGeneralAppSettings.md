@@ -88,10 +88,10 @@ Returns the general application settings including upload limits, work days conf
 | `WebDav` | boolean | Whether WebDAV protocol is enabled |
 | `DisplayAddIns` | boolean | Whether to display add-ins in the UI |
 | `MinYearInDateControls` | integer | Minimum year allowed in date picker controls |
-| `SystemRecycleBinAutoPurgeOption` | integer | Auto-purge option for system recycle bin (0-36 months) |
-| `MoveUsersRecycleBinToSystemRecycleBinIn` | integer | Days before moving user recycle bin items to system |
-| `RerouteRedirections` | boolean | Whether to reroute URL redirections |
-| `SendDiagnosticsAndStatistics` | boolean | Whether to send anonymous diagnostics |
+| `SystemRecycleBinAutoPurgeOption` | integer | Months an item stays in the system recycle bin before it is automatically purged. 0 = off. The server does not enforce a range; keep it within 0–36. |
+| `MoveUsersRecycleBinToSystemRecycleBinIn` | integer | Months after which items in users' recycle bins are moved to the system recycle bin (daily job). 0 = never. No range is enforced. |
+| `RerouteRedirections` | boolean | Legacy flag. Stored and returned, but not used by the server: changing it has no effect. |
+| `SendDiagnosticsAndStatistics` | boolean | Intended to switch off the daily status report to crm.inforouter.com. Currently not honoured: the report (license company name, machine name, version, database type/name/server, object counts, OS version) is sent every 24 hours regardless. |
 | `Workdays` | object | Work days and hours configuration |
 | `HolidayList` | array | List of Holiday objects — see Holiday Properties below |
 | `ZipDownloadSetting` | object | ZIP download configuration |
@@ -102,8 +102,8 @@ Returns the general application settings including upload limits, work days conf
 | Property | Type | Description |
 |----------|------|-------------|
 | `DocumentMaxSize` | long | Maximum document size in bytes (default: 75 MB = 78643200, max: 1 GB) |
-| `FileUploadTimeOut` | integer | Upload timeout in seconds |
-| `DefaultUploadFileChunkSize` | integer | Chunk size for chunked uploads in bytes (min: 256 KB, max: 32 MB) |
+| `FileUploadTimeOut` | integer | Upload timeout in seconds (default 900). Stored for clients; the server does not currently enforce it. |
+| `DefaultUploadFileChunkSize` | integer | Chunk size for chunked uploads in bytes (min: 256 KB, max: 32 MB). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings. |
 
 ## Workdays Properties
 
@@ -298,9 +298,9 @@ using (var client = new SrvSoapClient())
 
 ## Notes
 
-- **DocumentMaxSize**: Value in bytes. Default is 75 MB (78643200). Maximum is 1 GB (1073741824). Values below 1 MB are clamped to 1 MB.
-- **DefaultUploadFileChunkSize**: Minimum 256 KB (262144), maximum 32 MB (33554432).
-- **SystemRecycleBinAutoPurgeOption**: 0 means disabled; 1–36 represents months.
+- **DocumentMaxSize**: Value in bytes. Default is 75 MB (78643200). Maximum is 1 GB (1073741824). 0 means the 75 MB default. Values above 1 GB are clamped to 1 GB; values below 1 MB are currently stored as sent. Administrators are not limited by it.
+- **DefaultUploadFileChunkSize**: Minimum 256 KB (262144), maximum 32 MB (33554432). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings.
+- **SystemRecycleBinAutoPurgeOption**: 0 (or negative) means disabled; any positive value is a number of months. The server does not clamp it; keep it within 0–36.
 - **Workdays**: Used for business day calculations in workflows and due dates.
 - **Recurring Holidays**: A `HolidayDate` with year `2000` means the holiday recurs on that month/day every year.
 

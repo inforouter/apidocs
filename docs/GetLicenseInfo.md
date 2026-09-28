@@ -69,8 +69,8 @@ Retrieves the application license information including company details, license
 | `PhoneNumber` | string | Contact phone number |
 | `EmailAddress` | string | Contact email address |
 | `IsConcurrent` | boolean | Whether the license is concurrent (shared seats) or named-user |
-| `UserCount` | integer | Total number of licensed user seats |
-| `ActiveUserCount` | integer | Number of currently active users (authors + readonly) |
+| `UserCount` | integer | Number of licensed author (full) seats. Read-only seats are licensed separately (`ReadonlyUserCount`, not returned by this API). |
+| `ActiveUserCount` | integer | Number of enabled user accounts (authors + read-only), excluding the system administrator. Not a count of signed-in users. |
 | `DisabledUserCount` | integer | Number of disabled user accounts |
 | `DatabaseType` | string | Licensed database type (e.g., SQLServer, MySQL, Oracle) |
 | `AuthenticationType` | string | Authentication type (e.g., INFOROUTER, NATIVE) |
@@ -78,7 +78,7 @@ Retrieves the application license information including company details, license
 | `MaxLibraryCount` | integer | Maximum number of libraries allowed (0 = unlimited) |
 | `AnonymousAccess` | boolean | Whether anonymous (guest) access is licensed |
 | `Workflow` | boolean | Whether workflow features are licensed |
-| `ComplianceModule` | boolean | Whether the compliance module is licensed. Currently reports `true` on every instance; it will be read from the license, so read it rather than assuming. |
+| `ComplianceModule` | boolean | Whether the compliance module is licensed. Currently reports `true` on every instance. Not enforced by the server; it will be read from the license, so read it rather than assuming. |
 | `TrialCopy` | boolean | Whether this is a trial license |
 | `ExpirationDate` | DateTime | License expiration date (ISO 8601) |
 | `SubscriptionStartDate` | DateTime | Subscription start date (ISO 8601) |

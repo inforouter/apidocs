@@ -33,7 +33,7 @@ Deletes an existing Retention and Disposition (R&D) schedule definition. When `f
 ### Error Response
 
 ```xml
-<response success="false" error="There are documents or folders uses this Retention and Disposition schedule that cannot be deleted. Document count: 3 Folder count: 1" />
+<response success="false" errorCode="4170" error="This retention and disposition schedule has been applied to documents/folders and cannot be deleted. Document count: 3 Folder count: 1" />
 ```
 
 ## Required Permissions
@@ -96,9 +96,8 @@ A document whose schedule was cleared this way reads back from `GetDocumentRandD
 `<RetentionDispositionSchedule DefId="0" />`, where a document that never had one answers no child
 element at all.
 
-The two warnings on [DeleteRandDSchedule](DeleteRandDSchedule.md) apply here too, and the second is
-worse with `forceDelete="true"`: the in-use count is the only thing that stands between `RDdefId="0"`
-and the delete statements, and force skips it.
+A missing id answers 4041 'The selected retention and disposition schedule cannot be found…';
+RDdefId 0 or less answers 4000 'A retention and disposition schedule id is required…'.
 
 ## Notes
 
@@ -124,3 +123,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown |
 | `4030` | the caller may not manage retention schedules - including a caller with no ticket at all |
 | `4170` | `forceDelete` was false and the schedule is applied to documents or folders |
+| `4041` | no schedule has that id: "The selected retention and disposition schedule cannot be found…" |
+| `4000` | `RDdefId` is 0 or less: "A retention and disposition schedule id is required…" |

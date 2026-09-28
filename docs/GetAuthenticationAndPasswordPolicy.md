@@ -288,7 +288,7 @@ using (var client = new SrvSoapClient())
 **Login logging settings have been moved**: The following settings have been moved to the new `GetSystemBehaviorSettings` / `SetSystemBehaviorSettings` APIs:
 - `LogLogins` - Whether to log successful login events
 - `LogLoginAttempts` - Whether to log failed login attempts
-- `LoginDelay` - Delay in milliseconds between login attempts
+- `LoginDelay` - Delay in milliseconds added to every failed login response (successful logins are not delayed). 0–2000; values outside are clamped on save.
 
 Use `GetSystemBehaviorSettings` to access these settings (requires admin permission).
 

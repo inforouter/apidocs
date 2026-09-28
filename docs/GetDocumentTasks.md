@@ -150,7 +150,7 @@ When the document has no matching tasks the `<Value>` element is present but emp
 | `AllowedStartDate` | datetime | Earliest date/time the assignee can begin the task. `0001-01-01T00:00:00` if no restriction. |
 | `ReminderTimeSpan` | integer | Number of hours before the due date when a reminder is sent. `0` means no reminder. |
 | `ReminderDate` | datetime | Calculated date the reminder will be sent. `0001-01-01T00:00:00` if no reminder. |
-| `SupervisorNotificationOnDue` | integer | Number of hours before the due date when the supervisor is notified. `0` means no notification. |
+| `SupervisorNotificationOnDue` | integer | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks. |
 | `SupervisorNotificationDate` | datetime | Calculated date the supervisor notification will be sent. `0001-01-01T00:00:00` if no notification. |
 | `RedirectedFromUserId` | integer | User ID of the original assignee if the task was redirected. `0` if not redirected. |
 | `RedirectedFromUserName` | string | Username of the original assignee if the task was redirected. Empty string if not redirected. |

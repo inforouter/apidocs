@@ -77,10 +77,10 @@ An empty result (no workflows on the folder) returns:
 | `RequiresStartUpPlayers` | `true` if the workflow requires startup players to be assigned at submission time. |
 | `Active` | `true` if the workflow is currently active and accepting new submissions. |
 | `OnEndMoveToPath` | Path documents are moved to when the workflow completes. Empty string if disabled. |
-| `OnEndEventUrl` | Webhook URL called when the workflow completes. Empty string if disabled. |
+| `OnEndEventUrl` | Webhook URL called when the workflow completes. Empty string if disabled. Called with an HTTP POST when the workflow ends; see [CreateFlowDef3](CreateFlowDef3.md). |
 | `Hide` | `True` if the workflow is hidden from the folder UI. |
 
-The `<Supervisors>` child element lists workflow-level supervisors as `<User id="..."/>` and `<Group id="..."/>` entries.
+The `<Supervisors>` child element lists workflow-level supervisors as `<User id="..."/>` and `<Group id="..."/>` entries. `id` is a user or group id; pass a user back to UpdateWorkflowDefinition as `~U<id>`.
 
 ## Required Permissions
 

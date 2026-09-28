@@ -128,8 +128,8 @@ async function call(action, params) {
 }
 ```
 
-Lists the groups that belong to a library - the same list
-[GetDomainGroups](GetDomainGroups.md) answers, under a second name.
+Lists only the groups defined in this library (local groups); global member groups are not included
+(use [GetDomainGroups](GetDomainGroups.md)).
 
 ```javascript
 const root = await call('GetLocalGroups', {

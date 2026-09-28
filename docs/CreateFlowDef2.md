@@ -119,9 +119,8 @@ async function call(action, params) {
 }
 ```
 
-Creates a workflow definition and names a supervisor. The supervisor has to be given - an empty one
-fails 4041 - but it is then discarded, so the definition comes back with `<Supervisors />` empty.
-`UpdateWorkflowDefinition` is the only operation that actually attaches one.
+Creates a workflow definition and names a supervisor. The supervisor is attached; an empty value
+is accepted.
 
 ```javascript
 const root = await call('CreateFlowDef2', {

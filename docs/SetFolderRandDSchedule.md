@@ -116,7 +116,7 @@ element, where the document form answers a bare success.
 
 ## Notes
 
-- Assigning a schedule to a folder triggers the calculation of retention and disposition dates for all affected folders and documents.
+- Assigning a schedule to a folder triggers the calculation of retention and disposition dates for all affected folders and documents. Only the dates change in this call: open disposition tasks and disposition-status flags for this schedule are cleared. Items whose new disposition date is already past are picked up by the daily disposition job (up to about 24 hours later), which then creates the task or flag. Nothing is disposed by this call.
 - If a folder or document already has a schedule assigned, it is replaced with the new one.
 - To remove a schedule from a folder hierarchy, use [RemoveFolderRandDSchedule](RemoveFolderRandDSchedule.md).
 - To assign a schedule to a single document, use [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md).

@@ -27,7 +27,7 @@ Adds a new field to an existing custom property set definition. The field name i
 | `isRequired` | boolean | Yes | `true` if the field must be filled in; `false` if optional. |
 | `ControlSize` | integer | Yes | Display width of the input control in the UI. For `BOOLEAN` and `DATE` types, this is set automatically. |
 | `ControlOrder` | integer | Yes | Display order position of the field within the property set form. |
-| `ControlType` | string | Yes | UI control type. See **Control Types** table below. For `BOOLEAN` type, forced to `CHECK BOX`; for `DATE`, forced to `TEXT BOX`. |
+| `ControlType` | string | Yes | UI control type. See **Control Types** table below. For `BOOLEAN` it must be empty or `CHECK BOX`, for `DATE` empty or `TEXT BOX`; any other value is refused with `4000`. |
 
 ### Field Types
 
@@ -143,15 +143,17 @@ await call('AddPropertySetField', {
 });
 ```
 
-**Only `CHAR` keeps the `FieldLength` and `ControlSize` you send.** The other three overwrite both,
-whatever the caller asked for, and two of them overwrite `ControlType` as well:
+**`ControlSize` is overwritten silently for `BOOLEAN` (0), `NUMBER` (10) and `DATE` (12).** A
+`FieldLength` other than 0 or the type's own value (`BOOLEAN` 1, `NUMBER` 4, `DATE` 8), or a
+`ControlType` other than `CHECK BOX` for `BOOLEAN` or `TEXT BOX` for `DATE`, is refused with `4000`.
+Send 0 / empty to accept the type's value:
 
 | `FieldType` | `FieldLength` | `ControlSize` | `ControlType` |
 |---|---:|---:|---|
 | `CHAR` | as given, 1 to 255 | as given | as given |
-| `NUMBER` | forced to 4 | forced to 10 | as given |
-| `BOOLEAN` | forced to 1 | forced to 0 | forced to `CHECK BOX` |
-| `DATE` | forced to 8 | forced to 12 | forced to `TEXT BOX` |
+| `NUMBER` | 0 or 4, otherwise `4000` | overwritten to 10 | as given |
+| `BOOLEAN` | 0 or 1, otherwise `4000` | overwritten to 0 | empty or `CHECK BOX`, otherwise `4000` |
+| `DATE` | 0 or 8, otherwise `4000` | overwritten to 12 | empty or `TEXT BOX`, otherwise `4000` |
 
 ## Notes
 
@@ -160,6 +162,7 @@ whatever the caller asked for, and two of them overwrite `ControlType` as well:
 - `FieldName` must contain at least one letter or digit.
 - For `COMBO BOX`, `LIST BOX`, `RADIO BUTTON`, and `LOOKUP` control types, add valid option values after creating the field using [AddPropertySetFieldOption](AddPropertySetFieldOption.md).
 - Fields cannot be added to system property sets (built-in sets managed by infoRouter).
+- There is no API to rename a field or change its caption, type, length or control settings. Deleting a field drops its column: re-adding a field of the same name creates a new, empty column, and the values stored before are lost. Keep FieldName to 40 characters or fewer; DeletePropertySetField refuses longer names.
 
 ## Related APIs
 

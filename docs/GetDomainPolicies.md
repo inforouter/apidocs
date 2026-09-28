@@ -102,7 +102,7 @@ These reflect the domain's current policy configuration:
 | `RightAnonymous` | boolean | Whether anonymous users can perform this action |
 | `RightDomainManager` | boolean | Whether domain managers can perform this action |
 | `RightObjectOwner` | boolean | Whether object owners can perform this action |
-| `RightSubobjectOwner` | boolean | Whether sub-object owners can perform this action |
+| `RightSubobjectOwner` | boolean | Whether sub-object owners can perform this action. Sub-object owner = the user who checked the document out (Check In), the author of the comment (Change/Delete Comments), or the user who assigned the task (Remove Task). Only honoured where `SubObjectOwnerApplies` is true; ignored on other actions. It has no effect on Remove Workflow, where the submitter is always allowed. |
 | `RightRequired` | string | Required right level (see valid values below). Empty string if no right applies |
 | `LogAction` | boolean | Whether audit logging is enabled for this action |
 

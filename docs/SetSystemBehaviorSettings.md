@@ -39,8 +39,8 @@ Updates the system behavior settings including login logging configuration and l
 |----------|------|----------|-------------|-------------|
 | `LogLogins` | boolean | Yes | Whether to log successful login events | `true` or `false` |
 | `LogLoginAttempts` | boolean | Yes | Whether to log failed login attempts | `true` or `false` |
-| `LoginDelay` | integer | Yes | Delay in milliseconds between login attempts | 0-2000 |
-| `AllowLibraryManagersToEditPolicy` | boolean | Yes | Whether library managers can edit their domain's password policy | `true` or `false` |
+| `LoginDelay` | integer | Yes | Delay in milliseconds added to every failed login response (successful logins are not delayed). Values outside 0–2000 are clamped on save. | 0-2000 |
+| `AllowLibraryManagersToEditPolicy` | boolean | Yes | Whether library managers can view and edit the library policies (per-action rights and logging, via GetDomainPolicies/SetDomainPolicies) of the libraries they manage. It does not affect the password policy, which is system-wide and needs an administrator or Policy Manager. Default TRUE. | `true` or `false` |
 ## Response Structure
 
 ### Success Response

@@ -81,6 +81,10 @@ The `xmlContent` parameter must use the `<FORMDATA>` structure. Each template fi
 
 Pass an empty string for `xmlContent` only when the template has no user-defined fields.
 
+Send each field once. The server does not merge repeated `<Prompt>` elements: when a name appears more than once, the last one is used for rendering and for `replicateto` property replication, and only a checkbox whose value equals that one Prompt is shown ticked. There is no multi-value support; join several selections into one value yourself (for a CHAR property wide enough to hold them).
+
+A form input can carry `replicateto="DOCUMENT.PROPERTYSET.<SET>.<FIELD>[.<ROWNBR>]"` to copy its value into a document property set field (set and field names must match their stored case). It is ignored on `type="radio"` inputs.
+
 ### Detaching from the template
 
 A document saved from a form template stays bound to it: every new version is rendered from the template again, [EditFilledForm](EditFilledForm.md) edits its fields, and a file checked in to it is **not** kept: the check-in succeeds, but what is stored is the template rendered again with no form data. Pass `detachDocumentFromTemplate=true` to save it as usual and then leave it an **ordinary document**, checked out and in as the `.docx`, `.pdf` or `.htm` file it became:
@@ -106,6 +110,8 @@ A form can name a document to render its data into, with a `render-with` meta ta
 ```html
 <meta name="render-with" content="/Form Templates/business-letter.docx" />
 ```
+
+The content is used exactly as written: give the literal path, which may contain non-ASCII characters (e.g. `/Formlar/Başvuru Formu.htm`), not a URL- or HTML-entity-encoded one. Save the form template as UTF-8: the server always reads it as UTF-8. A path starting with `/` or `\` is looked up by name; anything else must be a document id.
 
 When the form at `templatePath` has one, what is stored is not HTML but the filled template, named with the template's extension (`letter` or `letter.htm` becomes `letter.docx`, `letter.pdf`; a name that already ends `.docx` or `.pdf` is kept as it is):
 
@@ -151,7 +157,7 @@ When calling this API after presenting the form to the user via [`UseFormTemplat
 'IR_title','CHAR','N','N','IR_author','CHAR','Y','N','IR_duedate','DATE','Y','N'
 ```
 
-Each group of 4 tokens describes one field:
+Each group of 4 tokens describes one field: one group per `<input>`, `<textarea>` and `<select>` element; a checkbox or radio group whose inputs share a name produces one group per input, so the same name can appear several times. De-duplicate names before building `xmlContent`.
 
 | Token (0-based position in group) | Meaning |
 |---|---|
@@ -165,6 +171,23 @@ To extract the field name from token 0: remove the leading `'IR_` (4 characters)
 **JavaScript example** — parse `InfoRouter_Fields` and build `xmlContent`:
 
 ```javascript
+// The value to send for one form field name:
+// - a single checkbox: its value when ticked, '' otherwise
+// - a checkbox group (several checkboxes sharing the name): the ticked values joined with ';'
+// - a radio group or any other control: el.value
+function fieldValue(el) {
+  if (!el) return '';
+  if (!el.tagName) {                                  // RadioNodeList: several inputs share the name
+    const items = Array.from(el);
+    if (items.every(i => i.type === 'checkbox')) {
+      return items.filter(i => i.checked).map(i => i.value).join(';');
+    }
+    return el.value;                                  // radio group: the checked one's value
+  }
+  if (el.type === 'checkbox') return el.checked ? el.value : '';
+  return el.value;
+}
+
 function parseInfoRouterFields(iframeDoc, form) {
   const fieldsInput = iframeDoc.getElementById('InfoRouter_Fields');
   if (!fieldsInput || !fieldsInput.value.trim()) return [];
@@ -174,10 +197,11 @@ function parseInfoRouterFields(iframeDoc, form) {
   for (let i = 0; i + 3 < tokens.length; i += 4) {
     const raw      = tokens[i].trim();                    // e.g. "'IR_title'"
     const name     = raw.slice(4, raw.length - 1);        // strip 'IR_ prefix and trailing '
+    if (fields.some(f => f.name === name)) continue;      // a checkbox/radio group repeats its name
     const dataType = tokens[i + 1].trim().replace(/'/g, ''); // CHAR | DATE | NUMBER | BOOLEAN
     const required = tokens[i + 2].trim() === "'Y'";
     const el       = form.elements[name];
-    const value    = el ? el.value : '';
+    const value    = fieldValue(el);
     fields.push({ name, value, dataType, required });
   }
   return fields;
@@ -343,6 +367,23 @@ function escapeXml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 }
 
+// The value to send for one form field name:
+// - a single checkbox: its value when ticked, '' otherwise
+// - a checkbox group (several checkboxes sharing the name): the ticked values joined with ';'
+// - a radio group or any other control: el.value
+function fieldValue(el) {
+  if (!el) return '';
+  if (!el.tagName) {                                  // RadioNodeList: several inputs share the name
+    const items = Array.from(el);
+    if (items.every(i => i.type === 'checkbox')) {
+      return items.filter(i => i.checked).map(i => i.value).join(';');
+    }
+    return el.value;                                  // radio group: the checked one's value
+  }
+  if (el.type === 'checkbox') return el.checked ? el.value : '';
+  return el.value;
+}
+
 // Parse the InfoRouter_Fields hidden input inside the rendered iframe form.
 // Returns an array of { name, value, dataType, required }.
 // Token format: 'IR_field1','CHAR','N','N','IR_field2','DATE','Y','N',...
@@ -355,10 +396,11 @@ function parseInfoRouterFields(iframeDoc, form) {
     const raw      = tokens[i].trim();
     if (raw.length < 5) continue;
     const name     = raw.slice(4, raw.length - 1);           // strip 'IR_ prefix + trailing '
+    if (fields.some(f => f.name === name)) continue;         // a checkbox/radio group repeats its name
     const dataType = tokens[i + 1].trim().replace(/'/g, ''); // CHAR | DATE | NUMBER | BOOLEAN
     const required = tokens[i + 2].trim() === "'Y'";
     const el       = form.elements[name];
-    const value    = el ? el.value : '';
+    const value    = fieldValue(el);
     fields.push({ name, value, dataType, required });
   }
   return fields;

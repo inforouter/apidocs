@@ -120,7 +120,7 @@ nobody has is `4041`.
 
 ## Notes
 
-- Only global user groups can be added using this API. Local groups (defined within a specific domain) are inherent members of that domain.
+- Only global user groups can be added using this API. Local groups (defined within a specific domain) cannot be added to any library (refused). They belong to their own library and its access lists honour them, but a local group does not make its users library members; they must be members already.
 - If the group is already a member of the domain, an error is returned.
 - Adding a group grants all current and future members of that group access to the domain.
 - Use `GetDomainMembers` to view current user and group members.

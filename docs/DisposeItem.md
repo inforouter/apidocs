@@ -51,7 +51,7 @@ The operation completes but individual documents that could not be disposed are 
 
 ## Required Permissions
 
-The caller must have **Delete** permission on the document or folder. The item must have an active R&D schedule.
+The caller must be in the Retention & Disposition Managers role (or be a system administrator) AND have Delete rights on the item. The item needs a disposition date that has arrived. Items under a Transfer-type schedule are refused.
 
 ## Example
 
@@ -149,7 +149,7 @@ caller branching on `success` concluded the work was done when nothing was.
 
 ## Notes
 
-- Disposal is **permanent and irreversible** — items are purged, not moved to the Recycle Bin
+- Disposal is **permanent and irreversible** — the item goes into the purge queue (recycle-bin status InPurgeState: hidden and not restorable) and is purged permanently by the background purge job within minutes
 - The path type is resolved automatically: document paths trigger single-document disposal; folder paths trigger recursive folder disposal
 - If the path resolves to neither a document nor a folder, an error is returned
 - For folder paths, per-item failures (checked-out documents, active workflows, etc.) do **not** abort the operation — they are reported as `<log>` child elements alongside `success="true"`

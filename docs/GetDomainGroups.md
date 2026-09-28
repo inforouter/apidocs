@@ -145,7 +145,7 @@ for (const group of root.querySelectorAll('usergroups > usergroup')) {
 }
 ```
 
-[GetLocalGroups](GetLocalGroups.md) answers exactly the same list under a different name.
+[GetLocalGroups](GetLocalGroups.md) returns only the library's local groups; GetDomainGroups also includes global groups that are library members.
 
 ## Notes
 

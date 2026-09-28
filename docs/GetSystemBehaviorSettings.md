@@ -47,8 +47,8 @@ Returns the system behavior settings including login logging configuration, logi
 |----------|------|---------|-------------|
 | `LogLogins` | boolean | false | Whether to log successful login events to the audit log |
 | `LogLoginAttempts` | boolean | false | Whether to log failed login attempts to the audit log |
-| `LoginDelay` | integer | 0 | Delay in milliseconds between login attempts (anti-brute-force protection). Range: 0-2000 |
-| `AllowLibraryManagersToEditPolicy` | boolean | true | Whether library managers can edit their domain's password policy |
+| `LoginDelay` | integer | 0 | Delay in milliseconds added to every failed login response (successful logins are not delayed). 0–2000; values outside are clamped on save. |
+| `AllowLibraryManagersToEditPolicy` | boolean | true | Whether library managers can view and edit the library policies (per-action rights and logging, via GetDomainPolicies/SetDomainPolicies) of the libraries they manage. It does not affect the password policy, which is system-wide and needs an administrator or Policy Manager. Default TRUE. |
 
 ## Required Permissions
 
@@ -194,10 +194,10 @@ using (var client = new SrvSoapClient())
 
 ## Notes
 
-- **LoginDelay**: Introduces a delay between login attempts to prevent brute-force attacks. Value is in milliseconds and is clamped to the range 0-2000. Values above 2000 are automatically normalized to 2000.
+- **LoginDelay**: Delay in milliseconds added to every failed login response (successful logins are not delayed). 0–2000; values outside are clamped on save.
 - **LogLogins**: When enabled, successful logins are recorded in the audit log for security monitoring.
 - **LogLoginAttempts**: When enabled, failed login attempts are recorded in the audit log, useful for detecting potential security threats.
-- **AllowLibraryManagersToEditPolicy**: When enabled, library managers can modify the password policy for their own domain. Defaults to true.
+- **AllowLibraryManagersToEditPolicy**: Whether library managers can view and edit the library policies (per-action rights and logging, via GetDomainPolicies/SetDomainPolicies) of the libraries they manage. It does not affect the password policy, which is system-wide and needs an administrator or Policy Manager. Default TRUE.
 - These settings are system-wide and affect all users.
 - Settings are cached in memory with a 15-minute sliding expiration. Changes made via `SetSystemBehaviorSettings` reset the cache immediately.
 - Changes to these settings require a call to `SetSystemBehaviorSettings`.

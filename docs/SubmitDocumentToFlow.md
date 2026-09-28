@@ -56,6 +56,8 @@ Anonymous access is not permitted. The infoRouter server must have a Workflow li
 | Workflow definition must exist and be **active** | Yes |
 | Workflow definition must belong to the same library as the document | Yes |
 
+Hidden workflows can be submitted. The workflow does not have to be applied to the document's folder, only to the same library.
+
 ## Example
 
 ### GET Request

@@ -21,7 +21,7 @@ Sets the access list (security permissions) for the document or folder at the sp
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full path to the document or folder. |
 | `AccessListXML` | string | Yes | XML string describing the new access list. See format below. |
-| `ApplyToTree` | bool | Yes | If `true` and the path is a folder, applies the access list recursively to all subfolders and documents. Ignored for documents. |
+| `ApplyToTree` | bool | Yes | If `true` and the path is a folder, applies the access list recursively to all subfolders and documents. Ignored for documents. true replaces the list on every subfolder and document below; their own lists are discarded and they inherit this one. With false, subfolders and documents that were inheriting this folder's list get the new list too; those with their own list keep it. |
 
 ### AccessListXML Format
 
@@ -29,9 +29,6 @@ The `AccessListXML` parameter must be a valid XML string with the following stru
 
 ```xml
 <AccessList>
-  <!-- Optional: Anonymous access -->
-  <Anonymous Right="0" />
-
   <!-- Optional: All domain members -->
   <DomainMembers Right="2" />
 
@@ -57,7 +54,8 @@ The `AccessListXML` parameter must be a valid XML string with the following stru
 | `6` | Full Control |
 
 - **Global user groups** have an empty `DomainName` attribute or omit it entirely.
-- Omitting `<Anonymous>` or `<DomainMembers>` leaves those entries unchanged or set to no access.
+- `<Anonymous>` is ignored by SetAccessList; anonymous access is not set here.
+- The list is replaced: a holder not in the XML (including DomainMembers) has no entry afterwards.
 - Right values outside the range 0 to 6 are refused with `4000` naming the value, and nothing is written. They used to be clamped, which turned a typo like `Right="66"` into a grant of full control.
 
 ---
@@ -213,7 +211,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4041` | nothing at that path - including one the caller may not see |
 | `4030` | the caller may not change security on this item |
 | `4000` | `AccessListXML` is not well-formed XML |
-| `none` | a user or group that cannot be found is dropped without a word, and the call still succeeds |
+| `4041` | an unknown user or group; nothing is written. |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |

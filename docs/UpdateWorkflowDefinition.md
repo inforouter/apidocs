@@ -26,7 +26,7 @@ Updates the properties of an existing workflow definition, including its name, a
 ### xmlParameters Structure
 
 ```xml
-<WorkflowDefinitionRequestModel>
+<WorkflowDefinitionRequest>
   <NewFlowName>Document Approval</NewFlowName>
   <ActiveFolderPath>/MyDomain/Active Documents</ActiveFolderPath>
   <Active>false</Active>
@@ -39,7 +39,7 @@ Updates the properties of an existing workflow definition, including its name, a
   <SupervisorUsergroupNames>
     <string>MyDomain/Approvers</string>
   </SupervisorUsergroupNames>
-</WorkflowDefinitionRequestModel>
+</WorkflowDefinitionRequest>
 ```
 
 To specify no supervisors, use empty elements:
@@ -58,8 +58,8 @@ To specify no supervisors, use empty elements:
 | `Active` | bool | `true` to activate the workflow, `false` to deactivate it. |
 | `OnEndMoveToPath` | string | Full infoRouter path of the folder documents are moved to when the workflow ends. Pass an empty string for no movement on end. |
 | `OnEndEventUrl` | string | URL called when the workflow ends (webhook). Pass an empty string for none. |
-| `Hide` | bool | `true` to hide the workflow from non-administrators; `false` to show it. |
-| `SupervisorUserNames` | string[] | Login names of users to assign as workflow supervisors. Use an empty element for no user supervisors. |
+| `Hide` | bool | `true` marks the workflow hidden; clients leave it out of submit lists. The server does not restrict it. `false` to show it. |
+| `SupervisorUserNames` | string[] | Login names of users to assign as workflow supervisors. Use an empty element for no user supervisors. A user id can be passed as `~U<id>` (e.g. `~U4`): that is how to send back the `<User id>` values GetFlowDef returns. An empty list is accepted and leaves the workflow with no supervisors (only administrators and library managers can then manage it). |
 | `SupervisorUsergroupNames` | string[] | Names of user groups to assign as workflow supervisors. Use the format `DomainName/GroupName` to disambiguate groups with the same name across domains, or just `GroupName` if unique. Use an empty element for no group supervisors. |
 
 ---
@@ -82,7 +82,7 @@ To specify no supervisors, use empty elements:
 
 ## Required Permissions
 
-The authenticated user must be a **system administrator** or a **current supervisor** of the workflow definition. Domain-level workflow management rights are enforced by the system.
+System administrator, library (domain) manager, or current workflow supervisor. The definition may be active.
 
 ---
 
@@ -97,7 +97,7 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &domainName=MyDomain
 &workflowName=Document+Approval
-&xmlParameters=<WorkflowDefinitionRequestModel><NewFlowName>Document+Approval</NewFlowName><ActiveFolderPath>/MyDomain/Active+Documents</ActiveFolderPath><Active>false</Active><OnEndMoveToPath>/MyDomain/Archive</OnEndMoveToPath><OnEndEventUrl></OnEndEventUrl><Hide>false</Hide><SupervisorUserNames><string>jdoe</string></SupervisorUserNames><SupervisorUsergroupNames /></WorkflowDefinitionRequestModel>
+&xmlParameters=<WorkflowDefinitionRequest><NewFlowName>Document+Approval</NewFlowName><ActiveFolderPath>/MyDomain/Active+Documents</ActiveFolderPath><Active>false</Active><OnEndMoveToPath>/MyDomain/Archive</OnEndMoveToPath><OnEndEventUrl></OnEndEventUrl><Hide>false</Hide><SupervisorUserNames><string>jdoe</string></SupervisorUserNames><SupervisorUsergroupNames /></WorkflowDefinitionRequest>
 ```
 
 ### Request (GET)
@@ -122,7 +122,7 @@ HTTP/1.1
       <tns:domainName>MyDomain</tns:domainName>
       <tns:workflowName>Document Approval</tns:workflowName>
       <tns:xmlParameters>
-        &lt;WorkflowDefinitionRequestModel&gt;
+        &lt;WorkflowDefinitionRequest&gt;
           &lt;NewFlowName&gt;Document Approval&lt;/NewFlowName&gt;
           &lt;ActiveFolderPath&gt;/MyDomain/Active Documents&lt;/ActiveFolderPath&gt;
           &lt;Active&gt;false&lt;/Active&gt;
@@ -131,7 +131,7 @@ HTTP/1.1
           &lt;Hide&gt;false&lt;/Hide&gt;
           &lt;SupervisorUserNames&gt;&lt;string&gt;jdoe&lt;/string&gt;&lt;/SupervisorUserNames&gt;
           &lt;SupervisorUsergroupNames /&gt;
-        &lt;/WorkflowDefinitionRequestModel&gt;
+        &lt;/WorkflowDefinitionRequest&gt;
       </tns:xmlParameters>
     </tns:UpdateWorkflowDefinition>
   </soap:Body>
@@ -161,8 +161,8 @@ async function call(action, params) {
 
 Rewrites a definition from an XML document. The root element is **`<WorkflowDefinitionRequest>`**,
 not the class name - sending `<WorkflowDefinitionRequestModel>` is a 5000 "error in XML document
-(1, 2)". It is also the only operation that can attach supervisors, since `CreateFlowDef2` and
-`CreateFlowDef3` discard the one they are given.
+(1, 2)". `CreateFlowDef2` and `CreateFlowDef3` also take a supervisor: the supervisor is attached;
+an empty value is accepted.
 
 ```javascript
 const definition = `
@@ -197,7 +197,6 @@ Putting a different name in `<NewFlowName>` renames the definition.
 - Multiple supervisors can be specified — both individual users (`SupervisorUserNames`) and groups (`SupervisorUsergroupNames`) are supported simultaneously.
 - For `SupervisorUsergroupNames`, use the format `DomainName/GroupName` when the group name is not unique across domains. If the group name is unique, just the group name is sufficient.
 - Use `ActivateFlowDef` or `DeactivateFlowDef` if you only need to toggle the active state without changing other properties.
-- Note: The class name in the XML root element is `WorkflowDefinitionRequestModel` (single `i` in `Defintion` — this is the spelling used in the codebase).
 
 ---
 
@@ -218,6 +217,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `5000` | `xmlParameters` is not a `<WorkflowDefinitionRequest>` document |
-| `4000` | no definition by that name, no folder at `ActiveFolderPath`, or a supervisor name that is not a user |
+| `4000` | no definition by that name, or no folder at `ActiveFolderPath` |
+| `4041` | a supervisor name that is not a user |
 | `4030` | the caller may not manage workflows in that library |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

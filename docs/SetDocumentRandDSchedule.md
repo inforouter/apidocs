@@ -102,7 +102,7 @@ nothing until the item has a cut-off date.
 
 ## Notes
 
-- Assigning a schedule triggers the calculation of the document's retention end date and disposition date based on the schedule settings and the document's creation date or cutoff date.
+- Assigning a schedule triggers the calculation of the document's retention end date and disposition date based on the schedule settings and the document's creation date or cutoff date. Only the dates change in this call: open disposition tasks and disposition-status flags for this schedule are cleared. Items whose new disposition date is already past are picked up by the daily disposition job (up to about 24 hours later), which then creates the task or flag. Nothing is disposed by this call.
 - If the document already has a schedule assigned, it is replaced with the new one.
 - To remove a schedule from a document without replacing it, use [RemoveDocumentRandDSchedule](RemoveDocumentRandDSchedule.md).
 - To assign a schedule to an entire folder hierarchy, use [SetFolderRandDSchedule](SetFolderRandDSchedule.md).
