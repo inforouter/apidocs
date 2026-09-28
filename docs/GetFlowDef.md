@@ -128,7 +128,7 @@ The step's on-start folder is not returned.
 | `RequiredAssigneeCount` | Assignee selection mode: `0` = all must complete, `1` = auto-select one, `2` = assign to all, one is enough. |
 | `SuperVisorId` | User ID of the task supervisor. `0` if none. |
 | `SuperVisorName` | Full name of the task supervisor. |
-| `SupervisorNotificationOnDue` | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks. |
+| `SupervisorNotificationOnDue` | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. The same notice also goes to the workflow's supervisors (users and group members). A task without its own supervisor sends none. |
 | `Priority` | Task priority: `0` = none, `1` = low, `5` = normal, `10` = high, `11` = urgent. |
 | `AllowedStartTimeSpan` | Hours before due date that define the earliest the task can be started. `0` means no restriction. |
 | `ReminderTimeSpan` | Hours before due date when the assignee receives a reminder notification. `0` to disable. |

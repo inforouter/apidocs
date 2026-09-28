@@ -38,7 +38,7 @@ The `TaskDefXML` parameter must be a valid XML document whose root element carri
 | `DeadLine` | integer | Yes | Task deadline in **hours** from the time the task is assigned. Must be greater than 0. |
 | `RequiredAssigneeCount` | integer | No | Controls how the system selects and completes tasks among multiple assignees. Valid values: `0` = All assignees must complete (default), `1` = System picks one assignee automatically, `2` = All are assigned but only one needs to complete. This is a mode, not a count. Any other value (including values above 2) is accepted without error and behaves as `0`. `1` picks the assignee with the fewest open tasks when the step starts; `2` drops the other assignees' unfinished tasks for this task definition as soon as one completes. |
 | `SuperVisorId` | integer | No | User ID of the task supervisor. `0` = no supervisor. |
-| `SupervisorNotificationOnDue` | integer | No | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks. |
+| `SupervisorNotificationOnDue` | integer | No | Days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. The same notice also goes to the workflow's supervisors (users and group members). A task without its own supervisor sends none. |
 | `Priority` | integer | No | Task priority. Valid values: `0` = No priority (default), `1` = Low, `5` = Normal, `10` = High, `11` = Urgent. |
 | `AllowedStartTimeSpan` | integer | No | Number of hours after assignment in which the assignee must start the task. `0` = no restriction. |
 | `ReminderTimeSpan` | integer | No | Number of hours before the deadline when a reminder is sent to the assignee. `0` = no reminder. Must not exceed `DeadLine`. |
@@ -270,7 +270,7 @@ await call('AddFlowTaskDef', {
 - `TaskName` follows the same validation rules as step names: alphanumeric only, maximum 32 characters.
 - `DeadLine` is required and must be greater than `0`. The API will return an error if `DeadLine` is `0`.
 - `instruction` is required and must not be empty.
-- `SupervisorNotificationOnDue` is in days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. Workflow-level supervisors are not notified of overdue tasks.
+- `SupervisorNotificationOnDue` is in days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. The same notice also goes to the workflow's supervisors (users and group members). A task without its own supervisor sends none.
 - If `StepNumber` does not match any existing step the call fails with `errorCode="4041"` and the message "this step has been deleted". Verify step numbers with `GetFlowDef` first.
 - Multiple tasks can be added to the same step by calling this API repeatedly.
 
