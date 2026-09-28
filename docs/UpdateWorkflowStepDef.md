@@ -23,7 +23,7 @@ Updates the display name and on-start folder move of an existing workflow step d
 | `workflowName` | string | Yes | Name of the workflow definition containing the step to update. |
 | `stepNumber` | integer | Yes | 1-based number of the step to update. |
 | `newStepName` | string | Yes | New display name for the step. |
-| `onStartMoveToFolderPath` | string | No | Full infoRouter folder path where documents are automatically moved when this step starts. Pass an empty string to remove the on-start folder move. Omitting the parameter has the same effect as an empty string: the on-start folder is cleared. To keep it, resend the current path. GetFlowDef does not currently return it. |
+| `onStartMoveToFolderPath` | string | No | Full infoRouter folder path where documents are automatically moved when this step starts. Left out: the current folder is kept. Empty string: the on-start folder move is removed. GetFlowDef returns the current folder as `OnStartMoveToFolderId` / `OnStartMoveToFolderPath`. |
 
 ## Response
 
@@ -128,4 +128,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4041` | `stepNumber` names no step of that definition |
 | `4000` | no definition by that name, or `onStartMoveToFolderPath` names no folder |
 | `4030` | the caller may not manage workflows in that library |
+| `4090` | another step of the definition already has `newStepName` (compared without regard to case) |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

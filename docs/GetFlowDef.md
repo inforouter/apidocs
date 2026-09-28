@@ -39,7 +39,7 @@ Returns the complete definition of a workflow, including all step definitions an
     OnEndMoveToPath="/Corporate/Archive"
     OnEndEventUrl="https://erp.example.com/workflow-complete"
     Hide="False">
-    <StepDef StepNumber="1" StepName="Review">
+    <StepDef StepNumber="1" StepName="Review" OnStartMoveToFolderId="0" OnStartMoveToFolderPath="">
       <TaskDefs>
         <TaskDef
           TaskDefId="55"
@@ -117,8 +117,10 @@ The `<Supervisors>` element lists the workflow supervisors as `<User id="..."/>`
 |-----------|-------------|
 | `StepNumber` | Numeric order of the step (1-based). |
 | `StepName` | Display name of the step. |
+| `OnStartMoveToFolderId` | Folder the document is moved to when the step starts. `0` if none. |
+| `OnStartMoveToFolderPath` | Path of that folder, as UpdateWorkflowStepDef takes it. Empty if none. |
 
-The step's on-start folder is not returned.
+UpdateWorkflowStepDef keeps the on-start folder when `onStartMoveToFolderPath` is left out, so a step can be renamed without sending it.
 
 ## TaskDef Attributes
 
