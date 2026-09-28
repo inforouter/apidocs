@@ -298,7 +298,7 @@ using (var client = new SrvSoapClient())
 
 ## Notes
 
-- **DocumentMaxSize**: Value in bytes. Default is 75 MB (78643200). Maximum is 1 GB (1073741824). 0 means the 75 MB default. Values above 1 GB are clamped to 1 GB; values below 1 MB are currently stored as sent. Administrators are not limited by it.
+- **DocumentMaxSize**: Value in bytes. Default is 75 MB (78643200). Maximum is 1 GB (1073741824). 0 (or a negative value) means the 75 MB default. Values above 1 GB are clamped to 1 GB, and values below 1 MB are raised to 1 MB. Administrators are not limited by it.
 - **DefaultUploadFileChunkSize**: Minimum 256 KB (262144), maximum 32 MB (33554432). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings.
 - **SystemRecycleBinAutoPurgeOption** and **MoveUsersRecycleBinToSystemRecycleBinIn**: months; 0 means disabled. SetGeneralAppSettings refuses values outside 0–36 with 4000.
 - **Workdays**: Used for business day calculations in workflows and due dates.
