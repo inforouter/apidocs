@@ -20,7 +20,7 @@ Adds a new field to an existing custom property set definition. The field name i
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PropertySetName` | string | Yes | Name of the property set to add the field to. |
-| `FieldName` | string | Yes | Internal name for the field. Alphanumeric and underscore characters only (auto-converted to uppercase). Must not be a reserved name. |
+| `FieldName` | string | Yes | Internal name for the field. Alphanumeric and underscore characters only (auto-converted to uppercase), at most 32 characters. Must not be a reserved name. |
 | `FieldCaption` | string | Yes | Display label shown to users in the UI. |
 | `FieldType` | string | Yes | Data type of the field. See **Field Types** table below. |
 | `FieldLength` | integer | Yes | Maximum length of the field value. `BOOLEAN`, `NUMBER` and `DATE` each fix it - 1, 4 and 8 - and a different value is refused `4000`; send `0` to take the type's own. Until 9.0 whatever was sent was overwritten in silence, so a twenty digit `NUMBER` became a four digit one and the caller was told the call had worked. |
@@ -162,7 +162,7 @@ Send 0 / empty to accept the type's value:
 - `FieldName` must contain at least one letter or digit.
 - For `COMBO BOX`, `LIST BOX`, `RADIO BUTTON`, and `LOOKUP` control types, add valid option values after creating the field using [AddPropertySetFieldOption](AddPropertySetFieldOption.md).
 - Fields cannot be added to system property sets (built-in sets managed by infoRouter).
-- There is no API to rename a field or change its caption, type, length or control settings. Deleting a field drops its column: re-adding a field of the same name creates a new, empty column, and the values stored before are lost. Keep FieldName to 40 characters or fewer; DeletePropertySetField refuses longer names.
+- There is no API to rename a field or change its caption, type, length or control settings. Deleting a field drops its column: re-adding a field of the same name creates a new, empty column, and the values stored before are lost.
 
 ## Related APIs
 
@@ -182,5 +182,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4030` | the caller is not a system administrator - including a caller with no ticket at all |
 | `4041` | no set by that name |
 | `4090` | the set already has a field of that name |
-| `4000` | `FieldType` or `ControlType` is not one of the accepted names, a `CHAR` `FieldLength` is outside 1 to 255, `FieldName` uses a character outside `0-9A-Z_`, `FieldName` is one of the six reserved names, or `FieldCaption` is empty |
+| `4000` | `FieldType` or `ControlType` is not one of the accepted names, a `CHAR` `FieldLength` is outside 1 to 255, `FieldName` uses a character outside `0-9A-Z_` or is longer than 32 characters, `FieldName` is one of the six reserved names, or `FieldCaption` is empty |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
