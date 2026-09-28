@@ -69,6 +69,7 @@ Returns the full details of a single workflow task by its task ID.
     <RedirectedFrom_UserName></RedirectedFrom_UserName>
     <AdHoc>False</AdHoc>
     <DeadLine>48</DeadLine>
+    <OnCompleteNotice>False</OnCompleteNotice>
     <RightType RightTypeId="2" RightTypeName="READ" RightTypeText="Read Only" />
     <Permissions>
       <Permission Name="EditDocument" Value="False" />
@@ -199,6 +200,8 @@ Returns the full details of a single workflow task by its task ID.
 | `extendedComment` | Full assignee comment text. Identical to `ShortComments` when the comment is 255 characters or fewer; contains the complete text when it is longer. |
 
 ### Right Type & Permissions
+
+The `<OnCompleteNotice>` element is `True` if the assigner and the workflow submitter are notified when the task is completed: the same value as the task definition's `OnCompleteNotice` in [GetFlowDef](GetFlowDef.md).
 
 The `<RightType>` element describes the document access right required by this task:
 

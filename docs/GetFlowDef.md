@@ -51,7 +51,9 @@ Returns the complete definition of a workflow, including all step definitions an
           SupervisorNotificationOnDue="-1"
           Priority="5"
           AllowedStartTimeSpan="0"
-          ReminderTimeSpan="0">
+          ReminderTimeSpan="0"
+          righttype="2"
+          OnCompleteNotice="False">
           <Requirements>
             <Requirement Name="LastestVersionRead" Definition="" RefObjectId="0" />
           </Requirements>
@@ -132,8 +134,10 @@ The step's on-start folder is not returned.
 | `Priority` | Task priority: `0` = none, `1` = low, `5` = normal, `10` = high, `11` = urgent. |
 | `AllowedStartTimeSpan` | Hours before due date that define the earliest the task can be started. `0` means no restriction. |
 | `ReminderTimeSpan` | Hours before due date when the assignee receives a reminder notification. `0` to disable. |
+| `righttype` | The right the task gives its assignee on the document while the task is open (`0`=NOACCESS … `6`=FULLCONTROL), as AddFlowTaskDef and UpdateWorkflowTaskDef take it. Also written as the `<RightType>` element, the same way a task writes it. |
+| `OnCompleteNotice` | `True` or `False`, as AddFlowTaskDef and UpdateWorkflowTaskDef take it. Tasks created from the definition carry the same value in their `<OnCompleteNotice>` element. |
 
-`OnCompleteNotice` and `righttype` are not returned.
+Both `righttype` and `OnCompleteNotice` are written with the names UpdateWorkflowTaskDef takes, so a `<TaskDef>` read here can be sent back as it stands; both reset when left out of an update.
 
 ## TaskDef Child Elements
 

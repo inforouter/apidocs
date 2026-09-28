@@ -159,6 +159,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
       <RedirectedFrom_UserName></RedirectedFrom_UserName>
       <AdHoc>false</AdHoc>
       <DeadLine>14</DeadLine>
+      <OnCompleteNotice>False</OnCompleteNotice>
       <RightType RightTypeId="2" RightTypeName="READ" RightTypeText="Read Only" />
       <Permissions>
         <Permission Name="EditDocument" Value="False" />
@@ -262,6 +263,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 | `RedirectedFrom_UserName` | string | Original assignee name if redirected |
 | `AdHoc` | boolean | Whether this is an ad-hoc task |
 | `DeadLine` | integer | Deadline in hours from task creation. `0` means no deadline. |
+| `OnCompleteNotice` | boolean | `True` if the assigner and the workflow submitter are notified when the task is completed. The same value as the task definition's `OnCompleteNotice` in [GetFlowDef](GetFlowDef.md). |
 | `RightType` | XML element | Document access right required by this task. Attributes: `RightTypeId` (integer: `0`=NOACCESS … `6`=FULLCONTROL), `RightTypeName` (enum name, e.g. `READ`), `RightTypeText` (localized label). |
 | `Permissions` | XML element | Six task-assignee permissions. Each `<Permission Name="..." Value="True\|False"/>`: `EditDocument`, `ChangeFinishdate`, `Postpone`, `ChangePriority`, `EditNextStep`, `EditAllSteps`. |
 | `RequirementDetails` | XML | Nested list of task requirements |
