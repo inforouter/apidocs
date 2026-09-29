@@ -39,7 +39,8 @@ Use this method when the infoRouter server is deployed behind IIS or Kestrel wit
       fullname="John Smith"
       email="jsmith@example.com"
       expireOn="2026-03-20T14:35:00Z"
-      isAuthenticated="True" />
+      isAuthenticated="True"
+      previousLogonDate="2026-09-28T07:42:10.000Z" />
 ```
 
 ### Response Attributes
@@ -56,6 +57,7 @@ Use this method when the infoRouter server is deployed behind IIS or Kestrel wit
 | `email` | string | User's email address |
 | `expireOn` | datetime (UTC) | Ticket expiration timestamp (30-day sliding window) |
 | `isAuthenticated` | boolean string | Whether the session is authenticated (`True`/`False`) |
+| `previousLogonDate` | datetime (UTC) | When the user last signed in before this sign-in, for a "last signed in on …" notice. Empty on the user's first sign-in. It is read before this sign-in replaces it, so no other API can return it afterwards: GetUser's `LastLogonDate` already shows this sign-in. |
 
 ### Error Response
 
