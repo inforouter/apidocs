@@ -33,120 +33,67 @@ Returns a single page of documents in the specified infoRouter folder path in **
 
 ### Success Response
 
-The root element is `<response>` and carries metadata about the queried folder and paging state as attributes. Each document on the requested page is returned as a `<d>` child element. Sub-folder items are never included.
+One `<d>` element per document on the requested page. Subfolders are not listed, and the root has no `folderfilter`.
 
 ```xml
-
-<response success="true"
-
-          error=""
-
-          folderid="10"
-
-          parentid="3"
-
-          name="Reports"
-
-          path="/Finance/Reports"
-
-          documentfilter=""
-
-          itemcount="47"
-
-          page="2"
-
-          pageSize="20">
-
-  <d id="1071"
-
-     n="Budget-2024.xlsx"
-
-     mdate="2024-05-20"
-
-     cdate="2024-01-10"
-
-     size="98304"
-
-     dformat="Microsoft Excel Spreadsheet"
-
-     chkoutbyusername=""
-
-     chkoutbyfullname=""
-
-     version="2"
-
-     publishedversion="0"
-
-     regdate="2024-01-10"
-
-     dtype="0" />
-
-  <d id="1072"
-
-     n="Forecast-Q3.pdf"
-
-     mdate="2024-07-01"
-
-     cdate="2024-07-01"
-
-     size="51200"
-
-     dformat="PDF Document"
-
-     chkoutbyusername="jsmith"
-
-     chkoutbyfullname="John Smith"
-
-     version="1"
-
-     publishedversion="1"
-
-     regdate="2024-07-01"
-
-     dtype="5" />
-
+<response success="true" error="" folderid="1170" parentid="1132" name="Reports"
+          path="\Finance\Reports" documentfilter="" page="1" pageSize="20" itemcount="2">
+  <d id="1051" n="Q1-Report.pdf" mdate="2024-06-15T14:30:00.000Z" cdate="2024-03-01T09:00:00.000Z"
+     size="204800" dformat="PDF Document" chkoutbyusername="" chkoutbyfullname=""
+     version="3000000" publishedversion="3000000" regdate="2024-03-01T09:00:00.000Z" dtype="0" />
+  <d id="1052" n="Budget.docx" mdate="2024-05-20T08:15:00.000Z" cdate="2024-01-10T10:00:00.000Z"
+     size="98304" dformat="Office Document" chkoutbyusername="jsmith" chkoutbyfullname="John Smith"
+     version="2000000" publishedversion="1000000" regdate="2024-01-10T10:00:00.000Z" dtype="5" />
 </response>
-
 ```
 
-### Root Element (`<response>`) Attributes
+A folder with nothing to list is a success with `itemcount="0"` and no children. So is a page past the end.
 
-| Attribute | Description |
-|-----------|-------------|
-| `success` | `true` if the request succeeded. |
-| `error` | Error message if `success` is `false`; otherwise empty. |
-| `folderid` | Integer ID of the queried folder. |
-| `parentid` | Integer ID of the queried folder's parent. |
-| `name` | Name of the queried folder. |
-| `path` | Full infoRouter path of the queried folder. |
-| `documentfilter` | The document name filter that was applied (empty string if no filter). |
-| `itemcount` | **Total** number of documents matching the filter across all pages, not just the current page. Use this together with `pageSize` to calculate total page count. |
-| `page` | The page number that was returned (present only when `PageNumber` is not `-1`). |
-| `pageSize` | The number of documents per page as configured in system settings (present only when `PageNumber` is not `-1`). |
+### `<response>` attributes
 
-### Document Element (`<d>`) Attributes
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `folderid` | integer | The id of the folder named by `Path`. |
+| `parentid` | integer | That folder's parent id; `0` when `Path` names a library. |
+| `name` | string | That folder's name. |
+| `path` | string | That folder's full path, with backslashes (`\Library\Folder`). |
+| `documentfilter` | string | The `DocumentFilter` applied; empty for none. |
+| `page` | integer | The `PageNumber` requested. Not written when `PageNumber` is `-1`. |
+| `pageSize` | integer | Items per page: the server's search page size setting (20 by default). Not written when `PageNumber` is `-1`. |
+| `itemcount` | integer | The number of `<d>` elements in this response - **this page**, not the folder's total. |
 
-| Attribute | Description |
-|-----------|-------------|
-| `id` | Unique integer ID of the document. |
-| `n` | Document file name (including extension). |
-| `mdate` | Last modification date (`yyyy-MM-dd` format). |
-| `cdate` | Creation date (`yyyy-MM-dd` format). |
-| `size` | File size in bytes. |
-| `dformat` | MIME type description (e.g. `PDF Document`, `Microsoft Excel Spreadsheet`). |
-| `chkoutbyusername` | Login name of the user who has the document checked out, or empty if not checked out. |
-| `chkoutbyfullname` | Full name of the user who has the document checked out, or empty if not checked out. |
-| `version` | Latest version number. |
-| `publishedversion` | Published version number (`0` if no version is published). |
-| `regdate` | Date the document was registered/uploaded (`yyyy-MM-dd` format). |
-| `dtype` | Document type integer ID (`0` if no type assigned). |
+### `<d>` attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The document's id. |
+| `n` | string | The document's name, with its extension. |
+| `mdate` | datetime (UTC) | When the document was last modified. |
+| `cdate` | datetime (UTC) | When the document was created. |
+| `size` | integer | The document's size in bytes. |
+| `dformat` | string | The description of its file format, looked up from the extension (e.g. `PDF Document`, `Internet Document`) - the value [GetDocument](GetDocument.md) reports as `Type`. |
+| `chkoutbyusername` | string | Login name of the user who has the document checked out; empty if it is not checked out. `~U` and the user id if that user can no longer be read. |
+| `chkoutbyfullname` | string | That user's full name; empty if it is not checked out. |
+| `version` | integer | The latest version, in the large-integer scheme where version 1 is `1000000` (`VersionNumber` in GetDocument). |
+| `publishedversion` | integer | The published version, in the same scheme; `0` if no version is published (`PublishedVersionNumber`). |
+| `regdate` | datetime (UTC) | When the document was registered - first added to infoRouter (`RegisterDate`). |
+| `dtype` | integer | The id of the document type assigned to it; `0` if none (`DocTypeID`). |
+
+Dates are written in universal format, `yyyy-MM-ddTHH:mm:ss.fffZ`.
 
 ### Error Response
 
+No folder at `Path`, including one the caller may not see:
+
 ```xml
+<response success="false" error="Target folder cannot be found." errorCode="4041" />
+```
 
-<response success="false" error="[ErrorCode] Error message" />
+A refusal raised while the folder's contents are being read - the caller not being allowed to list it -
+carries no `errorCode`:
 
+```xml
+<response success="false" error="..." />
 ```
 
 ---
@@ -245,15 +192,15 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ```
 
-totalDocuments = response/@itemcount
+page = 1
 
-pageSize       = response/@pageSize
-
-totalPages     = ceil(totalDocuments / pageSize)
-
-for page = 1 to totalPages:
+repeat:
 
     GET /srv.asmx/GetDocumentsByPage?...&PageNumber={page}
+
+    page = page + 1
+
+until response/@itemcount < response/@pageSize
 
 ```
 
@@ -311,9 +258,9 @@ past the end is a success with nothing in it rather than an error.
 
 - `PageNumber` is **1-based** -" the first page is `1`, not `0`.
 
-- The page size is controlled by the **Search Page Size** system setting; it is returned in the `pageSize` attribute of the response so clients can calculate total pages without additional calls.
+- The page size is controlled by the **Search Page Size** system setting; it is returned in the `pageSize` attribute of the response.
 
-- `itemcount` reflects the **total** number of documents matching `DocumentFilter` across all pages, not the count of items returned on the current page.
+- `itemcount` is the number of `<d>` elements on **this page**, not the total across all pages. A page with fewer than `pageSize` items is the last one.
 
 - `DocumentFilter` accepts a semicolon-separated list of partial name patterns. For example, `Report;Budget` returns documents whose names contain "Report" or "Budget".
 
@@ -325,7 +272,7 @@ past the end is a success with nothing in it rather than an error.
 
 - The `Path` parameter is case-insensitive and leading/trailing slashes are normalized automatically.
 
-- Date fields use `yyyy-MM-dd` format.
+- Dates are in universal format (UTC), e.g. `2024-06-15T14:30:00.000Z`.
 
 ---
 
@@ -350,13 +297,11 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4000` | no folder at that path - including one the caller may not see; see the note below |
+| `4041` | no folder at that path, including one the caller may not see |
+| none | a refusal raised while the folder's contents are read, such as the caller not being allowed to list it; the error document has no `errorCode` attribute |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-**The code for a missing folder is not the same across the three.** [GetDocuments](GetDocuments.md)
-answers `4041`; this one and the other compact listing answer `4000` for the identical condition and
-message, because they report the failure through a helper that does not carry the code. Treat both as
-"no such folder".
+A missing folder answers `4041`, as [GetDocuments](GetDocuments.md) does.
 
 A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
 can be read without authenticating.

@@ -28,22 +28,26 @@ Returns a paginated list of folders that the specified user is subscribed to. Th
 ### Success Response
 
 ```xml
-<response success="true" recordCount="15" startingRow="0" rowCount="10">
-  <folder id="10" name="HR Policies" path="/Departments/HR Policies" ... />
-  <folder id="25" name="Engineering" path="/Departments/Engineering" ... />
+<response success="true" error="" recordCount="15" startingRow="0" rowCount="2">
+  <folder FolderID="1010" ParentID="1002" Name="HR Policies" Path="\Departments\HR Policies"
+          Description="" CreationDate="2024-01-15T09:00:00.000Z"
+          OwnerName="System Administrator" DomainId="1002"
+          ClassificationLevel="NoMarkings" ClassificationLevelId="0" DeclassifyOn="" DowngradeOn=""
+          RDDefId="0" RetentionDate="" DispositionDate="" CutoffDate="" />
+  <folder FolderID="1025" ParentID="1002" Name="Engineering" ...same attributes... />
 </response>
 ```
 
 ### Empty Result Response
 
 ```xml
-<response success="true" recordCount="0" startingRow="0" rowCount="0" />
+<response success="true" error="" recordCount="0" startingRow="0" rowCount="0" />
 ```
 
 ### Error Response
 
 ```xml
-<response success="false" error="[ErrorCode] Error message" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Response Attributes
@@ -51,19 +55,15 @@ Returns a paginated list of folders that the specified user is subscribed to. Th
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `recordCount` | integer | Total number of subscribed folders for the user |
-| `startingRow` | integer | The starting row index used in the request |
-| `rowCount` | integer | Number of folder records returned in this response |
+| `startingRow` | integer | The `startingRow` sent in the request, echoed back |
+| `rowCount` | integer | Number of `<folder>` elements returned in this response |
 
-## Folder Properties
+## Folder Element
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | integer | Unique folder identifier |
-| `name` | string | Folder name |
-| `path` | string | Full path to the folder |
-| `created` | datetime | Folder creation date |
-| `modified` | datetime | Last modification date |
-| `description` | string | Folder description |
+Each subscribed folder is a `<folder>` element as [GetFolder](GetFolder.md) returns it with all its
+flags off - `FolderID`, `ParentID`, `Name`, `Path`, `Description`, `CreationDate`, `OwnerName`,
+`DomainId`, the classification and the retention dates. See its
+[attribute table](GetFolder.md#folder-attributes). There are no child elements.
 
 ## Required Permissions
 
@@ -150,9 +150,9 @@ async function getSubscribedFoldersByUser(userName, startingRow = 0, rowCount = 
         const folders = [];
         xmlDoc.querySelectorAll("folder").forEach(folder => {
             folders.push({
-                id: folder.getAttribute("id"),
-                name: folder.getAttribute("name"),
-                path: folder.getAttribute("path")
+                id: folder.getAttribute("FolderID"),
+                name: folder.getAttribute("Name"),
+                path: folder.getAttribute("Path")
             });
         });
         return { totalCount, folders };
@@ -179,9 +179,9 @@ using (var client = new SrvSoapClient())
         int totalCount = int.Parse(root.Attribute("recordCount")?.Value ?? "0");
         var folders = root.Elements("folder").Select(f => new
         {
-            Id = int.Parse(f.Attribute("id")?.Value ?? "0"),
-            Name = f.Attribute("name")?.Value,
-            Path = f.Attribute("path")?.Value
+            Id = int.Parse(f.Attribute("FolderID")?.Value ?? "0"),
+            Name = f.Attribute("Name")?.Value,
+            Path = f.Attribute("Path")?.Value
         }).ToList();
 
         Console.WriteLine($"Total subscribed folders: {totalCount}");

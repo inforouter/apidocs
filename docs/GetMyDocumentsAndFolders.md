@@ -31,39 +31,57 @@ Returns all documents and folders owned by the currently authenticated user, acr
 
 ### Success Response
 
+The owned folders come first, one `<folder>` element each, then the owned documents, one `<document>`
+element each - both children of `<response>`, which has no attributes of its own besides `success` and
+`error`. With all five flags `false`:
+
 ```xml
-<response success="true">
-  <folder id="456" name="My Project" description="Project files" parentid="100"
-          createdate="2023-01-15T09:00:00" modifydate="2024-03-20T14:30:00">
-    <!-- Included only when withrules=true -->
-    <Rules>...</Rules>
-    <!-- Included only when withpropertysets=true -->
-    <propertysets>...</propertysets>
-    <!-- Included only when withsecurity=true -->
-    <security>...</security>
-  </folder>
-  <document id="1001" name="Proposal.docx" versionid="1000045"
-            createdate="2023-06-01T10:00:00" modifydate="2024-01-10T08:00:00">
-    <!-- Included only when withVersions=true -->
-    <versions>
-      <version id="1000045" number="1" createdate="2023-06-01T10:00:00" />
-    </versions>
-    <!-- Included only when withpropertysets=true -->
-    <propertysets>...</propertysets>
-  </document>
+<response success="true" error="">
+  <folder FolderID="1170" ParentID="1001" Name="My Project" Path="\Projects\My Project"
+          Description="" CreationDate="2024-01-15T09:00:00.000Z" OwnerName="John Smith" DomainId="1001"
+          ClassificationLevel="NoMarkings" ClassificationLevelId="0" DeclassifyOn="" DowngradeOn=""
+          RDDefId="0" RetentionDate="" DispositionDate="" CutoffDate="" />
+  <folder FolderID="1171" ...same attributes... />
+  <document DocumentID="1051" Name="Proposal.docx" Path="\Projects\My Project" Description="" UpdateInstructions=""
+            CreationDate="2024-03-01T09:00:00.000Z" ModificationDate="2024-06-15T14:30:00.000Z"
+            CheckoutDate="" CheckoutBy="" CheckoutByUserName="" Size="204800" Type="Office Document"
+            PercentComplete="0" CompletionDate="" Importance="Normal" RetentionDate="" DispositionDate=""
+            CutoffDate="" RDDefId="0" ExpirationDate="" RegisterDate="2024-03-01T09:00:00.000Z"
+            RegisteredBy="John Smith" DocTypeID="0" DocTypeName="" AIEnhanced="0" AIExtractConfidence="0"
+            VersionNumber="3000000" PublishedVersionNumber="3000000" PublishingRule="LATEST"
+            OwnerName="John Smith" WorkflowId="0" WorkflowName="" WorkflowStepNumber="0" WorkflowStepName=""
+            Author="" Language="" Source="" ApprovalStatus="NoResult" ClassificationLevel="NoMarkings"
+            ClassificationLevelId="0" DeclassifyOn="" DomainId="1001" DomainName="Projects" DowngradeOn=""
+            FolderId="1170" Foldername="My Project" IsShortcut="FALSE" TargetDocumentId="0"
+            LastISOReviewDate="" NextISOReviewDate="" OwnerId="7" RegisterById="7" TemplateID="0"
+            VersionCount="3" UserViewStatus="2" />
+  <document DocumentID="1052" ...same attributes... />
 </response>
 ```
 
-Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
-`AIExtractConfidence`. The first says which of the document's attributes infoRouter Connect
-produced, as a set of bits - `0` when none did; the second how sure it was about the weakest value
-it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienhanced) and
-[AIExtractConfidence](GetDocument.md#aiextractconfidence).
+A user who owns nothing gets `<response success="true" error="" />`.
+
+### `<folder>` element
+
+The element [GetFolder](GetFolder.md) returns - see its [attribute table](GetFolder.md#folder-attributes)
+and [child elements](GetFolder.md#child-elements). `withOwner` adds a `<User>` child, `withrules` a
+`<Rules>`, `withpropertysets` a `<Propertysets>` and `withsecurity` an `<AccessList>`. `withVersions`
+does not apply to folders.
+
+### `<document>` element
+
+The element [GetDocument](GetDocument.md) returns - see its
+[attribute table](GetDocument.md#document-element-attributes) and
+[optional child elements](GetDocument.md#optional-child-elements). `withOwner` adds a `<User>` child,
+`withpropertysets` the property sets, `withsecurity` an `<AccessList>` and `withVersions` the version
+history; a `<DescriptionLog>` is written whenever the description has a recorded author. `withrules`
+does not apply to documents. The element carries `AIEnhanced` and `AIExtractConfidence` - see
+[AIEnhanced](GetDocument.md#aienhanced) and [AIExtractConfidence](GetDocument.md#aiextractconfidence).
 
 ### Error Response
 
 ```xml
-<response success="false" error="[901] Session expired or Invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ---

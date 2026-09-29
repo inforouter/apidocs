@@ -31,27 +31,33 @@ Returns the list of direct subfolders of the specified folder with full property
 
 ### Success Response
 
+One `<folder>` element per direct subfolder, children of `<response>`. With all four flags `false`:
+
 ```xml
-<response success="true">
-  <folder id="456" name="Reports" description="Quarterly Reports" parentid="100"
-          createdate="2023-01-15T09:00:00" modifydate="2024-03-20T14:30:00"
-          owner="jsmith" classificationlevel="0">
-    <!-- Optional sub-elements based on flags -->
-    <Rules>...</Rules>
-    <propertysets>...</propertysets>
-    <security>...</security>
-    <owner>...</owner>
-  </folder>
-  <folder id="457" name="Invoices" ...>
-    ...
-  </folder>
+<response success="true" error="">
+  <folder FolderID="1171" ParentID="1170" Name="Reports" Path="\Finance\Reports"
+          Description="" CreationDate="2024-01-15T09:00:00.000Z"
+          OwnerName="System Administrator" DomainId="1132"
+          ClassificationLevel="NoMarkings" ClassificationLevelId="0" DeclassifyOn="" DowngradeOn=""
+          RDDefId="0" RetentionDate="" DispositionDate="" CutoffDate="" />
+  <folder FolderID="1172" ParentID="1170" Name="Invoices" ...same attributes... />
 </response>
 ```
+
+Each flag set to `true` adds the same child element to every `<folder>` as it does in
+[GetFolder](GetFolder.md): `withOwner` a `<User>`, `WithRules` a `<Rules>`, `withPropertySets` a
+`<Propertysets>` and `withSecurity` an `<AccessList>`.
+
+### `<folder>` element
+
+The `<folder>` element is the one [GetFolder](GetFolder.md) returns - see its
+[attribute table](GetFolder.md#folder-attributes) and [child elements](GetFolder.md#child-elements).
+`FolderID` is the subfolder's id, `ParentID` the id of the folder named by `Path`.
 
 ### Error Response
 
 ```xml
-<response error="Folder not found." />
+<response success="false" error="Target folder cannot be found." errorCode="4041" />
 ```
 
 ---
@@ -183,14 +189,10 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4000` | no folder at that path - including one the caller may not see. Most of this group answers `4041` for the same condition; see the note below |
+| `4041` | no folder at that path, including one the caller may not see |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-**The code for a missing folder is not the same across this group.** `GetFolderRules`,
-`GetFolderAIPreferences`, `GetFolderCatalog`, `GetFolderStatistics` and `DeleteFolder` answer `4041`;
-this one and `GetFolder` answer `4000` for the identical condition and message, because they report
-the failure through a helper that does not carry the code. A client that has to work with more than
-one of them should treat both numbers as "no such folder".
+A missing folder answers `4041`, as `GetFolder`, `GetFolderRules`, `GetFolderAIPreferences`, `GetFolderCatalog`, `GetFolderStatistics` and `DeleteFolder` do.
 
 A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
 a library flagged as anonymous can be read without authenticating. The writes in this group -

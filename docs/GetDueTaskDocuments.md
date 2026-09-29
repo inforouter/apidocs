@@ -24,44 +24,45 @@ Returns the list of documents that have active (due) workflow tasks currently as
 
 ### Success Response
 
+One `<document>` per document that has at least one open (due) task assigned to the caller, listed
+once. Tasks whose document has been deleted, or that the caller can no longer read, are left out.
+
 ```xml
-<response success="true">
-  <document
-    id="1024"
-    name="ContractDraft.pdf"
-    path="/Corporate/Contracts/ContractDraft.pdf"
-    checkedout="false"
-    checkoutby=""
-    checkoutbyid="0"
-    owner="john.smith"
-    ownerid="7"
-    ownerFullName="John Smith"
-    createdate="2024-03-01 09:15:00"
-    modifydate="2024-03-10 14:22:00"
-    versioncount="3"
-    currentversion="3"
-    size="245760"
-    mimetype="application/pdf"
-    importance="0"
-    expired="false"
-    expirationdate=""
-    domainname="Corporate"
-    domainid="45" />
-  <document ... />
+<response success="true" error="">
+  <document DocumentID="1051" Name="Proposal.docx" Path="\Projects\My Project" Description="" UpdateInstructions=""
+            CreationDate="2024-03-01T09:00:00.000Z" ModificationDate="2024-06-15T14:30:00.000Z"
+            CheckoutDate="" CheckoutBy="" CheckoutByUserName="" Size="204800" Type="Office Document"
+            PercentComplete="0" CompletionDate="" Importance="Normal" RetentionDate="" DispositionDate=""
+            CutoffDate="" RDDefId="0" ExpirationDate="" RegisterDate="2024-03-01T09:00:00.000Z"
+            RegisteredBy="John Smith" DocTypeID="0" DocTypeName="" AIEnhanced="0" AIExtractConfidence="0"
+            VersionNumber="3000000" PublishedVersionNumber="3000000" PublishingRule="LATEST"
+            OwnerName="John Smith" WorkflowId="12" WorkflowName="Contract Approval"
+            WorkflowStepNumber="1" WorkflowStepName="Review"
+            Author="" Language="" Source="" ApprovalStatus="NoResult" ClassificationLevel="NoMarkings"
+            ClassificationLevelId="0" DeclassifyOn="" DomainId="1001" DomainName="Projects" DowngradeOn=""
+            FolderId="1170" Foldername="My Project" IsShortcut="FALSE" TargetDocumentId="0"
+            LastISOReviewDate="" NextISOReviewDate="" OwnerId="7" RegisterById="7" TemplateID="0"
+            VersionCount="3" UserViewStatus="2" />
+  <document DocumentID="1052" ...same attributes... />
 </response>
 ```
 
-An empty result set (no due tasks) returns:
+A caller with nothing due gets an empty list:
 
 ```xml
-<response success="true" />
+<response success="true" error="" />
 ```
 
-Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
-`AIExtractConfidence`. The first says which of the document's attributes infoRouter Connect
-produced, as a set of bits - `0` when none did; the second how sure it was about the weakest value
-it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienhanced) and
-[AIExtractConfidence](GetDocument.md#aiextractconfidence).
+### `<document>` element
+
+The element [GetDocument](GetDocument.md) returns with all four of its flags `false` - see its
+[attribute table](GetDocument.md#document-element-attributes). The only child it can have is a
+`<DescriptionLog>`, written when the description has a recorded author; there is no owner, property
+set, access list or version history. The element carries `AIEnhanced` and `AIExtractConfidence` - see
+[AIEnhanced](GetDocument.md#aienhanced) and [AIExtractConfidence](GetDocument.md#aiextractconfidence).
+
+The `<document>` tells you which document is due, not which task: use [getTasks](getTasks.md) for the
+tasks themselves.
 
 ### Error Response
 
@@ -97,13 +98,12 @@ Lists the documents the caller has a task due on. It takes nothing but the ticke
 ```javascript
 const root = await call('GetDueTaskDocuments', { authenticationTicket: ticket });
 
-for (const document of root.querySelectorAll('Document')) {
-  console.log(document.getAttribute('Path'));
+for (const document of root.querySelectorAll(':scope > document')) {
+  console.log(document.getAttribute('DocumentID'), document.getAttribute('Name'), document.getAttribute('Path'));
 }
 ```
 
-When the caller has nothing due it answers 4041 "document not found" rather than an empty list, so
-treat that code as "nothing due" instead of a fault.
+When the caller has nothing due the answer is a success with no `<document>` elements.
 
 ## Notes
 
@@ -128,4 +128,3 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4041` | the caller has no task due - a normal answer, not a fault |

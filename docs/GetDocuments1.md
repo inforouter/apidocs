@@ -31,117 +31,65 @@ Returns the documents in the specified infoRouter folder path in **short form**.
 
 ### Success Response
 
-The root element is `<response>` and carries metadata about the queried folder as attributes. Each document in the folder is returned as a `<d>` child element using short, abbreviated attribute names. Sub-folder items are not included. If the folder exists but contains no documents, only the root element with folder metadata is returned.
+One `<d>` element per document directly in the folder, in short form. Subfolders are not listed, and the root has no `folderfilter`.
 
 ```xml
-
-<response success="true"
-
-          error=""
-
-          folderid="10"
-
-          parentid="3"
-
-          name="Reports"
-
-          path="/Finance/Reports"
-
-          folderfilter=""
-
-          documentfilter=""
-
-          itemcount="2">
-
-  <d id="1051"
-
-     n="Annual-Summary-2024.pdf"
-
-     mdate="2024-06-15"
-
-     cdate="2024-03-01"
-
-     size="204800"
-
-     dformat="PDF Document"
-
-     chkoutbyusername=""
-
-     chkoutbyfullname=""
-
-     version="3"
-
-     publishedversion="3"
-
-     regdate="2024-03-01"
-
-     dtype="0" />
-
-  <d id="1052"
-
-     n="Budget-2024.xlsx"
-
-     mdate="2024-05-20"
-
-     cdate="2024-01-10"
-
-     size="98304"
-
-     dformat="Microsoft Excel Spreadsheet"
-
-     chkoutbyusername="jsmith"
-
-     chkoutbyfullname="John Smith"
-
-     version="2"
-
-     publishedversion="0"
-
-     regdate="2024-01-10"
-
-     dtype="0" />
-
+<response success="true" error="" folderid="1170" parentid="1132" name="Reports"
+          path="\Finance\Reports" documentfilter="" itemcount="2">
+  <d id="1051" n="Q1-Report.pdf" mdate="2024-06-15T14:30:00.000Z" cdate="2024-03-01T09:00:00.000Z"
+     size="204800" dformat="PDF Document" chkoutbyusername="" chkoutbyfullname=""
+     version="3000000" publishedversion="3000000" regdate="2024-03-01T09:00:00.000Z" dtype="0" />
+  <d id="1052" n="Budget.docx" mdate="2024-05-20T08:15:00.000Z" cdate="2024-01-10T10:00:00.000Z"
+     size="98304" dformat="Office Document" chkoutbyusername="jsmith" chkoutbyfullname="John Smith"
+     version="2000000" publishedversion="1000000" regdate="2024-01-10T10:00:00.000Z" dtype="5" />
 </response>
-
 ```
 
-### Root Element (`<response>`) Attributes
+A folder with nothing to list is a success with `itemcount="0"` and no children.
 
-| Attribute | Description |
-|-----------|-------------|
-| `success` | `true` if the request succeeded. |
-| `error` | Error message if `success` is `false`; otherwise empty. |
-| `folderid` | Integer ID of the queried folder. |
-| `parentid` | Integer ID of the queried folder's parent. |
-| `name` | Name of the queried folder. |
-| `path` | Full infoRouter path of the queried folder. |
-| `folderfilter` | The folder name filter applied (always empty -" no filter for this API). |
-| `documentfilter` | The document name filter applied (always empty -" no filter for this API). |
-| `itemcount` | Total count of document items returned. |
+### `<response>` attributes
 
-### Document Element (`<d>`) Attributes
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `folderid` | integer | The id of the folder named by `Path`. |
+| `parentid` | integer | That folder's parent id; `0` when `Path` names a library. |
+| `name` | string | That folder's name. |
+| `path` | string | That folder's full path, with backslashes (`\Library\Folder`). |
+| `documentfilter` | string | The document name filter applied - always empty, this call takes none. |
+| `itemcount` | integer | The number of `<d>` elements in this response. |
 
-| Attribute | Description |
-|-----------|-------------|
-| `id` | Unique integer ID of the document. |
-| `n` | Document file name (including extension). |
-| `mdate` | Last modification date (`yyyy-MM-dd` format). |
-| `cdate` | Creation date (`yyyy-MM-dd` format). |
-| `size` | File size in bytes. |
-| `dformat` | MIME type description (e.g. `PDF Document`, `Microsoft Excel Spreadsheet`). |
-| `chkoutbyusername` | Login name of the user who has the document checked out, or empty if not checked out. |
-| `chkoutbyfullname` | Full name of the user who has the document checked out, or empty if not checked out. |
-| `version` | Latest version number. |
-| `publishedversion` | Published version number (`0` if no version is published). |
-| `regdate` | Date the document was registered/uploaded (`yyyy-MM-dd` format). |
-| `dtype` | Document type integer ID (`0` if no type assigned). |
+### `<d>` attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The document's id. |
+| `n` | string | The document's name, with its extension. |
+| `mdate` | datetime (UTC) | When the document was last modified. |
+| `cdate` | datetime (UTC) | When the document was created. |
+| `size` | integer | The document's size in bytes. |
+| `dformat` | string | The description of its file format, looked up from the extension (e.g. `PDF Document`, `Internet Document`) - the value [GetDocument](GetDocument.md) reports as `Type`. |
+| `chkoutbyusername` | string | Login name of the user who has the document checked out; empty if it is not checked out. `~U` and the user id if that user can no longer be read. |
+| `chkoutbyfullname` | string | That user's full name; empty if it is not checked out. |
+| `version` | integer | The latest version, in the large-integer scheme where version 1 is `1000000` (`VersionNumber` in GetDocument). |
+| `publishedversion` | integer | The published version, in the same scheme; `0` if no version is published (`PublishedVersionNumber`). |
+| `regdate` | datetime (UTC) | When the document was registered - first added to infoRouter (`RegisterDate`). |
+| `dtype` | integer | The id of the document type assigned to it; `0` if none (`DocTypeID`). |
+
+Dates are written in universal format, `yyyy-MM-ddTHH:mm:ss.fffZ`.
 
 ### Error Response
 
+No folder at `Path`, including one the caller may not see:
+
 ```xml
+<response success="false" error="Target folder cannot be found." errorCode="4041" />
+```
 
-<response success="false" error="[ErrorCode] Error message" />
+A refusal raised while the folder's contents are being read - the caller not being allowed to list it -
+carries no `errorCode`:
 
+```xml
+<response success="false" error="..." />
 ```
 
 ---
@@ -259,7 +207,7 @@ and no `folderfilter` because it never looked at folders.
 
 - If the path does not exist or the user has no access to it, an error response is returned with `success="false"`.
 
-- Date fields use `yyyy-MM-dd` format.
+- Dates are in universal format (UTC), e.g. `2024-06-15T14:30:00.000Z`.
 
 - This API is significantly faster than `GetDocuments` for large folders because it avoids loading full document objects. Use it when only identity, name, size, date, or checkout status is needed.
 
@@ -286,13 +234,11 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4000` | no folder at that path - including one the caller may not see; see the note below |
+| `4041` | no folder at that path, including one the caller may not see |
+| none | a refusal raised while the folder's contents are read, such as the caller not being allowed to list it; the error document has no `errorCode` attribute |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-**The code for a missing folder is not the same across the three.** [GetDocuments](GetDocuments.md)
-answers `4041`; this one and the other compact listing answer `4000` for the identical condition and
-message, because they report the failure through a helper that does not carry the code. Treat both as
-"no such folder".
+A missing folder answers `4041`, as [GetDocuments](GetDocuments.md) does.
 
 A call with no ticket signs in as the anonymous user, so a document in a library flagged as anonymous
 can be read without authenticating.

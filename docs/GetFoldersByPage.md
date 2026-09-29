@@ -29,17 +29,51 @@ Returns a page of direct subfolders from the specified parent folder, with optio
 
 ### Success Response
 
+One `<f>` element per subfolder on the requested page. The root describes the folder that was read and the page.
+
 ```xml
-<response success="true">
-  <folder id="456" name="Reports" />
-  <folder id="457" name="Invoices" />
+<response success="true" error="" folderid="1170" parentid="1132" name="Reports"
+          path="\Finance\Reports" folderfilter="" page="1" pageSize="20" itemcount="2">
+  <f id="1171" n="2024" />
+  <f id="1172" n="2023" />
 </response>
 ```
 
+A folder with nothing to list is a success with `itemcount="0"` and no children. So is a page past the end.
+
+### `<response>` attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `folderid` | integer | The id of the folder named by `Path`. |
+| `parentid` | integer | That folder's parent id; `0` when `Path` names a library. |
+| `name` | string | That folder's name. |
+| `path` | string | That folder's full path, with backslashes (`\Library\Folder`). |
+| `folderfilter` | string | The `FolderFilter` applied; empty for none. |
+| `page` | integer | The `PageNumber` requested. Not written when `PageNumber` is `-1`. |
+| `pageSize` | integer | Items per page: the server's search page size setting (20 by default). Not written when `PageNumber` is `-1`. |
+| `itemcount` | integer | The number of `<f>` elements in this response - **this page**, not the folder's total. |
+
+### `<f>` attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The subfolder's id. |
+| `n` | string | The subfolder's name. |
+
 ### Error Response
 
+No folder at `Path`, including one the caller may not see:
+
 ```xml
-<response error="Folder not found." />
+<response success="false" error="Target folder cannot be found." errorCode="4041" />
+```
+
+A refusal raised while the folder's contents are being read - the caller not being allowed to list it -
+carries no `errorCode`:
+
+```xml
+<response success="false" error="..." />
 ```
 
 ---
@@ -155,10 +189,10 @@ root. A page past the end is a success with nothing in it rather than an error.
 
 ## Notes
 
-- Each page returns up to 20 folders.
+- Each page returns up to the server's search page size (20 by default), reported back as `pageSize`.
 - `FolderFilter` performs a substring match on folder names (case-insensitive on most configurations).
 - To get the first page, pass `PageNumber=1`.
-- An empty response (no `folder` elements) indicates no more folders are available on subsequent pages.
+- A response with no `<f>` elements means there are no more folders on this or later pages.
 - For a combined paged listing of folders and documents, use `GetFoldersAndDocumentsByPage`.
 
 ---
@@ -178,7 +212,8 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4000` | no folder at that path - including one the caller may not see. The setters in this group answer `4041` for the same condition; see the note below |
+| `4041` | no folder at that path, including one the caller may not see |
+| none | a refusal raised while the folder's contents are read, such as the caller not being allowed to list it; the error document has no `errorCode` attribute |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in

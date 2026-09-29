@@ -67,9 +67,9 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             UpdateInstructions=""
 
-            CreationDate="2024-03-01"
+            CreationDate="2024-03-01T09:00:00.000Z"
 
-            ModificationDate="2024-06-15"
+            ModificationDate="2024-06-15T14:30:00.000Z"
 
             CheckoutDate=""
 
@@ -85,7 +85,7 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             CompletionDate=""
 
-            Importance="1"
+            Importance="Normal"
 
             RetentionDate=""
 
@@ -97,9 +97,9 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             ExpirationDate=""
 
-            RegisterDate="2024-03-01"
+            RegisterDate="2024-03-01T09:00:00.000Z"
 
-            RegisteredBy="jsmith"
+            RegisteredBy="John Smith"
 
             DocTypeID="0"
 
@@ -109,13 +109,13 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             AIExtractConfidence="65"
 
-            VersionNumber="3"
+            VersionNumber="3000000"
 
-            PublishedVersionNumber="3"
+            PublishedVersionNumber="3000000"
 
-            PublishingRule="PublishingNotRequired"
+            PublishingRule="LATEST"
 
-            OwnerName="jsmith"
+            OwnerName="John Smith"
 
             WorkflowId="0"
 
@@ -177,11 +177,11 @@ Returns a `<response>` root element with a single `<document>` child element con
 
     <!-- Included only when withSecurity=true -->
 
-    <AccessList DateApplied="2024-03-01" AppliedBy="jsmith" InheritedSecurity="true"> ... </AccessList>
+    <AccessList DateApplied="2024-03-01T09:00:00.000Z" AppliedBy="John Smith" InheritedSecurity="true"> ... </AccessList>
 
     <!-- Included only when withOwner=true -->
 
-    <User UserID="7" UserName="jsmith" FullName="John Smith" ... />
+    <User exists="true" UserID="7" FirstName="John" LastName="Smith" Email="jsmith@example.com" MobileNumber="" Enabled="TRUE" UserName="jsmith" />
 
     <!-- Included only when withVersions=true -->
 
@@ -202,8 +202,8 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `Path` | Backslash-separated infoRouter path to the containing folder. |
 | `Description` | Document description text. Who wrote it is in the `<DescriptionLog>` child element. |
 | `UpdateInstructions` | Instructions for the next person checking in an update. |
-| `CreationDate` | Date the document was created (`yyyy-MM-dd` format). |
-| `ModificationDate` | Date the document was last modified. |
+| `CreationDate` | When the document was created, in universal format (UTC), e.g. `2024-03-01T09:00:00.000Z`. All dates below use the same format, and an unset date is an empty string. |
+| `ModificationDate` | When the document was last modified. |
 | `CheckoutDate` | Date the document was checked out, or empty if not checked out. |
 | `CheckoutBy` | Display name of the user who has the document checked out, or empty. |
 | `CheckoutByUserName` | Login name of the user who has the document checked out, or empty. |
@@ -211,22 +211,22 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `Type` | Human-readable document type / MIME description. |
 | `PercentComplete` | Completion percentage (0-"100). |
 | `CompletionDate` | Scheduled completion date, or empty if not set. |
-| `Importance` | Importance level (integer). |
+| `Importance` | Importance level by name: `Low`, `Normal`, `High`, `Vital`, or `NoMarkings` when none is set. |
 | `RetentionDate` | Calculated retain-until date, or empty if not set. |
 | `DispositionDate` | Scheduled disposition date, or empty if not set. |
 | `CutoffDate` | The date the retention clock is measured from, or empty if not set. `RetentionDate` and `DispositionDate` are calculated from it. Set with [SetDocumentCutoffDate](SetDocumentCutoffDate.md) and cleared with [RemoveDocumentCutoffDate](RemoveDocumentCutoffDate.md). |
 | `RDDefId` | The retention and disposition schedule applied to this document, or `0` when none is. Pass it to [GetRandDScheduleInfo](GetRandDScheduleInfo.md) for the schedule itself. |
 | `ExpirationDate` | Document expiration date, or empty if not set. |
 | `RegisterDate` | Date the document was registered / first uploaded. |
-| `RegisteredBy` | Login name of the user who registered the document. |
+| `RegisteredBy` | Full name of the user who registered the document. |
 | `DocTypeID` | Document type definition ID (`0` if none assigned). |
 | `DocTypeName` | Document type name, or empty if none assigned. |
 | `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
 | `AIExtractConfidence` | How sure infoRouter Connect was about the weakest value it extracted into the document's property sets, as a percentage `0` - `100`. `0` means nothing needs reviewing. See [AIExtractConfidence](GetDocument.md#aiextractconfidence). |
-| `VersionNumber` | Latest (working) version number. |
-| `PublishedVersionNumber` | Published version number (`0` if no published version exists). |
-| `PublishingRule` | Publishing rule name (e.g. `PublishingNotRequired`, `MustBePublished`). |
-| `OwnerName` | Login name of the document owner. |
+| `VersionNumber` | Latest (working) version number, in the large-integer scheme where version 1 is `1000000`. |
+| `PublishedVersionNumber` | Published version number, in the same scheme (`0` if no published version exists). |
+| `PublishingRule` | Publishing rule name: `LATEST`, `LASTAPPROVED`, `TAGGED`, `SPESIFICVERSION`, `UNPUBLISHED`, or `NONE`. |
+| `OwnerName` | Full name of the document owner. |
 | `WorkflowId` | Active workflow ID (`0` if not in a workflow). |
 | `WorkflowName` | Active workflow name, or empty. |
 | `WorkflowStepNumber` | Current workflow step number. |
@@ -234,7 +234,7 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `Author` | Author metadata field. |
 | `Language` | Language metadata field. |
 | `Source` | Source metadata field. |
-| `ApprovalStatus` | Approval status string (e.g. `Approved`, `Pending`). |
+| `ApprovalStatus` | Approval status: `NoResult`, `Approved` or `Rejected`. |
 | `ClassificationLevel` | Classification level name (`NoMarkings`, `Confidential`, `Secret`, etc.). |
 | `ClassificationLevelId` | Integer code for the classification level (0-"4). |
 | `DeclassifyOn` | Scheduled declassification date, or empty if not set. |
@@ -288,7 +288,7 @@ attribute cannot carry attributes of its own.
 
 ```xml
 
-<response success="false" error="Document not found." />
+<response success="false" error="Document not found." errorCode="4041" />
 
 ```
 

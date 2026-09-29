@@ -27,18 +27,49 @@ Returns the list of direct subfolders of the specified folder in short form (fol
 
 ### Success Response
 
+One `<f>` element per direct subfolder, in short form. The root describes the folder that was read.
+
 ```xml
-<response success="true">
-  <folder id="456" name="Reports" />
-  <folder id="457" name="Invoices" />
-  <folder id="458" name="Contracts" />
+<response success="true" error="" folderid="1170" parentid="1132" name="Reports"
+          path="\Finance\Reports" folderfilter="" itemcount="2">
+  <f id="1171" n="2024" />
+  <f id="1172" n="2023" />
 </response>
 ```
 
+A folder with nothing to list is a success with `itemcount="0"` and no children.
+
+### `<response>` attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `folderid` | integer | The id of the folder named by `Path`. |
+| `parentid` | integer | That folder's parent id; `0` when `Path` names a library. |
+| `name` | string | That folder's name. |
+| `path` | string | That folder's full path, with backslashes (`\Library\Folder`). |
+| `folderfilter` | string | The folder name filter applied - always empty, this call takes none. |
+| `itemcount` | integer | The number of `<f>` elements in this response. |
+
+### `<f>` attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `id` | integer | The subfolder's id. |
+| `n` | string | The subfolder's name. |
+
 ### Error Response
 
+No folder at `Path`, including one the caller may not see:
+
 ```xml
-<response error="Folder not found." />
+<response success="false" error="Target folder cannot be found." errorCode="4041" />
+```
+
+A refusal raised while the folder's contents are being read - the caller not being allowed to list it -
+carries no `errorCode`:
+
+```xml
+<response success="false" error="..." />
 ```
 
 ---
@@ -147,14 +178,12 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4000` | no folder at that path - including one the caller may not see. The setters in this group answer `4041` for the same condition; see the note below |
+| `4041` | no folder at that path, including one the caller may not see |
+| none | a refusal raised while the folder's contents are read, such as the caller not being allowed to list it; the error document has no `errorCode` attribute |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-**The code for a missing folder is not the same across this group.** `GetFolders1`, `GetFolders2` and
-`GetFoldersByPage` answer `4000`; `GetSubFoldersCount`, `UpdateFolderProperties`, `SetFolderRules`,
-`SetFolderAIPreferences`, `SetFolderCutoffDate`, `RemoveFolderCutoffDate` and `Move` answer `4041` for
-the identical condition, because the three listings report the failure through a helper that does not
-carry the code. Treat both numbers as "no such folder".
+A missing folder answers `4041`, as `GetSubFoldersCount`, `UpdateFolderProperties`, `SetFolderRules`,
+`SetFolderAIPreferences`, `SetFolderCutoffDate`, `RemoveFolderCutoffDate` and `Move` do.
 
 A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
 a library flagged as anonymous can be read without authenticating. The writes in this group refuse it

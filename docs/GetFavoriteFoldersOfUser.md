@@ -33,16 +33,39 @@ Returns a paged list of folders marked as favorites by the specified user.
 ### Success Response
 
 ```xml
-<root success="true" totalcount="8">
-  <folder id="55" name="Annual Reports" path="/Finance/Annual Reports" ... />
-  <folder id="78" name="Projects" path="/Engineering/Projects" ... />
-</root>
+<response success="true" error="" recordCount="8" startingRow="0" rowCount="2">
+  <folder FolderID="1055" ParentID="1001" Name="Annual Reports" Path="\Finance\Annual Reports"
+          Description="" CreationDate="2024-01-15T09:00:00.000Z"
+          OwnerName="System Administrator" DomainId="1001"
+          ClassificationLevel="NoMarkings" ClassificationLevelId="0" DeclassifyOn="" DowngradeOn=""
+          RDDefId="0" RetentionDate="" DispositionDate="" CutoffDate="" />
+  <folder FolderID="1078" ParentID="1070" Name="Projects" ...same attributes... />
+</response>
 ```
+
+A user with no favorite folders:
+
+```xml
+<response success="true" error="" recordCount="0" startingRow="0" rowCount="0" />
+```
+
+### `<response>` attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `recordCount` | integer | Total number of favorite folders of the user, regardless of paging. |
+| `startingRow` | integer | The `startingRow` sent in the request, echoed back. |
+| `rowCount` | integer | Number of `<folder>` elements in this response; may be less than the `rowCount` requested. |
+
+### `<folder>` element
+
+Each favorite folder is a `<folder>` element as [GetFolder](GetFolder.md) returns it with all its flags
+off - see its [attribute table](GetFolder.md#folder-attributes). There are no child elements.
 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or invalid ticket" />
+<response success="false" error="Session expired or invalid ticket" errorCode="4010" />
 ```
 
 ## Example
@@ -98,21 +121,24 @@ async function call(action, params) {
 ```
 
 ```javascript
-// What this page would have shown, done the way that works:
-const root = await call('GetFavorites', {
-  authenticationTicket: ticket,
-  withrules: false, withpropertysets: false, withsecurity: false,
-  withOwner: false, withVersions: false
+const root = await call('GetFavoriteFoldersOfUser', {
+  AuthenticationTicket: ticket,
+  userName: 'jsmith',
+  startingRow: 0,
+  rowCount: 25
 });
 
-const favouriteFolders = [...root.querySelectorAll(':scope > folder')];
+const total = Number(root.getAttribute('recordCount'));
+for (const folder of root.querySelectorAll(':scope > folder')) {
+  console.log(folder.getAttribute('FolderID'), folder.getAttribute('Name'), folder.getAttribute('Path'));
+}
 ```
 
 ## Notes
 
 - Use `startingRow=0` and `rowCount=0` to retrieve all favorite folders.
 - Results are returned in ascending order by folder name.
-- The `totalcount` attribute on the root element reflects the total number of favorite folders for the user, regardless of paging parameters.
+- The `recordCount` attribute on the root element reflects the total number of favorite folders for the user, regardless of paging parameters.
 - To retrieve favorite **documents** for a user, use [GetFavoriteDocumentsOfUser](GetFavoriteDocumentsOfUser.md).
 - To retrieve the full favorites list (documents and folders combined) for the current user, use [GetFavorites](GetFavorites.md).
 
@@ -122,5 +148,7 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `5000` | every call; see the note above |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4000` | no user by that name - the same code [GetSubscribedFoldersByUser](GetSubscribedFoldersByUser.md) answers, as both run the same server method |
+| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 

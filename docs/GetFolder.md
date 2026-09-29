@@ -31,12 +31,27 @@ Returns the properties of the folder at the specified path, with optional detail
 
 ### Success Response
 
+With all four flags `false`, the `<folder>` element has no children:
+
 ```xml
-<response success="true">
-  <folder id="456" name="Reports" description="Quarterly Reports" parentid="100"
-          createdate="2023-01-15T09:00:00" modifydate="2024-03-20T14:30:00"
-          owner="jsmith" classificationlevel="0">
-    <!-- Included only when WithRules=true -->
+<response success="true" error="">
+  <folder FolderID="1170" ParentID="1132" Name="WorkFlowTestOutput" Path="\Accounts Receivable\WorkFlowTestOutput"
+          Description="output of workflows will be here." CreationDate="2015-10-01T09:12:07.000Z"
+          OwnerName="System Administrator" DomainId="1132"
+          ClassificationLevel="NoMarkings" ClassificationLevelId="0" DeclassifyOn="" DowngradeOn=""
+          RDDefId="0" RetentionDate="" DispositionDate="" CutoffDate="" />
+</response>
+```
+
+With all four flags `true`, each adds one child:
+
+```xml
+<response success="true" error="">
+  <folder FolderID="1170" ParentID="1132" Name="WorkFlowTestOutput" ...same attributes as above...>
+    <!-- withOwner=true -->
+    <User exists="true" UserID="4" FirstName="System" LastName="Administrator" Email="admin@example.com"
+          MobileNumber="" Enabled="TRUE" UserName="sysadmin" />
+    <!-- WithRules=true -->
     <Rules>
       <Rule Name="AllowableFileTypes" Value="*" />
       <Rule Name="Checkins" Value="allows" />
@@ -46,21 +61,55 @@ Returns the properties of the folder at the specified path, with optional detail
       <Rule Name="NewDocuments" Value="allows" />
       <Rule Name="NewFolders" Value="allows" />
       <Rule Name="ClassifiedDocuments" Value="disallows" />
+      <Rule Name="AutoPromptPropertsetName" Value="" warning="mispelled attribute name. Use 'AutoPromptPropertysetName' instead." />
+      <Rule Name="AutoPromptPropertysetName" Value="" />
     </Rules>
-    <!-- Included only when withPropertySets=true -->
-    <propertysets>...</propertysets>
-    <!-- Included only when withSecurity=true -->
-    <security>...</security>
-    <!-- Included only when withOwner=true -->
-    <owner>...</owner>
+    <!-- withPropertySets=true -->
+    <Propertysets />
+    <!-- withSecurity=true -->
+    <AccessList DateApplied="" AppliedBy="" InheritedSecurity="true">
+      <Anonymous Right="2" Description="Read" />
+    </AccessList>
   </folder>
 </response>
 ```
 
+### `<folder>` attributes
+
+| Attribute | Type | Description |
+|---|---|---|
+| `FolderID` | integer | The folder's id. |
+| `ParentID` | integer | The parent folder's id; for a folder at the top of a library, the library's id. |
+| `Name` | string | The folder's name. |
+| `Path` | string | The full path, with backslashes (`\Library\Folder`). |
+| `Description` | string | The folder's description; empty if none. |
+| `CreationDate` | datetime (UTC) | When the folder was created. |
+| `OwnerName` | string | The owner's full name. `withOwner=true` adds the owner's `<User>` record. |
+| `DomainId` | integer | The id of the library (domain) the folder is in. |
+| `ClassificationLevel` | string | `NoMarkings`, `Declassified`, `Confidential`, `Secret` or `TopSecret`. |
+| `ClassificationLevelId` | integer | The same level as a number: `0` NoMarkings, `1` Declassified, `2` Confidential, `3` Secret, `4` TopSecret. |
+| `DeclassifyOn` | datetime (UTC) | When the classification is removed; empty if not scheduled. |
+| `DowngradeOn` | datetime (UTC) | When the classification is lowered; empty if not scheduled. |
+| `RDDefId` | integer | The retention and disposition schedule applied to the folder; `0` if none. |
+| `RetentionDate` | datetime (UTC) | Retained until; empty if no schedule. |
+| `DispositionDate` | datetime (UTC) | When the folder is due for disposition; empty if none. |
+| `CutoffDate` | datetime (UTC) | The date the retention period is counted from; empty if none. |
+
+Empty dates are written as an empty string, not as a placeholder date.
+
+### Child elements
+
+| Element | Written when | Content |
+|---|---|---|
+| `<User>` | `withOwner=true` | The owner: `UserID`, `UserName`, `FirstName`, `LastName`, `Email`, `MobileNumber`, `Enabled`. |
+| `<Rules>` | `WithRules=true` | One `<Rule Name Value>` per rule: `allows`/`disallows`, or the allowed file types (`*` = any) for `AllowableFileTypes`, or the property set a new document is prompted for (`AutoPromptPropertysetName`). The misspelled `AutoPromptPropertsetName` rule is kept for older clients; read `AutoPromptPropertysetName`. |
+| `<Propertysets>` | `withPropertySets=true` | The property set rows applied to the folder; empty if none. |
+| `<AccessList>` | `withSecurity=true` | The folder's access list: `InheritedSecurity`, `DateApplied`, `AppliedBy`, and one child per holder (`<Anonymous>`, `<DomainMembers>`, `<UserGroup>`, `<User>`) with its `Right`. |
+
 ### Error Response
 
 ```xml
-<response error="Folder not found." />
+<response success="false" error="Target folder cannot be found." errorCode="4041" />
 ```
 
 ---
@@ -185,14 +234,10 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4000` | no folder at that path - including one the caller may not see. Most of this group answers `4041` for the same condition; see the note below |
+| `4041` | no folder at that path, including one the caller may not see |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
-**The code for a missing folder is not the same across this group.** `GetFolderRules`,
-`GetFolderAIPreferences`, `GetFolderCatalog`, `GetFolderStatistics` and `DeleteFolder` answer `4041`;
-this one and `GetFolders` answer `4000` for the identical condition and message, because they report
-the failure through a helper that does not carry the code. A client that has to work with more than
-one of them should treat both numbers as "no such folder".
+A missing folder answers `4041`, as `GetFolderRules`, `GetFolderAIPreferences`, `GetFolderCatalog`, `GetFolderStatistics` and `DeleteFolder` do.
 
 A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
 a library flagged as anonymous can be read without authenticating. The writes in this group -
