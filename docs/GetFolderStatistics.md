@@ -47,7 +47,7 @@ Returns usage statistics for the specified folder, including subfolder count, to
 
 | Attribute | Description |
 |-----------|-------------|
-| `SubFolderCount` | Number of direct subfolders in the folder. |
+| `SubFolderCount` | Number of subfolders at every depth below the folder. |
 | `TotalDocumentCount` | Total number of documents in the folder and all subfolders. |
 | `CheckedOutCount` | Number of currently checked-out documents in the folder tree. |
 | `TotalSize` | Total storage size in bytes of all documents in the folder tree. |
@@ -137,14 +137,15 @@ console.log(
 );
 ```
 
-`SubFolderCount` counts direct subfolders only; every other count covers the whole tree.
+Every count covers the whole tree below the folder, not just its direct children.
 
 ## Notes
 
 - Statistics are computed recursively across the entire folder tree, not just direct children.
 - `TotalSize` is reported in bytes.
 - This API is useful for storage reporting and compliance dashboards.
-- Use `GetSubFoldersCount` for a lightweight count of direct subfolders only.
+- Use `GetSubFoldersCount` for a count of direct subfolders only.
+- Call this before [GetFolderCatalog](GetFolderCatalog.md): `SubFolderCount` + `TotalDocumentCount` tells how big the catalog will be.
 
 ---
 

@@ -92,7 +92,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [FolderExists1](FolderExists1.md) - Check whether a named subfolder exists within a specified parent folder
 - [GetFolder](GetFolder.md) - Get the full properties of a folder with optional rules, property sets, security, and owner details
 - [GetFolderAIPreferences](GetFolderAIPreferences.md) - Get the infoRouter Connect (AI) preferences in effect for a folder
-- [GetFolderCatalog](GetFolderCatalog.md) - Get the catalog information for a folder
+- [GetFolderCatalog](GetFolderCatalog.md) - Get every subfolder and document below a folder, with checksums, for synchronisation
 - [GetFolderRules](GetFolderRules.md) - Get the rules and policies configured for a folder
 - [GetFolderStatistics](GetFolderStatistics.md) - Get statistics for a folder (subfolder count, document count, total size)
 - [GetFolders](GetFolders.md) - Get the list of direct subfolders with full property details
