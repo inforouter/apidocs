@@ -47,6 +47,7 @@ Retrieves the application license information including company details, license
     <AnonymousAccess>true</AnonymousAccess>
     <Workflow>true</Workflow>
     <ComplianceModule>true</ComplianceModule>
+    <IRConnect>true</IRConnect>
     <TrialCopy>false</TrialCopy>
     <ExpirationDate>2027-12-31T00:00:00</ExpirationDate>
     <SubscriptionStartDate>2025-01-01T00:00:00</SubscriptionStartDate>
@@ -85,6 +86,7 @@ Retrieves the application license information including company details, license
 | `AnonymousAccess` | boolean | Whether anonymous (guest) access is licensed |
 | `Workflow` | boolean | Whether workflow features are licensed |
 | `ComplianceModule` | boolean | Whether the compliance module is licensed. Currently reports `true` on every instance. Not enforced by the server; it will be read from the license, so read it rather than assuming. |
+| `IRConnect` | boolean | Whether the licence allows infoRouter Connect (AI). `true` for every licence issued before 9.0. Whether Connect is also configured, and so usable, is `ConnectIsOn` in [ServerInfo](ServerInfo.md). |
 | `TrialCopy` | boolean | Whether this is a trial license |
 | `ExpirationDate` | DateTime | License expiration date (ISO 8601) |
 | `SubscriptionStartDate` | DateTime | Subscription start date (ISO 8601) |
@@ -256,7 +258,7 @@ using (var client = new SrvSoapClient())
   `UserCount`.
 - **MaxDocumentCount** and **MaxLibraryCount** of 0 means unlimited.
 - **ExpirationDate**, **SubscriptionStartDate**, and **SubscriptionEndDate** are returned in ISO 8601 format.
-- Boolean values (`IsConcurrent`, `AnonymousAccess`, `Workflow`, `ComplianceModule`, `TrialCopy`) are returned as lowercase strings ("true"/"false").
+- Boolean values (`IsConcurrent`, `AnonymousAccess`, `Workflow`, `ComplianceModule`, `IRConnect`, `TrialCopy`) are returned as lowercase strings ("true"/"false").
 - `AnonymousAccess`, `Workflow` and `ComplianceModule` are also reported by [ServerInfo](ServerInfo.md), which needs no ticket - use that one when the answer is needed before anybody has signed in.
 - License data is read from a `license.lic` file in the application configuration path.
 
