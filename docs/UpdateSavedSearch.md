@@ -28,7 +28,7 @@ Prefer POST: `searchParametersXml` is usually too long for a query string.
 | `isPersonal` | bool | Yes | Used only when creating (`searchPageId=0`). An update keeps the entry's owner whatever is sent |
 | `anonymousAccess` | bool | No | System-wide entries: the anonymous user may use it. Ignored for personal entries |
 | `publicAccess` | bool | No | System-wide entries: every signed-in user may use it. Ignored for personal entries |
-| `userGroupNames` | string | No | System-wide entries: the groups, separated by `\|` (`library\group` for a local group). **Replaces** the current groups; empty removes them all. Ignored for personal entries |
+| `userGroupNames` | string | No | System-wide entries: the groups, separated by <code>&#124;</code> (`library\group` for a local group). **Replaces** the current groups; empty removes them all. Ignored for personal entries |
 | `searchParametersXml` | string | No | The fields and their values. **Replaces** the stored definition; empty resets every field to shown with no value. See [SavedSearchXmlReference](SavedSearchXmlReference.md) |
 
 ## An Update Replaces Everything

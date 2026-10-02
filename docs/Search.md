@@ -108,7 +108,7 @@ Each element uses three attributes:
 | `SIZEIS` | `EQLT` (at most) / `EQGT` (at least) | Size in bytes | Filters by file size. |
 | `IMPORTANCE` | `EQ` / `GT-EQ` / `GT` / `LT` / `LT-EQ` | `LOW` / `NORMAL` / `HIGH` / `VITAL` | Filters by document importance. |
 | `CLEVEL` | -" | `NOMARKINGS` / `DECLASSIFIED` / `CONFIDENTIAL` / `SECRET` / `TOPSECRET` | Filters by classification level. |
-| `DATECRITERIA` | `EQ` / `EQLT` / `EQGT` / `BETWEEN` | Date string `yyyy-MM-dd`; for `BETWEEN` use `date1\|date2` | Filters by a date field. Add `SUBTYPE` attribute to specify which date field (see **Date Criteria Subtypes** below). |
+| `DATECRITERIA` | `EQ` / `EQLT` / `EQGT` / `BETWEEN` | Date string `yyyy-MM-dd`; for `BETWEEN` use <code>date1&#124;date2</code> | Filters by a date field. Add `SUBTYPE` attribute to specify which date field (see **Date Criteria Subtypes** below). |
 | `DOCSRC` | -" | Source string | Filters by document source. |
 | `DOCLANG` | -" | Language code (see **Document Language Values** below) | Filters by document language. |
 | `DOCAUTHOR` | -" | Author name string | Filters by document author metadata field. |
@@ -233,12 +233,12 @@ are not case sensitive. A field of the set that has no child element puts no con
 | | `NOTEQ` (or `NEQ`) | number | not equal to |
 | | `GT` / `LT` | number | greater than / less than |
 | | `EQGT` / `EQLT` | number | at least / at most |
-| | `BETWEEN` | `low\|high` | from `low` to `high`, both included |
+| | `BETWEEN` | <code>low&#124;high</code> | from `low` to `high`, both included |
 | | `NOTNULL` | empty | the field has a value |
 | | `NULL` | empty | the field has no value |
 | Date (`DATE`) | `EQ` | date | on that day |
 | | `EQGT` / `EQLT` | date | on or after / on or before that day |
-| | `BETWEEN` | `start\|end` | from `start` to `end`, both days included |
+| | `BETWEEN` | <code>start&#124;end</code> | from `start` to `end`, both days included |
 | | `TODAY`, `YESTERDAY` | empty | relative to today |
 | | `LAST7DAYS`, `NEXT7DAYS` | empty | the 7 days before / after today |
 | | `LASTWEEK`, `THISWEEK`, `NEXTWEEK` | empty | the calendar week |
@@ -259,6 +259,95 @@ are not case sensitive. A field of the set that has no child element puts no con
 - An operator that takes no value (`NULL`, `NOTNULL`, `ANYTIME`, `TODAY`, ...) must be sent with an empty
   `VALUE`; a value is refused.
 
+#### Examples by field type
+
+The examples use a property set `Invoice` with a text field `Customer`, a number field `Amount`, a date
+field `DueOn` and a yes/no field `Paid`. Each `PROPERTYSETNAME` element below is one complete property set
+criterion; put it inside the `<criteria>` root with any other criteria.
+
+**Text (`CHAR`)**
+
+```xml
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Customer" OPERATOR="LIKE"        VALUE="Acme" />      <!-- contains "Acme" -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Customer" OPERATOR="EQ"          VALUE="Acme Ltd" />  <!-- exactly "Acme Ltd" -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Customer" OPERATOR="NOTCONTAINS" VALUE="Test" />      <!-- does not contain "Test" -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Customer" OPERATOR="NULL"        VALUE="" />          <!-- no customer entered -->
+</criteria>
+```
+
+**Number (`NUMBER`)**
+
+```xml
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Amount" OPERATOR="BETWEEN" VALUE="1000|5000" />  <!-- 1000 to 5000, both included -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Amount" OPERATOR="EQGT"    VALUE="10000" />      <!-- 10000 or more -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Amount" OPERATOR="NOTEQ"   VALUE="0" />          <!-- anything but 0 -->
+</criteria>
+```
+
+**Date (`DATE`)**
+
+```xml
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="DueOn" OPERATOR="BETWEEN"   VALUE="2026-01-01|2026-03-31" />  <!-- the first quarter, 31 March included -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="DueOn" OPERATOR="EQLT"      VALUE="2026-06-30" />             <!-- on or before 30 June -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="DueOn" OPERATOR="NEXT7DAYS" VALUE="" />                       <!-- due in the coming week -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="DueOn" OPERATOR="ANYTIME"   VALUE="" />                       <!-- has a due date at all -->
+</criteria>
+```
+
+**Yes/No (`BOOLEAN`)**
+
+```xml
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Paid" OPERATOR="EQ"   VALUE="false" />  <!-- not paid -->
+</criteria>
+
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Paid" OPERATOR="NULL" VALUE="" />       <!-- never set -->
+</criteria>
+```
+
+**Several fields at once.** All conditions must hold: unpaid invoices of Acme between 1,000 and 5,000,
+due in the first quarter.
+
+```xml
+<criteria>
+  <criteria NAME="SEARCHFOR" VALUE="DOCUMENTSONLY" />
+  <criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+    <criteria NAME="Customer" OPERATOR="LIKE"    VALUE="Acme" />
+    <criteria NAME="Amount"   OPERATOR="BETWEEN" VALUE="1000|5000" />
+    <criteria NAME="DueOn"    OPERATOR="BETWEEN" VALUE="2026-01-01|2026-03-31" />
+    <criteria NAME="Paid"     OPERATOR="EQ"      VALUE="false" />
+  </criteria>
+</criteria>
+```
+
 #### When `OPERATOR` is missing or `VALUE` is empty
 
 | Field element | Result |
@@ -266,7 +355,7 @@ are not case sensitive. A field of the set that has no child element puts no con
 | no `OPERATOR` (or `OPERATOR=""`) and an empty `VALUE` | No condition on that field; the search runs as if the field were not listed. |
 | no `OPERATOR` but a `VALUE` | Refused with `4000`: *A search field value cannot be specified without a valid operator.* (For a date field the message says the value must be empty for the operator.) |
 | an operator that needs a value, with an empty `VALUE` | No condition on that field. It is **not** refused. |
-| `BETWEEN` without both ends (`VALUE="500"`, `"500\|"` or empty) | Refused with `4000`: *Invalid condition specified for the field: SET.FIELD: BETWEEN needs two values separated by \|: the low end and the high end.* |
+| `BETWEEN` without both ends (`VALUE="500"`, <code>"500&#124;"</code> or empty) | Refused with `4000`: *Invalid condition specified for the field: SET.FIELD: BETWEEN needs two values separated by \|: the low end and the high end.* |
 
 An operator other than `BETWEEN` sent with an empty value is not refused, so a search built from a form
 with empty inputs silently matches more documents rather than failing. Leave a field out, or check its
@@ -444,11 +533,17 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
   <criteria NAME="AIENHANCED"        VALUE="SUMMARY" />
 
+  <!-- One condition per field type: text, number (BETWEEN), date (BETWEEN) and yes/no -->
+
   <criteria NAME="PROPERTYSETNAME"   VALUE="ProjectMetadata">
 
-    <criteria NAME="Department" OPERATOR="EQ"   VALUE="Finance" />
+    <criteria NAME="Department" OPERATOR="EQ"      VALUE="Finance" />
 
-    <criteria NAME="Budget"     OPERATOR="EQGT" VALUE="50000" />
+    <criteria NAME="Budget"     OPERATOR="BETWEEN" VALUE="50000|250000" />
+
+    <criteria NAME="StartDate"  OPERATOR="BETWEEN" VALUE="2024-01-01|2024-06-30" />
+
+    <criteria NAME="Approved"   OPERATOR="EQ"      VALUE="true" />
 
   </criteria>
 

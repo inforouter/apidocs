@@ -117,7 +117,7 @@ These describe the configuration options available for each policy (used by UI t
 | `OwnershipApplies` | boolean | Whether the object owner option is configurable for this policy |
 | `SubObjectOwnerApplies` | boolean | Whether the sub-object owner option is available for this policy |
 | `SecurityApplies` | boolean | Whether the rights level dropdown applies to this policy |
-| `AllowedRights` | string | Pipe-delimited list of selectable right levels (e.g., `\|CHANGE\|FULLCONTROL`). Empty string when `SecurityApplies` is `false` |
+| `AllowedRights` | string | Pipe-delimited list of selectable right levels (e.g., <code>&#124;CHANGE&#124;FULLCONTROL</code>). Empty string when `SecurityApplies` is `false` |
 | `LogOption` | boolean | Whether audit logging is optional (configurable) for this policy. When `false`, the log setting is fixed and cannot be changed |
 
 ## Valid Action Values

@@ -265,7 +265,7 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 | `DeadLine` | integer | Deadline in hours from task creation. `0` means no deadline. |
 | `OnCompleteNotice` | boolean | `True` if the assigner and the workflow submitter are notified when the task is completed. The same value as the task definition's `OnCompleteNotice` in [GetFlowDef](GetFlowDef.md). |
 | `RightType` | XML element | Document access right required by this task. Attributes: `RightTypeId` (integer: `0`=NOACCESS … `6`=FULLCONTROL), `RightTypeName` (enum name, e.g. `READ`), `RightTypeText` (localized label). |
-| `Permissions` | XML element | Six task-assignee permissions. Each `<Permission Name="..." Value="True\|False"/>`: `EditDocument`, `ChangeFinishdate`, `Postpone`, `ChangePriority`, `EditNextStep`, `EditAllSteps`. |
+| `Permissions` | XML element | Six task-assignee permissions. Each <code>&lt;Permission Name="..." Value="True&#124;False"/&gt;</code>: `EditDocument`, `ChangeFinishdate`, `Postpone`, `ChangePriority`, `EditNextStep`, `EditAllSteps`. |
 | `RequirementDetails` | XML | Nested list of task requirements |
 | `Requirements` | string | Requirements summary |
 | `Supervisor_NotificationOnDue` | integer | Days before due date to notify supervisor |

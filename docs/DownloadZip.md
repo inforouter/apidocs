@@ -23,7 +23,7 @@ Zips one or more documents and folders and returns the archive as a raw byte arr
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `Paths` | string | Yes | Pipe-separated (`\|`) list of infoRouter paths to include in the zip. Each entry can be a full infoRouter path to a document or folder, or a short ID path (`~D{id}` for a document, `~F{id}` for a folder). Paths that cannot be resolved are silently skipped. |
+| `Paths` | string | Yes | Pipe-separated (<code>&#124;</code>) list of infoRouter paths to include in the zip. Each entry can be a full infoRouter path to a document or folder, or a short ID path (`~D{id}` for a document, `~F{id}` for a folder). Paths that cannot be resolved are silently skipped. |
 
 ### Paths Format
 

@@ -184,7 +184,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
 | `Only the system administrator can perform this operation` | The authenticated user is not a system administrator. |
 | `A document type with this name already exists.` | A document type with the given name already exists in the system. |
-| `Reserved value \| 'GENERIC'` | The name `GENERIC` is reserved and cannot be used. |
+| <code>Reserved value &#124; 'GENERIC'</code> | The name `GENERIC` is reserved and cannot be used. |
 | `The document type field must contain only letters, numeric, space or underscore characters.` | The `DocumentTypeName` contains invalid characters. |
 | `Specified custom propertyset not applicable to the documents.` | The named property set is not configured to apply to documents. |
 | `Specified custom propertyset is not a public property set.` | The named property set is not a global property set. |

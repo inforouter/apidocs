@@ -81,7 +81,7 @@ Returns a saved search or search page: its name, owner, access, and every field 
 | `anonymousAccess` | bool | The anonymous user may use it. Always `false` for personal entries | `anonymousAccess` |
 | `publicAccess` | bool | Every signed-in user may use it. Always `false` for personal entries | `publicAccess` |
 | `userGroupIds` | string | Comma-separated ids of the groups it is shared with. Empty for personal entries | — |
-| `userGroupNames` | string | The same groups by name, `\|`-separated, `library\group` for local groups | `userGroupNames` |
+| `userGroupNames` | string | The same groups by name, <code>&#124;</code>-separated, `library\group` for local groups | `userGroupNames` |
 
 ### `SEARCH` Element
 

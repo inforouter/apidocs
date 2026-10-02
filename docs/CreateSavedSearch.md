@@ -27,7 +27,7 @@ Prefer POST: `searchParametersXml` is usually too long for a query string.
 | `isPersonal` | bool | Yes | `true`: private to the caller. `false`: system-wide, requires the Search Administrator role |
 | `anonymousAccess` | bool | No | System-wide entries: the anonymous user may use it. Ignored for personal entries. Default `false` |
 | `publicAccess` | bool | No | System-wide entries: every signed-in user may use it. Ignored for personal entries. Default `false` |
-| `userGroupNames` | string | No | System-wide entries: groups whose members may use it, separated by `\|`. A library's local group is written `library\group`. Ignored for personal entries |
+| `userGroupNames` | string | No | System-wide entries: groups whose members may use it, separated by <code>&#124;</code>. A library's local group is written `library\group`. Ignored for personal entries |
 | `searchParametersXml` | string | No | The fields and their values. See [SavedSearchXmlReference](SavedSearchXmlReference.md). Empty = every field shown, no values |
 
 ## searchParametersXml

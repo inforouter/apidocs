@@ -2,17 +2,18 @@
 
 Builds a catalog of a folder: every subfolder at every depth, and every document in each of them. Each document carries its size, modification date and the checksums of its published and latest versions, so a client can tell which files have changed since it last looked. This is the call a synchronisation client uses. To show a folder in a UI, use the listings compared under [Compared with GetFolders and GetDocuments](#compared-with-getfolders-and-getdocuments).
 
-!!! warning "Large folders: check the size first"
-    The whole catalog is built in one request. The server walks the entire tree, looks up two checksums for every document and holds the complete response in memory before sending any of it. On a large tree the call can run for many minutes, puts a sustained load on the database and the server while it runs, and can fail outright if the request times out or the server runs short of memory.
-
-    Before calling it, call [GetFolderStatistics](GetFolderStatistics.md) on the same folder and add `SubFolderCount` and `TotalDocumentCount`; both cover the whole tree.
-
-    | Folders + documents | Advice |
-    |---|---|
-    | up to about 10,000 | Call it when needed. |
-    | more than about 10,000 | Call it outside business hours, or catalog the subfolders one at a time instead of the whole tree at once. |
-
-    10,000 is a guideline, not a limit the server enforces: what is safe depends on the server's hardware and on how busy it is. Time a call on a folder of known size on your own server and adjust the threshold from that. The statistics count everything in the tree, including what the caller cannot see, so the total is an upper bound on what the catalog returns.
+> **Warning: large folders. Check the size first.**
+>
+> The whole catalog is built in one request. The server walks the entire tree, looks up two checksums for every document and holds the complete response in memory before sending any of it. On a large tree the call can run for many minutes, puts a sustained load on the database and the server while it runs, and can fail outright if the request times out or the server runs short of memory.
+>
+> Before calling it, call [GetFolderStatistics](GetFolderStatistics.md) on the same folder and add `SubFolderCount` and `TotalDocumentCount`; both cover the whole tree.
+>
+> | Folders + documents | Advice |
+> |---|---|
+> | up to about 10,000 | Call it when needed. |
+> | more than about 10,000 | Call it outside business hours, or catalog the subfolders one at a time instead of the whole tree at once. |
+>
+> 10,000 is a guideline, not a limit the server enforces: what is safe depends on the server's hardware and on how busy it is. Time a call on a folder of known size on your own server and adjust the threshold from that. The statistics count everything in the tree, including what the caller cannot see, so the total is an upper bound on what the catalog returns.
 
 ## Endpoint
 

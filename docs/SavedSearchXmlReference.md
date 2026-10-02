@@ -40,7 +40,7 @@ Both are stored in the same format. What differs is what the UI does with it.
 | `SEARCHFOR` | `VALUE` | Empty (documents and folders), `DOCUMENTSONLY`, `FOLDERSONLY` |
 | `DOCTYPE` | `VALUE` | A document type name, or `GENERIC` for documents without a type. Not checked against the defined types |
 | `KEYWORDS` | `VALUE` | Full-text search words |
-| `DOCUMENTNAME` | `VALUE` | Document or folder names, `*` as wildcard, several separated by `\|`: `*.pdf\|*contract*` |
+| `DOCUMENTNAME` | `VALUE` | Document or folder names, `*` as wildcard, several separated by <code>&#124;</code>: <code>*.pdf&#124;*contract*</code> |
 | `FOLDERDESC` | `VALUE` | Text in a folder's description (folders only) |
 | `DOCUMENTID` | `VALUE` | Comma-separated document ids: `101,102` |
 | `FOLDERBYID` | `VALUE` | Comma-separated folder ids |
@@ -540,7 +540,7 @@ There is no API that runs a saved search by id. Run it by reading it with `GetSa
 | Saved search `ITEM` | Search API `criteria` |
 |---------------------|------------------------|
 | `SEARCHSCOPE VALUE="0"` / `1` / `2` / `3` | `SEARCHSCOPE VALUE="ONLINE"` / `ALL` / `ARCHIVE` / `ONLINE-HIDDENS` |
-| `DOCUMENTNAME VALUE="a\|b"` | One `DOCUMENTNAME` per name |
+| <code>DOCUMENTNAME VALUE="a&#124;b"</code> | One `DOCUMENTNAME` per name |
 | `FOLDERDESC` | `FOLDERDESCRIPTION` |
 | `FOLDER VALUE="1234" INCLUDESUBFOLDERS="FALSE"` | `FOLDER VALUE="~F1234"` and `INCLUDESUBFOLDERS VALUE="false"` |
 | `USERNAME VALUE="4"` | `USERNAME VALUE="~U4"` (one user only) |
@@ -549,7 +549,7 @@ There is no API that runs a saved search by id. Run it by reading it with `GetSa
 | `SIZEIS VALUE="AT LEAST" SIZEAMOUNT="1024"` | `SIZEIS OPERATOR="EQGT" VALUE="1024"` (`AT MOST` → `EQLT`; kilobytes in both) |
 | `IMPORTANCE OPERATOR="GT-EQ" VALUE="2"` | Same |
 | `CLEVEL VALUE="2"` | `CLEVEL VALUE="CONFIDENTIAL"` |
-| `DATECRITERIA VALUE="MODIFIED" DATETYPE="BETWEEN"` | `DATECRITERIA SUBTYPE="MODIFIED" OPERATOR="BETWEEN" VALUE="from\|to"` (`EQGT`/`EQLT` when one date is empty) |
+| `DATECRITERIA VALUE="MODIFIED" DATETYPE="BETWEEN"` | <code>DATECRITERIA SUBTYPE="MODIFIED" OPERATOR="BETWEEN" VALUE="from&#124;to"</code> (`EQGT`/`EQLT` when one date is empty) |
 | `DATETYPE="TODAY"` / `PREVIOUS` / `NEXT` | `EQ` today / `BETWEEN` the computed range, in the browser's local date |
 | `PROPERTYSETNAME` conditions | Child `criteria` with the Search API operator: `CHAR` 1 → `LIKE`, `NUMBER` 2 → `NOTEQ`, other names as in the table above |
 | `KEYWORDS`, `SEARCHFOR`, `DOCTYPE`, `DOCUMENTID`, `FOLDERBYID`, `DOCUMENTFORMAT`, `DOCSRC`, `DOCLANG`, `DOCAUTHOR`, `RDDEFID`, `PUBLISHSTATUS`, `AIENHANCED` | Same name and value |

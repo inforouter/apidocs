@@ -123,7 +123,7 @@ When the document has no matching tasks the `<Value>` element is present but emp
 | `DeadLine` | integer | Deadline in hours from assignment time. `0` means no deadline. |
 | `OnCompleteNotice` | boolean | `True` if the assigner and the workflow submitter are notified when the task is completed. The same value as the task definition's `OnCompleteNotice` in [GetFlowDef](GetFlowDef.md). |
 | `RightType` | XML element | Document access right required by this task. Attributes: `RightTypeId` (integer: `0`=NOACCESS, `1`=LIST, `2`=READ, `3`=ADD, `4`=ADDREAD, `5`=CHANGE, `6`=FULLCONTROL), `RightTypeName` (enum name, e.g. `READ`), `RightTypeText` (localized label). |
-| `Permissions` | XML element | Six task-assignee permissions. Each `<Permission Name="..." Value="True\|False"/>`: `EditDocument`, `ChangeFinishdate`, `Postpone`, `ChangePriority`, `EditNextStep`, `EditAllSteps`. |
+| `Permissions` | XML element | Six task-assignee permissions. Each <code>&lt;Permission Name="..." Value="True&#124;False"/&gt;</code>: `EditDocument`, `ChangeFinishdate`, `Postpone`, `ChangePriority`, `EditNextStep`, `EditAllSteps`. |
 | `Priority` | string | Task priority. Values: `NoPriority`, `Low`, `Normal`, `High`, `Urgent`. |
 | `TaskStatus` | string | Current task status. Values: `NotStarted`, `InProgress`, `DueDateChanged`, `Completed`, `Dropped`, `Reassigned`. |
 | `ApprovalStatus` | string | Approval decision if the task has an Approval requirement. Values: `NoResult`, `Reject`, `Approve`. |
