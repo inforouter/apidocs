@@ -24,10 +24,12 @@ Retrieves system-wide statistics including user counts, document counts, total d
 
 ### Success Response
 ```xml
-<root success="true">
+<response success="true" error="">
   <SystemStatistics>
     <TotalUserCount>150</TotalUserCount>
     <ActiveUserCount>140</ActiveUserCount>
+    <AuthorUserCount>90</AuthorUserCount>
+    <ReaderUserCount>50</ReaderUserCount>
     <DisabledUserCount>10</DisabledUserCount>
     <TotalDocumentCount>25000</TotalDocumentCount>
     <TotalDocumentSize>10737418240</TotalDocumentSize>
@@ -36,12 +38,12 @@ Retrieves system-wide statistics including user counts, document counts, total d
     <RegisteredDocumentsIn60Days>210</RegisteredDocumentsIn60Days>
     <RegisteredDocumentsIn90Days>345</RegisteredDocumentsIn90Days>
   </SystemStatistics>
-</root>
+</response>
 ```
 
 ### Error Response
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="..." errorCode="4030" />
 ```
 
 ## Response Fields
@@ -49,7 +51,9 @@ Retrieves system-wide statistics including user counts, document counts, total d
 | Field | Type | Description |
 |-------|------|-------------|
 | `TotalUserCount` | int | Total number of user accounts (active + disabled), excluding the system admin account |
-| `ActiveUserCount` | int | Number of active (non-disabled) users (authors + read-only users). Enabled accounts, not signed-in users; excludes the system administrator. To check seats, compare authors with LicenseCount and readers with ReadonlyUserCount; readers above ReadonlyUserCount use author seats. |
+| `ActiveUserCount` | int | Number of enabled users, `AuthorUserCount` + `ReaderUserCount`. Enabled accounts, not signed-in users; excludes the system administrator. Do not compare it with the licence: see [Checking seats](#checking-seats). |
+| `AuthorUserCount` | int | Enabled users who are not read-only. Each takes an author seat. |
+| `ReaderUserCount` | int | Enabled read-only users. They take reader seats first, author seats beyond those. |
 | `DisabledUserCount` | int | Number of disabled user accounts |
 | `TotalDocumentCount` | int | Total number of documents stored in the system |
 | `TotalDocumentSize` | long | Total size of all document versions in bytes |
@@ -57,6 +61,20 @@ Retrieves system-wide statistics including user counts, document counts, total d
 | `RegisteredDocumentsIn30Days` | int | Number of documents registered within the last 30 days |
 | `RegisteredDocumentsIn60Days` | int | Number of documents registered within the last 60 days |
 | `RegisteredDocumentsIn90Days` | int | Number of documents registered within the last 90 days |
+
+### Checking seats
+
+Authors and readers are licensed separately. Readers use the reader seats first; readers beyond them
+take author seats:
+
+```
+author seats in use = AuthorUserCount + max(0, ReaderUserCount - ReadonlyUserCount)
+the licence holds while author seats in use <= UserCount
+```
+
+`UserCount` and `ReadonlyUserCount` (the seats) come from [GetLicenseInfo](GetLicenseInfo.md). Warn on
+the author seats in use, not on `ActiveUserCount`: that one adds readers to authors and over-warns
+whenever there are reader seats.
 
 ## Required Permissions
 

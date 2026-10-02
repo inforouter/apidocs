@@ -35,7 +35,10 @@ Retrieves the application license information including company details, license
     <EmailAddress>admin@acme.com</EmailAddress>
     <IsConcurrent>false</IsConcurrent>
     <UserCount>50</UserCount>
-    <ActiveUserCount>35</ActiveUserCount>
+    <ReadonlyUserCount>100</ReadonlyUserCount>
+    <ActiveUserCount>135</ActiveUserCount>
+    <AuthorUserCount>40</AuthorUserCount>
+    <ReaderUserCount>95</ReaderUserCount>
     <DisabledUserCount>5</DisabledUserCount>
     <DatabaseType>SQLServer</DatabaseType>
     <AuthenticationType>INFOROUTER</AuthenticationType>
@@ -69,8 +72,11 @@ Retrieves the application license information including company details, license
 | `PhoneNumber` | string | Contact phone number |
 | `EmailAddress` | string | Contact email address |
 | `IsConcurrent` | boolean | Whether the license is concurrent (shared seats) or named-user |
-| `UserCount` | integer | Number of licensed author (full) seats. Read-only seats are licensed separately (`ReadonlyUserCount`, not returned by this API). |
-| `ActiveUserCount` | integer | Number of enabled user accounts (authors + read-only), excluding the system administrator. Not a count of signed-in users. |
+| `UserCount` | integer | Number of licensed author (full) seats. |
+| `ReadonlyUserCount` | integer | Number of licensed reader (read-only) seats. Readers beyond this take author seats. |
+| `ActiveUserCount` | integer | Number of enabled user accounts, `AuthorUserCount` + `ReaderUserCount`, excluding the system administrator. Not a count of signed-in users, and not what the licence is checked against. |
+| `AuthorUserCount` | integer | Enabled users who are not read-only. |
+| `ReaderUserCount` | integer | Enabled read-only users. |
 | `DisabledUserCount` | integer | Number of disabled user accounts |
 | `DatabaseType` | string | Licensed database type (e.g., SQLServer, MySQL, Oracle) |
 | `AuthenticationType` | string | Authentication type (e.g., INFOROUTER, NATIVE) |
@@ -160,7 +166,10 @@ async function getLicenseInfo() {
         return {
             companyName: info.querySelector("CompanyName").textContent,
             userCount: parseInt(info.querySelector("UserCount").textContent),
+            readerSeats: parseInt(info.querySelector("ReadonlyUserCount").textContent),
             activeUserCount: parseInt(info.querySelector("ActiveUserCount").textContent),
+            authorUserCount: parseInt(info.querySelector("AuthorUserCount").textContent),
+            readerUserCount: parseInt(info.querySelector("ReaderUserCount").textContent),
             disabledUserCount: parseInt(info.querySelector("DisabledUserCount").textContent),
             isConcurrent: info.querySelector("IsConcurrent").textContent === "true",
             workflow: info.querySelector("Workflow").textContent === "true",
@@ -179,10 +188,14 @@ async function getLicenseInfo() {
 async function displayLicenseStatus() {
     try {
         const license = await getLicenseInfo();
-        const availableSeats = license.userCount - license.activeUserCount;
+        // Readers beyond the reader seats take author seats.
+        const authorSeatsInUse = license.authorUserCount
+            + Math.max(0, license.readerUserCount - license.readerSeats);
+        const availableSeats = license.userCount - authorSeatsInUse;
 
         console.log(`Company: ${license.companyName}`);
-        console.log(`Licensed seats: ${license.userCount} (${availableSeats} available)`);
+        console.log(`Author seats: ${authorSeatsInUse} of ${license.userCount} in use (${availableSeats} available)`);
+        if (authorSeatsInUse >= 0.9 * license.userCount) console.warn('90% of the author seats are in use');
         console.log(`Active users: ${license.activeUserCount}`);
         console.log(`Subscription ends: ${license.subscriptionEndDate}`);
         console.log(`Workflow enabled: ${license.workflow}`);
@@ -238,7 +251,9 @@ using (var client = new SrvSoapClient())
 
 ## Notes
 
-- **ActiveUserCount** is the sum of author users and readonly users.
+- **ActiveUserCount** is the sum of `AuthorUserCount` and `ReaderUserCount`. To check the licence, use
+  author seats in use = `AuthorUserCount` + max(0, `ReaderUserCount` − `ReadonlyUserCount`), compared with
+  `UserCount`.
 - **MaxDocumentCount** and **MaxLibraryCount** of 0 means unlimited.
 - **ExpirationDate**, **SubscriptionStartDate**, and **SubscriptionEndDate** are returned in ISO 8601 format.
 - Boolean values (`IsConcurrent`, `AnonymousAccess`, `Workflow`, `ComplianceModule`, `TrialCopy`) are returned as lowercase strings ("true"/"false").
