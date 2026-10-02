@@ -1,5 +1,5 @@
 site_name: infoRouter API Documentation
-site_url: https://support.inforouter.com/api-docs/
+site_url: https://apidocs.inforouter.com/
 docs_dir: ./docs
 site_dir: ./www
 
