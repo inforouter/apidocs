@@ -204,28 +204,82 @@ The `DOCLANG` criterion accepts the following ISO 639-1 language codes:
 
 ### Property Set Criteria
 
-To filter by a custom property set, use the `PROPERTYSETNAME` element with child elements for each field:
+To filter by the values of a custom property set, add a `PROPERTYSETNAME` element whose `VALUE` is the
+property set name, with one child element per field to filter on:
 
 ```xml
-
-<criteria NAME="PROPERTYSETNAME" VALUE="MyPropertySet">
-
-  <criteria NAME="FieldName" OPERATOR="LIKE" VALUE="Annual Report" />
-
-  <criteria NAME="Amount"    OPERATOR="EQGT" VALUE="1000" />
-
+<criteria NAME="PROPERTYSETNAME" VALUE="Invoice">
+  <criteria NAME="Customer" OPERATOR="LIKE"    VALUE="Acme" />
+  <criteria NAME="Amount"   OPERATOR="BETWEEN" VALUE="1000|5000" />
+  <criteria NAME="DueOn"    OPERATOR="BETWEEN" VALUE="2026-01-01|2026-03-31" />
+  <criteria NAME="Paid"     OPERATOR="EQ"      VALUE="false" />
 </criteria>
-
 ```
 
-Supported operators per field data type:
+A document matches only if it meets **every** field condition (they are combined with AND). Field names
+are not case sensitive. A field of the set that has no child element puts no condition on the search.
 
-| Data Type | Operators |
-|-----------|-----------|
-| `CHAR` (text) | `LIKE`, `EQ`, `NULL`, `NOTNULL` |
-| `NUMBER` | `EQ`, `NOTEQ`, `EQLT`, `EQGT`, `GT`, `LT`, `NULL`, `NOTNULL` |
-| `DATE` | `ANYTIME`, `YESTERDAY`, `TODAY`, `LAST7DAYS`, `NEXT7DAYS`, `LASTWEEK`, `THISWEEK`, `NEXTWEEK`, `LASTMONTH`, `THISMONTH`, `NEXTMONTH`, `EQ`, `EQGT`, `EQLT`, `NULL` |
-| `BOOLEAN` | `EQ`, `NULL`, `NOTNULL` |
+#### Operators by field type
+
+| Field type | `OPERATOR` | `VALUE` | Matches |
+|---|---|---|---|
+| Text (`CHAR`) | `LIKE` (or `CONTAINS`) | text | the field contains the text |
+| | `NOTCONTAINS` | text | the field does not contain the text |
+| | `EQ` | text | the field is exactly the text |
+| | `NEQ` | text | the field is anything but the text |
+| | `NOTNULL` | empty | the field has a value |
+| | `NULL` | empty | the field has no value |
+| Number (`NUMBER`) | `EQ` | number | equal to |
+| | `NOTEQ` (or `NEQ`) | number | not equal to |
+| | `GT` / `LT` | number | greater than / less than |
+| | `EQGT` / `EQLT` | number | at least / at most |
+| | `BETWEEN` | `low\|high` | from `low` to `high`, both included |
+| | `NOTNULL` | empty | the field has a value |
+| | `NULL` | empty | the field has no value |
+| Date (`DATE`) | `EQ` | date | on that day |
+| | `EQGT` / `EQLT` | date | on or after / on or before that day |
+| | `BETWEEN` | `start\|end` | from `start` to `end`, both days included |
+| | `TODAY`, `YESTERDAY` | empty | relative to today |
+| | `LAST7DAYS`, `NEXT7DAYS` | empty | the 7 days before / after today |
+| | `LASTWEEK`, `THISWEEK`, `NEXTWEEK` | empty | the calendar week |
+| | `LASTMONTH`, `THISMONTH`, `NEXTMONTH` | empty | the calendar month |
+| | `ANYTIME` | empty | the field has a date |
+| | `NULL` | empty | the field has no date |
+| Yes/No (`BOOLEAN`) | `EQ` | `true` / `false` | the field has that value |
+| | `NOTNULL` | empty | the field has a value |
+| | `NULL` | empty | the field has no value |
+
+- Operators are not case sensitive.
+- **`BETWEEN`** takes two values separated by `|`, as `DATECRITERIA` does; `;` is accepted as well.
+  Both ends are included. For a date written without a time, the end date counts as the whole day:
+  `2026-01-01|2026-03-31` includes documents dated 31 March. An end date with a time is taken at that time.
+- Write dates as `yyyy-MM-dd`. `EQ`, `EQGT` and `EQLT` compare whole days; a time in the value is ignored.
+- An operator that does not exist for the field's type is refused, for example `BETWEEN` on a text field
+  or `NOTNULL` on a date field (use `ANYTIME`).
+- An operator that takes no value (`NULL`, `NOTNULL`, `ANYTIME`, `TODAY`, ...) must be sent with an empty
+  `VALUE`; a value is refused.
+
+#### When `OPERATOR` is missing or `VALUE` is empty
+
+| Field element | Result |
+|---|---|
+| no `OPERATOR` (or `OPERATOR=""`) and an empty `VALUE` | No condition on that field; the search runs as if the field were not listed. |
+| no `OPERATOR` but a `VALUE` | Refused with `4000`: *A search field value cannot be specified without a valid operator.* (For a date field the message says the value must be empty for the operator.) |
+| an operator that needs a value, with an empty `VALUE` | No condition on that field. It is **not** refused. |
+| `BETWEEN` without both ends (`VALUE="500"`, `"500\|"` or empty) | Refused with `4000`: *Invalid condition specified for the field: SET.FIELD: BETWEEN needs two values separated by \|: the low end and the high end.* |
+
+An operator other than `BETWEEN` sent with an empty value is not refused, so a search built from a form
+with empty inputs silently matches more documents rather than failing. Leave a field out, or check its
+value, before sending it.
+
+#### Errors
+
+| Case | Result |
+|---|---|
+| A field name the property set does not have | Refused with `4000`: *Property set field cannot be found : SET.FIELD* |
+| An operator the field type does not have | Refused with `4000`: *Invalid condition specified for the field: SET.FIELD: Invalid operator for text field* (or number, date, boolean) |
+| A value that is not a number or a date where one is needed | Refused with `4000`: *Invalid condition specified for the field: SET.FIELD: ...* |
+| A property set name that does not exist | Refused with `4041`. |
 
 ---
 
@@ -541,7 +595,7 @@ the parser does not recognise.
 
 - The `RECENTDOCUMENTS` criterion returns recent documents for the currently authenticated user only; no `VALUE` attribute is required.
 
-- Property set field names are case-insensitive, but the property set name must match an existing definition in the system.
+- Property set field names are case-insensitive. A property set name that does not exist is refused with `4041`.
 
 - The `TEMPLATEPATH` criterion accepts either a full infoRouter document path (e.g. `/Finance/Templates/mytemplate.htm`) or the short-form `~D<id>` notation (e.g. `~D42`). Use `~D999` as the reserved identifier for all HTML form documents — it matches any document whose template is the built-in HTML document type regardless of which specific template file was used.
 
