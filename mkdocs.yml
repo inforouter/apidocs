@@ -109,6 +109,7 @@ nav:
     - CreateFolder1: CreateFolder1.md
     - DeleteFolder: DeleteFolder.md
     - Move: Move.md
+    - Rename: Rename.md
     - Copy: Copy.md
     - FolderExists: FolderExists.md
     - FolderExists1: FolderExists1.md

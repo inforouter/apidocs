@@ -104,6 +104,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetSubFoldersCount](GetSubFoldersCount.md) - Get the count of direct subfolders in a folder
 - [Move](Move.md) - Move a document or folder to a new destination path
 - [RemoveFolderCutoffDate](RemoveFolderCutoffDate.md) - Remove the cutoff date from a folder and optionally its subfolders and documents
+- [Rename](Rename.md) - Rename a document or folder in place, changing nothing else
 - [SetFolderAIPreferences](SetFolderAIPreferences.md) - Set the infoRouter Connect (AI) preferences of a folder (with optional tree propagation)
 - [SetFolderCutoffDate](SetFolderCutoffDate.md) - Set the cutoff date on a folder and optionally its subfolders and documents
 - [SetFolderRules](SetFolderRules.md) - Set the rules and policies for a folder (with optional tree propagation)

@@ -21,7 +21,7 @@ Updates the name and/or description of the specified folder. The folder itself m
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the existing folder (e.g. `/Finance/Reports`). |
 | `NewFolderName` | string | Yes | New name for the folder. Unlike folder creation, which sanitises silently, an unusable name is **refused** here with `4000`. Empty, or nothing but spaces, is refused by model binding with HTTP 400. |
-| `NewDescription` | string | No | New description for the folder. Pass empty string or null to clear the description. |
+| `NewDescription` | string | No | New description for the folder. Leave it out to keep the current description; send it empty to clear it. |
 
 ---
 
@@ -109,22 +109,15 @@ async function call(action, params) {
 }
 ```
 
-Renames a folder and sets its description. Both are written every time: there is no way to change one
-and leave the other, so a caller changing the name has to send the current description back with it or
-it is cleared.
+Renames a folder and sets its description. Leave `NewDescription` out to keep the description the
+folder has; send it empty to clear it. To change only the name, [Rename](Rename.md) is the simpler call.
 
 ```javascript
-// Read what is there, change one thing, write both back.
-const folder = (await call('GetFolder', {
-  authenticationTicket: ticket, Path: '/Finance/Reports',
-  WithRules: false, withPropertySets: false, withSecurity: false, withOwner: false
-})).querySelector('folder');
-
+// Change the name only: the description is kept.
 await call('UpdateFolderProperties', {
   authenticationTicket: ticket,
   Path: '/Finance/Reports',
-  NewFolderName: 'Quarterly Reports',
-  NewDescription: folder.getAttribute('Description')
+  NewFolderName: 'Quarterly Reports'
 });
 ```
 
@@ -134,7 +127,8 @@ message naming the characters a folder may not carry. The two disagree, so a cli
 renames with the same name-building code will find one path works and the other does not.
 
 An empty `NewFolderName`, or one of nothing but spaces, is refused by model binding with HTTP 400.
-`NewDescription` may be empty; that clears the description.
+`NewDescription` sent empty clears the description; left out, it keeps it. (Before 9.0 leaving it out
+cleared it as well.)
 
 ## Notes
 
