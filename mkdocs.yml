@@ -370,6 +370,7 @@ nav:
     - RemoveWorkflowAttachment: RemoveWorkflowAttachment.md
 
   - Security & Access:
+    - AdministrativeRoles: AdministrativeRoles.md
     - GetAccessList: GetAccessList.md
     - GetAccessListHistory: GetAccessListHistory.md
     - GetOwner: GetOwner.md

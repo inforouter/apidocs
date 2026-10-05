@@ -231,6 +231,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [VerifyVersionHash](VerifyVersionHash.md) - Verify the integrity of a document version by comparing its stored content hash
 
 ### Security & Access Control
+- [AdministrativeRoles](AdministrativeRoles.md) - The built-in administrative role groups and the calls each one unlocks
 - [ApplyInheritedAccessList](ApplyInheritedAccessList.md) - Apply the inherited (parent) access list to a document or folder, removing any custom security settings
 - [DocumentAccessAllowed](DocumentAccessAllowed.md) - Check whether the calling user is allowed to perform a specific action on a document
 - [FolderAccessAllowed](FolderAccessAllowed.md) - Check whether the calling user is allowed to perform a specific action on a folder
