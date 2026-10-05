@@ -156,6 +156,7 @@ where it should have been a `4090`. Nothing is moved when that happens.
 ## Notes
 
 - The destination folder must already exist before calling this API.
+- **infoRouter Connect.** A document moved into another folder is queued for whatever that folder's AI preferences ask for ([SetFolderAIPreferences](SetFolderAIPreferences.md)), less what its `AIEnhanced` flags say it already has. A moved folder does the same for every published document in it and its subfolders, each under its own folder's preferences: a folder without preferences of its own takes them from the folders above it, which may have just changed.
 - The item name at the destination is determined by the last component of `DestinationPath`. You can effectively rename an item during the move by using a different name in the destination path.
 - Moving a folder moves all its contents (subfolders and documents) as well.
 - Checked-out documents within the folder may prevent the move operation.

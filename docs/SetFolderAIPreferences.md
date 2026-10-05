@@ -35,22 +35,23 @@ Names are case-insensitive.
 | `AutoAbstract` | Write the longer abstract of new document versions. |
 | `AutoExtractKeywords` | Produce keywords for new document versions. |
 | `AutoOCR` | Read the text out of scanned documents so they become searchable. |
-| `AutoClassify` | Stored but **not yet performed by the server**. |
-| `AutoExtractData` | Stored but **not yet performed by the server**. |
+| `AutoClassify` | Work out the document type of new document versions. |
+| `ExtractDataPropertySet` | **Not a switch:** the property set read out of every new document version, e.g. `INVOICE`. **Naming one turns extraction on**; an empty value turns it off. It must be an existing property set (otherwise `4041`), and is stored as the set spells its own name. |
+| `AutoExtractData` | Kept for compatibility; extraction is on exactly when `ExtractDataPropertySet` names a set. `off` clears the set. `on` is refused with `4000` unless a set is named, in the same call or already on the folder. |
 | `ScrubPII` | Scrub PII before document text is handed to the AI provider. |
 | `ApplyToSubfolders` | Apply the preferences to the subfolder tree as well (see Notes). |
 
-> **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in or imported afterwards. To produce content for a document already there, ask for it directly with [GetConnectProfile](GetConnectProfile.md).
+> **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in, imported, copied or moved into the folder afterwards - a copied or moved document is not asked again for what its `AIEnhanced` flags say it already has. To produce content for a document already there, ask for it directly with [GetConnectProfile](GetConnectProfile.md).
 
 > **Every answer is its own switch, and asks for nothing else.** A folder that switches on `AutoDescribe` alone gets a description - not a summary, keywords or a document type along with it. Switching several on still costs one call, because one call answers all of them; see [GetFolderAIPreferences](GetFolderAIPreferences.md) for exactly what gets queued.
 
 > **There is no `AutoProfile`.** Pre-release builds carried one preference standing for `AutoDescribe`, `AutoSummarize`, `AutoExtractKeywords` and `AutoClassify` together; name the ones you want instead. `AutoProfile` is an unknown preference name now and is ignored like any other.
 
-> **`AutoClassify` and `AutoExtractData` are accepted and stored, but the server does not act on them yet.** They are recorded so a folder's intent survives, and will start working when the operations are implemented.
+> **Extraction reads the folder's own `ExtractDataPropertySet`.** Until 9.0 builds, `AutoExtractData` took the property set from the folder rules' `AutoPromptPropertysetName` - the set a user is asked to fill in on upload. That rule is no longer used for extraction: name the set here.
 
 ### Supported Values
 
-`on` and `off`. For convenience `true`/`false`, `yes`/`no` and `1`/`0` are also accepted. Values are case-insensitive; any other value fails the call.
+`on` and `off`. For convenience `true`/`false`, `yes`/`no` and `1`/`0` are also accepted. Values are case-insensitive; any other value fails the call. `ExtractDataPropertySet` takes a property set name instead.
 
 ### Example xmlPreferences
 

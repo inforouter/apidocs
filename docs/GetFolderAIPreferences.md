@@ -35,7 +35,8 @@ A folder that has no preferences of its own inherits them from the nearest paren
     <Preference Name="AutoSummarize" Value="on" />
     <Preference Name="AutoClassify" Value="off" />
     <Preference Name="AutoExtractKeywords" Value="on" />
-    <Preference Name="AutoExtractData" Value="off" />
+    <Preference Name="AutoExtractData" Value="on" />
+    <Preference Name="ExtractDataPropertySet" Value="INVOICE" />
     <Preference Name="AutoDescribe" Value="on" />
     <Preference Name="AutoAbstract" Value="off" />
     <Preference Name="AutoOCR" Value="on" />
@@ -68,14 +69,15 @@ A folder that has no preferences of its own inherits them from the nearest paren
 | `AutoAbstract` | `"on"` / `"off"` | Write the longer abstract of new document versions. |
 | `AutoExtractKeywords` | `"on"` / `"off"` | Produce keywords for new document versions. |
 | `AutoOCR` | `"on"` / `"off"` | Read the text out of scanned documents so they become searchable. |
-| `AutoClassify` | `"on"` / `"off"` | Stored but **not yet performed by the server**. |
-| `AutoExtractData` | `"on"` / `"off"` | Stored but **not yet performed by the server**. |
+| `AutoClassify` | `"on"` / `"off"` | Work out the document type of new document versions. |
+| `AutoExtractData` | `"on"` / `"off"` | `on` exactly when `ExtractDataPropertySet` names a set: it is not stored separately. |
+| `ExtractDataPropertySet` | a property set name, or empty | The property set read out of every new document version. Empty when none is named - then nothing is extracted. The folder rules' auto prompt property set is not used for extraction. |
 | `ScrubPII` | `"on"` / `"off"` | Scrub PII before document text is handed to the AI provider. |
 | `ApplyToSubfolders` | `"on"` / `"off"` | The preferences also govern the subfolder tree, including subfolders created later. |
 
 ### What actually runs when a document arrives
 
-Switching a preference on does not queue work by itself. Work is queued when a document is **uploaded, checked in as a new version, or imported** into the folder, and only for the operations this server can carry out.
+Switching a preference on does not queue work by itself. Work is queued when a document is **uploaded, checked in as a new version, imported, copied or moved** into the folder, and only for the operations this server can carry out.
 
 **Each switch asks for its own answer, and however many are on it is still one job and one call.** One call answers all of them, and it answers only what was asked for - so a folder that switches on `AutoDescribe` alone is written a description, and does not quietly acquire a summary, keywords and a document type with it.
 
@@ -89,7 +91,7 @@ Some documents are skipped entirely:
 
 - **Shortcuts and URL documents** have no content to read, so nothing is queued for them.
 - **File types infoRouter Connect cannot read** are skipped, except for OCR - OCR is what produces the text in the first place, and the scans that need it most are exactly the types the readable list leaves out.
-- **`AutoClassify` and `AutoExtractData` are never queued**, because the server has no implementation for them yet. Switching them on is recorded and has no other effect.
+- **No `ExtractDataPropertySet`** means nothing is extracted.
 
 Automatic work is queued behind anything a user is waiting for. If somebody asks for a document's summary through [GetDocumentSummary](GetDocumentSummary.md) while it is still queued, that job moves to the front.
 

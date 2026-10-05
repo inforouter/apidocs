@@ -200,6 +200,7 @@ the operation, not on a shared rule.
 
 ## Notes
 
+- **infoRouter Connect.** A copied document is queued for whatever the destination folder's AI preferences ask for ([SetFolderAIPreferences](SetFolderAIPreferences.md)), as an upload into that folder would be - less what the copy already carries. The copy keeps the source's AI results and its `AIEnhanced` flags and `AIExtractConfidence`, so a summary the source already has is not asked for again. Copying a folder does this for each of its documents.
 - The source path is resolved as a **document first**. If no document is found at `SourcePath`, it is resolved as a **folder**.
 
 - When using a full `DestinationPath`, the **parent folder** of that path must already exist. The copy operation does not create intermediate folders.
