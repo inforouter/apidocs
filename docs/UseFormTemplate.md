@@ -48,11 +48,11 @@ response is not HTML but its fields, for the caller to show a form of its own wi
 ```xml
 <root success="true" formType="fields" templateType="pdf" templateId="123">
   <FORMDATA>
-    <Prompt Name="Customer" type="text" required="true" maxLength="40">Acme Ltd</Prompt>
-    <Prompt Name="Address" type="multiline" required="false"></Prompt>
-    <Prompt Name="Approved" type="checkbox" required="false">false</Prompt>
-    <Prompt Name="Region" type="radio" required="false">EU</Prompt>
-    <Prompt Name="Country" type="choice" required="false">TR</Prompt>
+    <Prompt Name="Customer" title="Customer" type="text" required="true" maxLength="40">Acme Ltd</Prompt>
+    <Prompt Name="Address" title="Address" type="multiline" required="false"></Prompt>
+    <Prompt Name="Approved" title="Approved" type="checkbox" required="false">false</Prompt>
+    <Prompt Name="Region" title="Region" type="radio" required="false">EU</Prompt>
+    <Prompt Name="Country" title="Country" type="choice" required="false">TR</Prompt>
   </FORMDATA>
   <Options Name="Region">
     <Option value="EU" text="EU" />
@@ -65,7 +65,7 @@ response is not HTML but its fields, for the caller to show a form of its own wi
 </root>
 ```
 
-The fields are in the `<FORMDATA>` notation `xmlContent` takes: change the values and post the `<FORMDATA>` to [SaveFilledForm](SaveFilledForm.md) as it is. The `type`, `required` and `maxLength` attributes are passed over when it is saved.
+The fields are in the `<FORMDATA>` notation `xmlContent` takes: change the values and post the `<FORMDATA>` to [SaveFilledForm](SaveFilledForm.md) as it is. The `title`, `type`, `required` and `maxLength` attributes are passed over when it is saved.
 
 | Item | Description |
 |---|---|
@@ -73,18 +73,36 @@ The fields are in the `<FORMDATA>` notation `xmlContent` takes: change the value
 | `templateType` | `pdf` or `docx`. |
 | `templateId` | The template document. Pass it to [SaveFilledForm](SaveFilledForm.md) as `templatePath=~D<templateId>`. |
 | `Prompt/@Name` | The field's name, as `xmlContent` must give it. |
-| `Prompt/@type` | `text`, `multiline`, `checkbox`, `radio` or `choice`. |
-| `Prompt/@required` | `true` when the PDF marks the field required. Always `false` for Word. |
+| `Prompt/@title` | The text to show for the field, made from its name: underscores become spaces, words joined in CamelCase are split, and the first letter is capitalised, so `recipient_name` and `RecipientName` are both `Recipient name`. A word between underscores keeps its case (`VAT_number` is `VAT number`). |
+| `Prompt/@type` | `text`, `multiline`, `checkbox`, `radio` or `choice` for a PDF; `text`, `date` or `number` for Word. Send a `date` as `yyyy-MM-dd` and a `number` with a dot as the decimal separator (`1234.5`): the template prints them in its own format. |
+| `Prompt/@required` | `true` when the PDF marks the field required, or the Word placeholder ends in `*`. Only reported: the server does not refuse an empty required field. |
 | `Prompt/@maxLength` | The most characters the PDF field takes; absent when there is no limit. |
 | `Prompt` text | The value the template holds: a PDF field's current value; always empty for Word. A checkbox is `true` or `false`; a radio or choice field holds one of its `Option/@value`s. |
 | `Options` | The entries of the `radio` or `choice` field of the same `Name`: `value` is what to save, `text` what to show. Listed apart from the `<Prompt>`, whose text is its value and nothing else. |
 
 What is listed:
 
-- **Word (`.docx`)**: every `{{placeholder}}` and every name used in a `{?{condition}}`, in the order they first appear (body, then headers and footers). All are `text` with an empty value: a Word template holds no types or defaults. Loops (`{{#Items}}`) and dotted names (`{{Customer.Name}}`) are not listed: no single form value can fill them.
+- **Word (`.docx`)**: every `{{placeholder}}` and every name used in a `{?{condition}}`, in the order they first appear (body, then headers and footers), each once. The title, type (`text`, `date` or `number`) and required flag are read from the placeholder: `{{Customer_name*}}` is a required field named `Customer_name`, titled "Customer name"; `{{Due}:format(dd.MM.yyyy)}` is a `date`; `{{Total}:format(N2)}` is a `number`. Loops (`{{#Items}}`) and dotted names (`{{Customer.Name}}`) are not listed: no single form value can fill them. See [Writing a Word template](SaveFilledForm.md#writing-a-word-template) for the full rules.
 - **PDF**: the AcroForm fields, by the last part of their name without an index (`form1[0].page1[0].Customer[0]` is `Customer`). Fields with the same short name are filled with the same value, so they are listed once. Read-only fields, signatures and push buttons are not listed.
 
 `targetFolderPath` may be left out for a PDF or Word template; when it is given it must name an existing folder. `submitUrl` does not apply to a field list and is ignored.
+
+#### Showing a Word template's fields
+
+A Word template carries no labels or rules of its own: everything in a Word `<Prompt>` is read from its placeholder (see [Writing a Word template](SaveFilledForm.md#writing-a-word-template)). To build the form:
+
+| Attribute | What the form does with it |
+|---|---|
+| `title` | Use it as the field's label. |
+| `type="text"` | A text box. Line breaks in the value are kept as lines, so a multi-line box is fine. |
+| `type="date"` | A date picker. Send the value as `yyyy-MM-dd`; an HTML `<input type="date">` value already is. |
+| `type="number"` | A number box. Send the value with a dot as the decimal separator and no thousands separator: `1234.5`. |
+| `required="true"` | Refuse to submit while it is empty. The server does not check it. |
+
+- Show a date or number in the user's own format if you like, but always send the shapes above: the template formats the value itself. A value in another shape is printed exactly as sent.
+- Word fields never have `maxLength` or `<Options>`.
+- Post the `<FORMDATA>` back to [SaveFilledForm](SaveFilledForm.md) with the same `Name`s; the other attributes are ignored.
+
 
 ### Error Response
 

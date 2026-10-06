@@ -127,24 +127,103 @@ Both match a `<Prompt>` to a field or placeholder without regard to case, and a 
 Type the placeholders into the document in Word, where the value should appear:
 
 ```
-{{today}}
+{{Letter_date*}:format(d MMMM yyyy)}
 
-{{Recipient_name}}
+{{Recipient_name*}}
 {{Recipient_address}}
 
 Dear {{Salutation}},
 
 {{Body}}
 
+Amount due: {{Amount}:format(N2)}
+
 {?{Enclosures.Length > 0}}Enclosures: {{Enclosures}}{{/}}
 {?{cc.Length > 0}}cc: {{cc}}{{/}}
 ```
 
-- A name is letters, digits and underscores, and matches the form field's `id`/`name`: `{{Recipient_name}}`. A name with a hyphen or a space (`{{customer-name}}`) is not a placeholder and stays in the document as typed.
+[UseFormTemplate](UseFormTemplate.md) lists this template's fields as:
+
+| Name | title | type | required |
+|---|---|---|---|
+| `Letter_date` | Letter date | `date` | `true` |
+| `Recipient_name` | Recipient name | `text` | `true` |
+| `Recipient_address` | Recipient address | `text` | `false` |
+| `Salutation` | Salutation | `text` | `false` |
+| `Body` | Body | `text` | `false` |
+| `Amount` | Amount | `number` | `false` |
+| `Enclosures` | Enclosures | `text` | `false` |
+| `cc` | Cc | `text` | `false` |
+
+A Word template has nowhere to store a field's label, type or rules, so they are read from the placeholder itself, as described below.
+
+##### Names
+
+- A name is letters (Turkish and other non-English letters included), digits and underscores, and matches the form field's `id`/`name`: `{{Recipient_name}}`, `{{İl}}`.
+- A name with a hyphen or a space (`{{customer-name}}`) is not a placeholder and stays in the document as typed.
+- The form data's `<Prompt Name>` is matched to the name without regard to case. A name the form data does not supply is left blank.
+- A name used several times is one field, filled with the same value everywhere.
+
+##### Titles
+
+The title a form shows for a field is made from its name: underscores become spaces, words joined in CamelCase are split, and the first letter is capitalised.
+
+| Placeholder | Title |
+|---|---|
+| `{{recipient_name}}` | Recipient name |
+| `{{RecipientName}}` | Recipient name |
+| `{{VATNumber}}` | VAT number |
+| `{{Recipient_Name}}` | Recipient Name |
+| `{{il}}` | Il |
+| `{{İl}}` | İl |
+
+A word split out of CamelCase starts lowercase unless it is an abbreviation in capitals. A word between underscores keeps its case as typed. For exact wording, or correct Turkish capitals such as "İl", write the name the way the title should read.
+
+##### Required fields
+
+A name ending in `*` marks a required field: `{{Recipient_name*}}` is the field `Recipient_name`, with the title "Recipient name" and `required="true"`.
+
+- The `*` is not part of the name: the form data sends `<Prompt Name="Recipient_name">`.
+- The `*` is removed before the document is filled, so it never shows in the output.
+- A field is required if it carries the `*` in any one of the places it appears.
+- `required` is only reported, for the form to enforce. The server does not refuse an empty required field.
+
+##### Types and formats
+
+`{{Name}:format(...)}` prints the value in a format. The format goes **after** the closing `}` of the name: `{{Name:format(...)}}`, with the format inside the braces, is not a placeholder and stays in the document as typed. `F` is short for `format`, and the format may be quoted: `{{Name}:F('d MMMM yyyy')}`.
+
+The format also gives the field its type:
+
+| Placeholder | type | Send | Printed |
+|---|---|---|---|
+| `{{Due}:format(dd.MM.yyyy)}` | `date` | `2026-10-06` | 06.10.2026 |
+| `{{Due}:format(d MMMM yyyy)}` | `date` | `2026-03-01` | 1 March 2026 |
+| `{{Due}:format(dd.MM.yyyy HH:mm)}` | `date` | `2026-03-01T14:30` | 01.03.2026 14:30 |
+| `{{Total}:format(N2)}` | `number` | `1234.5` | 1,234.50 |
+| `{{Total}:format(0.00)}` | `number` | `12.5` | 12.50 |
+| `{{Count}:format(#,##0)}` | `number` | `12345` | 12,345 |
+| `{{Subject}}` | `text` | any text | as sent |
+
+- Any format with day (`d`), month (`M`) and year (`y`) parts is a `date`. The standard number formats (`N`, `C`, `F`, `P`, `E`, `G`, optionally with decimals such as `N2`) and custom formats made of `0`, `#`, `,` and `.` are a `number`. Any other format is `text`.
+- A field is `text` when it is printed without a format in any place, used in a condition, or formatted as a date in one place and a number in another.
+- **Sending values.** Send a `date` as `yyyy-MM-dd`, optionally with a time (`yyyy-MM-ddTHH:mm` or `yyyy-MM-ddTHH:mm:ss`). Send a `number` with a dot as the decimal separator and no thousands separator (`1234.5`). The server converts the value before applying the template's format, so the document shows it as the template formats it.
+- A value in any other shape (`next Tuesday`, `06/10/2026`) is printed as sent, without the format. An empty value prints nothing.
+- **Language.** Month names and separators are always English (`1 March 2026`, `1,234.50`), whatever the server's or the user's language. For a document in another language, write the format with literal separators (`dd.MM.yyyy`) and avoid month names and the `N` and `C` formats.
+
+##### Conditions
+
+- `{?{...}}...{{/}}` keeps the text between only when the condition holds. A paragraph that holds nothing but the condition is removed altogether when it does not.
+- `Name.Length > 0` tests that a value was entered.
+- Avoid quotes in conditions: Word turns typed `""` into curly quotes, which are not quotes to the template engine.
+- Do not test a `date` or `number` field in a condition: a name used in a condition is listed as `text`. Give the condition its own text field.
+
+##### Other rules
+
 - A value with several lines (a `<textarea>`) keeps its lines.
-- `{?{...}}...{{/}}` keeps the text between only when the condition holds; a paragraph that holds nothing but the condition is removed altogether when it does not. `Name.Length > 0` tests that a value was entered. Avoid quotes in conditions: Word turns typed `""` into curly quotes, which are not quotes to the template engine.
-- Placeholders work in the page headers and footers too.
+- Placeholders work in the page headers and footers, footnotes and endnotes too.
 - Formatting the placeholder (bold, font, colour) formats the value that replaces it.
+- Loops (`{{#Items}}...{{/Items}}`) and dotted names (`{{Customer.Name}}`) are not form fields: no single form value can fill them.
+- Drop-down lists, default values and maximum lengths cannot be expressed in a Word template. When a form needs them, pair the Word template with an HTML form template (`render-with`, above).
 - A template the engine cannot read, such as a `{?{...}}` with no closing `{{/}}`, fails the call with an error starting `[00100]WordFunctions.FillWordTemplate()`, and nothing is created.
 
 A stored HTML filled form can also be rendered into a Word template on download, without storing it: `/docs/<library>/<folder>/<document>?RenderLayout=/Form Templates/business-letter.docx`.
