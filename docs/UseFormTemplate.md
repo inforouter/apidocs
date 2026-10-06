@@ -1,6 +1,14 @@
 # UseFormTemplate API
 
-Returns the rendered HTML form for a content template. The response is the complete HTML that the user's browser can display and submit to create a new document in the specified destination folder.
+Prepares a new form from a form template, for the user to fill in. What comes back depends on the template's file type:
+
+| Template | Recognised by | Response `formType` | What the UI gets | What the UI does |
+|---|---|---|---|---|
+| **HTML form** | any template that is not `.pdf` or `.docx` (e.g. `.htm`, `.html`) | `html` | the rendered form, a complete HTML page | Shows the page (in an iframe) and collects its inputs on submit. |
+| **PDF form** | `.pdf` | `fields` | a list of the PDF's form fields | Builds its own form from the list. |
+| **Word template** | `.docx` | `fields` | a list of the document's `{{placeholders}}` | Builds its own form from the list. |
+
+All three are saved the same way: post the values as `<FORMDATA>` to [SaveFilledForm](SaveFilledForm.md). This call creates nothing.
 
 ## Endpoint
 
@@ -19,31 +27,61 @@ Returns the rendered HTML form for a content template. The response is the compl
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `targetFolderPath` | string | For an HTML form | Full infoRouter path of the destination folder where the new document will be created (e.g. `/Finance/Reports`). Required for an HTML form template; optional for a PDF or Word template, whose fields are returned with no form to point at a folder. A folder that is given must exist. |
-| `templatePath` | string | Yes | Full infoRouter path of the template document (e.g. `/Templates/ExpenseForm.htm`), or `~D<id>` short form (e.g. `~D42`). Use `~D999` for the built-in HTML document type. |
-| `submitUrl` | string | No | URL to set as the HTML form `action` attribute. When empty or left out, the form `action` defaults to `IRDOC.ASPX`, which has no handler in the current server: always intercept the submit and call SaveFilledForm. Pass the route of a React/SPA page to intercept the submission client-side instead. Ignored for a PDF or Word template. |
+| `templatePath` | string | Yes | Full infoRouter path of the template document (e.g. `/Templates/ExpenseForm.htm`), or `~D<id>` with its document id (e.g. `~D42`). The template must have a published version. |
+| `targetFolderPath` | string | HTML form only | The folder the new document will be created in (e.g. `/Finance/Reports`). Required for an HTML form, whose rendered page carries the folder's id. Optional for a PDF or Word template; when given, it must be an existing folder. |
+| `submitUrl` | string | No | HTML form only: the `action` of the rendered `<form>`. Left out or empty, it is `IRDOC.ASPX`, which has no handler in this server, so always intercept the submit (see [Showing an HTML form](#showing-an-html-form)). Ignored for a PDF or Word template. |
 
 ---
 
-## Response
-
-### Success Response — HTML form template (`formType="html"`)
+## Response: HTML form template (`formType="html"`)
 
 ```xml
 <root success="true" formType="html"><![CDATA[
-<!DOCTYPE html>
 <html>
-  ...rendered form HTML...
+  ...the template, with its inputs set to their defaults...
+  <form ACTION="IRDOC.ASPX" METHOD="POST">
+    <input type="hidden" value="1329" name="InfoRouter_FolderID" id="InfoRouter_FolderID">
+    <input type="hidden" value="100826" name="InfoRouter_TemplateID" id="InfoRouter_TemplateID">
+    <input type="hidden" value="" name="InfoRouter_Ticket" id="InfoRouter_Ticket">
+    <input type="hidden" value="7" name="InfoRouter_UserID" id="InfoRouter_UserID">
+    <input type="hidden" value="jdoe" name="InfoRouter_UserName" id="InfoRouter_UserName">
+    ...the template's own inputs...
+    <input type="hidden" value="'IR_Subject','DATE','Y','N',..." name="InfoRouter_Fields" id="InfoRouter_Fields">
+  </form>
 </html>
 ]]></root>
 ```
 
-The element content is the complete rendered HTML form wrapped in a CDATA section to preserve HTML characters (`<`, `>`, `&`) without XML encoding.
+The root element's text (CDATA) is the template's HTML with the server's additions. Read it with `textContent`.
 
-### Success Response — PDF or Word template (`formType="fields"`)
+- **Defaults.** Each input's `value` attribute is kept as the default, with two special values: `TODAY()` becomes today's date as `yyyy-MM-dd`, and `NOW()` the current date and time.
+- **Hidden inputs.** The server adds `InfoRouter_FolderID`, `InfoRouter_TemplateID`, `InfoRouter_Ticket`, `InfoRouter_UserID` and `InfoRouter_UserName` at the start of the form, and `InfoRouter_Fields` at its end.
+- **`InfoRouter_Ticket`** holds the caller's ticket only when the server setting `ShareTicketWithCustomPageAndForms` is `true` in `appsettings.json`. It is `false` by default, and the field is empty.
 
-A PDF or Word document can be a form template on its own, with no HTML form paired with it. For one, the
-response is not HTML but its fields, for the caller to show a form of its own with:
+### `InfoRouter_Fields`
+
+A comma-separated list with four quoted tokens for every `<input>`, `<textarea>` and `<select>` in the form, in document order:
+
+```
+'IR_Subject','DATE','Y','N','IR_','CHAR','N','N','IR_Country','CHAR','N','N'
+```
+
+| Token | Meaning |
+|---|---|
+| 1. `'IR_<name>'` | The input's `name` with `IR_` in front. **`'IR_'` alone is an input with no name**, such as a submit button: skip it. A checkbox or radio group lists its name once per input: keep the first. |
+| 2. `'CHAR'`, `'DATE'`, `'NUMBER'` or `'BOOLEAN'` | The data type the **template author** gave the input with a `datatype` attribute (`<input name="Due" datatype="DATE">`). `CHAR` when there is none. It is not taken from the input's own `type`: an `<input type="date">` without `datatype` is `CHAR`. |
+| 3. `'Y'` or `'N'` | `Y` when the author gave the input a `required="true"` attribute. |
+| 4. `'N'` | Reserved. |
+
+The server checks neither the data type nor required when the form is saved. Use them to validate in the UI if you like.
+
+---
+
+## Response: PDF or Word template (`formType="fields"`)
+
+A PDF or Word template has no HTML. The response lists its fields for the UI to build a form from.
+
+### PDF example
 
 ```xml
 <root success="true" formType="fields" templateType="pdf" templateId="123">
@@ -65,477 +103,258 @@ response is not HTML but its fields, for the caller to show a form of its own wi
 </root>
 ```
 
-The fields are in the `<FORMDATA>` notation `xmlContent` takes: change the values and post the `<FORMDATA>` to [SaveFilledForm](SaveFilledForm.md) as it is. The `title`, `type`, `required` and `maxLength` attributes are passed over when it is saved.
+### Word example
 
-| Item | Description |
-|---|---|
-| `formType` | `fields` here; `html` for an HTML form template, whose response is the rendered form in CDATA as above. |
-| `templateType` | `pdf` or `docx`. |
-| `templateId` | The template document. Pass it to [SaveFilledForm](SaveFilledForm.md) as `templatePath=~D<templateId>`. |
-| `Prompt/@Name` | The field's name, as `xmlContent` must give it. |
-| `Prompt/@title` | The text to show for the field, made from its name: underscores become spaces, words joined in CamelCase are split, and the first letter is capitalised, so `recipient_name` and `RecipientName` are both `Recipient name`. A word between underscores keeps its case (`VAT_number` is `VAT number`). |
-| `Prompt/@type` | `text`, `multiline`, `checkbox`, `radio` or `choice` for a PDF; `text`, `date` or `number` for Word. Send a `date` as `yyyy-MM-dd` and a `number` with a dot as the decimal separator (`1234.5`): the template prints them in its own format. |
-| `Prompt/@required` | `true` when the PDF marks the field required, or the Word placeholder ends in `*`. Only reported: the server does not refuse an empty required field. |
-| `Prompt/@maxLength` | The most characters the PDF field takes; absent when there is no limit. |
-| `Prompt` text | The value the template holds: a PDF field's current value; always empty for Word. A checkbox is `true` or `false`; a radio or choice field holds one of its `Option/@value`s. |
-| `Options` | The entries of the `radio` or `choice` field of the same `Name`: `value` is what to save, `text` what to show. Listed apart from the `<Prompt>`, whose text is its value and nothing else. |
-
-What is listed:
-
-- **Word (`.docx`)**: every `{{placeholder}}` and every name used in a `{?{condition}}`, in the order they first appear (body, then headers and footers), each once. The title, type (`text`, `date` or `number`) and required flag are read from the placeholder: `{{Customer_name*}}` is a required field named `Customer_name`, titled "Customer name"; `{{Due}:format(dd.MM.yyyy)}` is a `date`; `{{Total}:format(N2)}` is a `number`. Loops (`{{#Items}}`) and dotted names (`{{Customer.Name}}`) are not listed: no single form value can fill them. See [Writing a Word template](SaveFilledForm.md#writing-a-word-template) for the full rules.
-- **PDF**: the AcroForm fields, by the last part of their name without an index (`form1[0].page1[0].Customer[0]` is `Customer`). Fields with the same short name are filled with the same value, so they are listed once. Read-only fields, signatures and push buttons are not listed.
-
-`targetFolderPath` may be left out for a PDF or Word template; when it is given it must name an existing folder. `submitUrl` does not apply to a field list and is ignored.
-
-#### Showing a Word template's fields
-
-A Word template carries no labels or rules of its own: everything in a Word `<Prompt>` is read from its placeholder (see [Writing a Word template](SaveFilledForm.md#writing-a-word-template)). To build the form:
-
-| Attribute | What the form does with it |
-|---|---|
-| `title` | Use it as the field's label. |
-| `type="text"` | A text box. Line breaks in the value are kept as lines, so a multi-line box is fine. |
-| `type="date"` | A date picker. Send the value as `yyyy-MM-dd`; an HTML `<input type="date">` value already is. |
-| `type="number"` | A number box. Send the value with a dot as the decimal separator and no thousands separator: `1234.5`. |
-| `required="true"` | Refuse to submit while it is empty. The server does not check it. |
-
-- Show a date or number in the user's own format if you like, but always send the shapes above: the template formats the value itself. A value in another shape is printed exactly as sent.
-- Word fields never have `maxLength` or `<Options>`.
-- Post the `<FORMDATA>` back to [SaveFilledForm](SaveFilledForm.md) with the same `Name`s; the other attributes are ignored.
-
-
-### Error Response
+For a template containing `{{Customer_name*}}`, `{{Due}:format(dd.MM.yyyy)}` and `{{Total}:format(N2)}`:
 
 ```xml
-<root success="false" error="Error message" />
+<root success="true" formType="fields" templateType="docx" templateId="124">
+  <FORMDATA>
+    <Prompt Name="Customer_name" title="Customer name" type="text" required="true"></Prompt>
+    <Prompt Name="Due" title="Due" type="date" required="false"></Prompt>
+    <Prompt Name="Total" title="Total" type="number" required="false"></Prompt>
+  </FORMDATA>
+</root>
+```
+
+A Word response never has `maxLength` or `<Options>`, and its values are always empty.
+
+### Attributes
+
+| Item | PDF | Word |
+|---|---|---|
+| `templateType` | `pdf` | `docx` |
+| `templateId` | The template's document id. Pass it to [SaveFilledForm](SaveFilledForm.md) as `templatePath=~D<templateId>`. | same |
+| `Prompt/@Name` | The field's name: the last part of the AcroForm name, without its index (`form1[0].page1[0].Customer[0]` is `Customer`). Send it back unchanged. | The placeholder's name, without the `*` marking a required field. |
+| `Prompt/@title` | The label to show, made from `Name`: underscores become spaces, CamelCase is split, and the first letter is capitalised (`RecipientName` and `recipient_name` are both "Recipient name"). | same |
+| `Prompt/@type` | `text`, `multiline`, `checkbox`, `radio` or `choice` | `text`, `date` or `number` |
+| `Prompt/@required` | `true` when the PDF field is marked required | `true` when the placeholder ends in `*` |
+| `Prompt/@maxLength` | The most characters the field takes. Absent when there is no limit. | never present |
+| `Prompt` text | The value the field holds in the template (its default) | always empty |
+| `<Options>` | One for each `radio` and `choice` field | never present |
+
+### `type`: the control to show and the value to send
+
+`type` is a single attribute that tells you both things: which control to show, and in what form to send its value back. Every value is sent as text in the `<Prompt>`.
+
+| `type` | From | Show | Send |
+|---|---|---|---|
+| `text` | PDF, Word | a one-line text box (for Word, a multi-line box also works: line breaks are kept) | the text |
+| `multiline` | PDF | a multi-line text box | the text, lines separated by line breaks |
+| `checkbox` | PDF | a checkbox | `true` or `false` |
+| `radio` | PDF | radio buttons, one per `<Option>` | one `Option/@value`. An empty or unknown value leaves the template's selection as it was. |
+| `choice` | PDF | a drop-down, one entry per `<Option>` | one `Option/@value` |
+| `date` | Word | a date picker | `yyyy-MM-dd`, optionally with a time: `yyyy-MM-ddTHH:mm` |
+| `number` | Word | a number box | digits with a dot as the decimal separator and no thousands separator: `1234.5` |
+
+For a `date` or `number`, the template formats the value itself (`06.10.2026`, `1,234.50`). A value in any other form is printed exactly as sent. See [Writing a Word template](SaveFilledForm.md#writing-a-word-template).
+
+### `<Options>`: the entries of a radio or choice field
+
+```xml
+<Options Name="Country">
+  <Option value="TR" text="Turkey" />
+  <Option value="NL" text="Netherlands" />
+</Options>
+```
+
+- `Options/@Name` is the `Name` of the `<Prompt>` it belongs to.
+- `value` is what to send, and `text` is what to show. For a radio group the two are the same.
+- The `<Prompt>` text holds the selected `value`, or nothing.
+
+**Why the options are not inside the `<Prompt>`:** the `<FORMDATA>` is meant to be posted back to [SaveFilledForm](SaveFilledForm.md) as it is, and the server takes the whole text of a `<Prompt>` as its value. With the `<Option>`s inside the `<Prompt>`, their texts would become part of the saved value. Keeping them in a sibling `<Options>` element leaves each `<Prompt>` holding its value and nothing else.
+
+### Rules the UI must enforce
+
+The server reports these rules but does not check them when the form is saved:
+
+- `required="true"`: refuse to submit an empty value.
+- `maxLength`: limit the input's length.
+- `choice`: the server stores any text sent, so offer only the listed options.
+
+### What is listed
+
+- **PDF**: the AcroForm fields that can be filled, in the PDF's order. Read-only fields, signatures and push buttons are not listed. Fields sharing a short name are filled with the same value, so they are listed once.
+- **Word**: every `{{placeholder}}` and every name used in a `{?{condition}}`, in the order they first appear: the body, then headers, footers, footnotes and endnotes. Each name is listed once. Loops (`{{#Items}}`) and dotted names (`{{Customer.Name}}`) are not listed, because no single form value can fill them. The title, type and required flag are read from the placeholder; see [Writing a Word template](SaveFilledForm.md#writing-a-word-template).
+
+### Saving
+
+Post the `<FORMDATA>` element to [SaveFilledForm](SaveFilledForm.md) with the values filled in. The attributes other than `Name` (`title`, `type`, `required`, `maxLength`) may be left on or removed, as they are ignored, and the `<Options>` elements are not sent:
+
+```
+POST /srv.asmx/SaveFilledForm
+authenticationTicket=...&path=/Finance/Contracts/Acme.pdf&templatePath=~D123
+&xmlContent=<FORMDATA><Prompt Name="Customer">Acme Ltd</Prompt><Prompt Name="Approved">true</Prompt><Prompt Name="Country">NL</Prompt></FORMDATA>
 ```
 
 ---
+
+## Error Response
+
+```xml
+<root success="false" errorCode="4041" error="Document not found." />
+```
+
+| `errorCode` | When |
+|---:|---|
+| `4000` | The template has no published version. An HTML template that is marked offline also returns `4000`. |
+| `4010` | The ticket is expired or unknown, or there is no ticket. |
+| `4041` | No template at `templatePath`, or it is in a library the caller cannot see. Also returned when no folder exists at `targetFolderPath`, including when none was given for an HTML form template. |
+| `4230` | A PDF or Word template that is marked offline. |
+| `5000` | The PDF or Word file could not be read as a form template (e.g. a damaged file). |
+| HTTP 400 | `templatePath` was missing or empty: the request is refused before it reaches the API, and there is no XML error document. |
 
 ## Required Permissions
 
-- **Read** permission on the template document.
-- **Add Document** permission on the destination folder (`targetFolderPath`).
+- An authenticated user.
+- The template must be in a library the caller can see.
+- No permission is checked on `targetFolderPath` here, because this call creates nothing. The folder permission is checked by [SaveFilledForm](SaveFilledForm.md) when the document is created.
 
 ---
 
-## Example
+## Showing an HTML form
 
-### POST Request
+The rendered HTML is a complete page with its own `<html>`, `<style>` and `<script>`. Show it in an **`<iframe srcdoc>`**, not with `innerHTML` or `dangerouslySetInnerHTML`:
 
-```
-POST /srv.asmx/UseFormTemplate HTTP/1.1
-Content-Type: application/x-www-form-urlencoded
-
-authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
-&targetFolderPath=/Finance/Reports
-&templatePath=/Templates/ExpenseReport.htm
-&submitUrl=
-```
-
-### Using ~D999 for HTML Documents
-
-To render the built-in HTML document form (not tied to a specific template file):
-
-```
-POST /srv.asmx/UseFormTemplate HTTP/1.1
-Content-Type: application/x-www-form-urlencoded
-
-authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
-&targetFolderPath=/Finance/Reports
-&templatePath=~D999
-&submitUrl=
-```
-
-### Using submitUrl for React/SPA Integration
-
-**Do not use `submitUrl` when embedding inside a React app via iframe** — see the React section below. The `submitUrl` parameter is only useful when an external page submits to a known server-side route.
-
----
-
-## React Integration
-
-The rendered HTML is a complete standalone page (`<html>`, `<head>`, `<style>`, `<body>`). The correct way to embed it in a React application is inside an **`<iframe srcdoc>`**, not via `dangerouslySetInnerHTML`.
-
-**Why iframe and not `dangerouslySetInnerHTML`:**
-
-| | `dangerouslySetInnerHTML` | `<iframe srcdoc>` |
+| | `innerHTML` / `dangerouslySetInnerHTML` | `<iframe srcdoc>` |
 |---|---|---|
-| `<script>` tags execute | No | Yes |
-| `<style>` isolated from React app | No — leaks into host page | Yes |
-| Full HTML document supported | No — strips `<html>/<head>/<body>` | Yes |
-| Submit interception | Requires `querySelector` on container | `contentDocument.querySelector` on load |
+| The form's `<script>`s run | No | Yes |
+| The form's `<style>` stays out of the host page | No | Yes |
+| A full HTML document is supported | No: `<html>`, `<head>` and `<body>` are stripped | Yes |
 
-`srcdoc` iframes are always same-origin with their parent, so `contentDocument` access is always permitted regardless of the host the React app is served from.
+A `srcdoc` iframe is same-origin with its parent (keep `allow-same-origin` if you sandbox it), so the host page can reach the form through `contentDocument`.
 
-The rendered HTML has `InfoRouter_Ticket` set to an empty string. The React app must inject the live session ticket in the `onLoad` handler before the user submits.
-
-### Step 1 — Fetch the form
+### Fetch the form
 
 ```javascript
-const res = await fetch(
-  `/srv.asmx/UseFormTemplate?authenticationTicket=${ticket}` +
-  `&targetFolderPath=${encodeURIComponent(targetFolderPath)}` +
-  `&templatePath=${encodeURIComponent(templatePath)}` +
-  `&submitUrl=`
-);
-const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-const renderedHtml = xml.querySelector('root').textContent;
+async function loadForm(ticket, targetFolderPath, templatePath) {
+  const res = await fetch('/srv.asmx/UseFormTemplate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ authenticationTicket: ticket, targetFolderPath, templatePath }),
+  });
+  const root = new DOMParser().parseFromString(await res.text(), 'text/xml').documentElement;
+  if (root.getAttribute('success') !== 'true') {
+    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
+  }
+  return root.getAttribute('formType') === 'html'
+    ? { kind: 'html', html: root.textContent }
+    : { kind: 'fields', root };            // a PDF or Word template: build the form yourself
+}
 ```
 
-### Step 2 — Render inside an iframe and intercept submit
+### Collect the inputs and save
 
-```jsx
-import { useRef } from 'react';
+```javascript
+function escapeXml(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
-// The value to send for one form field name:
+// The value to send for one input name:
 // - a single checkbox: its value when ticked, '' otherwise
 // - a checkbox group (several checkboxes sharing the name): the ticked values joined with ';'
-// - a radio group or any other control: el.value
+// - a radio group or any other control: its value
 function fieldValue(el) {
   if (!el) return '';
-  if (!el.tagName) {                                  // RadioNodeList: several inputs share the name
+  if (!el.tagName) {                                   // RadioNodeList: several inputs share the name
     const items = Array.from(el);
     if (items.every(i => i.type === 'checkbox')) {
       return items.filter(i => i.checked).map(i => i.value).join(';');
     }
-    return el.value;                                  // radio group: the checked one's value
+    return el.value;
   }
   if (el.type === 'checkbox') return el.checked ? el.value : '';
   return el.value;
 }
 
-function InfoRouterForm({ renderedHtml, authTicket, targetFolderPath, documentName }) {
+// The template's inputs, read from InfoRouter_Fields: [{ name, dataType, required }]
+function templateFields(doc) {
+  const tokens = (doc.getElementById('InfoRouter_Fields')?.value ?? '')
+    .split(',').map(t => t.trim().replace(/^'|'$/g, ''));
+  const fields = [];
+  for (let i = 0; i + 3 < tokens.length; i += 4) {
+    const name = tokens[i].slice(3);                   // drop the IR_ prefix
+    if (!name || fields.some(f => f.name === name)) continue;   // unnamed button, or a repeated group
+    fields.push({ name, dataType: tokens[i + 1], required: tokens[i + 2] === 'Y' });
+  }
+  return fields;
+}
+
+function formData(doc) {
+  const form = doc.querySelector('form');
+  return '<FORMDATA>' +
+    templateFields(doc)
+      .map(f => `<Prompt Name="${escapeXml(f.name)}">${escapeXml(fieldValue(form.elements[f.name]))}</Prompt>`)
+      .join('') +
+    '</FORMDATA>';
+}
+```
+
+### React
+
+```jsx
+import { useRef, useCallback } from 'react';
+
+function HtmlForm({ html, ticket, templatePath, documentPath, onSaved }) {
   const iframeRef = useRef(null);
 
-  const handleLoad = () => {
+  const handleLoad = useCallback(() => {
     const doc = iframeRef.current.contentDocument;
     const form = doc.querySelector('form');
     if (!form) return;
 
-    // Inject the live ticket — the rendered HTML has this field empty
+    // Scripts inside the form may read the ticket; it is empty unless the server shares it.
     const ticketField = doc.getElementById('InfoRouter_Ticket');
-    if (ticketField) ticketField.value = authTicket;
+    if (ticketField) ticketField.value = ticket;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      // Parse InfoRouter_Fields to discover field names and build xmlContent
-      const fieldsInput = doc.getElementById('InfoRouter_Fields');
-      const tokens = fieldsInput ? fieldsInput.value.split(',') : [];
-      const seen = new Set();                         // a checkbox/radio group repeats its name
-      let xmlContent = '<FORMDATA>';
-      for (let i = 0; i + 3 < tokens.length; i += 4) {
-        const raw   = tokens[i].trim();                 // e.g. "'IR_title'"
-        const name  = raw.slice(4, raw.length - 1);    // strip 'IR_ prefix and trailing '
-        if (seen.has(name)) continue;
-        seen.add(name);
-        const value = fieldValue(form.elements[name]).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        xmlContent += `<Prompt Name="${name}">${value}</Prompt>`;
-      }
-      xmlContent += '</FORMDATA>';
-
-      const body = new URLSearchParams({
-        AuthenticationTicket: authTicket,
-        Path:         targetFolderPath.replace(/\/+$/, '') + '/' + documentName,
-        TemplatePath: templatePath,
-        xmlContent,
-      });
-
-      const res = await fetch('/srv.asmx/CreateDocumentUsingTemplate', {
+    form.addEventListener('submit', async e => {
+      e.preventDefault();                              // IRDOC.ASPX has no handler: never let it post
+      const res = await fetch('/srv.asmx/SaveFilledForm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
+        body: new URLSearchParams({
+          authenticationTicket: ticket,
+          path: documentPath,                          // full path of the document to create
+          templatePath,
+          xmlContent: formData(doc),
+        }),
       });
-
-      const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-      const root = xml.querySelector('root') ?? xml.querySelector('response');
-      if (root?.getAttribute('success') === 'true') {
-        // handle success — root may have DocumentID and DocumentName attributes
-      } else {
-        console.error('Submit failed:', root?.getAttribute('error'));
-      }
+      const root = new DOMParser().parseFromString(await res.text(), 'text/xml').documentElement;
+      if (root.getAttribute('success') === 'true') onSaved?.(root);
+      else console.error(root.getAttribute('errorCode'), root.getAttribute('error'));
     });
-  };
+  }, [ticket, templatePath, documentPath, onSaved]);
 
   return (
     <iframe
       ref={iframeRef}
-      srcdoc={renderedHtml}
+      srcDoc={html}
       onLoad={handleLoad}
-      style={{ width: '100%', height: '600px', border: 'none' }}
-      title="Document Form"
+      sandbox="allow-scripts allow-forms allow-same-origin"
+      style={{ width: '100%', height: 600, border: 'none' }}
+      title="Form"
     />
   );
 }
 ```
 
-### The `InfoRouter_Fields` hidden input
-
-The rendered HTML always contains a hidden input named `InfoRouter_Fields`. Its value is a comma-separated list of 4-token descriptors — one group per `<input>`, `<textarea>` and `<select>` element; a checkbox or radio group whose inputs share a name produces one group per input, so the same name can appear several times. De-duplicate names before building `xmlContent`.
-
-```
-'IR_title','CHAR','N','N','IR_author','CHAR','Y','N','IR_duedate','DATE','Y','N'
-```
-
-Each group of 4 tokens:
-
-| Position in group | Meaning |
+| Rule | Reason |
 |---|---|
-| 0 — `'IR_{fieldname}'` | HTML input name with `'IR_` prefix and trailing `'`. Strip those to get the bare field name. |
-| 1 — `'CHAR'` \| `'DATE'` \| `'NUMBER'` \| `'BOOLEAN'` | Data type. |
-| 2 — `'Y'` \| `'N'` | Required flag. |
-| 3 — `'N'` | Reserved. |
-
-You must parse this value to know which form inputs to collect and to build the correct `xmlContent` for [`CreateDocumentUsingTemplate`](CreateDocumentUsingTemplate.md).
-
-### Key points
-
-- `submitUrl` must always be included in the request. Pass an empty string `""` when embedding via iframe — the iframe's `onLoad` handler takes over submit interception entirely, so the form's `action` attribute is irrelevant.
-- `e.preventDefault()` must be called to stop the browser from navigating away when the user clicks Submit.
-- The `InfoRouter_Ticket` hidden field is empty in the rendered HTML by design. Always overwrite it with the current session ticket in `handleLoad` and again in the submit handler.
-- Read `InfoRouter_Fields` from `iframeDoc` in the `onLoad` handler to discover all template field names and their data types before building `xmlContent`.
-- If `renderedHtml` changes (user picks a different template), the iframe re-renders and `onLoad` fires again, re-attaching the listener cleanly.
+| Use `srcDoc`, not `src` | The HTML is a string; there is no URL to load it from. |
+| `sandbox="allow-scripts allow-forms allow-same-origin"` | The form's scripts run, and the host can reach `contentDocument`. |
+| `e.preventDefault()` on submit | The form's `action` has no handler; the save is the separate SaveFilledForm call. |
+| Re-attach in `onLoad` | When `html` changes the iframe reloads and `onLoad` fires again. |
 
 ---
-
-## JavaScript
-
-Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
-`errorCode` is the number to report.
-
-```javascript
-async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
-  const root = new DOMParser()
-    .parseFromString(await response.text(), 'text/xml')
-    .documentElement;
-
-  if (root.getAttribute('success') !== 'true') {
-    throw new Error(`${root.getAttribute('errorCode')}: ${root.getAttribute('error')}`);
-  }
-  return root;
-}
-```
-
-Renders a form template ready to be filled in. The HTML comes back as the root element's **CDATA**
-rather than in a child element.
-
-```javascript
-const root = await call('UseFormTemplate', {
-  authenticationTicket: ticket,
-  targetFolderPath: '/Forms/Filled',
-  templatePath: '/Forms/Templates/expenses.htm',
-  submitUrl: '/my-app/submit'
-});
-
-document.getElementById('host').innerHTML = root.textContent;
-```
-
-[SaveFilledForm](SaveFilledForm.md) writes the result back. A caller with no ticket is refused;
-this used to answer one as readily as an authenticated caller, where its neighbours do not.
 
 ## Notes
 
-- The `templatePath` accepts either a full document path or the `~D<id>` short form. `~D999` is the reserved identifier for the built-in HTML document type and does not correspond to a physical document in the repository.
-- The rendered HTML is returned inside a CDATA section. Extract the element's text content before rendering it in a browser.
-- `submitUrl` must always be present in the request. When passed as an empty string `""`, the form `action` defaults to `IRDOC.ASPX`, which has no handler in the current server: always intercept the submit and call SaveFilledForm. This parameter is only meaningful for non-React integrations where a server-side route must receive the POST. In a React app using `<iframe srcdoc>`, pass `submitUrl=""` and intercept submit via `contentDocument` instead.
-- The `InfoRouter_Ticket` hidden field inside the rendered form is always empty. The React app must inject the live session ticket in the iframe `onLoad` handler.
-- Use this API to embed infoRouter form templates inside custom applications or portals.
-
----
+- `targetFolderPath` is only used by an HTML form, whose page carries the folder's id. For a PDF or Word template, where the document will be saved is decided by the `path` given to [SaveFilledForm](SaveFilledForm.md).
+- To edit a document already saved from a form, use [EditFilledForm](EditFilledForm.md). It answers in the same two shapes, with the saved values filled in.
+- `~D999` is not a template this API can open: it returns `4041`. The blank HTML document is a [SaveFilledForm](SaveFilledForm.md) feature (`templatePath=999`), with no form to render.
 
 ## Related APIs
 
-- [CreateHtmlDocument](CreateHtmlDocument.md) — Store a completed HTML document in a folder.
-- [Search](Search.md) — Find documents rendered from a specific template using the `TEMPLATEPATH` criterion.
-
----
-
-## Error Codes
-
-The `errorCode` values this operation returns, checked against a running server:
-
-| `errorCode` | When |
-|---:|---|
-| `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4041` | no document at `templatePath`, or no folder at `targetFolderPath` (including none given for an HTML form template) |
-
-| `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
-
-| Error | Description |
-|-------|-------------|
-| `[900] Authentication failed` | Invalid or missing authentication ticket. |
-| `[901] Session expired or Invalid ticket` | The ticket has expired or does not exist. |
-| Folder not found | The `targetFolderPath` does not exist or is not accessible. |
-| Document not found | The `templatePath` does not resolve to an existing document. |
-| Access denied | The user lacks Read permission on the template or Add Document permission on the folder. |
-| `SystemError:...` | An unexpected server-side error occurred. |
-
----
-
-## React Implementer Guide
-
-Production-ready patterns derived from the reference demo at `IRWebCore/wwwRoot/form-template-demo.html`.
-
-### Shared helper functions
-
-These functions are used across all three form APIs (`UseFormTemplate`, `GetFormFromDocument`, `CreateDocumentUsingTemplate`). Define them once in a shared module.
-
-```javascript
-// XML-escape a value before placing it inside a <Prompt> element
-function escapeXml(s) {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-// The value to send for one form field name:
-// - a single checkbox: its value when ticked, '' otherwise
-// - a checkbox group (several checkboxes sharing the name): the ticked values joined with ';'
-// - a radio group or any other control: el.value
-function fieldValue(el) {
-  if (!el) return '';
-  if (!el.tagName) {                                  // RadioNodeList: several inputs share the name
-    const items = Array.from(el);
-    if (items.every(i => i.type === 'checkbox')) {
-      return items.filter(i => i.checked).map(i => i.value).join(';');
-    }
-    return el.value;                                  // radio group: the checked one's value
-  }
-  if (el.type === 'checkbox') return el.checked ? el.value : '';
-  return el.value;
-}
-
-// Parse the InfoRouter_Fields hidden input from a rendered form inside an iframe.
-// Returns an array of { name, value, dataType, required }.
-// InfoRouter_Fields format: 'IR_field1','CHAR','N','N','IR_field2','DATE','Y','N',...
-function parseInfoRouterFields(iframeDoc, form) {
-  const input = iframeDoc.getElementById('InfoRouter_Fields');
-  if (!input || !input.value.trim()) return [];
-  const tokens = input.value.split(',');
-  const fields = [];
-  for (let i = 0; i + 3 < tokens.length; i += 4) {
-    const raw      = tokens[i].trim();                       // e.g. "'IR_title'"
-    if (raw.length < 5) continue;
-    const name     = raw.slice(4, raw.length - 1);           // strip 'IR_ prefix + trailing '
-    if (fields.some(f => f.name === name)) continue;         // a checkbox/radio group repeats its name
-    const dataType = tokens[i + 1].trim().replace(/'/g, ''); // CHAR | DATE | NUMBER | BOOLEAN
-    const required = tokens[i + 2].trim() === "'Y'";
-    const el       = form.elements[name];
-    const value    = fieldValue(el);
-    fields.push({ name, value, dataType, required });
-  }
-  return fields;
-}
-
-// Build the <FORMDATA> XML required by CreateDocumentUsingTemplate
-function buildXmlContent(fields) {
-  if (!fields || fields.length === 0) return '';
-  return '<FORMDATA>' +
-    fields.map(f => `<Prompt Name="${f.name}">${escapeXml(f.value)}</Prompt>`).join('') +
-    '</FORMDATA>';
-}
-
-// Parse an infoRouter XML response — handles both <root> and <response> root elements
-function parseXml(xmlText) {
-  const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-  const root = doc.querySelector('root') ?? doc.querySelector('response');
-  if (!root) return { ok: false, error: 'Could not parse response' };
-  return { ok: root.getAttribute('success') === 'true', error: root.getAttribute('error') ?? '', el: root };
-}
-```
-
-### Step 1 — Fetch the form
-
-```javascript
-async function loadForm(apiBase, ticket, targetFolderPath, templatePath) {
-  const body = new URLSearchParams({
-    authenticationTicket: ticket,
-    targetFolderPath,
-    templatePath,
-    submitUrl: '',   // Always include; pass '' when using iframe submit interception
-  });
-  const res = await fetch(`${apiBase}/UseFormTemplate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
-  const r = parseXml(await res.text());
-  if (!r.ok) throw new Error(r.error);
-  return r.el.textContent;  // Raw HTML extracted from CDATA
-}
-```
-
-`r.el.textContent` extracts the HTML from inside the CDATA wrapper. `submitUrl` must always be present — pass `''` to let the iframe `onLoad` handler own submit interception.
-
-### Step 2 — Render in React and intercept submit
-
-```jsx
-import { useState, useRef, useCallback } from 'react';
-
-function CreateDocumentForm({ ticket, targetFolderPath, templatePath, apiBase, onSubmit }) {
-  const [renderedHtml, setRenderedHtml] = useState('');
-  const iframeRef = useRef(null);
-
-  async function handleLoadForm() {
-    const html = await loadForm(apiBase, ticket, targetFolderPath, templatePath);
-    setRenderedHtml(html);
-  }
-
-  // useCallback with full dependency array prevents stale closures in the submit handler
-  const handleIframeLoad = useCallback(() => {
-    const iframe = iframeRef.current;
-    if (!iframe || !renderedHtml) return;
-    const doc = iframe.contentDocument;
-
-    // Always inject the live ticket — the rendered form leaves InfoRouter_Ticket empty
-    const ticketField = doc.getElementById('InfoRouter_Ticket');
-    if (ticketField) ticketField.value = ticket;
-
-    const form = doc.querySelector('form');
-    if (!form) return;
-
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      // Collect all template fields and their current values
-      const fields = parseInfoRouterFields(doc, form);
-      // Hand off to the parent — it will call CreateDocumentUsingTemplate
-      onSubmit({ fields, templatePath });
-    });
-  }, [renderedHtml, ticket, templatePath]);
-
-  return (
-    <>
-      <button onClick={handleLoadForm}>Load Form</button>
-      {renderedHtml && (
-        <iframe
-          ref={iframeRef}
-          srcDoc={renderedHtml}
-          onLoad={handleIframeLoad}
-          sandbox="allow-scripts allow-forms allow-same-origin"
-          style={{ width: '100%', height: 600, border: 'none' }}
-          title="Document Form"
-        />
-      )}
-    </>
-  );
-}
-```
-
-### Critical rules
-
-| Rule | Reason |
-|---|---|
-| Use `srcDoc` (not `src`) on the iframe | Renders the HTML string directly without a round-trip |
-| `sandbox="allow-scripts allow-forms allow-same-origin"` | Scripts inside the form execute; `contentDocument` access is permitted |
-| `e.preventDefault()` + `e.stopPropagation()` | Prevents the browser from navigating away on submit |
-| Inject `InfoRouter_Ticket` in `onLoad` | The rendered HTML always has this field empty by design |
-| List `[renderedHtml, ticket, templatePath]` in `useCallback` deps | Prevents the submit handler from capturing stale values when inputs change |
-| Call `CreateDocumentUsingTemplate` from the `onSubmit` handler | `UseFormTemplate` only renders the form; the actual save is a separate call |
-
----
+- [SaveFilledForm](SaveFilledForm.md): Save the filled form as a new document.
+- [EditFilledForm](EditFilledForm.md): Open a saved form for editing.
+- [Search](Search.md): Find documents created from a template with the `TEMPLATEPATH` criterion.
