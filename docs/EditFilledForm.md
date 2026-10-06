@@ -1,5 +1,7 @@
 # EditFilledForm API
 
+<!-- {% raw %} -->
+
 Opens a document that was saved from a form, for the user to edit its values, and checks the document out to the caller. It is the edit counterpart of [UseFormTemplate](UseFormTemplate.md), and answers in the same two shapes, with the saved values filled in:
 
 | The document was saved from | Response `formType` | What the UI gets | What the UI does |
@@ -41,7 +43,7 @@ The call checks the document out before it answers:
 - If someone else has it checked out, the call fails with `4230`.
 - If the call fails after it checked the document out (for example, the document was not saved from a form), it releases that checkout before answering. A checkout the caller already held is left as it was.
 
-**Saving does not check the document back in.** [SaveFilledForm](SaveFilledForm.md) stores the new version and keeps a checkout the caller already holds, so after EditFilledForm and SaveFilledForm the document is **still checked out** to the user. Call [UnLock](UnLock.md) after saving, or when the user cancels the edit, to release it.
+**Saving checks the document back in.** [SaveFilledForm](SaveFilledForm.md) stores the new version and checks the document in, so nothing more is needed after saving. When the user **cancels** the edit instead, call [UnLock](UnLock.md): otherwise the document stays checked out to them.
 
 ---
 
@@ -142,7 +144,7 @@ authenticationTicket=...&path=/Finance/Contracts/Acme.pdf&templatePath=~D123
 &xmlContent=<FORMDATA><Prompt Name="Customer">Acme Ltd</Prompt><Prompt Name="Country">TR</Prompt></FORMDATA>
 ```
 
-For a PDF or Word template, take the id from the response's `templateId`. For an HTML form, take it from the `InfoRouter_TemplateID` hidden input. Then release the checkout with [UnLock](UnLock.md).
+For a PDF or Word template, take the id from the response's `templateId`. For an HTML form, take it from the `InfoRouter_TemplateID` hidden input. The save checks the document back in.
 
 ---
 
@@ -225,7 +227,6 @@ function EditHtmlForm({ html, ticket, documentPath, onDone }) {
         templatePath: `~D${templateId}`,
         xmlContent: formData(doc),
       });
-      await post('UnLock', { authenticationTicket: ticket, path: documentPath, force: 'false' });  // saving leaves it checked out
       onDone?.();
     });
   }, [ticket, documentPath, onDone]);
@@ -243,7 +244,11 @@ function EditHtmlForm({ html, ticket, documentPath, onDone }) {
 }
 ```
 
-When the user cancels instead, call `UnLock` too: the document stays checked out to them until it is released.
+When the user cancels instead, release the checkout:
+
+```javascript
+await post('UnLock', { authenticationTicket: ticket, path: documentPath, force: 'false' });
+```
 
 ---
 
@@ -256,4 +261,6 @@ When the user cancels instead, call `UnLock` too: the document stays checked out
 
 - [UseFormTemplate](UseFormTemplate.md): Open a template as a new, empty form.
 - [SaveFilledForm](SaveFilledForm.md): Save the form as a new document, or a new version of an existing one.
-- [UnLock](UnLock.md): Release the checkout this call takes.
+- [UnLock](UnLock.md): Release the checkout this call takes, when the edit is cancelled.
+
+<!-- {% endraw %} -->

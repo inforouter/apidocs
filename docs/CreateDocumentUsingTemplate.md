@@ -246,7 +246,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 - When creating a **new version** of an existing document that is not currently checked out, the API automatically checks the document out and then publishes the new version (leaving the document checked in).
 
-- When creating a **new version** of a document that is **already checked out by the current user**, the document remains checked out after the call.
+- When creating a **new version** of a document that is **already checked out by the current user**, the document is checked in with the new version.
 
 - If the document at `Path` is checked out by a **different user**, the call fails with an error.
 

@@ -1,5 +1,7 @@
 # UseFormTemplate API
 
+<!-- {% raw %} -->
+
 Prepares a new form from a form template, for the user to fill in. What comes back depends on the template's file type:
 
 | Template | Recognised by | Response `formType` | What the UI gets | What the UI does |
@@ -358,3 +360,5 @@ function HtmlForm({ html, ticket, templatePath, documentPath, onSaved }) {
 - [SaveFilledForm](SaveFilledForm.md): Save the filled form as a new document.
 - [EditFilledForm](EditFilledForm.md): Open a saved form for editing.
 - [Search](Search.md): Find documents created from a template with the `TEMPLATEPATH` criterion.
+
+<!-- {% endraw %} -->

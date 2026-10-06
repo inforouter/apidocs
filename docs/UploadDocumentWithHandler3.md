@@ -1,5 +1,7 @@
 # UploadDocumentWithHandler3 API
 
+<!-- {% raw %} -->
+
 Finalizes a chunked file upload and creates a new document or a new version of an existing document at the specified path, with extended options supplied through an XML parameters string. This is the most flexible handler-finalization method and supports all upload options including version comment, publish option, checkout, keywords, text-only content, manual version numbers, custom dates, and email notifications.
 
 ## Endpoint
@@ -76,7 +78,6 @@ and a malformed one is refused with `4000`.
 
 The sample below uses the browser `File` API and `fetch`. It covers all four steps, computes CRC32 in-browser, handles `tryagain` retries, verifies the final file checksum, and explicitly deletes the upload handler after a successful finalization.
 
-{% raw %}
 ```javascript
 /**
  * Upload a file to infoRouter using the chunked upload API.
@@ -207,7 +208,6 @@ async function uploadWithChunks(baseUrl, authenticationTicket, file, irPath, xml
   };
 }
 ```
-{% endraw %}
 
 #### Usage
 
@@ -322,3 +322,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
+
+<!-- {% endraw %} -->

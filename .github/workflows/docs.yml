@@ -36,6 +36,9 @@ jobs:
           python fix_encoding.py
           python fix_links.py
 
+      - name: Check for Liquid syntax GitHub's Jekyll build cannot take
+        run: python check_liquid.py
+
       - name: Build site
         run: zensical build -f mkdocs.yml
 
