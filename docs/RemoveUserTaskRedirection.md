@@ -100,7 +100,7 @@ await call('RemoveUserTaskRedirection', { authenticationTicket: ticket, userName
 - Removing a redirection does not affect tasks that were already forwarded before the removal. Only future task assignments are affected.
 - To view the current redirection for a user, use [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md).
 - To set or update a redirection, use [SetUserTaskRedirection](SetUserTaskRedirection.md).
-- To change the redirection target without removing and re-adding it, use [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md).
+- To change the redirection target without removing and re-adding it, use [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md). That call needs the `RerouteRedirections` application setting to be on; removing a redirection does not.
 
 ## Related APIs
 

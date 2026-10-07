@@ -125,7 +125,7 @@ with no end is not something this API can express.
 - If the user already has a redirection configured, it is replaced (not stacked). There can only be one active redirection per user at a time.
 - If `startOn` is in the past, the system silently adjusts it to the current time instead of returning an error.
 - This API cannot create an open-ended (no end date) redirection. Both start and end dates are required.
-- To only change the target user without changing dates, use [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md).
+- To only change the target user without changing dates, use [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md). That call needs the `RerouteRedirections` application setting to be on; this one does not.
 - To remove the redirection, use [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md).
 
 ## Related APIs

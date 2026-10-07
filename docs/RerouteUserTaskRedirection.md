@@ -42,12 +42,15 @@ To create a new redirection from scratch, use [SetUserTaskRedirection](SetUserTa
 
 The calling user must be one of:
 - The **user themselves** (self-service -" rerouting their own redirection), or
+- The **user the tasks are currently redirected to** (passing them on to somebody else), or
 - A **User Manager**, or
 - A **Library Manager**.
 
 Anonymous access is not permitted.
 
 ## Preconditions
+
+Rerouting must be allowed: the application setting **Allow rerouting of redirected tasks** (`RerouteRedirections` in [GetGeneralAppSettings](GetGeneralAppSettings.md) / [SetGeneralAppSettings](SetGeneralAppSettings.md)) must be `true`. It is `true` by default (a server where it was never saved allows rerouting); once an administrator turns it off, this call is refused with `4030` for every caller, the system administrator included. The setting applies to this call only: [SetUserTaskRedirection](SetUserTaskRedirection.md) and [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) work whatever it says.
 
 The user specified by `userName` must **already have an active task redirection** configured. If no redirection exists, the call returns an error. Use [SetUserTaskRedirection](SetUserTaskRedirection.md) to create a new redirection.
 
@@ -113,6 +116,8 @@ failure - so the caller was told it had failed and not why.
 
 ## Notes
 
+- Until 9.0 the `RerouteRedirections` setting was not checked by this call; it only decided whether the user interface showed the Reroute link. A server whose stored value is `false` now refuses rerouting until the setting is turned on.
+- Until 9.0 the user the tasks are redirected to was refused (`4030`) unless they were also allowed to set the redirection, so only the user themselves and managers could reroute.
 - This API only changes the redirection **target**. The date window is inherited from the existing record.
 - If you need to change both the target and the date window, remove the existing redirection with [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) and create a new one with [SetUserTaskRedirection](SetUserTaskRedirection.md).
 - To verify the updated redirection, use [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md).
@@ -134,4 +139,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4041` | `userName` or `redirectTasksToUser` is not a user |
 | `4000` | the two names are the same |
 | `4041` | that user has no redirection to reroute |
+| `4030` | the `RerouteRedirections` setting is off, or the caller may not reroute this user's redirection |
 | `4030` | there is no ticket at all |
