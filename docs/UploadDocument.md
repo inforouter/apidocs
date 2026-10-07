@@ -191,6 +191,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4030` | the caller may not add documents there, or the folder rules forbid the file type |
 | `HTTP 415` | the call was a GET; `FileContent` can only be posted |
 | `HTTP 400` | `FileContent` or `Path` was empty |
+| `4080` | (REST) the request was still arriving when the `FileUploadTimeOut` time ran out; see [GetGeneralAppSettings](GetGeneralAppSettings.md) |
 
 | Error | Description |
 |-------|-------------|

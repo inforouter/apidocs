@@ -102,7 +102,7 @@ Returns the general application settings including upload limits, work days conf
 | Property | Type | Description |
 |----------|------|-------------|
 | `DocumentMaxSize` | long | Maximum document size in bytes (default: 75 MB = 78643200, max: 1 GB) |
-| `FileUploadTimeOut` | integer | Upload timeout in seconds (default 900). A value for clients only: a client may use it as the timeout of its own upload requests. The server stores and returns it but does not end an upload that runs longer, and does not check its range. |
+| `FileUploadTimeOut` | integer | Upload timeout in seconds (default 900). Applied by the server to the REST upload calls (`/srv.asmx/Upload...`: UploadDocument*, UploadFileChunk, UploadZip*, UploadTiffAsPDF*, UploadNewDocumentWidthHandler): a request that has not finished arriving within this time is ended and answered with `errorCode` `4080`. It limits each request, so a chunked upload gets this time per chunk. `0` or less means no limit. SOAP and WebDAV uploads are not timed. The range is not checked: a very small value makes every upload fail. A change applies to the next request. |
 | `DefaultUploadFileChunkSize` | integer | Chunk size for chunked uploads in bytes (min: 256 KB, max: 32 MB). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings. |
 
 ## Workdays Properties

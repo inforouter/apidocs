@@ -223,6 +223,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4041` | no folder at the parent of the path |
 | `4030` | the caller may not add documents there, or the folder rules forbid the file type |
 | `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
+| `4080` | (REST) the request was still arriving when the `FileUploadTimeOut` time ran out; see [GetGeneralAppSettings](GetGeneralAppSettings.md) |
 
 | Error | Description |
 |-------|-------------|

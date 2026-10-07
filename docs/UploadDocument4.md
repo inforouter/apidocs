@@ -212,6 +212,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `HTTP 415` | the call was a GET; the content can only be posted |
 | `HTTP 400` | `xmlParameters` was empty; it is required, so send `<parameters />` |
 | `4000` | the document was not well-formed XML; the message carries the parser's own words |
+| `4080` | (REST) the request was still arriving when the `FileUploadTimeOut` time ran out; see [GetGeneralAppSettings](GetGeneralAppSettings.md) |
 
 | Error | Description |
 |-------|-------------|

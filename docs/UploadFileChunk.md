@@ -204,6 +204,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `none` | a checksum mismatch is `success="false"` with `tryagain="true"`, meaning send that chunk again |
 | `HTTP 415` | the call was a GET; the content can only be posted |
 | `HTTP 400` | a required parameter was empty; refused by model binding, so there is no error document |
+| `4080` | (REST) the request was still arriving when the `FileUploadTimeOut` time ran out; see [GetGeneralAppSettings](GetGeneralAppSettings.md) |
 
 | Error | Description |
 |-------|-------------|
