@@ -102,7 +102,7 @@ Returns the general application settings including upload limits, work days conf
 | Property | Type | Description |
 |----------|------|-------------|
 | `DocumentMaxSize` | long | Maximum document size in bytes (default: 75 MB = 78643200, max: 1 GB) |
-| `FileUploadTimeOut` | integer | Upload timeout in seconds (default 900). Stored for clients; the server does not currently enforce it. |
+| `FileUploadTimeOut` | integer | Upload timeout in seconds (default 900). A value for clients only: a client may use it as the timeout of its own upload requests. The server stores and returns it but does not end an upload that runs longer, and does not check its range. |
 | `DefaultUploadFileChunkSize` | integer | Chunk size for chunked uploads in bytes (min: 256 KB, max: 32 MB). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings. |
 
 ## Workdays Properties

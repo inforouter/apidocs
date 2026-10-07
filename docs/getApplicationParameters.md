@@ -142,7 +142,7 @@ These additional parameters are returned only when the authenticated user is a s
 |-----------|------|-------------|
 | `INDEXCATALOG` | string | Name of the search index catalog |
 | `LOGLOGINS` | TRUE/FALSE | Whether user logins are logged |
-| `FILEUPLOADTIMEOUT` | integer | Upload timeout in seconds (default 900). Stored for clients; the server does not currently enforce it. |
+| `FILEUPLOADTIMEOUT` | integer | Upload timeout in seconds (default 900). A value for clients only: a client may use it as the timeout of its own upload requests. The server stores and returns it but does not end an upload that runs longer. |
 | `ALLOWOWNERSHIPTRANSFER` | TRUE/FALSE | Whether document ownership transfer is allowed |
 | `SUBSCRIPTIONNOTIFICATIONS` | TRUE/FALSE | Whether subscription email notifications are enabled |
 | `SENDEMAIL` | TRUE/FALSE | Whether the Send To email feature is enabled |
