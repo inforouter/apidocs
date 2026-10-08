@@ -36,10 +36,11 @@ GET /srv.asmx/GetWorkflowStatistics?authenticationTicket=xxx&domainName=Engineer
 
 Response includes:
 - Domain and workflow information
-- Average processing time (hours and text)
+- Planned length of the workflow (hours and text)
 - Total pending count (all-time)
 - Total completed count (all-time)
-- Total overdue count
+- Running workflows past their own due date
+- Running workflows with an overdue task
 
 ### With Date Range Statistics
 
@@ -60,7 +61,7 @@ Response includes all-time statistics PLUS date range specific data:
 
 ```xml
 <response success="true">
-  <WorkflowStatistics>
+  <Value>
     <DomainName>Engineering</DomainName>
     <WorkflowName>DocumentReview</WorkflowName>
     <ActiveFolderPath>/Engineering/Reviews/Active</ActiveFolderPath>
@@ -69,7 +70,8 @@ Response includes all-time statistics PLUS date range specific data:
     <TotalPending>15</TotalPending>
     <TotalCompleted>892</TotalCompleted>
     <TotalOverdue>2</TotalOverdue>
-  </WorkflowStatistics>
+    <TotalWithOverdueTasks>6</TotalWithOverdueTasks>
+  </Value>
 </response>
 ```
 
@@ -77,7 +79,7 @@ Response includes all-time statistics PLUS date range specific data:
 
 ```xml
 <response success="true">
-  <WorkflowStatistics>
+  <Value>
     <DomainName>Engineering</DomainName>
     <WorkflowName>DocumentReview</WorkflowName>
     <ActiveFolderPath>/Engineering/Reviews/Active</ActiveFolderPath>
@@ -93,7 +95,8 @@ Response includes all-time statistics PLUS date range specific data:
     <TotalPending>15</TotalPending>
     <TotalCompleted>892</TotalCompleted>
     <TotalOverdue>2</TotalOverdue>
-  </WorkflowStatistics>
+    <TotalWithOverdueTasks>6</TotalWithOverdueTasks>
+  </Value>
 </response>
 ```
 
@@ -110,14 +113,38 @@ Response includes all-time statistics PLUS date range specific data:
 | `DomainName` | string | Name of the domain | Always |
 | `WorkflowName` | string | Name of the workflow | Always |
 | `ActiveFolderPath` | string | Path to workflow's active folder | Always |
-| `AverageTimeSpanInHours` | integer | Average time in hours | Always |
-| `AverageTimeSpanInText` | string | Human-readable average time | Always |
-| `TotalPending` | integer | All-time pending count | Always |
-| `TotalCompleted` | integer | All-time completed count | Always |
-| `TotalOverdue` | integer | Current overdue count | Always |
+| `AverageTimeSpanInHours` | integer | The **planned** length of the workflow in hours: each step's longest task deadline, added up. It is read from the definition, not measured from runs, so it has a value when nothing has completed. Despite the name it is not an average. | Always |
+| `AverageTimeSpanInText` | string | The same planned length as text, for example "8 Days" | Always |
+| `TotalPending` | integer | Workflows of this definition that are running now (not finished) | Always |
+| `TotalCompleted` | integer | Workflows of this definition that have finished, all-time | Always |
+| `TotalOverdue` | integer | Running workflows past **the workflow's own due date**. Task due dates are not looked at. See [How overdue is counted](#how-overdue-is-counted). | Always |
+| `TotalWithOverdueTasks` | integer | Running workflows that have **at least one task past its due date**. Added in 9.0. See [How overdue is counted](#how-overdue-is-counted). | Always |
 | `PendingInRange` | integer (nullable) | Pending in date range | Only with dates |
 | `SubmittedInRange` | integer (nullable) | Submitted in date range | Only with dates |
 | `CompletedInRange` | integer (nullable) | Completed in date range | Only with dates |
+
+## How Overdue Is Counted
+
+The response counts late workflows in two ways, and they answer different questions.
+
+| Count | A running workflow is counted when | Use it for |
+|-------|-------------------------------------|------------|
+| `TotalOverdue` | the workflow's own due date has passed | "Which workflows should have finished by now?" |
+| `TotalWithOverdueTasks` | it has at least one task past its due date | "Which workflows are stuck on a late task?" |
+
+- **The workflow's due date** is set when a document is submitted: the submit time plus the planned length (`AverageTimeSpanInHours`). It does not move when a task's due date is changed.
+- **An overdue task** is one that has started, is not finished, is in progress, and whose due date has passed. This is the same rule the server's task lists use when they are filtered to overdue tasks.
+- A workflow is counted once in `TotalWithOverdueTasks` however many of its tasks are late.
+
+The two can differ a lot. With a planned length of 8 days and a first step due after 2, a workflow whose first task is three days late is in `TotalWithOverdueTasks` and not yet in `TotalOverdue`:
+
+```xml
+<TotalPending>9</TotalPending>
+<TotalOverdue>0</TotalOverdue>
+<TotalWithOverdueTasks>9</TotalWithOverdueTasks>
+```
+
+A running workflow that has no due date stored is never counted in `TotalOverdue`. Until 9.0 `TotalOverdue` was the only count, and it was described as the number of workflows with overdue tasks, which it is not.
 
 ## Required Permissions
 
@@ -191,7 +218,7 @@ SOAPAction: "http://tempuri.org/GetWorkflowStatistics"
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <response success="true">
-  <WorkflowStatistics>
+  <Value>
     <DomainName>Quality</DomainName>
     <WorkflowName>QualityApproval</WorkflowName>
     <ActiveFolderPath>/Quality/Pending Approvals</ActiveFolderPath>
@@ -200,7 +227,8 @@ SOAPAction: "http://tempuri.org/GetWorkflowStatistics"
     <TotalPending>45</TotalPending>
     <TotalCompleted>892</TotalCompleted>
     <TotalOverdue>7</TotalOverdue>
-  </WorkflowStatistics>
+    <TotalWithOverdueTasks>11</TotalWithOverdueTasks>
+  </Value>
 </response>
 ```
 
@@ -227,9 +255,9 @@ async function getWorkflowStats(domainName, workflowName, startDate = null, endD
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlText, "text/xml");
     
-    const root = xmlDoc.querySelector("root");
+    const root = xmlDoc.documentElement;
     if (root.getAttribute("success") === "true") {
-        const stats = xmlDoc.querySelector("WorkflowStatistics");
+        const stats = xmlDoc.querySelector("Value");
         return {
             domainName: stats.querySelector("DomainName").textContent,
             workflowName: stats.querySelector("WorkflowName").textContent,
@@ -297,7 +325,7 @@ using (var client = new SrvSoapClient())
         var root = response.Root;
         if (root.Attribute("success")?.Value == "true")
         {
-            var stats = root.Element("WorkflowStatistics");
+            var stats = root.Element("Value");
             
             var workflowStats = new
             {

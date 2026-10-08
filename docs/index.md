@@ -24,6 +24,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [CreateWebDavSession](CreateWebDavSession.md) - Create a WebDAV session ticket for mapping a drive in Windows File Explorer
 - [ForgotPassword](ForgotPassword.md) - Initiate a password reset by sending a one-time token to the user's registered email address
 - [ForgotPasswordByUserName](ForgotPasswordByUserName.md) - Initiate a password reset by login name (sends token to the user's registered email address)
+- [GetSignInOptions](GetSignInOptions.md) - Get what a user can sign in with: password form, Windows authentication, guest access, single sign-on providers (no authentication required)
 - [GetWebDavSessions](GetWebDavSessions.md) - List the current user's WebDAV session tickets with their mount paths and expiry dates
 - [isValidTicket](isValidTicket.md) - Check whether an authentication ticket is still valid without supplying credentials or extending the expiration
 - [LogOut](LogOut.md) - Invalidate an authentication ticket and clear the server-side session

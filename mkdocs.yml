@@ -76,6 +76,7 @@ nav:
     - AuthenticateUser: AuthenticateUser.md
     - AuthenticateUser1: AuthenticateUser1.md
     - AuthenticateUserViaWindows: AuthenticateUserViaWindows.md
+    - GetSignInOptions: GetSignInOptions.md
     - isValidTicket: isValidTicket.md
     - RenewTicket: RenewTicket.md
     - LogOut: LogOut.md
