@@ -31,7 +31,7 @@ successful empty `<options />`, although adding an option to one of those is ref
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PropertySetName` | string | Yes | Internal name of the property set. |
 | `PropertyFieldName` | string | Yes | Internal name of the field whose options to retrieve. |
-| `OptionFilter` | string | No | Filter string to narrow results. Used as a SQL `WHERE` clause parameter for `LOOKUP` fields. Refused `4000` on a field of any other control type, which cannot use one. |
+| `OptionFilter` | string | No | Filter string to narrow results. For a `LOOKUP` field it replaces the placeholder `<%=VALUE%>` in the field's SQL sentence; a single quote in it is doubled. See [how to write the sentence](SetPropertySetLookupFieldParametersForSQLServer.md#filtering-the-lookup-and-returning-several-columns). Refused `4000` on a field of any other control type, which cannot use one. |
 
 ## Response
 
@@ -167,7 +167,7 @@ empty `<options />`, although *adding* an option to one of those is refused `400
 
 - `PropertyFieldName` lookup is **case-insensitive** -" the field name is matched against the uppercase field names stored in the property set.
 - Static options are returned sorted **alphabetically** by value.
-- For `LOOKUP` fields, the `OptionFilter` value is passed to the configured SQL query's filter parameter. The exact behavior depends on the SQL sentence configured for the field.
+- For `LOOKUP` fields, the `OptionFilter` value replaces `<%=VALUE%>` in the configured SQL sentence, as text inside the sentence, not as a query parameter. A sentence without the placeholder ignores the filter. An empty filter leaves whatever surrounds the placeholder, so `LIKE '<%=VALUE%>%'` becomes `LIKE '%'` and matches every row.
 - To add a static option, use [AddPropertySetFieldOption](AddPropertySetFieldOption.md). To remove one, use [DeletePropertySetFieldOption](DeletePropertySetFieldOption.md).
 - To configure a `LOOKUP` field's data source, use [SetPropertySetLookupFieldParametersForSQLServer](SetPropertySetLookupFieldParametersForSQLServer.md), [SetPropertySetLookupFieldParametersForMYSQL](SetPropertySetLookupFieldParametersForMYSQL.md), or [SetPropertySetLookupFieldParametersForORACLE](SetPropertySetLookupFieldParametersForORACLE.md).
 

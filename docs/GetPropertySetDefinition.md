@@ -78,6 +78,23 @@ Fields with `ControlType="LOOKUP"` include an additional `<lookupparams>` child 
 </field>
 ```
 
+What `<lookupparams>` carries depends on the field and on the caller:
+
+| Case | `looktype` | `error` | Children |
+|------|-----------|---------|----------|
+| The lookup has not been configured yet | `""` | `""` | none |
+| Configured, and the caller is a System Administrator | `database` | absent | `dbconnectionparams`, `sqlsentence` |
+| Configured, and the caller is not a System Administrator | `database` | `Access denied.` | none |
+
+A lookup that is not configured yet looks like this. It is not a failure: test for an empty `looktype`, and set the lookup up with [SetPropertySetLookupFieldParametersForSQLServer](SetPropertySetLookupFieldParametersForSQLServer.md) or its Oracle or MySQL equivalent. Until 9.0 this case also said `error="Access denied."`, to administrators as well.
+
+```xml
+<field FieldName="STATE" Caption="State" DataType="CHAR" DataLength="255"
+       Required="TRUE" ControlSize="1" ControlOrder="0" ControlType="LOOKUP">
+  <lookupparams looktype="" error="" />
+</field>
+```
+
 ### Error Response
 
 ```xml
