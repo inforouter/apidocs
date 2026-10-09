@@ -469,7 +469,7 @@ console.log(page.getAttribute('from'), page.getAttribute('to'), page.getAttribut
 
 - `GetPreviousSearchPage` must be called **after** a successful `Search` call and at least one `GetNextSearchPage` call. Calling it when already on the first page returns the first page again (`FirstPage="true"`).
 
-- The page size is configured at the system level via the **Search Page Size** setting (typically 20 items per page). This value cannot be overridden per request.
+- The page size is configured at the system level via the **Search Page Size** setting (typically 20 items per page). To choose the size for one call, use [GetPreviousSearchPage1](GetPreviousSearchPage1.md).
 
 - The cursor position is shared with `GetNextSearchPage` -" both APIs operate on the same server-side pagination state for the current session.
 

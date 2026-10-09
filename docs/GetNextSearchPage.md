@@ -478,7 +478,7 @@ result of its own.
 
 - `GetNextSearchPage` must be called **after** a successful `Search` call. If `Search` has not been called in the current session, or the session search state has expired, the API returns an error.
 
-- The page size is configured at the system level via the **Search Page Size** setting (typically 20 items per page). This value cannot be overridden per request.
+- The page size is configured at the system level via the **Search Page Size** setting (typically 20 items per page). To choose the size for one call, use [GetNextSearchPage1](GetNextSearchPage1.md).
 
 - Each call to `GetNextSearchPage` advances the internal cursor by one page. To revisit earlier pages, use `GetPreviousSearchPage`.
 

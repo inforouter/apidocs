@@ -396,7 +396,9 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 
 ### Search
 - [GetNextSearchPage](GetNextSearchPage.md) - Get the next page of a prepared search result set
+- [GetNextSearchPage1](GetNextSearchPage1.md) - Get the next page of a prepared search with a row count for the call
 - [GetPreviousSearchPage](GetPreviousSearchPage.md) - Get the previous page of a prepared search result set
+- [GetPreviousSearchPage1](GetPreviousSearchPage1.md) - Get the previous page of a prepared search with a row count for the call
 - [CreateSavedSearch](CreateSavedSearch.md) - Create a new saved search or search page definition
 - [DeleteSavedSearch](DeleteSavedSearch.md) - Delete a saved search or search page definition by ID
 - [GetSavedSearch](GetSavedSearch.md) - Get the full definition of a single saved search or search page including field-visibility configuration
