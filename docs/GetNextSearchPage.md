@@ -480,6 +480,9 @@ result of its own.
 
 - The page size is configured at the system level via the **Search Page Size** setting (typically 20 items per page). To choose the size for one call, use [GetNextSearchPage1](GetNextSearchPage1.md).
 
+
+- **ISO reviewer:** every `<document>` carries `ISOReviewById`, `ISOReviewByName` and `ISOReviewWorkflowName` (added in 9.0), beside `LastISOReviewDate` and `NextISOReviewDate`. `ISOReviewById` is a user id, or a special role as it is stored: `-5` the document's owner, `-8` the submitter, with the role's label as the name. `ISOReviewWorkflowName` is the workflow the review is submitted to, empty for a review by task. A document with no ISO review definition has `ISOReviewById="0"` and two empty names. The reviewers of a page are read with one query, so a list of review schedules needs no `GetISOReviewDefinition` call per row.
+
 - Each call to `GetNextSearchPage` advances the internal cursor by one page. To revisit earlier pages, use `GetPreviousSearchPage`.
 
 - The first call after `Search` returns the **first page** (`FirstPage="true"`). Subsequent calls return subsequent pages until `LastPage="true"`.

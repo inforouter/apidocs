@@ -68,6 +68,8 @@ authenticationTicket=abc123&withrules=false&withPropertySets=false&withSecurity=
 - After the last page (`LastPage="true"`), another call starts again from where that last page started.
 - [GetPreviousSearchPage1](GetPreviousSearchPage1.md) steps back with a row count of its own.
 
+- Each `<document>` carries the ISO reviewer (`ISOReviewById`, `ISOReviewByName`, `ISOReviewWorkflowName`); see the notes of [GetNextSearchPage](GetNextSearchPage.md).
+
 ## Related APIs
 
 - [Search](Search.md) - Prepare the search these pages are read from

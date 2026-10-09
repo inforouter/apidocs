@@ -67,6 +67,8 @@ authenticationTicket=abc123&withrules=false&withPropertySets=false&withSecurity=
 - When fewer than `rowCount` rows lie before the last page served, the page starts at row 1 and may overlap it. On the first page, the first page is returned again.
 - `rowCount` may change from one call to the next, and calls may be mixed with `GetPreviousSearchPage`, which always uses the system page size.
 
+- Each `<document>` carries the ISO reviewer (`ISOReviewById`, `ISOReviewByName`, `ISOReviewWorkflowName`); see the notes of [GetNextSearchPage](GetNextSearchPage.md).
+
 ## Related APIs
 
 - [Search](Search.md) - Prepare the search these pages are read from

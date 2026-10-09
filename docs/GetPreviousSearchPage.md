@@ -471,6 +471,9 @@ console.log(page.getAttribute('from'), page.getAttribute('to'), page.getAttribut
 
 - The page size is configured at the system level via the **Search Page Size** setting (typically 20 items per page). To choose the size for one call, use [GetPreviousSearchPage1](GetPreviousSearchPage1.md).
 
+
+- **ISO reviewer:** every `<document>` carries `ISOReviewById`, `ISOReviewByName` and `ISOReviewWorkflowName` (added in 9.0), beside `LastISOReviewDate` and `NextISOReviewDate`. `ISOReviewById` is a user id, or a special role as it is stored: `-5` the document's owner, `-8` the submitter, with the role's label as the name. `ISOReviewWorkflowName` is the workflow the review is submitted to, empty for a review by task. A document with no ISO review definition has `ISOReviewById="0"` and two empty names. The reviewers of a page are read with one query, so a list of review schedules needs no `GetISOReviewDefinition` call per row.
+
 - The cursor position is shared with `GetNextSearchPage` -" both APIs operate on the same server-side pagination state for the current session.
 
 - When already on the first page, `GetPreviousSearchPage` resets the cursor to position 1 and returns the first page again rather than returning an error.
