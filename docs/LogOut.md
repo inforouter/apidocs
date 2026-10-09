@@ -1,6 +1,6 @@
 # LogOut API
 
-Logs out the authenticated user by invalidating their authentication ticket and clearing their server-side session variables. After a successful logout, the ticket can no longer be used for API calls.
+Logs out the authenticated user by invalidating their authentication ticket and clearing their server-side session variables. After a successful logout, the ticket can no longer be used for API calls. The call is safe to repeat: a ticket that names no session is answered with success.
 
 ## Endpoint
 
@@ -18,7 +18,7 @@ Logs out the authenticated user by invalidating their authentication ticket and 
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `AuthenticationTicket` | string | No | The authentication ticket to invalidate. If not supplied, the server checks the `ticket` HTTP cookie on the request. If neither is present or valid, the call fails with `[901]`. |
+| `AuthenticationTicket` | string | No | The authentication ticket to invalidate. If not supplied, the server checks the `ticket` HTTP cookie on the request. A ticket that names no session (already signed out, expired, or never issued) is answered with success. |
 
 ## Response
 
@@ -31,12 +31,14 @@ Logs out the authenticated user by invalidating their authentication ticket and 
 ### Error Response
 
 ```xml
-<root success="false" error="[901] Session expired or Invalid ticket" />
+<root success="false" error="[ErrorCode] Error message" />
 ```
+
+An unknown or expired ticket is **not** an error here; see Notes.
 
 ## Required Permissions
 
-- Only a valid, currently active authentication ticket can be logged out.
+- None. Any caller may end the session of the ticket it holds; a ticket that names no session is answered with success.
 
 ## Example
 
@@ -98,13 +100,13 @@ Cancels the ticket. Anything still holding it is signed out.
 await call('LogOut', { authenticationTicket: ticket });
 ```
 
-Afterwards `isValidTicket` answers `4010` for it.
+Afterwards `isValidTicket` answers `4010` for it. Calling `LogOut` again with the same ticket succeeds.
 
 ## Notes
 
 - **Ticket is removed from memory cache:** The session entry is deleted from the server's in-memory cache. Any subsequent API call using the same ticket will immediately receive a `[901] Session expired or Invalid ticket` error.
 - **Cookie fallback:** If `AuthenticationTicket` is not supplied in the request parameters, the server checks for a `ticket` HTTP cookie. This is useful for browser-based clients that store the ticket in a cookie rather than passing it explicitly.
-- **Already-expired tickets return an error:** If the ticket has already expired before `LogOut` is called, the server cannot find the session to remove and returns `[901]`. This is expected behaviour -" the session was already gone. Callers should not treat this as a critical failure during cleanup.
+- **Safe to repeat:** A ticket that names no session - signed out already, expired, or never issued - is answered with `success="true"`, since there is nothing left to sign out. The answer is the same in all three cases, so it says nothing about whether a ticket ever existed. Until 9.0 this returned `[901]`.
 - **Best practice:** Always call `LogOut` at the end of an integration session to release the server-side session entry and free memory cache resources, rather than simply abandoning the ticket to expire naturally after 30 days.
 
 ## Related APIs
@@ -115,13 +117,4 @@ Afterwards `isValidTicket` answers `4010` for it.
 
 ## Error Codes
 
-The `errorCode` values this operation returns, checked against a running server:
-
-| `errorCode` | When |
-|---:|---|
-| `4010` | `[901]` the ticket is expired or unknown |
-
-
-| Error | Description |
-|-------|-------------|
-| `[901] Session expired or Invalid ticket` | The ticket is missing, already expired, or not found in the session cache |
+This operation has no error of its own. A ticket that names no session is answered with success, not `[901]` / `4010`.
