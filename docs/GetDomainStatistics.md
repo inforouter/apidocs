@@ -28,6 +28,8 @@ Returns statistics for the specified domain/library.
 ```xml
 <root success="true">
   <LibraryStatistics>
+    <DomainId>123</DomainId>
+    <DomainName>Finance</DomainName>
     <FolderCount>78</FolderCount>
     <LocalUserCount>25</LocalUserCount>
     <LocalGroupCount>5</LocalGroupCount>
@@ -45,6 +47,8 @@ Returns statistics for the specified domain/library.
 
 | Property | Type | Description |
 |----------|------|-------------|
+| `DomainId` | integer | The id of the domain the numbers are of. Added in 9.0. |
+| `DomainName` | string | Its name. Added in 9.0. |
 | `FolderCount` | integer | Total number of folders in the domain |
 | `LocalUserCount` | integer | Number of users created locally in this domain |
 | `LocalGroupCount` | integer | Number of user groups created locally in this domain |

@@ -522,7 +522,8 @@ console.log(value.querySelector('TotalPending').textContent,
 ## Related APIs
 
 - `GetFlowDef` - Get detailed workflow definition
-- `GetDomainFlows` - List all workflows in a domain (use this to get workflow names, then call GetWorkflowStatistics for each)
+- `GetAllWorkflowStatistics` - The statistics of every workflow of a domain, or of all domains, in one call (no call per workflow)
+- `GetDomainFlows` - List all workflows in a domain
 - `getTasks` - Get workflow tasks with filtering
 - `GetTask` - Get specific task details
 - `CompleteTask` - Complete a workflow task

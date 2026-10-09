@@ -256,6 +256,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDomainMembers1](GetDomainMembers1.md) - Get domain/library members with sort order and detail-mode control
 - [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md) - Get all domain/library memberships for a specified user
 - [GetDomainPolicies](GetDomainPolicies.md) - Get policies and rules for a domain/library
+- [GetAllDomainStatistics](GetAllDomainStatistics.md) - Get statistics for every domain/library in one call
 - [GetDomainStatistics](GetDomainStatistics.md) - Get statistics for a domain/library
 - [GetDomainUsers](GetDomainUsers.md) - Get all users of a domain/library including indirect group members
 - [GetDomainUsers1](GetDomainUsers1.md) - Get all domain/library users with sort order and detail-mode control
@@ -322,6 +323,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetUsersTaskPerformance](GetUsersTaskPerformance.md) - Get user task performance statistics (due and overdue task counts)
 - [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) - Get workflow roles assigned to a user (supervisor and assignee roles)
 - [GetWorkflowDefinitions](GetWorkflowDefinitions.md) - Get all workflow definitions in the system with optional active-only filter (admin only)
+- [GetAllWorkflowStatistics](GetAllWorkflowStatistics.md) - Get the statistics of every workflow of a domain, or of all domains, in one call
 - [GetWorkflowStatistics](GetWorkflowStatistics.md) - Get workflow performance statistics (pending, completed, overdue counts)
 
 ### Property Sets
