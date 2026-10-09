@@ -264,6 +264,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDomains1](GetDomains1.md) - Get the list of domains/libraries, optionally with the managers of each
 - [GetManagedDomainsByUser](GetManagedDomainsByUser.md) - Get domains/libraries managed by a specified user
 - [GetManagers](GetManagers.md) - Get the list of managers of a domain/library
+- [GetMembersWithoutAccess](GetMembersWithoutAccess.md) - Get the library members whose right on the library is below a minimum
 - [GetMemberDomains](GetMemberDomains.md) - Get the domains/libraries where the current user is a member
 - [RemoveManagerFromDomain](RemoveManagerFromDomain.md) - Remove manager status from a user in a domain/library
 - [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) - Remove a user from a domain/library member list
