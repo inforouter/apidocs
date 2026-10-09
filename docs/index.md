@@ -444,6 +444,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single item from the Recycle Bin by handler (admin only)
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a single Recycle Bin item to its original or a specified folder location
 - [SearchRecycledItems](SearchRecycledItems.md) - Search documents and folders across all users' Recycle Bins with optional filters (admin only)
+- [SearchRecycledItems1](SearchRecycledItems1.md) - Search all users' Recycle Bins a page at a time, sorted, with the total count (admin only)
 
 ### User Management
 - [AddPropertySetRowForUser](AddPropertySetRowForUser.md) - Add a property set row to a user

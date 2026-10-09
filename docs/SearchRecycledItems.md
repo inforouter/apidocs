@@ -29,7 +29,7 @@ All filter parameters are optional. When all filters are omitted the API returns
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. The authenticated user must be a system administrator. |
-| `objectName` | string | No | Filter by the name of the recycled item (document or folder name). Supports partial (substring) matching. Leave empty to return items of any name. |
+| `objectName` | string | No | Filter by the name of the recycled item (document or folder name). Matched exactly, unless it contains `*`, which stands for any run of characters (`*report*`, `*.pdf`). Leave empty to return items of any name. |
 | `dateDeletedMinDate` | DateTime | No | Filter to items deleted on or after this date/time. Format: `yyyy-MM-dd` or `yyyy-MM-ddTHH:mm:ss`. UTC values are automatically converted to server local time. Leave empty for no lower bound. |
 | `dateDeletedMaxDate` | DateTime | No | Filter to items deleted on or before this date/time. Format: `yyyy-MM-dd` or `yyyy-MM-ddTHH:mm:ss`. UTC values are automatically converted to server local time. Leave empty for no upper bound. |
 | `minSize` | long | No | Filter to items whose total size is at least this many bytes. `0` or omitted means no minimum size filter. |
@@ -264,7 +264,9 @@ const root = await call('SearchRecycledItems', {
 
 - **All Filters Optional**: Calling with only `authenticationTicket` returns every recycled item in the system. Add filters to narrow results.
 
-- **ObjectName is Substring Match**: The `objectName` filter matches any item whose name contains the given string; it is not a full-name-only match.
+- **ObjectName is an Exact Match Unless It Has a Wildcard**: `objectName=Report` finds only an item named exactly `Report`. Use `*` for a partial match: `*Report*` finds any name containing it. (This page used to say the filter was a substring match; it never was.)
+
+- **Paging**: This call returns every match at once. [SearchRecycledItems1](SearchRecycledItems1.md) returns them a page at a time, sorted, with the total.
 
 - **Date Filters**: Both `dateDeletedMinDate` and `dateDeletedMaxDate` can be sent in UTC -" the server automatically converts them to local time for comparison. Either bound can be omitted independently.
 
