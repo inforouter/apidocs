@@ -461,6 +461,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetAllUsers](GetAllUsers.md) - Get all users with full detail
 - [GetAllUsers1](GetAllUsers1.md) - Paged and filtered user list with sorting
 - [GetAllUsers2](GetAllUsers2.md) - Paged and filtered user list with user type filter
+- [GetAllUsers3](GetAllUsers3.md) - Paged and filtered user list with a filter for users who belong to no library
 - [GetAllUsersWithoutDetails](GetAllUsersWithoutDetails.md) - Paged user list without preference details
 - [GetCoWorkers](GetCoWorkers.md) - Get co-workers of the current user (fixed sort, full detail)
 - [GetCoWorkers1](GetCoWorkers1.md) - Get co-workers with configurable sort and detail level

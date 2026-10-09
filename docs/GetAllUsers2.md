@@ -19,7 +19,7 @@ Returns a paged and filtered list of infoRouter users with full detail, supporti
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `startingRowNumber` | int | Yes | Zero-based index of the first row to return. Use `0` to start from the beginning. |
+| `startingRowNumber` | int | Yes | The first row to return, counted from `1`. `0` returns every row and `numberOfRow` is then not used. (This page used to call it a zero-based index, which it is not.) |
 | `numberOfRow` | int | Yes | Number of rows per page. |
 | `firstNameFilter` | string | No | Filter by first name (partial match). Pass empty or null for no filter. |
 | `lastNameFilter` | string | No | Filter by last name (partial match). Pass empty or null for no filter. |

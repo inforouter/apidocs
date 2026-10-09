@@ -62,6 +62,7 @@ Returns a `<usergroups>` collection with one `<usergroup>` element per global gr
 | `DomainID` | Always `0` for global groups (not tied to a domain). |
 | `DomainName` | Always empty for global groups. |
 | `public` | `True` if group membership is visible to all users; `False` if membership is private. |
+| `MemberOfLibraryCount` | How many libraries the group is a member of. `0` means the group gives its users no library. Added in 9.0. Not present on the built-in role groups (`[Administrators]` and the like), which are not made members of libraries. |
 
 ---
 
