@@ -1,8 +1,8 @@
 # GetAllUsers3 API
 
-Returns a list of users with paging, filtering and sorting, and one filter more than [GetAllUsers2](GetAllUsers2.md): the users who belong to no library.
+Returns a list of users with paging, filtering and sorting, and one parameter more than [GetAllUsers2](GetAllUsers2.md): `onlyUsersInNoLibrary`, to list the users who belong to no library.
 
-A user who is not a member of any library, and is in no user group that is, can sign in and reach nothing. `membershipFilter=0` finds them.
+A user who is not a member of any library, and is in no user group that is, can sign in and reach nothing. `onlyUsersInNoLibrary=true` finds them.
 
 ## Endpoint
 
@@ -12,7 +12,7 @@ A user who is not a member of any library, and is in no user group that is, can 
 
 ## Methods
 
-- **GET** `/srv.asmx/GetAllUsers3?authenticationTicket=...&startingRowNumber=...&numberOfRow=...&...&membershipFilter=...`
+- **GET** `/srv.asmx/GetAllUsers3?authenticationTicket=...&startingRowNumber=...&numberOfRow=...&...&onlyUsersInNoLibrary=...`
 - **POST** `/srv.asmx/GetAllUsers3` (form data)
 - **SOAP** Action: `http://tempuri.org/GetAllUsers3`
 
@@ -33,7 +33,7 @@ A user who is not a member of any library, and is in no user group that is, can 
 | `userTypeFilter` | int | Yes | `-1` no filter, `1` author, `2` reader. |
 | `sortBy` | int | Yes | Sort column, as in `GetAllUsers2`. |
 | `sortAscending` | bool | Yes | `true` for ascending order. |
-| `membershipFilter` | int | Yes | `-1` no filter: the call is then `GetAllUsers2`. `0` only the users who belong to no library. |
+| `onlyUsersInNoLibrary` | bool | Yes | `true` returns only the users who belong to no library. `false` returns all users: the call is then `GetAllUsers2`. |
 
 ## Response
 
@@ -68,7 +68,7 @@ The permissions of `GetAllUsers2`.
 POST /srv.asmx/GetAllUsers3 HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
-authenticationTicket=abc123&startingRowNumber=1&numberOfRow=25&userStatusFilter=1&userTypeFilter=-1&sortBy=1&sortAscending=true&membershipFilter=0
+authenticationTicket=abc123&startingRowNumber=1&numberOfRow=25&userStatusFilter=1&userTypeFilter=-1&sortBy=1&sortAscending=true&onlyUsersInNoLibrary=true
 ```
 
 ## Notes
@@ -76,7 +76,7 @@ authenticationTicket=abc123&startingRowNumber=1&numberOfRow=25&userStatusFilter=
 - **What "belongs to a library" means.** The user is a member of a library, or is in a user group that is a member of one. This is the rule the server uses to decide whether a user is a library member.
 - **The built-in roles do not count.** Being in `[Administrators]` or another bracketed role group is not library membership; the system administrator account is listed if it is a member of no library.
 - **Being a local user does not count by itself.** A user created in a library is listed if that library has not also been given the user as a member.
-- **The other filters apply too.** `userStatusFilter=1` with `membershipFilter=0` returns the enabled users who belong to nothing.
+- **The other filters apply too.** `userStatusFilter=1` with `onlyUsersInNoLibrary=true` returns the enabled users who belong to nothing.
 - **Which groups are the cause.** [GetGlobalGroups](GetGlobalGroups.md) returns `MemberOfLibraryCount` for each group; a group with `0` gives its users no library.
 
 ## Related APIs
@@ -90,6 +90,6 @@ authenticationTicket=abc123&startingRowNumber=1&numberOfRow=25&userStatusFilter=
 
 | `errorCode` | When |
 |---:|---|
-| `4000` | `membershipFilter` is neither `-1` nor `0`, or `sortBy`, `userStatusFilter` or `userTypeFilter` is not a known value |
+| `4000` | `sortBy`, `userStatusFilter` or `userTypeFilter` is not a known value |
 | `4010` | `[901]` the ticket is expired or unknown |
 | `4030` | The caller may not list users |
