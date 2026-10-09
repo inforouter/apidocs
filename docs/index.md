@@ -260,6 +260,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetDomainUsers](GetDomainUsers.md) - Get all users of a domain/library including indirect group members
 - [GetDomainUsers1](GetDomainUsers1.md) - Get all domain/library users with sort order and detail-mode control
 - [GetDomains](GetDomains.md) - Get the list of all domains/libraries in the system
+- [GetDomains1](GetDomains1.md) - Get the list of domains/libraries, optionally with the managers of each
 - [GetManagedDomainsByUser](GetManagedDomainsByUser.md) - Get domains/libraries managed by a specified user
 - [GetManagers](GetManagers.md) - Get the list of managers of a domain/library
 - [GetMemberDomains](GetMemberDomains.md) - Get the domains/libraries where the current user is a member
