@@ -184,7 +184,7 @@ a zone, unlike the `...Z` timestamps most of the API uses.
 - Use `SetFolderAIPreferences` to modify the preferences of a folder.
 - The call always succeeds for an existing, readable folder: a folder that was never configured (and inherits nothing) reports every preference as `off`.
 - `FolderID` in the response is always the id of the folder that was asked for, also when the values were inherited from a parent folder.
-- The automatic operations additionally require infoRouter Connect to be configured on the server (`AppSettings:IRConnect`); preferences that are on have no effect while Connect is unconfigured.
+- The automatic operations additionally require infoRouter Connect to be configured on the server (`AppSettings:IRConnect`); preferences that are on have no effect while Connect is unconfigured or not licensed (the maintenance contract has ended).
 
 ---
 

@@ -65,7 +65,7 @@ This API does not require any parameters.
 | `WorkflowIsOn` | boolean | Whether this server may run workflows ("true"/"false"). Hide workflow actions when it is false - they will be refused. |
 | `AnonymousAccessIsOn` | boolean | Whether this server allows anonymous access ("true"/"false"). A sign-in page can read this before anybody has signed in, which is the point of it being on an unauthenticated call. |
 | `ComplianceModuleIsOn` | boolean | Whether this server has the compliance module ("true"/"false"). Currently reports `true` on every instance. Not enforced by the server; it will be read from the license, so read it rather than assuming. |
-| `ConnectIsOn` | boolean | Whether infoRouter Connect (AI) can be used: the licence allows it **and** the server is configured with a Connect service URL and API key. Hide the Connect actions when it is `"false"`. Licences issued before 9.0 allow Connect, so on those it follows the configuration alone. |
+| `ConnectIsOn` | boolean | Whether infoRouter Connect (AI) can be used: the licence allows it, the maintenance contract is running, **and** the server is configured with a Connect service URL and API key. Hide the Connect actions when it is `"false"`. Connect's term is the maintenance contract's: it works through `SubscriptionEndDate` and is off from the next day, with no grace period; a licence with no maintenance contract has no Connect. Licences issued before 9.0 allow Connect, so on those it follows the contract and the configuration. |
 
 ## Required Permissions
 

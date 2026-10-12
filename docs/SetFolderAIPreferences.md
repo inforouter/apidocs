@@ -180,7 +180,7 @@ binding with HTTP 400 before the operation runs. Send `<AIPreferences />` to mea
 - The preferences are merged onto the values currently in effect for the folder, so a call that lists a single preference leaves the others untouched.
 - `ApplyToSubfolders` is itself a stored preference, not a one-off switch: while it is on, the folder's preferences are copied to every subfolder created afterwards. Turning it off stops that inheritance but leaves the values already written onto the subfolders in place.
 - Unknown `Preference` names are ignored, so a newer client can send preferences an older server does not know yet.
-- The automatic operations additionally require infoRouter Connect to be configured on the server (`AppSettings:IRConnect`); preferences that are on have no effect while Connect is unconfigured.
+- The automatic operations additionally require infoRouter Connect to be configured on the server (`AppSettings:IRConnect`); preferences that are on have no effect while Connect is unconfigured or not licensed (the maintenance contract has ended).
 
 ---
 

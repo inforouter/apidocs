@@ -52,7 +52,7 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 | Attribute | Description |
 |-----------|-------------|
 | `configured` | False when this instance has no Connect service configured at all. Everything below is then empty. |
-| `reachable` | Whether the service answered. False leaves `<Capabilities>` empty and puts the reason in `error`. |
+| `reachable` | Whether the service answered. False leaves `<Capabilities>` empty and puts the reason in `error`. Also false, without the service being asked, when the licence does not allow Connect or the maintenance contract has ended; `error` says so. |
 | `provisioned` | False when the service answers but has not been set up yet. |
 | `scrubPii` | Whether documents are scrubbed of personal data on the way out by default. |
 | `maxKeywordCount` | How many keywords are asked for when a request does not say. |

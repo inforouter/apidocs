@@ -86,7 +86,7 @@ Retrieves the application license information including company details, license
 | `AnonymousAccess` | boolean | Whether anonymous (guest) access is licensed |
 | `Workflow` | boolean | Whether workflow features are licensed |
 | `ComplianceModule` | boolean | Whether the compliance module is licensed. Currently reports `true` on every instance. Not enforced by the server; it will be read from the license, so read it rather than assuming. |
-| `IRConnect` | boolean | Whether the licence allows infoRouter Connect (AI). `true` for every licence issued before 9.0. Whether Connect is also configured, and so usable, is `ConnectIsOn` in [ServerInfo](ServerInfo.md). |
+| `IRConnect` | boolean | Whether the licence allows infoRouter Connect (AI). `true` for every licence issued before 9.0. This is the licence's flag alone: Connect also stops the day after `SubscriptionEndDate` (no grace period) and needs a configured Connect service. Whether it is usable now is `ConnectIsOn` in [ServerInfo](ServerInfo.md). |
 | `TrialCopy` | boolean | Whether this is a trial license |
 | `ExpirationDate` | DateTime | License expiration date (ISO 8601) |
 | `SubscriptionStartDate` | DateTime | Subscription start date (ISO 8601) |

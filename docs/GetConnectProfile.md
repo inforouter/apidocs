@@ -186,7 +186,7 @@ The server works out the cheapest set of calls that answers what you asked for. 
 3. **Shortcut and URL documents** - an error; they have no content to read.
 4. **Offline documents** - an error; the content is temporarily inaccessible.
 5. **Permission** - the caller must be able to change the document's properties. The answers are written onto the document, so this is a write however it looks from the caller's side.
-6. **Connect not configured** - every requested row comes back `Disabled`.
+6. **Connect not configured, or not licensed** (the licence does not include it, or the maintenance contract has ended) - every requested row comes back `Disabled`, and `error` says which.
 7. **Already stored** - anything present is returned as `Ready` and is not produced again, unless `ForceRefresh=true`.
 8. **Plan** - what is left is turned into the fewest AI calls that answer it, dropping anything switched off, unimplemented, or asking to read a file type Connect cannot read. Those come back `Disabled`.
 9. **Queue** - the planned work is queued at user priority, carrying `ScrubPii`, `MaxKeywordCount` and the property set name so the worker makes the call you asked for. A job already there has its state reported instead, and a job queued automatically is moved to the front because somebody is now waiting for it. A later request replaces the options of a job that has not started; one already running keeps the options it started with.
@@ -324,7 +324,7 @@ provisioned for is a wasted round trip.
 - Folders can have any of this produced automatically for documents added to them; see [SetFolderAIPreferences](SetFolderAIPreferences.md). A folder that asks for profiling gets the description, abstract, summary, keywords and document type from one call, the same way this API does. A folder cannot ask for a named property set — that is a per-request decision.
 - Generated keywords are a separate kind from the ones a user curated, so this API never destroys a keyword somebody entered — `ForceRefresh` replaces the generated ones and leaves the user's own alone. To clear those, set them with [UpdateDocumentKeywords](UpdateDocumentKeywords.md) first.
 - Every call this API queues can be recorded in the daily `IRConnect` log — what was asked for, what came back, how long it took, and what it cost. See `IRConnect.CallLogging` and [GetLogs](GetLogs.md).
-- Generation requires infoRouter Connect to be configured through the `IRConnect` application settings.
+- Generation requires infoRouter Connect to be configured through the `IRConnect` application settings and covered by the licence: Connect stops the day after the maintenance contract's end date, with no grace period. See `ConnectIsOn` in [ServerInfo](ServerInfo.md).
 
 ## Error Codes
 
