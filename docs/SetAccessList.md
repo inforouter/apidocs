@@ -188,6 +188,7 @@ in this API, which let the exception out as an HTTP 500.
 - The `ApplyToTree` parameter only applies when the path points to a **folder**.
 - To revert to inherited security from the parent folder, use `ApplyInheritedAccessList` instead.
 - To read the current access list, use `GetAccessList`.
+- Before sending `ApplyToTree=true`, [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) tells how many subfolders and documents carry a different access list and would be overwritten.
 - URL-encode the `AccessListXML` value when passing via GET or form POST.
 
 ---
@@ -196,6 +197,7 @@ in this API, which let the exception out as an HTTP 500.
 
 - [GetAccessList](GetAccessList.md) - Retrieve the current access list
 - [GetAccessListHistory](GetAccessListHistory.md) - Retrieve the access list history
+- [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) - Count what applying to the tree would overwrite
 - [ApplyInheritedAccessList](ApplyInheritedAccessList.md) - Revert to inherited security
 - [GetOwner](GetOwner.md) - Get the owner of a document or folder
 

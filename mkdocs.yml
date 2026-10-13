@@ -374,6 +374,7 @@ nav:
     - AdministrativeRoles: AdministrativeRoles.md
     - GetAccessList: GetAccessList.md
     - GetAccessListHistory: GetAccessListHistory.md
+    - GetFolderAccessListStatistics: GetFolderAccessListStatistics.md
     - GetOwner: GetOwner.md
     - GetOwnershipChangeLog: GetOwnershipChangeLog.md
     - GetSecurityChangeLog: GetSecurityChangeLog.md
