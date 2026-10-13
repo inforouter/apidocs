@@ -21,7 +21,7 @@ Updates the name and member visibility setting of the specified infoRouter user 
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DomainName` | string | No | The domain/library name if the group is a local group. Pass empty or null for global groups. |
 | `GroupName` | string | Yes | The current name of the user group to update. |
-| `NewGroupName` | string | Yes | The new name for the user group. Pass the same value as `GroupName` to keep the current name. |
+| `NewGroupName` | string | Yes | The new name for the user group. Pass the same value as `GroupName` to keep the current name. Maximum 64 characters; a longer value is refused with `4000`. |
 | `showMembers` | bool | Yes | If `true`, group membership is publicly visible to all users. If `false`, membership is private (hidden from non-members). |
 
 ---

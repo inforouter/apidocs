@@ -33,7 +33,7 @@ Saves the column layout and custom property set preference for the authenticated
 | `sortBy` | string | Yes | Column name to sort by (e.g. `"ModificationDate"`). Required: an empty string is refused with HTTP 400. A name that is not in `enum_IR.ColumnList` is refused `4000`. Not looked at at all when `sortByPropertySetId` is non-zero. |
 | `sortVector` | string | Yes | Sort direction: `"asc"` or `"desc"`, read without regard to case. Required: an empty string is refused with HTTP 400. Anything else is refused `4000`. Until 9.0 the comparison was case-sensitive, so `"ASC"` was quietly stored as no sort direction at all. |
 | `sortByPropertySetId` | int | Yes | Property set ID when sorting by a custom property field. Pass `0` when not sorting by a custom property. An id no property set has is refused `4041`. |
-| `sortByPropertySetColumnName` | string | Yes | Custom property field name when sorting by a custom property. Pass an empty string otherwise |
+| `sortByPropertySetColumnName` | string | Yes | Custom property field name when sorting by a custom property. Pass an empty string otherwise Maximum 32 characters; a longer value is refused with `4000`. |
 
 ## Response
 
@@ -207,6 +207,7 @@ the answer from [GetUserFolderColumns](GetUserFolderColumns.md) reports `sortBy`
 
 ## Notes
 
+- A column named more than once in `columnNames` is kept once.
 - The setting is saved per-user per-folder. Other users viewing the same folder are not affected.
 - An unrecognised column name is refused `4000` and nothing is saved. Column name matching is case-insensitive.
 - The column order in the response of `GetUserFolderColumns` reflects the order of names supplied here.

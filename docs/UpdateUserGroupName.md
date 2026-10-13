@@ -21,7 +21,7 @@ Updates the name of the specified infoRouter user group.
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DomainName` | string | No | The domain/library name if the group is a local group. Pass empty or null for global groups. |
 | `GroupName` | string | Yes | The current name of the user group to rename. |
-| `NewGroupName` | string | Yes | The new name for the user group. |
+| `NewGroupName` | string | Yes | The new name for the user group. Maximum 64 characters; a longer value is refused with `4000`. |
 
 ---
 

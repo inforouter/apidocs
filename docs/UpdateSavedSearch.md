@@ -23,8 +23,8 @@ Prefer POST: `searchParametersXml` is usually too long for a query string.
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `searchPageId` | int | Yes | The entry to update. `0` creates a new entry |
 | `searchPageType` | string | Yes | `savedSearch` or `searchPage`, in any case. Must be the entry's current type: an update cannot change it |
-| `name` | string | Yes | Display name, 5 to 64 characters, unique among entries of the same type. Rules as in [CreateSavedSearch](CreateSavedSearch.md#names) |
-| `description` | string | No | Description. Empty clears it |
+| `name` | string | Yes | Display name, 5 to 64 characters, unique among entries of the same type. Rules as in [CreateSavedSearch](CreateSavedSearch.md#names) Maximum 64 characters; a longer value is refused with `4000`. |
+| `description` | string | No | Description. Empty clears it Maximum 255 characters; a longer value is refused with `4000`. |
 | `isPersonal` | bool | Yes | Used only when creating (`searchPageId=0`). An update keeps the entry's owner whatever is sent |
 | `anonymousAccess` | bool | No | System-wide entries: the anonymous user may use it. Ignored for personal entries |
 | `publicAccess` | bool | No | System-wide entries: every signed-in user may use it. Ignored for personal entries |

@@ -21,7 +21,7 @@ Updates the metadata of an existing custom property set definition: its name, ca
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PropertySetName` | string | Yes | Current internal name of the property set to update. |
 | `NewPropertySetName` | string | Yes | New internal name. Trimmed and uppercased automatically. Must contain only letters, digits, and underscores (`A-"Z`, `0-"9`, `_`). Maximum 40 characters (23 on Oracle). Must be unique across all property sets. |
-| `PropertySetCaption` | string | Yes | New display caption. Must be unique across all property sets. |
+| `PropertySetCaption` | string | Yes | New display caption. Must be unique across all property sets. Maximum 50 characters; a longer value is refused with `4000`. |
 | `AppliestoDocuments` | boolean | Yes | `true` if this property set should be applicable to documents. |
 | `AppliestoFolders` | boolean | Yes | `true` if this property set should be applicable to folders. |
 | `AppliestoUsers` | boolean | Yes | `true` if this property set should be applicable to users. |

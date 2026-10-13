@@ -20,7 +20,7 @@ Disposes a document or folder by path per its active Retention and Disposition (
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `path` | string | Yes | Full path of the document or folder to dispose |
-| `disposeComments` | string | No | Disposition comment. Omit or pass empty string if not required. |
+| `disposeComments` | string | No | Disposition comment. Omit or pass empty string if not required. A longer value is cut to 255 characters. |
 
 ## Response
 

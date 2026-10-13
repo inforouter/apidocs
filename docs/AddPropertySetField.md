@@ -20,8 +20,8 @@ Adds a new field to an existing custom property set definition. The field name i
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PropertySetName` | string | Yes | Name of the property set to add the field to. |
-| `FieldName` | string | Yes | Internal name for the field. Alphanumeric and underscore characters only (auto-converted to uppercase), at most 32 characters. Must not be a reserved name. |
-| `FieldCaption` | string | Yes | Display label shown to users in the UI. |
+| `FieldName` | string | Yes | Internal name for the field. Alphanumeric and underscore characters only (auto-converted to uppercase), at most 32 characters. Must not be a reserved name. Maximum 32 characters; a longer value is refused with `4000`. |
+| `FieldCaption` | string | Yes | Display label shown to users in the UI. Maximum 50 characters; a longer value is refused with `4000`. |
 | `FieldType` | string | Yes | Data type of the field. See **Field Types** table below. |
 | `FieldLength` | integer | Yes | Maximum length of the field value. `BOOLEAN`, `NUMBER` and `DATE` each fix it - 1, 4 and 8 - and a different value is refused `4000`; send `0` to take the type's own. Until 9.0 whatever was sent was overwritten in silence, so a twenty digit `NUMBER` became a four digit one and the caller was told the call had worked. |
 | `isRequired` | boolean | Yes | `true` if the field must be filled in; `false` if optional. |

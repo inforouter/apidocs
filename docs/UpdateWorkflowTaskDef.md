@@ -249,6 +249,7 @@ await call('UpdateWorkflowTaskDef', {
 
 ## Notes
 
+- Length limits in the task definition xml: `TaskName` 32 characters, and the `Definition` of each `Requirement` 255. A longer value is refused with `4000`.
 - The workflow definition must be **inactive** before task definitions can be updated. Use [DeactivateFlowDef](DeactivateFlowDef.md) if the workflow is currently active.
 - Use [GetFlowDef](GetFlowDef.md) to retrieve existing `taskDefId` values and current task configuration before calling this API.
 - The `taskDefXML` value must be URL-encoded when sent via GET or form-encoded POST.

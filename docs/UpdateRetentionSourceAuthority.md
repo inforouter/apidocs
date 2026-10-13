@@ -38,7 +38,7 @@ Updates (renames) a retention source authority in the system. The new authority 
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `currentAuthorityName` | string | Yes | Current name of the retention source authority to update |
-| `newAuthorityName` | string | Yes | New name for the retention source authority |
+| `newAuthorityName` | string | Yes | New name for the retention source authority Maximum 64 characters; a longer value is refused with `4000`. |
 
 
 

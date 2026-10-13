@@ -34,7 +34,7 @@ This API **never calls the Connect service itself**. Producing any of this takes
 | `IncludeOcrText` | bool | Yes | Ask for the text of a scan, written back so the document becomes searchable. |
 | `IncludeMarkdown` | bool | Yes | Ask for the document as structured markdown — real headings and real tables, which flat text extraction loses. Costs no AI call. |
 | `IncludeRedactedText` | bool | Yes | Ask for the document's text with personal data replaced by `[REDACTED]`. One way — nothing stored can be turned back into the names it replaced. Costs no AI call. |
-| `IncludeExtractData` | string | No | Name of a property set to read out of the document. Empty asks for none. |
+| `IncludeExtractData` | string | No | Name of a property set to read out of the document. Empty asks for none. Maximum 50 characters; a longer value is refused with `4000`. |
 | `MaxKeywordCount` | int | No | How many keywords to ask for. `0` uses the number this instance is configured for (`IRConnect.MaxTags`). |
 | `ScrubPii` | string | No | `yes`, `no`, or empty for whatever this instance is configured to do. |
 

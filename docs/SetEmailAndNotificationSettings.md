@@ -132,6 +132,7 @@ await call('SetEmailAndNotificationSettings', {
 
 ## Notes
 
+- `SendToLogCcAddress` and `FaxQue` take 255 characters each; a longer value is refused with `4000`.
 - The recommended workflow is: call `GetEmailAndNotificationSettings`, modify the returned XML, then pass it to `SetEmailAndNotificationSettings`.
 - SMTP server connection settings (server, port, username, password) are managed in `appsettings.json` and cannot be changed through this API.
 - `AttachmentSizeLimit` must be provided in bytes; the UI displays this value in KB.

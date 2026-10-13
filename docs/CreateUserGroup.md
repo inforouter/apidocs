@@ -20,7 +20,7 @@ Creates a new user group. If a domain/library name is specified, a local user gr
 |-----------|------|----------|-------------|
 | `AuthenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `DomainName` | string | No | Name of the domain/library to create a local group in. Leave empty to create a global group. |
-| `GroupName` | string | Yes | Name of the new user group |
+| `GroupName` | string | Yes | Name of the new user group Maximum 64 characters; a longer value is refused with `4000`. |
 
 ## Response
 

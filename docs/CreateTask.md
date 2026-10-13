@@ -230,6 +230,7 @@ const taskId = root.querySelector('TaskId').textContent;
 
 ## Notes
 
+- The `Definition` of each task requirement takes 255 characters; a longer one is refused with `4000`.
 - If the specified assignee has an active task redirection, the task is silently redirected to the configured target user and `Value/RedirectedUserName` contains the actual assignee login name.
 - Use `DeleteTask` to remove the task, `CompleteTask` to mark it done, or `ReassignTask` to transfer it to another user.
 - `Priority` and `RightType` values are case-sensitive enum names; all must be from the tables above.

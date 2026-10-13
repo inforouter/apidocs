@@ -20,7 +20,7 @@ Updates the properties of an existing domain/library, including its name, anonym
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DomainName` | string | Yes | Current name of the domain/library to update. |
-| `NewDomainName` | string | Yes | New name for the domain/library. Pass the same value as `DomainName` to keep the current name. |
+| `NewDomainName` | string | Yes | New name for the domain/library. Pass the same value as `DomainName` to keep the current name. Maximum 128 characters; a longer value is refused with `4000`. |
 | `Anonymous` | bool | Yes | If `true`, enables anonymous (guest) access to the domain. If `false`, requires authenticated membership. |
 | `Hidden` | bool | Yes | If `true`, hides the domain from regular library listings. If `false`, the domain appears in listings. |
 | `WelcomeMessage` | string | No | New welcome or description message for the domain. Pass empty string or null to clear the existing message. |

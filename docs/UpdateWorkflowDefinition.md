@@ -189,6 +189,7 @@ Putting a different name in `<NewFlowName>` renames the definition.
 
 ## Notes
 
+- Length limits in `xmlParameters`: `NewFlowName` 32 characters, `OnEndEventUrl` 225. A longer value is refused with `4000`.
 - Identify the workflow to update by `domainName` + `workflowName` (the current name). Use `GetFlowDef` to retrieve current values before calling this API.
 - To rename the workflow, supply a different value in `NewFlowName`. The new name must be unique within the domain; if a workflow with that name already exists, the call returns an error.
 - Activating a workflow (`Active=true`) requires that at least one step with at least one task is defined. If no steps or tasks exist, the activation is rejected.

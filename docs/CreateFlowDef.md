@@ -29,7 +29,7 @@ This is the minimal variant. Use the numbered variants for additional configurat
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DomainName` | string | Yes | Name of the domain/library in which to create the workflow definition. |
-| `FlowName` | string | Yes | Name of the new workflow definition. Maximum 32 alphanumeric characters. Must be unique within the domain. |
+| `FlowName` | string | Yes | Name of the new workflow definition. Maximum 32 alphanumeric characters. Must be unique within the domain. Maximum 32 characters; a longer value is refused with `4000`. |
 | `ActiveFolderPath` | string | Yes | Full infoRouter path of the folder where the workflow is active (e.g. `/Corporate/Contracts`). Documents in this folder and its sub-folders can be submitted to this workflow. |
 
 ## Response

@@ -133,6 +133,7 @@ The id survives, and the schedule records who made the change - `GetRandDSchedul
 
 ## Notes
 
+- Text attributes of `RDDefXML` longer than their field are cut, not refused: `Name` 128, `Description` 255, `URL` 255, `ReferenceNumber` 20, `SourceAuthority` 64, `RecordsSeriesName` 100, `TransferAgency` 100 characters.
 - When `ApplyToExistingDocumentFolders = true`, all documents and folders currently assigned this schedule have their retention end dates and disposition dates recalculated immediately. Only the dates change in this call: open disposition tasks and disposition-status flags for this schedule are cleared. Items whose new disposition date is already past are picked up by the daily disposition job (up to about 24 hours later), which then creates the task or flag. Nothing is disposed by this call. For large organizations with many affected objects this operation may take some time.
 - When `ApplyToExistingDocumentFolders = false`, existing dates are left unchanged; only the schedule definition itself is updated.
 - Changes that trigger recalculation include: RetentionType, RetentionTrigger, any RetentionPeriod values, DispositionType, DispositionTrigger, any DispositionPeriod values, and MoveFolderId.

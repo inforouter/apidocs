@@ -22,8 +22,8 @@ Prefer POST: `searchParametersXml` is usually too long for a query string.
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `searchPageType` | string | Yes | `savedSearch` or `searchPage`, in any case. Anything else is refused |
-| `name` | string | Yes | Display name, 5 to 64 characters. Unique among entries of the same type (see [Names](#names)) |
-| `description` | string | No | Description. Empty or omitted = none |
+| `name` | string | Yes | Display name, 5 to 64 characters. Unique among entries of the same type (see [Names](#names)) Maximum 64 characters; a longer value is refused with `4000`. |
+| `description` | string | No | Description. Empty or omitted = none Maximum 255 characters; a longer value is refused with `4000`. |
 | `isPersonal` | bool | Yes | `true`: private to the caller. `false`: system-wide, requires the Search Administrator role |
 | `anonymousAccess` | bool | No | System-wide entries: the anonymous user may use it. Ignored for personal entries. Default `false` |
 | `publicAccess` | bool | No | System-wide entries: every signed-in user may use it. Ignored for personal entries. Default `false` |

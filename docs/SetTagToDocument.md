@@ -20,7 +20,7 @@ Applies a tag to the latest version of the specified document. If the document's
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`). |
-| `tagText` | string | Yes | Text of the tag to apply. Must be 1-"128 characters. Allowed characters: Unicode letters, digits (`0-"9`), underscore (`_`), hyphen (`-`), and space. |
+| `tagText` | string | Yes | Text of the tag to apply. Must be 1-"128 characters. Allowed characters: Unicode letters, digits (`0-"9`), underscore (`_`), hyphen (`-`), and space. Maximum 128 characters; a longer value is refused with `4000`. |
 
 ---
 

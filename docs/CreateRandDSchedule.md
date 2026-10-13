@@ -181,6 +181,7 @@ The rules the server enforces, in the order it checks them:
 
 ## Notes
 
+- Text attributes of `RDDefXML` longer than their field are cut, not refused: `Name` 128, `Description` 255, `URL` 255, `ReferenceNumber` 20, `SourceAuthority` 64, `RecordsSeriesName` 100, `TransferAgency` 100 characters.
 - `RetentionType` is `0` none, `1` **temporary** and `2` **permanent** - these two notes had the names the wrong way round until 9.0.
 - When `RetentionType = 2` (permanent), all period values are automatically reset to 0 and `RetentionTrigger` is set to `On Create`, and a disposition is refused: see below.
 - When `RetentionType = 1` (temporary), at least one of `RetentionPeriodYears`, `RetentionPeriodMonths`, or `RetentionPeriodDays` must be greater than 0.

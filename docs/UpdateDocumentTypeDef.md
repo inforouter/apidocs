@@ -20,7 +20,7 @@ Updates the definition of an existing document type. Allows renaming the documen
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `documentTypeId` | int | Yes | The numeric ID of the document type definition to update. Use `GetDocumentTypes` to retrieve IDs. |
-| `newDocumentTypeName` | string | Yes | The new name for the document type. Must be unique system-wide. |
+| `newDocumentTypeName` | string | Yes | The new name for the document type. Must be unique system-wide. Maximum 30 characters. |
 | `newRequiredPropertySetName` | string | No | The name of the property set to require for documents of this type. `null` — which is what omitting it means — leaves the current one in place. An empty string removes it **over SOAP only**; an empty value in a REST call arrives as nothing sent, and the property set stays. |
 
 ---

@@ -33,11 +33,11 @@ This is the most complete variant of the CreateFlowDef family. Use it when you n
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DomainName` | string | Yes | Name of the domain/library in which to create the workflow definition. |
-| `FlowName` | string | Yes | Name of the new workflow definition. Maximum 32 alphanumeric characters. Must be unique within the domain. |
+| `FlowName` | string | Yes | Name of the new workflow definition. Maximum 32 alphanumeric characters. Must be unique within the domain. Maximum 32 characters; a longer value is refused with `4000`. |
 | `ActiveFolderPath` | string | Yes | Full infoRouter path of the folder where the workflow is active (e.g. `/Corporate/Contracts`). Documents in this folder can be submitted to this workflow. |
 | `OnEndMoveToPath` | string | No | Full infoRouter path of the folder where documents are automatically moved when the workflow completes. Pass an empty string to leave documents in place. |
 | `Supervisor` | string | No | Login name of the user to assign as the workflow supervisor. Pass an empty string if no supervisor is needed. |
-| `OnEndEventUrl` | string | No | Webhook URL that the server calls when the workflow completes. Pass an empty string to disable the event callback. |
+| `OnEndEventUrl` | string | No | Webhook URL that the server calls when the workflow completes. Pass an empty string to disable the event callback. Maximum 225 characters; a longer value is refused with `4000`. |
 | `Hide` | boolean | No | When `true`, the workflow definition is hidden from the document library folder UI. Default: `false`. |
 
 ## Response

@@ -20,8 +20,8 @@ Updates the email address and mobile number of the specified infoRouter user in 
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `userName` | string | Yes | The username of the account to update. |
-| `emailAddress` | string | Yes | The new email address. Pass the existing value to keep it unchanged. |
-| `mobileNumber` | string | Yes | The new mobile number. Pass the existing value to keep it unchanged. |
+| `emailAddress` | string | Yes | The new email address. Pass the existing value to keep it unchanged. Maximum 64 characters; a longer value is refused with `4000`. |
+| `mobileNumber` | string | Yes | The new mobile number. Pass the existing value to keep it unchanged. Maximum 20 characters; a longer value is refused with `4000`. |
 
 ---
 

@@ -20,10 +20,10 @@ Creates a new infoRouter user account.
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DomainName` | string | No | The domain/library to add the user to as a member upon creation. Pass empty or null to create the user without a domain membership. |
-| `UserName` | string | Yes | The login name for the new user. Must be unique across the system. |
-| `FirstName` | string | Yes | The user's first name. |
-| `LastName` | string | Yes | The user's last name. |
-| `EmailAddress` | string | No | The user's email address. Used for notifications and password reset. |
+| `UserName` | string | Yes | The login name for the new user. Must be unique across the system. Maximum 64 characters; a longer value is refused with `4000`. |
+| `FirstName` | string | Yes | The user's first name. Maximum 30 characters; a longer value is refused with `4000`. |
+| `LastName` | string | Yes | The user's last name. Maximum 30 characters; a longer value is refused with `4000`. |
+| `EmailAddress` | string | No | The user's email address. Used for notifications and password reset. Maximum 64 characters; a longer value is refused with `4000`. |
 | `Password` | string | No | The initial password for native authentication users. Do not specify for users authenticated by external systems (LDAP, OAuth, Windows). |
 | `ReadOnlyUser` | bool | Yes | If `true`, the user is created as a read-only user (cannot upload or edit documents). If `false`, the user is an author. |
 | `AuthenticationSource` | string | Yes | The authentication source. Use `native` for infoRouter built-in authentication, or specify the name of a configured LDAP, OAuth, or Windows domain authority. |

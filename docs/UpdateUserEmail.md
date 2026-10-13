@@ -20,7 +20,7 @@ Updates the email address of the specified infoRouter user.
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `UserName` | string | Yes | The username of the account whose email address will be updated. |
-| `NewEmailAddress` | string | Yes | The new email address. Pass the existing email to keep it unchanged (no-op). |
+| `NewEmailAddress` | string | Yes | The new email address. Pass the existing email to keep it unchanged (no-op). Maximum 64 characters; a longer value is refused with `4000`. |
 
 ---
 

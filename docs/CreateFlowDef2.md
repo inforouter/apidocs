@@ -33,7 +33,7 @@ This extends `CreateFlowDef1` by adding the `Supervisor` parameter. For the full
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DomainName` | string | Yes | Name of the domain/library in which to create the workflow definition. |
-| `FlowName` | string | Yes | Name of the new workflow definition. Maximum 32 alphanumeric characters. Must be unique within the domain. |
+| `FlowName` | string | Yes | Name of the new workflow definition. Maximum 32 alphanumeric characters. Must be unique within the domain. Maximum 32 characters; a longer value is refused with `4000`. |
 | `ActiveFolderPath` | string | Yes | Full infoRouter path of the folder where the workflow is active (e.g. `/Corporate/Contracts`). |
 | `OnEndMoveToPath` | string | No | Full infoRouter path of the folder where documents are moved when the workflow completes. Pass an empty string to leave documents in place. |
 | `Supervisor` | string | No | Login name of the user to assign as the workflow supervisor. Pass an empty string or omit if no supervisor is needed. |

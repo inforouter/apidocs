@@ -19,7 +19,7 @@ Creates a new infoRouter domain/library with the specified name and configuratio
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `DomainName` | string | Yes | Name for the new domain/library. Must be unique across all domains. |
+| `DomainName` | string | Yes | Name for the new domain/library. Must be unique across all domains. Maximum 128 characters; a longer value is refused with `4000`. |
 | `Anonymous` | bool | Yes | If `true`, the domain allows anonymous (guest) access without authentication. If `false`, users must be authenticated members to access the domain. |
 | `Hidden` | bool | Yes | If `true`, the domain is hidden from regular library listings and only visible to administrators and members who know the name. |
 | `WelcomeMessage` | string | No | Optional welcome or description message for the domain. Pass empty string or null if not needed. |

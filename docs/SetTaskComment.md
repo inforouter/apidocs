@@ -22,7 +22,7 @@ Pass an empty string to clear an existing comment.
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `taskId` | integer | Yes | Unique numeric ID of the task. |
-| `comments` | string | Yes | Comment text for the task. Pass an empty string to clear the comment. |
+| `comments` | string | Yes | Comment text for the task. Pass an empty string to clear the comment. A longer value is cut to 255 characters. |
 
 ## Response
 

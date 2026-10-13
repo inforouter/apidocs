@@ -19,7 +19,7 @@ Creates a new retention source authority in the system. Retention source authori
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
-| `authorityName` | string | Yes | Name of the retention source authority to create (e.g., "SEC - Securities and Exchange Commission") |
+| `authorityName` | string | Yes | Name of the retention source authority to create (e.g., "SEC - Securities and Exchange Commission") Maximum 64 characters; a longer value is refused with `4000`. |
 
 ## Response
 

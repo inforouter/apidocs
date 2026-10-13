@@ -21,7 +21,7 @@ Sets or clears the Retention and Disposition (R&D) freeze flag on a document or 
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `path` | string | Yes | Full path of the document or folder |
 | `rdFreezeFlag` | bool | Yes | `true` to freeze the item; `false` to unfreeze |
-| `actionComment` | string | No | Optional comment describing the reason for the change |
+| `actionComment` | string | No | Optional comment describing the reason for the change Maximum 255 characters; a longer value is refused with `4000`. |
 
 ## Response
 

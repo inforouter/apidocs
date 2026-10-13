@@ -254,6 +254,7 @@ await call('UpdateRunningWorkflowTaskDef', {
 
 ## Notes
 
+- Length limits in the task definition xml: `TaskName` 32 characters, and the `Definition` of each `Requirement` 255. A longer value is refused with `4000`.
 - The document must have an **actively running** workflow. Use [UpdateWorkflowTaskDef](UpdateWorkflowTaskDef.md) to modify task definitions on inactive workflow definitions.
 - The `DeadLine` field in `taskDefXML` is required and must be greater than `0`.
 - `taskDefId` must refer to a task definition in the specified `stepNumber` of the running workflow. Use the running workflow data to identify valid IDs.

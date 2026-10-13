@@ -20,7 +20,7 @@ Creates a new custom property set definition. A property set is a set of custom 
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PropertySetName` | string | Yes | Internal name for the property set. Alphanumeric and underscore characters only (auto-converted to uppercase). Max 40 characters (23 on Oracle). Must be unique. |
-| `PropertySetCaption` | string | Yes | Display label shown to users in the UI. Must be unique across all property sets. |
+| `PropertySetCaption` | string | Yes | Display label shown to users in the UI. Must be unique across all property sets. Maximum 50 characters; a longer value is refused with `4000`. |
 | `AppliestoDocuments` | boolean | Yes | `true` if this property set can be applied to documents. |
 | `AppliestoFolders` | boolean | Yes | `true` if this property set can be applied to folders. |
 | `AppliestoUsers` | boolean | Yes | `true` if this property set can be applied to user accounts. |

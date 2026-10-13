@@ -22,7 +22,7 @@ Sets the publishing rule on a document, controlling which version is served as t
 | `documentPath` | string | Yes | Full infoRouter path of the document (e.g. `/Finance/Reports/Q1Summary.pdf`). |
 | `publishingRule` | string | Yes | Publishing rule to apply. See Publishing Rule Values below. Case-insensitive. |
 | `publishedVersionNumber` | integer | Conditional | Internal version number to pin. Required only when `publishingRule` is `SPECIFICVERSION`; pass `0` for all other rules. |
-| `releaseTag` | string | Conditional | Tag name identifying the version to publish. Required only when `publishingRule` is `TAGGED`; leave it empty for all other rules. Until 9.0 it was declared without a question mark, so an empty one was refused with HTTP 400 even for `LATEST`, which ignores the value - there was no way to call the operation without inventing a tag. |
+| `releaseTag` | string | Conditional | Tag name identifying the version to publish. Required only when `publishingRule` is `TAGGED`; leave it empty for all other rules. Until 9.0 it was declared without a question mark, so an empty one was refused with HTTP 400 even for `LATEST`, which ignores the value - there was no way to call the operation without inventing a tag. Maximum 128 characters; a longer value is refused with `4000`. |
 
 ## Publishing Rule Values
 

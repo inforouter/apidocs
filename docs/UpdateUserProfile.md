@@ -19,10 +19,10 @@ Updates the profile of the specified infoRouter user, including their name, user
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `UserName` | string | Yes | The current username of the account to update. |
-| `NewUserName` | string | Yes | The new username. Pass the same value as `UserName` to keep the current username. |
-| `NewFirstName` | string | Yes | The new first name. |
-| `NewLastName` | string | Yes | The new last name. |
+| `UserName` | string | Yes | The current username of the account to update. Maximum 64 characters; a longer value is refused with `4000`. |
+| `NewUserName` | string | Yes | The new username. Pass the same value as `UserName` to keep the current username. Maximum 64 characters; a longer value is refused with `4000`. |
+| `NewFirstName` | string | Yes | The new first name. Maximum 30 characters; a longer value is refused with `4000`. |
+| `NewLastName` | string | Yes | The new last name. Maximum 30 characters; a longer value is refused with `4000`. |
 | `AuthenticateSource` | string | Yes | The authentication source for the user (e.g., `native`, an LDAP/OAuth authority name, or a Windows domain). |
 
 ---

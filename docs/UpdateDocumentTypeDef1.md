@@ -20,7 +20,7 @@ Updates an existing document type definition. Allows renaming the document type,
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `DocumentTypeId` | int | Yes | The numeric ID of the document type definition to update. Use `GetDocumentTypes` to retrieve IDs. |
-| `NewDocumentTypeName` | string | Yes | New name for the document type. Must be unique system-wide. |
+| `NewDocumentTypeName` | string | Yes | New name for the document type. Must be unique system-wide. Maximum 30 characters. |
 | `NewRequiredPropertySetName` | string | **Yes** | Name of the property set to require for documents of this type. **Whatever you send is written**: send the current name to keep it, an empty string to remove it. Omitting it removes it, so send it every time. Use [UpdateDocumentTypeDef](UpdateDocumentTypeDef.md) when you want the property set left alone. |
 | `RandDScheduleName` | string | No | Name of an existing retention and disposition schedule to set as the default for this type. Pass an empty string to remove the current schedule. Omit (pass `null`) to leave the existing schedule unchanged. |
 | `Description` | string | **Yes** | What the document type means, in a sentence. Maximum 255 characters, single line. **Whatever you send is written**: send the current description to keep it, an empty string to clear it. Omitting it clears the description, so send it every time. Use [UpdateDocumentTypeDef](UpdateDocumentTypeDef.md) when you want the description left alone. |

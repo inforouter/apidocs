@@ -154,6 +154,7 @@ using (var client = new SrvSoapClient())
 
 ## Notes
 
+- A column named more than once in `columnNames` is kept once.
 - Column name validation is case-insensitive (e.g., `itemname` matches `ItemName`).
 - At least one column name must be provided. An empty or whitespace-only string will return an error.
 - Leading and trailing whitespace around column names is trimmed automatically.

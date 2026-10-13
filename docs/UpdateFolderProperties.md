@@ -20,8 +20,8 @@ Updates the name and/or description of the specified folder. The folder itself m
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `Path` | string | Yes | Full infoRouter path to the existing folder (e.g. `/Finance/Reports`). |
-| `NewFolderName` | string | Yes | New name for the folder. Unlike folder creation, which sanitises silently, an unusable name is **refused** here with `4000`. Empty, or nothing but spaces, is refused by model binding with HTTP 400. |
-| `NewDescription` | string | No | New description for the folder. Leave it out to keep the current description; send it empty to clear it. |
+| `NewFolderName` | string | Yes | New name for the folder. Maximum 128 characters. Unlike folder creation, which sanitises silently, an unusable name is **refused** here with `4000`. Empty, or nothing but spaces, is refused by model binding with HTTP 400. |
+| `NewDescription` | string | No | New description for the folder. Leave it out to keep the current description; send it empty to clear it. Maximum 255 characters; a longer value is refused with `4000`. |
 
 ---
 
@@ -157,6 +157,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4041` | no folder at that path - including one the caller may not see |
 | `4090` | a folder of that name is already in the parent |
 | `4000` | `NewFolderName` carries one of `/ \ : * ? " < > | # % & +` or a tab |
+| `4000` | `NewFolderName` is longer than 128 characters, or `NewDescription` longer than 255 |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |

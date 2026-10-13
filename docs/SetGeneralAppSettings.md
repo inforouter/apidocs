@@ -248,6 +248,7 @@ await call('SetGeneralAppSettings', {
 
 ## Notes
 
+- The `Description` of a holiday takes 32 characters; a longer one is refused with `4000`.
 - All numeric values are expressed in *bytes* unless the property name indicates minutes/hours.
 - infoRouter does not set a request-size limit of its own. A single-request (non-chunked) upload is limited by the host's request-size limit (Kestrel / IIS requestFiltering maxAllowedContentLength). Use chunked upload for large files.
 - Holidays are serialized through `HolidayList` (dictionary values are not serialized directly).

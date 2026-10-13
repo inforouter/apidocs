@@ -20,8 +20,8 @@ Creates a new subfolder with an optional description inside the specified parent
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `ParentFolderPath` | string | Yes | Full infoRouter path to the parent folder (e.g. `/Finance/Reports`). It does **not** have to exist: any missing folder along the way is created. Only the library at the start of the path must already exist. |
-| `NewFolderName` | string | Yes | Name of the new subfolder. Sanitised before use - see below - so the folder created may carry a different name, which the response reports. An empty name, or one of nothing but spaces, is refused with HTTP 400. |
-| `Description` | string | No | Optional description for the new folder. |
+| `NewFolderName` | string | Yes | Name of the new subfolder. Sanitised before use - see below - so the folder created may carry a different name, which the response reports. An empty name, or one of nothing but spaces, is refused with HTTP 400. Maximum 128 characters. |
+| `Description` | string | No | Optional description for the new folder. Maximum 255 characters; a longer value is refused with `4000`. |
 
 ---
 

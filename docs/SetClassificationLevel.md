@@ -27,8 +27,8 @@ Sets the classification level of the specified document or folder. Classificatio
 | `ClassificationLevel` | int | Yes | The classification level to apply. See the **Classification Level Values** table below. |
 | `DowngradeOn` | DateTime | No | Date on which the classification should be downgraded. Only applicable for Confidential (2), Secret (3), and Top Secret (4) levels. Omit or pass `null` to leave unset. |
 | `DeclassifyOn` | DateTime | No | Date on which the item should be declassified. Only applicable for Confidential (2), Secret (3), and Top Secret (4) levels. Omit or pass `null` to leave unset. |
-| `ReasonForAction` | string | No | Free-text reason for the classification change. Recorded in the classification change log. |
-| `Agency` | string | No | Name of the agency responsible for the classification action. Recorded in the classification change log. |
+| `ReasonForAction` | string | No | Free-text reason for the classification change. Recorded in the classification change log. Maximum 255 characters; a longer value is refused with `4000`. |
+| `Agency` | string | No | Name of the agency responsible for the classification action. Recorded in the classification change log. Maximum 64 characters; a longer value is refused with `4000`. |
 
 ### Classification Level Values
 

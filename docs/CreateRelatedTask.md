@@ -206,6 +206,7 @@ The new task's `<LinkedTaskID>` points back at the task it was created from.
 
 ## Notes
 
+- The `Definition` of each task requirement takes 255 characters; a longer one is refused with `4000`.
 - The related task is linked to the parent task and inherits its document context.
 - If the specified assignee has an active task redirection, the task is silently redirected and `Value/RedirectedUserName` contains the actual assignee login name.
 - Use `DeleteTask` to remove the task, `CompleteTask` to mark it done, or `ReassignTask` to transfer it to another user.

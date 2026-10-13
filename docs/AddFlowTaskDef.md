@@ -265,6 +265,7 @@ await call('AddFlowTaskDef', {
 
 ## Notes
 
+- Length limits in the task definition xml: `TaskName` 32 characters, and the `Definition` of each `Requirement` 255. A longer value is refused with `4000`.
 - The workflow definition must be **inactive** before task definitions can be added. Use `DeactivateFlowDef` if the workflow is currently active.
 - The `TaskDefXML` value must be URL-encoded when sent via GET or form-encoded POST.
 - `TaskName` follows the same validation rules as step names: alphanumeric only, maximum 32 characters.
