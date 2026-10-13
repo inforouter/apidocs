@@ -57,7 +57,7 @@ Sets the ISO review schedule on a document. Defines when and how the document sh
 | `StartDate` | datetime | Date from which the review schedule begins |
 | `ScheduleDef` | string | Schedule definition string (see formats below) |
 | `ReviewByUserId` | int | Reviewer: real user ID, or `-5` = DocumentOwner, `-8` = Submitter |
-| `Instructions` | string | Task instructions shown to the reviewer (task mode only; ignored in workflow mode) |
+| `Instructions` | string | Task instructions shown to the reviewer (task mode only; ignored in workflow mode). Maximum 255 characters; a longer value is refused with `4000`. |
 | `WorkflowDefId` | int | `0` = task mode; positive integer = submit to this workflow definition ID |
 | `DeadlineHours` | int | Task deadline in total hours from the review trigger date |
 | `Priority` | int | Task priority: `0` = Low, `1` = Normal, `2` = High |

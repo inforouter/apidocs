@@ -280,6 +280,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## Notes
 
+- In `xmlParameters`, `DESCRIPTION` takes 4000 characters and each keyword in `KEYWORDS` takes 128; a longer value is refused with `4000`.
 - Passing an empty string for `xmlParameters` uses server defaults.
 - This is the recommended approach for large file uploads requiring full metadata control.
 - See `UploadDocument4` for the complete XML parameter reference.

@@ -45,7 +45,7 @@ The `xmlRules` parameter must be a valid XML string with `<Rules>` as the root e
 
 | Rule Name | Values | Description |
 |-----------|--------|-------------|
-| `ALLOWABLEFILETYPES` | `*` or comma-separated extensions (e.g. `.pdf,.docx,.xlsx`) | Restricts uploadable file types. `*` allows all types. |
+| `ALLOWABLEFILETYPES` | `*` or comma-separated extensions (e.g. `.pdf,.docx,.xlsx`) | Restricts uploadable file types. `*` allows all types. Each type takes 32 characters; a longer one is refused with `4000`. |
 | `NEWFOLDERS` | `"allows"` or `"disallows"` | Controls creation of new subfolders. |
 | `FOLDERDELETES` | `"allows"` or `"disallows"` | Controls deletion of subfolders. |
 | `CHECKOUTS` | `"allows"` or `"disallows"` | Controls document check-outs. |

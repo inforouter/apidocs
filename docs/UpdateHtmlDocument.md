@@ -131,6 +131,7 @@ or a shortcut is refused with `4000`, and the document is not checked out.
 
 ## Notes
 
+- In `xmlParameters`, `DESCRIPTION` takes 4000 characters and each keyword in `KEYWORDS` takes 128; a longer value is refused with `4000`.
 - To create a new HTML document instead of updating an existing one, use `CreateHtmlDocument`.
 - Passing `null` for `description` preserves the document's current description; passing an empty string clears it.
 - The document path must point to an existing HTML (`.htm` / `.html`) document.

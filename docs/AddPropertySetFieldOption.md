@@ -21,7 +21,7 @@ Adds a static option value to a property set field. Only fields with a `COMBO BO
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `PropertySetName` | string | Yes | Name of the property set that contains the field. |
 | `FieldName` | string | Yes | Internal name of the field to add the option to. |
-| `OptionValue` | string | Yes | The option value to add. Tabs and newlines are normalized to spaces. Trimmed before storage. Cannot be empty. Truncated silently if it exceeds the field's maximum length. |
+| `OptionValue` | string | Yes | The option value to add. Tabs and newlines are normalized to spaces. Trimmed before storage. Cannot be empty. May be no longer than the field's own length, and never longer than 255 characters; a longer value is refused with `4000`. |
 
 ## Response
 
@@ -120,7 +120,7 @@ The options come back under the field in `GetPropertySetDefinition`, as
 
 - `OptionValue` is case-sensitive and must be unique within the field.
 - Tab characters and line breaks in `OptionValue` are replaced with spaces before storage.
-- If `OptionValue` exceeds the field's maximum character length, it is silently truncated (no error returned).
+- An `OptionValue` longer than the field's length, or than 255 characters, is refused with `4000`.
 - Option values apply to static dropdown lists. For dynamic lookup fields (connected to an external database), use [SetPropertySetLookupFieldParametersForSQLServer](SetPropertySetLookupFieldParametersForSQLServer.md), [SetPropertySetLookupFieldParametersForMYSQL](SetPropertySetLookupFieldParametersForMYSQL.md), or [SetPropertySetLookupFieldParametersForORACLE](SetPropertySetLookupFieldParametersForORACLE.md) instead.
 - To remove an option, use [DeletePropertySetFieldOption](DeletePropertySetFieldOption.md).
 - To view existing options, use [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md).

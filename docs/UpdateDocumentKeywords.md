@@ -20,7 +20,7 @@ Updates the user-defined keywords of the specified document. Keywords are free-t
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}`). |
-| `keywords` | string | Yes | Comma-separated keywords to assign to the document. Replaces any previously stored keywords. Pass an empty string to clear all keywords. Each keyword longer than 128 characters is cut to 128. |
+| `keywords` | string | Yes | Comma-separated keywords to assign to the document. Replaces any previously stored keywords. Pass an empty string to clear all keywords. Each keyword takes 128 characters; a longer one is refused with `4000`. |
 
 ### Separators
 

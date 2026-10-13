@@ -21,8 +21,8 @@ Updates the core properties of the specified document: display name, description
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}`). |
 | `newDocumentName` | string | No | New display name for the document (without extension). Pass `null` or omit to leave unchanged. Maximum 128 characters. |
-| `newDescription` | string | No | New description for the document. Pass `null` or omit to leave unchanged. Line endings are normalized automatically. A longer value is cut to 4000 characters. |
-| `newUpdateInstructions` | string | No | New update instructions for contributors. Pass `null` or omit to leave unchanged. Line endings are normalized automatically. A longer value is cut to 4000 characters. |
+| `newDescription` | string | No | New description for the document. Pass `null` or omit to leave unchanged. Line endings are normalized automatically. Maximum 4000 characters; a longer value is refused with `4000`. |
+| `newUpdateInstructions` | string | No | New update instructions for contributors. Pass `null` or omit to leave unchanged. Line endings are normalized automatically. Maximum 4000 characters; a longer value is refused with `4000`. |
 
 ---
 

@@ -38,7 +38,7 @@ The same applies to a summary stored before 9.0, when nothing recorded an author
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `path` | string | Yes | Full infoRouter path to the document (e.g. `/Finance/Reports/Q1-Report.pdf`), or a short document ID path (`~D{id}` or `~D{id}.ext`). |
 | `versionNumber` | int | Yes | The version the summary describes, recorded on the row. Pass `0` for the published version, or for the latest version when the document has never been published. Must be `0` or a modern-format version number (>= 1,000,000). Values between `1` and `999,999` are rejected. It is **not** part of the row's identity: naming a different version overwrites the same summary. |
-| `summary` | string | Yes | The summary text to store. Trimmed to the maximum database string length. An empty string clears the stored summary text (the row is kept; [`GetDocumentSummary`](GetDocumentSummary.md) will then report `-`). A longer value is cut to 4000 characters. |
+| `summary` | string | Yes | The summary text to store. Trimmed to the maximum database string length. An empty string clears the stored summary text (the row is kept; [`GetDocumentSummary`](GetDocumentSummary.md) will then report `-`). Maximum 4000 characters; a longer value is refused with `4000`. |
 
 ### Version Number Format
 

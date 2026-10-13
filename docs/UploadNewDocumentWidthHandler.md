@@ -192,6 +192,7 @@ uploads and checks back in, leaving the document free. It does not mean "leave i
 
 ## Notes
 
+- In `xmlParameters`, `DESCRIPTION` takes 4000 characters and each keyword in `KEYWORDS` takes 128; a longer value is refused with `4000`.
 - This API only creates **new** documents. It does not create new versions of existing documents. To upload a new version, use `UploadDocumentWithHandler3`.
 - The `folderPath` must already exist. Use `CreateFolder` to create it first if needed.
 - Despite the typo in the name ("Width" vs "With"), this is the correct API name and must be used exactly as shown.

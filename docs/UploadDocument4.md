@@ -52,8 +52,8 @@ All `NAME` values are case-insensitive. If `VALUE` is omitted the element's inne
 | Key | Type | Description |
 |-----|------|-------------|
 | `TEXTONLYCONTENT` | string | Plain-text content for full-text indexing (useful for image-only documents). |
-| `DESCRIPTION` | string | Document description. |
-| `KEYWORDS` | string | Comma-separated keywords. A keyword may be a phrase ("acceptance letter"); spaces do not separate keywords. |
+| `DESCRIPTION` | string | Document description. Maximum 4000 characters; a longer value is refused with `4000`. |
+| `KEYWORDS` | string | Comma-separated keywords. A keyword may be a phrase ("acceptance letter"); spaces do not separate keywords. Each keyword takes 128 characters; a longer one is refused with `4000`. |
 | `VERSIONCOMMENT` | string | Version comment recorded in version history. |
 | `CHECKOUT` | bool (`true`/`false`) | Lock document immediately after upload. |
 | `PUBLISHOPTION` | enum | Publishing behavior: `ServerDefault`, `Publish`, `DontPublish`. |
