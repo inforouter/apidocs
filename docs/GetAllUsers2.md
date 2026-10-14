@@ -26,7 +26,7 @@ Returns a paged and filtered list of infoRouter users with full detail, supporti
 | `userNameFilter` | string | No | Filter by username (partial match). Pass empty or null for no filter. |
 | `emailFilter` | string | No | Filter by email address (partial match). Pass empty or null for no filter. |
 | `authenticationSourceFilter` | string | No | Filter by authentication source (partial match). Pass empty or null for no filter. |
-| `domainNameFilter` | string | No | Filters local users by their home library. It does not test library membership, and global users never match. Exact match unless the value contains wildcard characters. Pass empty or null for no filter. |
+| `domainNameFilter` | string | No | Filters local users by their home library. It does not test library membership, and global users never match. Exact match unless the value contains wildcard characters. It may also be `~L<id>`, the library's id. Pass empty or null for no filter. |
 | `userStatusFilter` | int | Yes | Filter by account status. Valid values: `-1` = no filter (all users), `0` = disabled only, `1` = enabled only. |
 | `userTypeFilter` | int | Yes | Filter by user type. Valid values: `-1` = no filter (all types), `1` = authors only, `2` = read-only users only. |
 | `sortBy` | int | Yes | Sort field. Valid values: `0` = default, `1` = username, `2` = first name + last name, `3` = last name + first name, `4` = email, `5` = status, `6` = authentication source, `7` = domain/library, `8` = user type. |

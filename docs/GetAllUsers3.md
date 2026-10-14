@@ -28,7 +28,7 @@ A user who is not a member of any library, and is in no user group that is, can 
 | `userNameFilter` | string | No | Filter by user name. Matched exactly, unless it contains `*`, which stands for any run of characters. Empty for no filter. |
 | `emailFilter` | string | No | Filter by email address. Empty for no filter. |
 | `authenticationSourceFilter` | string | No | Filter by authentication source. Empty for no filter. |
-| `domainNameFilter` | string | No | The library that local users belong to. Empty for no filter. |
+| `domainNameFilter` | string | No | The library that local users belong to, by name or as `~L<id>` with the library's id. Empty for no filter. |
 | `userStatusFilter` | int | Yes | `-1` no filter, `0` disabled, `1` enabled. |
 | `userTypeFilter` | int | Yes | `-1` no filter, `1` author, `2` reader. |
 | `sortBy` | int | Yes | Sort column, as in `GetAllUsers2`. |
