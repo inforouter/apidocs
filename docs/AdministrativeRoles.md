@@ -142,7 +142,7 @@ can read them.
 |---|---|---|
 | Change application settings | [SetGeneralAppSettings](SetGeneralAppSettings.md), [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md), [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md), [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md), [SetDefaultFolderColumns](SetDefaultFolderColumns.md) | nobody else |
 | Read system behaviour and e-mail settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md), [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) | nobody else |
-| Read and change library policies | [GetDomainPolicies](GetDomainPolicies.md), [SetDomainPolicies](SetDomainPolicies.md) | managers of that library, **only** when the system behaviour setting *Allow library managers to edit policies* is on. Reading needs the same right as changing. |
+| Read and change library policies | [GetDomainPolicies](GetDomainPolicies.md), [SetDomainPolicies](SetDomainPolicies.md) | managers of that library: reading always, changing **only** when the system behaviour setting *Allow library managers to edit policies* is on |
 | See every workflow task | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | as for User Managers |
 
 The other settings calls need no role: [GetGeneralAppSettings](GetGeneralAppSettings.md) and

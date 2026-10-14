@@ -180,7 +180,12 @@ These describe the configuration options available for each policy (used by UI t
 
 ## Required Permissions
 
-The caller must have **UpdateLibraryPolicies** permission on the specified domain.
+Either of:
+
+- the right to change the library's policies: an **administrator**, a member of **[Policy Managers]**, or a manager of the library when the system behaviour setting *Allow library managers to edit policies* is on;
+- being a **manager of the library**, whatever that setting says.
+
+Up to 8.7 reading needed the right to change, so a library manager could not read their own library's policies while the setting was off. Anyone else is refused with `4030`.
 
 ## Example
 
@@ -280,6 +285,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller may neither change the library's policies nor manages the library |
 | `4041` | no library by that name - including one the caller cannot see |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
