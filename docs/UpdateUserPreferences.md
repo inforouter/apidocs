@@ -61,6 +61,8 @@ The `xmlPreferences` parameter must be a valid XML string with a `<Preferences>`
 
 ## Required Permissions
 
+**An administrator's account** (the `sysadmin` account or a member of `[Administrators]`) can be changed by administrators only; anyone else is refused with `4030`. See [AdministrativeRoles](AdministrativeRoles.md).
+
 **System administrator** or the **user themselves.** A user can update their own preferences; a system administrator can update any user's preferences.
 
 ---

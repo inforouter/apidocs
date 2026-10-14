@@ -43,6 +43,8 @@ Updates the email address and mobile number of the specified infoRouter user in 
 
 ## Required Permissions
 
+**An administrator's account** (the `sysadmin` account or a member of `[Administrators]`) can be changed by administrators only; anyone else is refused with `4030`. See [AdministrativeRoles](AdministrativeRoles.md).
+
 **System administrator** or the **user themselves.** A user can update their own contact info; a system administrator can update any user's contact info.
 
 ---

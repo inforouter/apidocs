@@ -45,6 +45,8 @@ Updates the profile of the specified infoRouter user, including their name, user
 
 ## Required Permissions
 
+**An administrator's account** (the `sysadmin` account or a member of `[Administrators]`) can be changed by administrators only; anyone else is refused with `4030`. See [AdministrativeRoles](AdministrativeRoles.md).
+
 **System administrator.** Only system administrators can update user profiles.
 
 ---

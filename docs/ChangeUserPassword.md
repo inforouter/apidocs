@@ -38,6 +38,8 @@ Changes the password of the specified infoRouter user. A user may change their o
 
 ## Required Permissions
 
+**An administrator's account** (the `sysadmin` account or a member of `[Administrators]`) can be changed by administrators only; anyone else is refused with `4030`. See [AdministrativeRoles](AdministrativeRoles.md).
+
 - **Own password:** Any authenticated user may change their own password (where `UserName` matches the caller's own login name).
 - **Another user's password:** The caller must hold the **User Manager** administrative role.
 

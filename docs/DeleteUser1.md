@@ -49,6 +49,8 @@ Deletes the specified infoRouter user account with administrator password confir
 
 ## Required Permissions
 
+**An administrator's account** (the `sysadmin` account or a member of `[Administrators]`) can be changed by administrators only; anyone else is refused with `4030`. See [AdministrativeRoles](AdministrativeRoles.md).
+
 **System administrator.** Only system administrators can delete user accounts.
 
 ---

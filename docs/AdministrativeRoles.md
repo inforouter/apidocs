@@ -86,6 +86,12 @@ Administrators also:
 
 Library managers pass these checks only for users and groups **local to their library**, never for global ones.
 
+**An administrator's account** - the `sysadmin` account or any member of `[Administrators]` - is changed by
+administrators only. User Managers and library managers can read it, but cannot change its profile, status,
+type, password, e-mail, preferences, task redirections or property set rows, delete it, or transfer its work to
+someone else (`4030`, "Only administrators can change an administrator's account"). Up to 8.7 only the `sysadmin`
+account was protected, so a User Manager could reset another administrator's password and sign in as them.
+
 | Action | Web service calls | Also allowed for |
 |---|---|---|
 | Create a user, send them the welcome e-mail | [CreateUser](CreateUser.md), [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md) | lib managers, for users of their library |

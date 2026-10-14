@@ -53,6 +53,8 @@ Transfers checked-out documents from one user to another. The check-out ownershi
 
 ## Required Permissions
 
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+
 **System administrator.** Only system administrators can transfer user data between accounts.
 
 ---

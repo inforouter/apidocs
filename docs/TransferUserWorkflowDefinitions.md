@@ -53,6 +53,8 @@ Transfers workflow definition roles (assignees and supervisors) from one user to
 
 ## Required Permissions
 
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+
 **System administrator.** Only system administrators can transfer user data between accounts.
 
 ---

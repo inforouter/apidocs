@@ -39,6 +39,8 @@ If the user has no active task redirection, the call succeeds silently with no e
 
 ## Required Permissions
 
+**An administrator's account** (the `sysadmin` account or a member of `[Administrators]`) can be changed by administrators only; anyone else is refused with `4030`. See [AdministrativeRoles](AdministrativeRoles.md).
+
 The calling user must be one of:
 - The **user themselves** (self-service -" removing their own redirection), or
 - A **User Manager**, or
