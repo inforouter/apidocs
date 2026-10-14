@@ -110,7 +110,7 @@ Library managers pass these checks only for users and groups **local to their li
 | Add or remove group members | [AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md) | lib managers. **Not** for the role groups on this page: those are administrators only. |
 | See members of a group that hides them | [GetUserGroupMembers](GetUserGroupMembers.md), [GetUserGroupMembers1](GetUserGroupMembers1.md) | lib managers, for local groups. Groups that show their members can be read by anyone. |
 | Add or remove library members | [AddUserAsDomainMember](AddUserAsDomainMember.md), [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md), [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), [RemoveUserGroupFromDomainMembership](RemoveUserGroupFromDomainMembership.md) | lib managers of that library |
-| Add or remove library managers | [AddManagerToDomain](AddManagerToDomain.md), [RemoveManagerFromDomain](RemoveManagerFromDomain.md) | nobody else - **not** library managers |
+| Add or remove library managers | [AddManagerToDomain](AddManagerToDomain.md), [RemoveManagerFromDomain](RemoveManagerFromDomain.md) | nobody else - **not** library managers. A User Manager cannot appoint themselves. |
 | See every workflow task | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | Policy Managers as well. Never refused: without one of these roles the list covers the caller's own tasks and the tasks of the libraries they manage. |
 
 **Looking up another user.** Any call that names a user other than the caller first checks that the caller may
