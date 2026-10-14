@@ -170,5 +170,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | Error | Description |
 |-------|-------------|
 | `[901]` | Session expired or invalid authentication ticket |
-| `[2840]` | Access denied — system administrator role required to query another user |
+| `[1573]` | Only the system administrator can perform this operation - a non-administrator asked about another user (`errorCode` 4030). Up to 8.7 this said only search administrators could. |
 | User not found | The specified `userName` does not exist |
