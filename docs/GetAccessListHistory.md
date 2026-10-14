@@ -85,7 +85,9 @@ The response contains the current access list followed by zero or more historica
 
 ## Required Permissions
 
-**Read security access list permission** (ActionId 26) on the target document or folder.
+**Read security access list permission** (ActionId 26) on the target document or folder; or, without it, an administrator, a member of `[Audit Managers]`, or a manager of the item's library. Up to 8.7 the role could not stand in for the permission, because the current list was read first.
+
+[GetAccessList](GetAccessList.md), the current list alone, still needs the permission.
 
 ---
 
@@ -201,7 +203,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | nothing at that path - including one the caller may not see |
-| `4030` | the caller may not read this item's access list |
+| `4030` | the caller may not read this item's access list, and is not an Audit Manager or a manager of its library |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |

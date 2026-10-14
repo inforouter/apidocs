@@ -128,15 +128,11 @@ can read them.
 |---|---|---|
 | Read audit logs | [GetCheckoutLog](GetCheckoutLog.md), [GetCheckInLog](GetCheckInLog.md), GetVersionCreateLog, GetVersionDeleteLog, [GetNewDocumentsAndFoldersLog](GetNewDocumentsAndFoldersLog.md), [GetDeleteLog](GetDeleteLog.md), [GetDispositionLog](GetDispositionLog.md), [GetOwnershipChangeLog](GetOwnershipChangeLog.md), [GetClassificationLogs](GetClassificationLogs.md) | lib managers, when the path filter or object is in their library. With no path filter, only Audit Managers. |
 | Read the security change log | [GetSecurityChangeLog](GetSecurityChangeLog.md) | anyone with the right to read the access list of the document or folder; lib managers, the library's root folder included |
-| Read SOX and ISO history | [GetSoxLogs](GetSoxLogs.md), [GetISOLogs](GetISOLogs.md) | anyone with the right to read that log on the document; the role is the fallback for callers without it; lib managers |
+| Read SOX, ISO and access-list history | [GetSoxLogs](GetSoxLogs.md), [GetISOLogs](GetISOLogs.md), [GetAccessListHistory](GetAccessListHistory.md) | anyone with the right to read that log on the document; the role is the fallback for callers without it; lib managers |
 | See the licence | [GetLicenseInfo](GetLicenseInfo.md) | nobody else |
 | See server status | [GetSystemStatistics](GetSystemStatistics.md), [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) | nobody else |
 | See warehouse status | [GetWarehouseStatus](GetWarehouseStatus.md) | nobody else |
 | Read the server logs | [GetLogStatistics](GetLogStatistics.md) / [1](GetLogStatistics1.md), [GetLogs](GetLogs.md) | nobody else |
-
-[GetAccessListHistory](GetAccessListHistory.md) is not an Audit Manager call: it returns the current access list
-with the history, so the caller needs the right to read the access list of the document or folder, and the role
-does not stand in for it.
 
 ---
 
