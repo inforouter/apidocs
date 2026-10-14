@@ -149,8 +149,9 @@ The other settings calls need no role: [GetGeneralAppSettings](GetGeneralAppSett
 
 ## R&D Managers (103)
 
-Retention and disposition. Library managers are **never** allowed these, and the role is not limited to a
-library: an R&D Manager acts on every library.
+Retention and disposition. The role is not limited to a library: an R&D Manager acts on every library.
+
+**Defining** schedules is for R&D Managers only:
 
 | Action | Web service calls | Notes |
 |---|---|---|
@@ -158,12 +159,18 @@ library: an R&D Manager acts on every library.
 | Change or delete a schedule | [UpdateRandDSchedule](UpdateRandDSchedule.md), [DeleteRandDSchedule](DeleteRandDSchedule.md), [DeleteRandDSchedule1](DeleteRandDSchedule1.md) | |
 | Manage retention source authorities | [CreateRetentionSourceAuthority](CreateRetentionSourceAuthority.md), [UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md), [DeleteRetentionSourceAuthority](DeleteRetentionSourceAuthority.md) | |
 | Dispose of documents | [DisposeItem](DisposeItem.md) | For items that have a disposition date. Also needs the right to delete the item. A folder is checked document by document. |
-| Freeze or unfreeze | [SetRdFreezeFlag](SetRdFreezeFlag.md) | Documents and folders. Also needs the right to change the retention period of the item. |
-| Give a document a schedule other than its folder's | [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md), [RemoveDocumentRandDSchedule](RemoveDocumentRandDSchedule.md), UpdateDocumentType | Only when the folder has a schedule and the new one differs from it (or is none). Following the folder's schedule, or a document in a folder with no schedule, needs no role, only the right to change the retention period. |
 
-Setting or removing a **folder's** schedule ([SetFolderRandDSchedule](SetFolderRandDSchedule.md),
-[RemoveFolderRandDSchedule](RemoveFolderRandDSchedule.md)) needs no role: only the right to change the retention
-period of that folder.
+**Applying** schedules to items takes the *change retention period* right on the item **or** the R&D Manager
+role: either one is enough, so library managers and other users with the right may do these too.
+
+| Action | Web service calls |
+|---|---|
+| Freeze or unfreeze | [SetRdFreezeFlag](SetRdFreezeFlag.md) (documents and folders) |
+| Set or remove a document's schedule | [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md), [RemoveDocumentRandDSchedule](RemoveDocumentRandDSchedule.md), UpdateDocumentType |
+| Set or remove a folder's schedule | [SetFolderRandDSchedule](SetFolderRandDSchedule.md), [RemoveFolderRandDSchedule](RemoveFolderRandDSchedule.md). Removing one also lifts the freezes it covers. |
+
+Up to 8.7 a freeze, and a document schedule other than its folder's, needed the right **and** the role, while a
+folder's schedule needed the right alone.
 
 R&D Managers also **receive the disposition tasks** the daily disposition job creates: each goes to one active
 member of `[R&D Managers]`, or to the `sysadmin` account when the group has none.

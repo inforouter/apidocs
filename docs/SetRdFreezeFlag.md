@@ -52,7 +52,7 @@ The operation completes but individual items that could not be updated are repor
 
 ## Required Permissions
 
-The caller must have appropriate access to the document or folder. The item must have an active R&D schedule.
+Either the **change retention period** right on the document or folder, or membership of **[R&D Managers]**, which stands in for the right on any document or folder. Defining schedules themselves is for R&D Managers only. Up to 8.7 it needed the right **and** the role. The item must have an R&D schedule, and a document's freeze cannot be lifted while its folder is frozen.
 
 ## Example
 

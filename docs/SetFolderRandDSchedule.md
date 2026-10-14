@@ -40,7 +40,7 @@ Assigns a Retention and Disposition (R&D) schedule to a folder identified by pat
 
 ## Required Permissions
 
-The calling user must have write access to the folder.
+Either the **change retention period** right on the folder, or membership of **[R&D Managers]**, which stands in for the right on any folder. Defining schedules themselves is for R&D Managers only. Up to 8.7 the role did not count; the right was required. Each document under it is checked the same way; one the caller may not change is reported in the response and left as it was.
 
 ## Example
 

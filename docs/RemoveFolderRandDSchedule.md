@@ -39,7 +39,7 @@ Removes (unassigns) the Retention and Disposition (R&D) schedule from a folder i
 
 ## Required Permissions
 
-The calling user must have write access to the folder.
+Either the **change retention period** right on the folder, or membership of **[R&D Managers]**, which stands in for the right on any folder. Defining schedules themselves is for R&D Managers only. Up to 8.7 the role did not count; the right was required. Removing a folder's schedule also lifts the freeze on the folder and on what it applies to.
 
 ## Example
 

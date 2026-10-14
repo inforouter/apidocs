@@ -38,7 +38,7 @@ Assigns a Retention and Disposition (R&D) schedule to a document identified by p
 
 ## Required Permissions
 
-The calling user must have write access to the document.
+Either the **change retention period** right on the document, or membership of **[R&D Managers]**, which stands in for the right on any document. Defining schedules themselves is for R&D Managers only. Up to 8.7 a schedule other than the folder's needed the right **and** the role.
 
 ## Example
 
