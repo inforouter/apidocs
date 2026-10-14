@@ -93,7 +93,7 @@ Library managers pass these checks only for users and groups **local to their li
 |---|---|---|
 | Create a user | [CreateUser](CreateUser.md) | lib managers, for users of their library |
 | List users | [GetAllUsers](GetAllUsers.md), [GetAllUsers1](GetAllUsers1.md), [GetAllUsers2](GetAllUsers2.md), [GetAllUsers3](GetAllUsers3.md), [GetAllUsersWithoutDetails](GetAllUsersWithoutDetails.md) | lib managers, when the library filter names their own library. GetAllUsers (no filter) is User Managers only. |
-| Look up another user | [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), and every call that names a user other than the caller (see note) | self; lib managers; **co-workers** of that user (members of a library the caller is also a member of) |
+| Look up another user | [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md), and every call that names a user other than the caller (see note) | self; lib managers; **co-workers** of that user (members of a library the caller is also a member of) |
 | Change a user's profile, status or type | [UpdateUserProfile](UpdateUserProfile.md), [ChangeUserStatus](ChangeUserStatus.md), [ChangeUserType](ChangeUserType.md) | lib managers. **Not** self. |
 | Change a user's preferences, contact details, e-mail | [UpdateUserPreferences](UpdateUserPreferences.md), [UpdateUserContactInfo](UpdateUserContactInfo.md), [UpdateUserEmail](UpdateUserEmail.md) | self, lib managers |
 | Set a user's password | [ChangeUserPassword](ChangeUserPassword.md) | self, lib managers |
@@ -117,7 +117,7 @@ Library managers pass these checks only for users and groups **local to their li
 see that user: self, administrators, User Managers, the managers of that user's library, and co-workers pass.
 This covers the user calls above, the Transfer… calls, the property-set-row-for-user calls, and [Search](Search.md)
 or GetFoldersAndDocumentsByPage2 when the criteria name a user. Most of these calls then make their own check
-from the table; GetUser, GetUserStatistics and GetDomainMembershipsOfUser make no further check, so a co-worker
+from the table; GetUser, GetUserStatistics, GetDomainMembershipsOfUser and GetUserTaskRedirectionTo make no further check, so a co-worker
 can read them.
 
 ---

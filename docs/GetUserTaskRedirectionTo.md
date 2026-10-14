@@ -67,7 +67,9 @@ The `<TaskRedirection>` element describes the **destination** user (the person t
 
 ## Required Permissions
 
-Any authenticated user may call this API.
+The caller must be allowed to see the user, as for [GetUser](GetUser.md): the user themselves, administrators,
+User Managers, the managers of the user's library, and co-workers (members of a library the caller is also a
+member of). Anyone else is refused with `4030`.
 
 ## Example
 
@@ -124,8 +126,7 @@ if (redirection) {
 ```
 
 With nothing redirected the answer carries **no child element at all** - not an empty wrapper - so
-test for `<TaskRedirection>` before reading it. A call with no ticket is the anonymous user rather
-than an error, and it discloses nothing.
+test for `<TaskRedirection>` before reading it. A call with no ticket is refused with `4010`.
 
 ## Notes
 
@@ -148,5 +149,6 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `4010` | the ticket is expired or unknown |
+| `4010` | the ticket is expired or unknown, or there is no ticket |
+| `4030` | the caller may not see that user, or may not list users and the name is unknown |
 | `4041` | no user by that name |
