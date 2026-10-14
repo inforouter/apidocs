@@ -146,8 +146,8 @@ Each `<change>` element contains:
 
 ## Required Permissions
 
-- **Library-level queries**: User must have `ViewAuditLogs` admin permission
-- **Document/Folder queries**: User must have `ReadSecurityAccessList` permission on the object, or `ViewAuditLogs` admin permission
+- **Library-level queries** (the path is a library's root): an administrator, a member of `[Audit Managers]`, or a manager of that library. Up to 8.7 library managers were refused here, though allowed on the library's subfolders.
+- **Document/Folder queries**: the `ReadSecurityAccessList` right on the object; otherwise an administrator, a member of `[Audit Managers]`, or a manager of the object's library.
 
 ## Example Requests
 
@@ -251,7 +251,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4000` | `path` was left empty - it is required despite being declared optional |
-| `4030` | the caller may not read the security change log |
+| `4030` | the caller may not read the security change log (see Required Permissions) |
 
 
 Common error responses:
