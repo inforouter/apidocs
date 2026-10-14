@@ -116,7 +116,8 @@ Library managers pass these checks only for users and groups **local to their li
 **Looking up another user.** Any call that names a user other than the caller first checks that the caller may
 see that user: self, administrators, User Managers, the managers of that user's library, and co-workers pass.
 This covers the user calls above, the Transfer… calls, the property-set-row-for-user calls, and [Search](Search.md)
-or GetFoldersAndDocumentsByPage2 when the criteria name a user. Most of these calls then make their own check
+or GetFoldersAndDocumentsByPage2 when the criteria name a user. Search criteria that read a user's own lists (`SUBSCRIPTIONSOF`,
+`FAVORITESOF`, `DOWNLOADQUEOF`, `VIEWCRITERIA` with `USERNAME`) then need the *activity lists* right above. Most of these calls then make their own check
 from the table; GetUser, GetUserStatistics, GetDomainMembershipsOfUser and GetUserTaskRedirectionTo make no further check, so a co-worker
 can read them.
 

@@ -684,9 +684,10 @@ the parser does not recognise.
 
 - The `CHECKOUTSTATUS` value `CHECKEDOUTBYUSER` requires an additional `USERNAME` attribute on the same element specifying the target user's login name.
 
-- The `VIEWCRITERIA` criterion can optionally include a `USERNAME` attribute to filter by another user's view history (requires appropriate permissions).
+- The `VIEWCRITERIA` criterion can optionally include a `USERNAME` attribute to filter by another user's view history.
 
 - The `SUBSCRIPTIONSOF`, `FAVORITESOF`, and `DOWNLOADQUEOF` criteria require the `VALUE` attribute to be a valid infoRouter username; an error is returned if the user is not found.
+- `SUBSCRIPTIONSOF`, `FAVORITESOF`, `DOWNLOADQUEOF` and `VIEWCRITERIA` with `USERNAME` read another user's activity, so for a user other than the caller they need the right the dedicated calls need (GetSubscribedDocumentsByUser, GetFavoriteDocumentsOfUser, GetUserViewLog): an administrator, a User Manager, or a manager of that user's library. A co-worker is refused with `4030`. Naming yourself always works.
 
 - The `RECENTDOCUMENTS` criterion returns recent documents for the currently authenticated user only; no `VALUE` attribute is required.
 
@@ -717,4 +718,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4000` | a criterion name the parser does not know, or a `SortBy` that is not one of the columns |
 | `4000` | the document was not well-formed XML; the message carries the parser's own words |
+| `4030` | a criterion names another user whose lists or view history the caller may not read, or a user the caller may not see |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
