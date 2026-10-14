@@ -276,7 +276,11 @@ The `SortBy` parameter accepts one of the following `TaskSortOption` values:
 
 - User must be authenticated (valid authentication ticket required)
 - Anonymous users cannot call this API (returns insufficient rights error)
-- Tasks returned are scoped to the authenticated user's permissions
+- Tasks returned are scoped to the authenticated user. Unless the criteria name a document or a workflow, the list holds:
+  - the tasks the caller is assigned to, assigned, or supervises;
+  - for an **administrator**, every task in every library;
+  - for a **library manager**, every task in the libraries they manage.
+- User Managers and Policy Managers see only the tasks they take part in. Up to 8.7 they saw every task in every library, because the list borrowed the Control Panel's libraries to administer.
 
 ## Use Cases
 

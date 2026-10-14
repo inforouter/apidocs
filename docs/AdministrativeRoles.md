@@ -75,7 +75,9 @@ Administrators also:
   the sets of their libraries);
 - may use [GetMembersWithoutAccess](GetMembersWithoutAccess.md) on any library (others only on the libraries they
   manage);
-- pass every library-manager and workflow-management check;
+- pass every library-manager and workflow-management check, and see every workflow task in
+  [getTasks](getTasks.md) / [GetTasks1](GetTasks1.md) (library managers see those of their libraries; User and Policy
+  Managers only their own);
 - are not limited by the maximum document size setting when uploading, WebDAV included.
 
 ---
@@ -106,7 +108,6 @@ Library managers pass these checks only for users and groups **local to their li
 | See members of a group that hides them | [GetUserGroupMembers](GetUserGroupMembers.md), [GetUserGroupMembers1](GetUserGroupMembers1.md) | lib managers, for local groups. Groups that show their members can be read by anyone. |
 | Add or remove library members | [AddUserAsDomainMember](AddUserAsDomainMember.md), [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md), [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), [RemoveUserGroupFromDomainMembership](RemoveUserGroupFromDomainMembership.md) | lib managers of that library |
 | Add or remove library managers | [AddManagerToDomain](AddManagerToDomain.md), [RemoveManagerFromDomain](RemoveManagerFromDomain.md) | nobody else - **not** library managers. A User Manager cannot appoint themselves. |
-| See every workflow task | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | Policy Managers as well. Never refused: without one of these roles the list covers the caller's own tasks and the tasks of the libraries they manage. |
 
 **Looking up another user.** Any call that names a user other than the caller first checks that the caller may
 see that user: self, administrators, User Managers, the managers of that user's library, and co-workers pass.
@@ -139,7 +140,6 @@ can read them.
 | Change application settings | [SetGeneralAppSettings](SetGeneralAppSettings.md), [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md), [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md), [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md), [SetDefaultFolderColumns](SetDefaultFolderColumns.md) | nobody else |
 | Read system behaviour and e-mail settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md), [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) | nobody else |
 | Read and change library policies | [GetDomainPolicies](GetDomainPolicies.md), [SetDomainPolicies](SetDomainPolicies.md) | managers of that library: reading always, changing **only** when the system behaviour setting *Allow library managers to edit policies* is on |
-| See every workflow task | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | as for User Managers |
 
 The other settings calls need no role: [GetGeneralAppSettings](GetGeneralAppSettings.md) and
 [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) answer any signed-in user, and
