@@ -1,6 +1,6 @@
 # GetEmailAndNotificationSettings API
 
-Returns all email and notification settings for the infoRouter system. Requires system administrator privileges.
+Returns all email and notification settings for the infoRouter system. Requires an administrator or a Policy Manager.
 
 ## Endpoint
 
@@ -76,7 +76,7 @@ Returns all email and notification settings for the infoRouter system. Requires 
 
 ## Required Permissions
 
-Caller must be a **system administrator**.
+Caller must be an **administrator** or a member of **[Policy Managers]**: the same right [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md) asks for. Up to 8.7 reading was administrators only.
 
 ## Example
 
@@ -132,5 +132,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4030` | a caller with no ticket |
+| `4030` | a caller with no ticket, or one who is neither an administrator nor a Policy Manager |
 

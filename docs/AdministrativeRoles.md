@@ -67,7 +67,7 @@ which are **only** for administrators:
 | Property sets | [CreatePropertySetDefinition](CreatePropertySetDefinition.md) / [1](CreatePropertySetDefinition1.md), [UpdatePropertySetDefinition](UpdatePropertySetDefinition.md) / 1, [DeletePropertySetDefinition](DeletePropertySetDefinition.md), [AddPropertySetField](AddPropertySetField.md), [DeletePropertySetField](DeletePropertySetField.md), [AddPropertySetFieldOption](AddPropertySetFieldOption.md), [DeletePropertySetFieldOption](DeletePropertySetFieldOption.md), SetPropertySetLookupFieldParametersFor… (SQL Server, Oracle, MySQL) |
 | Document types | [CreateDocumentTypeDef](CreateDocumentTypeDef.md) / [1](CreateDocumentTypeDef1.md), UpdateDocumentTypeDef / 1, [DeleteDocumentTypeDef](DeleteDocumentTypeDef.md) |
 | Recycle bin | [SearchRecycledItems](SearchRecycledItems.md) / [1](SearchRecycledItems1.md), [PurgeRecycleBinItem](PurgeRecycleBinItem.md); [RestoreRecycleBinItem](RestoreRecycleBinItem.md) for items in **another user's** recycle bin (anyone may restore from their own) |
-| Settings | [FlushApplicationCache](FlushApplicationCache.md), [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md), [SetDefaultFolderColumns](SetDefaultFolderColumns.md), [UpdateApplicationLicense](UpdateApplicationLicense.md) |
+| Settings | [FlushApplicationCache](FlushApplicationCache.md), [SetDefaultFolderColumns](SetDefaultFolderColumns.md), [UpdateApplicationLicense](UpdateApplicationLicense.md) |
 | Server logs | [GetLogStatistics](GetLogStatistics.md) / [1](GetLogStatistics1.md), [GetLogs](GetLogs.md). Audit Managers cannot read these. |
 | Users | [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md); [GetManagedDomainsByUser](GetManagedDomainsByUser.md) for **another** user |
 | Role groups | Adding and removing members of the six groups on this page ([AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md)) |
@@ -148,16 +148,14 @@ does not stand in for it.
 | Action | Web service calls | Also allowed for |
 |---|---|---|
 | Change application settings | [SetGeneralAppSettings](SetGeneralAppSettings.md), [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md), [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md), [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md) | nobody else |
-| Read system behaviour settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) | nobody else |
+| Read system behaviour and e-mail settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md), [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) | nobody else |
 | Read and change library policies | [GetDomainPolicies](GetDomainPolicies.md), [SetDomainPolicies](SetDomainPolicies.md) | managers of that library, **only** when the system behaviour setting *Allow library managers to edit policies* is on. Reading needs the same right as changing. |
 | See every workflow task | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | as for User Managers |
 
 The other settings calls need no role: [GetGeneralAppSettings](GetGeneralAppSettings.md) and
 [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) answer any signed-in user, and
-[GetDefaultFolderColumns](GetDefaultFolderColumns.md) answers anyone. Two settings calls are **administrators
-only**, not Policy Managers: [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) (so a Policy
-Manager can change the e-mail settings but cannot read them back) and
-[SetDefaultFolderColumns](SetDefaultFolderColumns.md).
+[GetDefaultFolderColumns](GetDefaultFolderColumns.md) answers anyone. [SetDefaultFolderColumns](SetDefaultFolderColumns.md)
+is **administrators only**, not Policy Managers.
 
 ---
 
