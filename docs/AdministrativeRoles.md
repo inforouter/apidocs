@@ -68,7 +68,6 @@ which are **only** for administrators:
 | Document types | [CreateDocumentTypeDef](CreateDocumentTypeDef.md) / [1](CreateDocumentTypeDef1.md), UpdateDocumentTypeDef / 1, [DeleteDocumentTypeDef](DeleteDocumentTypeDef.md) |
 | Recycle bin | [SearchRecycledItems](SearchRecycledItems.md) / [1](SearchRecycledItems1.md), [PurgeRecycleBinItem](PurgeRecycleBinItem.md); [RestoreRecycleBinItem](RestoreRecycleBinItem.md) for items in **another user's** recycle bin (anyone may restore from their own) |
 | Settings | [FlushApplicationCache](FlushApplicationCache.md), [UpdateApplicationLicense](UpdateApplicationLicense.md) |
-| Server logs | [GetLogStatistics](GetLogStatistics.md) / [1](GetLogStatistics1.md), [GetLogs](GetLogs.md). Audit Managers cannot read these. |
 | Users | [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md); [GetManagedDomainsByUser](GetManagedDomainsByUser.md) for **another** user |
 | Role groups | Adding and removing members of the six groups on this page ([AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md)) |
 
@@ -133,9 +132,7 @@ can read them.
 | See the licence | [GetLicenseInfo](GetLicenseInfo.md) | nobody else |
 | See server status | [GetSystemStatistics](GetSystemStatistics.md), [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) | nobody else |
 | See warehouse status | [GetWarehouseStatus](GetWarehouseStatus.md) | nobody else |
-
-Audit Managers **cannot** read the server logs ([GetLogs](GetLogs.md), [GetLogStatistics](GetLogStatistics.md)):
-those are administrators only.
+| Read the server logs | [GetLogStatistics](GetLogStatistics.md) / [1](GetLogStatistics1.md), [GetLogs](GetLogs.md) | nobody else |
 
 [GetAccessListHistory](GetAccessListHistory.md) is not an Audit Manager call: it returns the current access list
 with the history, so the caller needs the right to read the access list of the document or folder, and the role

@@ -93,7 +93,7 @@ The `logType` parameter is case-insensitive.
 
 ## Required Permissions
 
-The caller must be a **System Administrator**.
+The caller must be an **administrator** or a member of **[Audit Managers]**, who also see the server status, the warehouse status and the licence. Up to 8.7 only administrators could read the logs.
 
 ## Example
 
@@ -184,7 +184,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4030` | the caller may not view server status - including a caller with no ticket |
+| `4030` | the caller is neither an administrator nor an Audit Manager - including a caller with no ticket |
 | `4000` | a log type it does not recognise - the message lists the ones it does |
 | `5000` | `Information` or `Warning` where that log has never been written - see above |
 
