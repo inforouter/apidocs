@@ -104,7 +104,7 @@ Each element uses three attributes:
 | `INCLUDESUBFOLDERS` | -" | `true` / `false` | When used with `FOLDER`, controls whether sub-folders are included. |
 | `VIEWCRITERIA` | -" | `NOVIEW` / `UPDATED` / `SAW` | Filters by view state. Add `USERNAME="username"` attribute to filter by another user's view state. |
 | `CHECKOUTSTATUS` | -" | `CHECKEDOUT` / `NOTCHECKEDOUT` / `CHECKEDOUTBYME` / `CHECKEDOUTBYUSER` | Filters by checkout status. `CHECKEDOUTBYUSER` also requires a `USERNAME="username"` attribute on the element. |
-| `USERNAME` | -" | infoRouter username | Filters documents by author (owner). |
+| `USERNAME` | -" | infoRouter username | Filters documents by author (owner). An unknown user name is refused with `4041`. |
 | `SIZEIS` | `EQLT` (at most) / `EQGT` (at least) | Size in bytes | Filters by file size. |
 | `IMPORTANCE` | `EQ` / `GT-EQ` / `GT` / `LT` / `LT-EQ` | `LOW` / `NORMAL` / `HIGH` / `VITAL` | Filters by document importance. |
 | `CLEVEL` | -" | `NOMARKINGS` / `DECLASSIFIED` / `CONFIDENTIAL` / `SECRET` / `TOPSECRET` | Filters by classification level. |
@@ -718,5 +718,6 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4000` | a criterion name the parser does not know, or a `SortBy` that is not one of the columns |
 | `4000` | the document was not well-formed XML; the message carries the parser's own words |
+| `4041` | a criterion names a user who is not there |
 | `4030` | a criterion names another user whose lists or view history the caller may not read, or a user the caller may not see |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
