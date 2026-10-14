@@ -111,7 +111,9 @@ await call('CreateUserGroup1', {
 > **Changed in 9.0: the flag is stored as given.** A group created with `showMembers=true` is read back
 > by `GetUserGroup` as `public="True"`, and one created with `showMembers=false` as `public="False"`.
 > Up to 8.7 the flag was stored inverted, so a client that sent the opposite of what it meant must
-> now send what it means. Plain `CreateUserGroup`, sending no flag, shows the members of a library group.
+> now send what it means. The flag holds for a **global** group too; up to 8.7 a global group was always
+> created hidden, whatever it asked for. Plain `CreateUserGroup`, sending no flag, still shows the members
+> of a library group and hides those of a global one.
 
 A group belongs to a library when `DomainName` names one, and is **global** when `DomainName` is
 left empty. The two live in different lists: `GetDomainGroups` and `GetLocalGroups` answer a

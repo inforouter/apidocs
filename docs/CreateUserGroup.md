@@ -117,7 +117,7 @@ library's own groups, `GetGlobalGroups` the global ones.
 
 - When `DomainName` is empty or omitted, a global user group is created
 - When `DomainName` is specified, a local user group is created within that domain/library
-- This API does not include a `showMembers` parameter; members are hidden by default. Use `CreateUserGroup1` if you need to control member visibility.
+- This API does not include a `showMembers` parameter: a library group shows its members (`public="True"`), and a global group hides them (`public="False"`). Use `CreateUserGroup1` if you need to control member visibility.
 - Group names must be unique within their scope (global or domain-level)
 
 ## Error Codes
