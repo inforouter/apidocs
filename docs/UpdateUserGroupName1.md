@@ -138,8 +138,9 @@ await call('UpdateUserGroupName1', {
 });
 ```
 
-> **The flag is stored inverted**, the same way `CreateUserGroup1` stores it: `showMembers=false`
-> reads back as `public="True"`. Send the opposite of what you mean until this is fixed.
+> **Changed in 9.0: the flag is stored as given**, as `CreateUserGroup1` stores it: `showMembers=false`
+> reads back as `public="False"`. Up to 8.7 it was stored inverted, so a client that sent the opposite
+> of what it meant must now send what it means.
 
 ## Notes
 
