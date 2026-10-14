@@ -139,7 +139,7 @@ Shorter XML is accepted too. Remember that the fields not listed are then shown.
 
 - Signed-in user. The anonymous user cannot create entries.
 - **Personal entries** (`isPersonal=true`): any signed-in user.
-- **System-wide entries** (`isPersonal=false`): members of the `[Search & Category Administrators]` role group. Being the system administrator is not enough on its own.
+- **System-wide entries** (`isPersonal=false`): members of the `[Search & Category Administrators]` role group, and administrators (members of `[Administrators]` and the `sysadmin` account). Up to 8.7 administrators had to be in the group as well.
 
 ## Names
 

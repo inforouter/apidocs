@@ -11,7 +11,7 @@ this page describes those checks as the server makes them.
 
 | Group id | Group name | Role | In short |
 |---:|---|---|---|
-| `104` | `[Administrators]` | Administrators | Everything except Search & Category Administrators. Passes every other role check below. |
+| `104` | `[Administrators]` | Administrators | Everything. Passes every role check below. |
 | `100` | `[User Managers]` | UserManager | Users, user groups, library membership and managers, user transfers. |
 | `101` | `[Audit Managers]` | AuditManager | Audit logs, licence, server and warehouse status. |
 | `102` | `[Policy Managers]` | PolicyManager | Application settings and library policies. |
@@ -38,10 +38,6 @@ For an administrative action the server allows the call when **any** of these is
 
 A refusal is `errorCode="4030"`, and the message names the roles that would have been allowed.
 
-> **Search & Category Administrators is the exception.** That role is checked on its own, and membership of
-> `[Administrators]` does **not** grant it, not even for the `sysadmin` account. To manage system-wide saved
-> searches, an administrator must also be a member of `[Search & Category Administrators]`.
-
 ## Finding out which roles the signed-in user has
 
 There is no single "my roles" call. Use these:
@@ -58,7 +54,7 @@ There is no single "my roles" call. Use these:
 
 ## Administrators (104)
 
-Administrators pass **every** check on this page except Search & Category Administrators, plus the following,
+Administrators pass **every** check on this page, plus the following,
 which are **only** for administrators:
 
 | Area | Web service calls |
@@ -183,10 +179,10 @@ owner and need no role.
 |---|---|
 | Create a system-wide saved search or search page | [CreateSavedSearch](CreateSavedSearch.md) without `isPersonal` |
 | Change a system-wide one | [UpdateSavedSearch](UpdateSavedSearch.md). A personal one can be changed only by its owner, even by a search administrator. |
-| Delete a system-wide one, or anyone's personal one | [DeleteSavedSearch](DeleteSavedSearch.md) |
+| Delete a system-wide one | [DeleteSavedSearch](DeleteSavedSearch.md). A personal one can be deleted only by its owner. |
 | See every system-wide saved search, whatever groups it is shared with | [GetSavedSearches](GetSavedSearches.md), [GetSavedSearch](GetSavedSearch.md) |
 
-As noted above, `[Administrators]` membership does not include this role.
+Administrators hold this role too, without being members of the group. Up to 8.7 they had to be added to it.
 
 ---
 

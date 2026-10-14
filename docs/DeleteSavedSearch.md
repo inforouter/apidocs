@@ -38,8 +38,8 @@ Deletes a saved search or search page definition by ID.
 ## Required Permissions
 
 - User must be authenticated.
-- **Personal entries**: the owner, or a member of the `[Search & Category Administrators]` role group.
-- **System-wide entries**: members of the `[Search & Category Administrators]` role group.
+- **Personal entries**: the owner only. Up to 8.7 a search administrator could delete anyone's personal entry, which they can neither read nor update.
+- **System-wide entries**: members of the `[Search & Category Administrators]` role group, and administrators.
 
 ## Example Requests
 
@@ -124,4 +124,4 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no saved search by that id |
-| `4030` | the caller neither owns the page nor is a search administrator |
+| `4030` | a personal page the caller does not own, or a system-wide page and the caller is not a search administrator |

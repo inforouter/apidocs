@@ -65,7 +65,7 @@ UpdateSavedSearch does not merge. Every parameter you send, or leave empty, beco
 
 - Signed-in user.
 - **Personal entry:** its owner only. A search administrator cannot update another user's personal entry.
-- **System-wide entry:** members of the `[Search & Category Administrators]` role group.
+- **System-wide entry:** members of the `[Search & Category Administrators]` role group, and administrators.
 - Creating (`searchPageId=0`): as in [CreateSavedSearch](CreateSavedSearch.md#required-permissions).
 
 ## Examples

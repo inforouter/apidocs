@@ -53,7 +53,11 @@ Transfers domain/library manager roles from one user to another. The target user
 
 ## Required Permissions
 
-**System administrator.** Only system administrators can transfer user data between accounts.
+An **administrator**, a **User Manager**, or a manager of the libraries of **both** users (for users local to them).
+
+The target must already be a member of each library; where they are not, that library's manager role stays with the source user. A User Manager cannot name **themselves** as the target: like [AddManagerToDomain](AddManagerToDomain.md), it would make them a manager of those libraries. That is refused with `4030` before anything is transferred.
+
+Up to 8.7 this call transferred nothing: the target never became a manager, and the source lost its role only where the target already managed the same library.
 
 ---
 
@@ -159,7 +163,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4030` | there is no ticket at all |
+| `4030` | there is no ticket at all, the caller may not transfer these users' work, or a User Manager named themselves as the target |
 | `4041` | no user by either name |
 | `4000` | `fromUserName` and `toUserName` name the same account |
 | `HTTP 400` | `fromUserName` or `toUserName` was empty; refused by model binding, so there is no error document |
