@@ -25,13 +25,16 @@ Returns the full classification history log for the specified document or folder
 
 ## Required Permissions
 
-The `Path` parameter is always resolved to a specific document or folder. The permission check is performed against the library that contains that object. This means **only library-level `ViewAuditLogs` permission is required** — system-wide admin rights are not needed.
+The `Path` is resolved to a document or folder, and the caller passes when **either** holds:
 
-| Scenario | Required permission |
-|----------|---------------------|
-| Path resolves to a document | **ViewAuditLogs** for the library containing that document |
-| Path resolves to a folder | **ViewAuditLogs** for the library containing that folder |
-| Path does not resolve | Error returned — no permission check is performed |
+- the library's **read classification log** policy grants them the item. By default that is the item's **owner**, the library's **managers**, and users with **Full Control** on it; each library can change this in its policies ([SetDomainPolicies](SetDomainPolicies.md));
+- they are an **administrator**, a member of **[Audit Managers]**, or a **manager of the item's library**.
+
+Up to 8.7 only the second was checked: the policy was ignored, so the owner and the users it named were refused. This is how [GetSoxLogs](GetSoxLogs.md) and [GetISOLogs](GetISOLogs.md) already worked.
+
+| Scenario | Result |
+|----------|--------|
+| Path does not resolve | `4041` - no permission check is performed |
 
 ---
 
@@ -209,7 +212,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4030` | the caller can see the document but may not read its log |
+| `4030` | the caller can see the item but neither the policy nor an audit role lets them read its log |
 | `4041` | no document at that path - including a path the caller cannot see, so an anonymous caller gets this rather than 4030 |
 
 
