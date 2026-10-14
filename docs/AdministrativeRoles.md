@@ -11,7 +11,7 @@ this page describes those checks as the server makes them.
 
 | Group id | Group name | Role | In short |
 |---:|---|---|---|
-| `104` | `[Administrators]` | Administrators | Everything. Passes every role check below. |
+| `104` | `[Administrators]` | Administrators | Everything except Search & Category Administrators. Passes every other role check below. |
 | `100` | `[User Managers]` | UserManager | Users, user groups, library membership and managers, user transfers. |
 | `101` | `[Audit Managers]` | AuditManager | Audit logs, licence, server and warehouse status. |
 | `102` | `[Policy Managers]` | PolicyManager | Application settings and library policies. |
@@ -21,8 +21,9 @@ this page describes those checks as the server makes them.
 - These are system groups: they belong to no library, and their ids are fixed.
 - **Only Administrators can add or remove members of these groups.** A user manager cannot make someone a user
   manager.
-- The `sysadmin` account is always a member of `[Administrators]` and cannot be removed from it.
+- The `sysadmin` account always counts as an administrator, and cannot be removed from `[Administrators]`.
 - Holding several roles combines what they allow.
+- The members of these groups are hidden: only Administrators and User Managers can list them.
 
 ## How the server decides
 
@@ -32,13 +33,14 @@ For an administrative action the server allows the call when **any** of these is
 2. The action allows **self-service** and the caller is acting on their own account (marked *self* below).
 3. The caller is in one of the role groups the action requires.
 4. The action allows **library managers** and the caller manages the library the action is about (marked
-   *lib managers* below). For a global user or group, there is no library and this does not apply.
+   *lib managers* below). A user or group belongs to a library only when it is local to that library: for a
+   global user or group, and for application-wide actions, there is no library and this step never passes.
 
 A refusal is `errorCode="4030"`, and the message names the roles that would have been allowed.
 
 > **Search & Category Administrators is the exception.** That role is checked on its own, and membership of
-> `[Administrators]` does **not** grant it. To manage system-wide saved searches, an administrator must also be
-> a member of `[Search & Category Administrators]`.
+> `[Administrators]` does **not** grant it, not even for the `sysadmin` account. To manage system-wide saved
+> searches, an administrator must also be a member of `[Search & Category Administrators]`.
 
 ## Finding out which roles the signed-in user has
 
@@ -46,7 +48,9 @@ There is no single "my roles" call. Use these:
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the user's own name (always allowed for
   yourself): the `GroupID` values `100`–`105` in the answer are the roles held.
-- `getApplicationParameters` answers whether the caller is an administrator.
+- [getApplicationParameters](getApplicationParameters.md) tells you whether the caller is an administrator:
+  only administrators get the extended block (SMTP, password policy, authentication authorities, warehouse
+  paths).
 - Whether the caller manages a library: [GetManagedDomainsByUser](GetManagedDomainsByUser.md) with the caller's
   own name, or an empty name.
 
@@ -54,15 +58,17 @@ There is no single "my roles" call. Use these:
 
 ## Administrators (104)
 
-Administrators pass **every** check on this page, plus the following, which are **only** for administrators:
+Administrators pass **every** check on this page except Search & Category Administrators, plus the following,
+which are **only** for administrators:
 
 | Area | Web service calls |
 |---|---|
 | Libraries | [CreateDomain](CreateDomain.md), [DeleteDomain](DeleteDomain.md), [UpdateDomain](UpdateDomain.md), [ArchiveDomain](ArchiveDomain.md), [UnarchiveDomain](UnarchiveDomain.md) |
 | Property sets | [CreatePropertySetDefinition](CreatePropertySetDefinition.md) / [1](CreatePropertySetDefinition1.md), [UpdatePropertySetDefinition](UpdatePropertySetDefinition.md) / 1, [DeletePropertySetDefinition](DeletePropertySetDefinition.md), [AddPropertySetField](AddPropertySetField.md), [DeletePropertySetField](DeletePropertySetField.md), [AddPropertySetFieldOption](AddPropertySetFieldOption.md), [DeletePropertySetFieldOption](DeletePropertySetFieldOption.md), SetPropertySetLookupFieldParametersFor… (SQL Server, Oracle, MySQL) |
 | Document types | [CreateDocumentTypeDef](CreateDocumentTypeDef.md) / [1](CreateDocumentTypeDef1.md), UpdateDocumentTypeDef / 1, [DeleteDocumentTypeDef](DeleteDocumentTypeDef.md) |
-| Recycle bin | [SearchRecycledItems](SearchRecycledItems.md), [PurgeRecycleBinItem](PurgeRecycleBinItem.md), [RestoreRecycleBinItem](RestoreRecycleBinItem.md) for items in **another user's** recycle bin (anyone may restore their own) |
-| Settings and logs | [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md), [UpdateApplicationLicense](UpdateApplicationLicense.md), [GetLogStatistics](GetLogStatistics.md) / [1](GetLogStatistics1.md), [GetLogs](GetLogs.md) |
+| Recycle bin | [SearchRecycledItems](SearchRecycledItems.md) / [1](SearchRecycledItems1.md), [PurgeRecycleBinItem](PurgeRecycleBinItem.md); [RestoreRecycleBinItem](RestoreRecycleBinItem.md) for items in **another user's** recycle bin (anyone may restore from their own) |
+| Settings | [FlushApplicationCache](FlushApplicationCache.md), [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md), [SetDefaultFolderColumns](SetDefaultFolderColumns.md), [UpdateApplicationLicense](UpdateApplicationLicense.md) |
+| Server logs | [GetLogStatistics](GetLogStatistics.md) / [1](GetLogStatistics1.md), [GetLogs](GetLogs.md). Audit Managers cannot read these. |
 | Users | [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md); [GetManagedDomainsByUser](GetManagedDomainsByUser.md) for **another** user |
 | Role groups | Adding and removing members of the six groups on this page ([AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md)) |
 
@@ -72,18 +78,22 @@ Administrators also:
   (others get the definition without them);
 - see every property set in [GetPropertySetDefinitions](GetPropertySetDefinitions.md) (others see public sets and
   the sets of their libraries);
-- can open any library, and pass every library-manager and workflow-management check;
-- are not limited by the maximum document size setting when uploading.
+- may use [GetMembersWithoutAccess](GetMembersWithoutAccess.md) on any library (others only on the libraries they
+  manage);
+- pass every library-manager and workflow-management check;
+- are not limited by the maximum document size setting when uploading, WebDAV included.
 
 ---
 
 ## User Managers (100)
 
+Library managers pass these checks only for users and groups **local to their library**, never for global ones.
+
 | Action | Web service calls | Also allowed for |
 |---|---|---|
 | Create a user | [CreateUser](CreateUser.md) | lib managers, for users of their library |
-| List users | [GetAllUsers](GetAllUsers.md), [GetAllUsers1](GetAllUsers1.md), [GetAllUsers2](GetAllUsers2.md), [GetAllUsersWithoutDetails](GetAllUsersWithoutDetails.md) | lib managers, when listing their own library |
-| Look up another user | [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), and every call that names a user other than the caller (see note) | lib managers; co-workers of that user |
+| List users | [GetAllUsers](GetAllUsers.md), [GetAllUsers1](GetAllUsers1.md), [GetAllUsers2](GetAllUsers2.md), [GetAllUsers3](GetAllUsers3.md), [GetAllUsersWithoutDetails](GetAllUsersWithoutDetails.md) | lib managers, when the library filter names their own library. GetAllUsers (no filter) is User Managers only. |
+| Look up another user | [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), and every call that names a user other than the caller (see note) | self; lib managers; **co-workers** of that user (members of a library the caller is also a member of) |
 | Change a user's profile, status or type | [UpdateUserProfile](UpdateUserProfile.md), [ChangeUserStatus](ChangeUserStatus.md), [ChangeUserType](ChangeUserType.md) | lib managers. **Not** self. |
 | Change a user's preferences, contact details, e-mail | [UpdateUserPreferences](UpdateUserPreferences.md), [UpdateUserContactInfo](UpdateUserContactInfo.md), [UpdateUserEmail](UpdateUserEmail.md) | self, lib managers |
 | Set a user's password | [ChangeUserPassword](ChangeUserPassword.md) | self, lib managers |
@@ -91,23 +101,24 @@ Administrators also:
 | See a user's activity lists | GetUserViewLog / 1 / Lite, [GetAuthoredDocuments](GetAuthoredDocuments.md), [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md), [GetDocumentsOwnedByUser](GetDocumentsOwnedByUser.md), [GetFavoriteDocumentsOfUser](GetFavoriteDocumentsOfUser.md), [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md), [GetSubscribedDocumentsByUser](GetSubscribedDocumentsByUser.md), [GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md), [GetFoldersOwnedByUser](GetFoldersOwnedByUser.md), [GetSubscribedFoldersByUser](GetSubscribedFoldersByUser.md) | self, lib managers |
 | See a user's group memberships | [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) | self, lib managers |
 | See a user's workflow roles | [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) | self, lib managers |
-| Manage task redirections | [SetUserTaskRedirection](SetUserTaskRedirection.md), [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md), [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md), [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) | self, lib managers; for rerouting, also the user the redirection points to, and only while the `RerouteRedirections` setting is on |
-| Transfer one user's work to another | all 13 Transfer… calls: [TransferUserTasks](TransferUserTasks.md), [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md), [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md), [TransferUserGroupMemberships](TransferUserGroupMemberships.md), [TransferUserDomainMemberships](TransferUserDomainMemberships.md), [TransferUserDomainManagerRoles](TransferUserDomainManagerRoles.md), [TransferUserSecurityPermissions](TransferUserSecurityPermissions.md), and the rest | lib managers of **both** users' libraries |
-| Property set rows on a user | [AddPropertySetRowForUser](AddPropertySetRowForUser.md), UpdatePropertySetRowForUser, [DeletePropertySetRowForUser](DeletePropertySetRowForUser.md) | lib managers |
+| Manage task redirections | [SetUserTaskRedirection](SetUserTaskRedirection.md), [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md), [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md), [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) | self, lib managers; for rerouting, also the user the redirection points to. Rerouting also needs the `RerouteRedirections` setting on. |
+| Transfer one user's work to another | all 13 Transfer… calls: [TransferUserTasks](TransferUserTasks.md), [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md), [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md), [TransferUserGroupMemberships](TransferUserGroupMemberships.md), [TransferUserDomainMemberships](TransferUserDomainMemberships.md), [TransferUserDomainManagerRoles](TransferUserDomainManagerRoles.md), [TransferUserSecurityPermissions](TransferUserSecurityPermissions.md), and the rest | lib managers, when **both** users are local to libraries they manage |
+| Property set rows on a user | [AddPropertySetRowForUser](AddPropertySetRowForUser.md), UpdatePropertySetRowForUser, [DeletePropertySetRowForUser](DeletePropertySetRowForUser.md) | lib managers. **Not** self. |
 | Create a user group | [CreateUserGroup](CreateUserGroup.md), [CreateUserGroup1](CreateUserGroup1.md) | lib managers, for local groups of their library |
-| Rename a user group | UpdateUserGroupName / 1 | lib managers, for groups of their library |
-| Delete a user group | [DeleteUsergroup](DeleteUsergroup.md) | lib managers, for groups of their library |
+| Rename a user group | UpdateUserGroupName / 1 | lib managers, for groups of their library. Not the role groups. |
+| Delete a user group | [DeleteUsergroup](DeleteUsergroup.md) | lib managers, for groups of their library. Not the role groups. |
 | Add or remove group members | [AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md) | lib managers. **Not** for the role groups on this page: those are administrators only. |
-| See members of a group that hides them | [GetUserGroupMembers](GetUserGroupMembers.md), [GetUserGroupMembers1](GetUserGroupMembers1.md) | lib managers. Groups that show their members can be read by anyone. |
+| See members of a group that hides them | [GetUserGroupMembers](GetUserGroupMembers.md), [GetUserGroupMembers1](GetUserGroupMembers1.md) | lib managers, for local groups. Groups that show their members can be read by anyone. |
 | Add or remove library members | [AddUserAsDomainMember](AddUserAsDomainMember.md), [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md), [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), [RemoveUserGroupFromDomainMembership](RemoveUserGroupFromDomainMembership.md) | lib managers of that library |
 | Add or remove library managers | [AddManagerToDomain](AddManagerToDomain.md), [RemoveManagerFromDomain](RemoveManagerFromDomain.md) | nobody else - **not** library managers |
-| Flush the application cache | [FlushApplicationCache](FlushApplicationCache.md) | nobody else |
-| See tasks across libraries | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | never refused: without the role, the list covers the caller's own tasks and the libraries they manage (also widened by Policy Managers) |
+| See every workflow task | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | Policy Managers as well. Never refused: without one of these roles the list covers the caller's own tasks and the tasks of the libraries they manage. |
 
-**Looking up another user.** Any call that names a user other than the caller checks this role first:
-the user lists above, the Transfer… calls, the property-set-row-for-user calls, and [Search](Search.md) or
-GetFoldersAndDocumentsByPage2 when the criteria name a user. A library manager of that user's library, or a
-co-worker of that user, passes as well.
+**Looking up another user.** Any call that names a user other than the caller first checks that the caller may
+see that user: self, administrators, User Managers, the managers of that user's library, and co-workers pass.
+This covers the user calls above, the Transfer… calls, the property-set-row-for-user calls, and [Search](Search.md)
+or GetFoldersAndDocumentsByPage2 when the criteria name a user. Most of these calls then make their own check
+from the table; GetUser, GetUserStatistics and GetDomainMembershipsOfUser make no further check, so a co-worker
+can read them.
 
 ---
 
@@ -115,11 +126,19 @@ co-worker of that user, passes as well.
 
 | Action | Web service calls | Also allowed for |
 |---|---|---|
-| Read audit logs | [GetCheckoutLog](GetCheckoutLog.md), [GetCheckInLog](GetCheckInLog.md), GetVersionCreateLog, GetVersionDeleteLog, [GetNewDocumentsAndFoldersLog](GetNewDocumentsAndFoldersLog.md), [GetDeleteLog](GetDeleteLog.md), [GetDispositionLog](GetDispositionLog.md), [GetOwnershipChangeLog](GetOwnershipChangeLog.md), [GetClassificationLogs](GetClassificationLogs.md), [GetSecurityChangeLog](GetSecurityChangeLog.md) | lib managers of the library the log is about (not for a library's root security log) |
-| Read SOX, ISO and access-list history | [GetSoxLogs](GetSoxLogs.md), [GetISOLogs](GetISOLogs.md), [GetAccessListHistory](GetAccessListHistory.md) | anyone with the right on the document or folder; the role is the fallback for callers without it; lib managers |
+| Read audit logs | [GetCheckoutLog](GetCheckoutLog.md), [GetCheckInLog](GetCheckInLog.md), GetVersionCreateLog, GetVersionDeleteLog, [GetNewDocumentsAndFoldersLog](GetNewDocumentsAndFoldersLog.md), [GetDeleteLog](GetDeleteLog.md), [GetDispositionLog](GetDispositionLog.md), [GetOwnershipChangeLog](GetOwnershipChangeLog.md), [GetClassificationLogs](GetClassificationLogs.md) | lib managers, when the path filter or object is in their library. With no path filter, only Audit Managers. |
+| Read the security change log | [GetSecurityChangeLog](GetSecurityChangeLog.md) | anyone with the right to read the access list of the document or folder; lib managers. For a library's root folder, **only** Audit Managers. |
+| Read SOX and ISO history | [GetSoxLogs](GetSoxLogs.md), [GetISOLogs](GetISOLogs.md) | anyone with the right to read that log on the document; the role is the fallback for callers without it; lib managers |
 | See the licence | [GetLicenseInfo](GetLicenseInfo.md) | nobody else |
 | See server status | [GetSystemStatistics](GetSystemStatistics.md), [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) | nobody else |
 | See warehouse status | [GetWarehouseStatus](GetWarehouseStatus.md) | nobody else |
+
+Audit Managers **cannot** read the server logs ([GetLogs](GetLogs.md), [GetLogStatistics](GetLogStatistics.md)):
+those are administrators only.
+
+[GetAccessListHistory](GetAccessListHistory.md) is not an Audit Manager call: it returns the current access list
+with the history, so the caller needs the right to read the access list of the document or folder, and the role
+does not stand in for it.
 
 ---
 
@@ -127,28 +146,40 @@ co-worker of that user, passes as well.
 
 | Action | Web service calls | Also allowed for |
 |---|---|---|
-| Change application settings | [SetGeneralAppSettings](SetGeneralAppSettings.md), [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md), [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md), [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md), [SetDefaultFolderColumns](SetDefaultFolderColumns.md) | nobody else |
-| Read system behaviour settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) | nobody else. The other Get…Settings calls need no role, except GetEmailAndNotificationSettings (administrators only). |
-| Read and change library policies | [GetDomainPolicies](GetDomainPolicies.md), [SetDomainPolicies](SetDomainPolicies.md) | managers of that library, **only** when the system behaviour setting *Allow library managers to edit policies* is on |
-| See tasks across libraries | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | as for User Managers |
+| Change application settings | [SetGeneralAppSettings](SetGeneralAppSettings.md), [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md), [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md), [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md) | nobody else |
+| Read system behaviour settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) | nobody else |
+| Read and change library policies | [GetDomainPolicies](GetDomainPolicies.md), [SetDomainPolicies](SetDomainPolicies.md) | managers of that library, **only** when the system behaviour setting *Allow library managers to edit policies* is on. Reading needs the same right as changing. |
+| See every workflow task | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | as for User Managers |
+
+The other settings calls need no role: [GetGeneralAppSettings](GetGeneralAppSettings.md) and
+[GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) answer any signed-in user, and
+[GetDefaultFolderColumns](GetDefaultFolderColumns.md) answers anyone. Two settings calls are **administrators
+only**, not Policy Managers: [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) (so a Policy
+Manager can change the e-mail settings but cannot read them back) and
+[SetDefaultFolderColumns](SetDefaultFolderColumns.md).
 
 ---
 
 ## R&D Managers (103)
 
-Retention and disposition. Library managers are **never** allowed these.
+Retention and disposition. Library managers are **never** allowed these, and the role is not limited to a
+library: an R&D Manager acts on every library.
 
 | Action | Web service calls | Notes |
 |---|---|---|
 | Create a schedule | [CreateRandDSchedule](CreateRandDSchedule.md) | |
 | Change or delete a schedule | [UpdateRandDSchedule](UpdateRandDSchedule.md), [DeleteRandDSchedule](DeleteRandDSchedule.md), [DeleteRandDSchedule1](DeleteRandDSchedule1.md) | |
 | Manage retention source authorities | [CreateRetentionSourceAuthority](CreateRetentionSourceAuthority.md), [UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md), [DeleteRetentionSourceAuthority](DeleteRetentionSourceAuthority.md) | |
-| Dispose of documents | [DisposeItem](DisposeItem.md) | For items that have a disposition date. A folder is checked document by document. |
-| Freeze or unfreeze | [SetRdFreezeFlag](SetRdFreezeFlag.md) | Documents and folders. |
-| Give a document a schedule other than its folder's | [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md), [RemoveDocumentRandDSchedule](RemoveDocumentRandDSchedule.md), UpdateDocumentType | Only when the folder has a schedule and the new one differs from it (or is none). Following the folder's schedule needs no role. |
+| Dispose of documents | [DisposeItem](DisposeItem.md) | For items that have a disposition date. Also needs the right to delete the item. A folder is checked document by document. |
+| Freeze or unfreeze | [SetRdFreezeFlag](SetRdFreezeFlag.md) | Documents and folders. Also needs the right to change the retention period of the item. |
+| Give a document a schedule other than its folder's | [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md), [RemoveDocumentRandDSchedule](RemoveDocumentRandDSchedule.md), UpdateDocumentType | Only when the folder has a schedule and the new one differs from it (or is none). Following the folder's schedule, or a document in a folder with no schedule, needs no role, only the right to change the retention period. |
+
+Setting or removing a **folder's** schedule ([SetFolderRandDSchedule](SetFolderRandDSchedule.md),
+[RemoveFolderRandDSchedule](RemoveFolderRandDSchedule.md)) needs no role: only the right to change the retention
+period of that folder.
 
 R&D Managers also **receive the disposition tasks** the daily disposition job creates: each goes to one active
-member of `[R&D Managers]`, or to `sysadmin` when the group has none.
+member of `[R&D Managers]`, or to the `sysadmin` account when the group has none.
 
 ---
 
@@ -160,9 +191,9 @@ owner and need no role.
 | Action | Web service calls |
 |---|---|
 | Create a system-wide saved search or search page | [CreateSavedSearch](CreateSavedSearch.md) without `isPersonal` |
-| Change one | [UpdateSavedSearch](UpdateSavedSearch.md) |
-| Delete one, or anyone's personal one | [DeleteSavedSearch](DeleteSavedSearch.md) |
-| See every saved search, whatever groups it is shared with | [GetSavedSearches](GetSavedSearches.md), [GetSavedSearch](GetSavedSearch.md) |
+| Change a system-wide one | [UpdateSavedSearch](UpdateSavedSearch.md). A personal one can be changed only by its owner, even by a search administrator. |
+| Delete a system-wide one, or anyone's personal one | [DeleteSavedSearch](DeleteSavedSearch.md) |
+| See every system-wide saved search, whatever groups it is shared with | [GetSavedSearches](GetSavedSearches.md), [GetSavedSearch](GetSavedSearch.md) |
 
 As noted above, `[Administrators]` membership does not include this role.
 

@@ -1,6 +1,6 @@
 # FlushApplicationCache API
 
-Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. This API is restricted to system administrators with the `FlushApplicationCache` permission.
+Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. Only administrators can call it: the `sysadmin` account and members of `[Administrators]`.
 
 ## Endpoint
 
@@ -36,8 +36,8 @@ Flushes the in-memory application cache, forcing the system to reload configurat
 
 ## Required Permissions
 
-- Administrators only: User must have `FlushApplicationCache` admin permission
-- Non-admin users will receive an insufficient rights error
+- Administrators only: the `sysadmin` account and members of `[Administrators]`. No other role, User Managers included, may flush the cache.
+- Anyone else is refused with `errorCode="4030"`.
 
 ## Use Cases
 
@@ -158,7 +158,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4030` | a caller with no ticket |
+| `4030` | a caller with no ticket, or a signed-in caller who is not an administrator |
 
 
 Common error responses:
@@ -166,7 +166,7 @@ Common error responses:
 | Error | Description |
 |-------|-------------|
 | `[901]Session expired or Invalid ticket` | Invalid or expired authentication ticket |
-| `[921]Insufficient rights` | User does not have `FlushApplicationCache` admin permission |
+| `[921]Insufficient rights` | The caller is not an administrator |
 
 ## Related APIs
 
