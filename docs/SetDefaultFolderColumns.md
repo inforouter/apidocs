@@ -37,7 +37,8 @@ Sets the system default folder columns using a comma-separated list of column na
 
 ## Required Permissions
 
-- User must be authenticated (anonymous users cannot perform this action)
+- An **administrator** or a member of **[Policy Managers]**, as for the other application-wide settings. Up to 8.7 only administrators could, and others were refused with `4000`.
+- The permission is checked before the column list, so a caller without it gets `4030` whatever it sent.
 
 ## Column Name Validation
 
@@ -168,7 +169,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4030` | a caller with no ticket, or one who may not update settings |
+| `4030` | a caller with no ticket, or one who is neither an administrator nor a Policy Manager |
 
 
 Common error responses:
