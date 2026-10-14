@@ -68,7 +68,7 @@ which are **only** for administrators:
 | Document types | [CreateDocumentTypeDef](CreateDocumentTypeDef.md) / [1](CreateDocumentTypeDef1.md), UpdateDocumentTypeDef / 1, [DeleteDocumentTypeDef](DeleteDocumentTypeDef.md) |
 | Recycle bin | [SearchRecycledItems](SearchRecycledItems.md) / [1](SearchRecycledItems1.md), [PurgeRecycleBinItem](PurgeRecycleBinItem.md); [RestoreRecycleBinItem](RestoreRecycleBinItem.md) for items in **another user's** recycle bin (anyone may restore from their own) |
 | Settings | [FlushApplicationCache](FlushApplicationCache.md), [UpdateApplicationLicense](UpdateApplicationLicense.md) |
-| Users | [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md); [GetManagedDomainsByUser](GetManagedDomainsByUser.md) for **another** user |
+| Users | [GetManagedDomainsByUser](GetManagedDomainsByUser.md) for **another** user |
 | Role groups | Adding and removing members of the six groups on this page ([AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md)) |
 
 Administrators also:
@@ -90,7 +90,7 @@ Library managers pass these checks only for users and groups **local to their li
 
 | Action | Web service calls | Also allowed for |
 |---|---|---|
-| Create a user | [CreateUser](CreateUser.md) | lib managers, for users of their library |
+| Create a user, send them the welcome e-mail | [CreateUser](CreateUser.md), [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md) | lib managers, for users of their library |
 | List users | [GetAllUsers](GetAllUsers.md), [GetAllUsers1](GetAllUsers1.md), [GetAllUsers2](GetAllUsers2.md), [GetAllUsers3](GetAllUsers3.md), [GetAllUsersWithoutDetails](GetAllUsersWithoutDetails.md) | lib managers, when the library filter names their own library. GetAllUsers (no filter) is User Managers only. |
 | Look up another user | [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md), and every call that names a user other than the caller (see note) | self; lib managers; **co-workers** of that user (members of a library the caller is also a member of) |
 | Change a user's profile, status or type | [UpdateUserProfile](UpdateUserProfile.md), [ChangeUserStatus](ChangeUserStatus.md), [ChangeUserType](ChangeUserType.md) | lib managers. **Not** self. |

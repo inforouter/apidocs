@@ -1,6 +1,6 @@
 # SendWelcomeEmailForUser API
 
-Sends a welcome email to a specified user. For native-authenticated users the email includes a 48-hour password reset link. For externally-authenticated users it includes their authentication source name. Requires system administrator privileges.
+Sends a welcome email to a specified user. For native-authenticated users the email includes a 48-hour password reset link. For externally-authenticated users it includes their authentication source name. Requires an administrator, a User Manager, or a manager of the user's library.
 
 ## Endpoint
 
@@ -35,7 +35,7 @@ Sends a welcome email to a specified user. For native-authenticated users the em
 
 ## Required Permissions
 
-Caller must be a **system administrator**.
+The caller must be allowed to create the user: an **administrator**, a member of **[User Managers]**, or a **manager of the user's library** (for a user local to it). Up to 8.7 only administrators could.
 
 ## Email Content
 
@@ -67,7 +67,7 @@ authenticationTicket=abc123&userName=jdoe
 
 | Condition | Error Message |
 |-----------|---------------|
-| Caller is not a system administrator | Only the system administrator can perform this operation |
+| Caller may not create the user | Access denied, naming the roles that may |
 | User not found | User does not exist |
 | User has no email address on file | User has no e-mail address on file |
 
@@ -111,7 +111,7 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
-| `4030` | there is no ticket at all |
-| `4010` | the ticket is expired or unknown |
-| `4000` | no user by that name |
+| `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not an administrator, a User Manager or a manager of the user's library |
+| `4041` | no user by that name |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
