@@ -81,6 +81,9 @@ nav:
     - RenewTicket: RenewTicket.md
     - LogOut: LogOut.md
     - CreateTicketforUser: CreateTicketforUser.md
+    - CreateWebDavSession: CreateWebDavSession.md
+    - GetWebDavSessions: GetWebDavSessions.md
+    - RemoveWebDavSession: RemoveWebDavSession.md
     - ForgotPassword: ForgotPassword.md
     - ForgotPasswordByUserName: ForgotPasswordByUserName.md
     - ChangePasswordUsingSecretText: ChangePasswordUsingSecretText.md
@@ -226,7 +229,9 @@ nav:
   - Search:
     - Search: Search.md
     - GetNextSearchPage: GetNextSearchPage.md
+    - GetNextSearchPage1: GetNextSearchPage1.md
     - GetPreviousSearchPage: GetPreviousSearchPage.md
+    - GetPreviousSearchPage1: GetPreviousSearchPage1.md
     - CreateSavedSearch: CreateSavedSearch.md
     - UpdateSavedSearch: UpdateSavedSearch.md
     - GetSavedSearch: GetSavedSearch.md
@@ -248,6 +253,7 @@ nav:
     - GetAllUsers: GetAllUsers.md
     - GetAllUsers1: GetAllUsers1.md
     - GetAllUsers2: GetAllUsers2.md
+    - GetAllUsers3: GetAllUsers3.md
     - GetAllUsersWithoutDetails: GetAllUsersWithoutDetails.md
     - GetUserGroup: GetUserGroup.md
     - GetUserGroupMembers: GetUserGroupMembers.md
@@ -285,12 +291,15 @@ nav:
   - Domains:
     - GetDomain: GetDomain.md
     - GetDomains: GetDomains.md
+    - GetDomains1: GetDomains1.md
     - GetDomainGroups: GetDomainGroups.md
     - GetDomainMembers: GetDomainMembers.md
     - GetDomainMembers1: GetDomainMembers1.md
+    - GetMembersWithoutAccess: GetMembersWithoutAccess.md
     - GetDomainMembershipsOfUser: GetDomainMembershipsOfUser.md
     - GetDomainPolicies: GetDomainPolicies.md
     - GetDomainStatistics: GetDomainStatistics.md
+    - GetAllDomainStatistics: GetAllDomainStatistics.md
     - GetDomainUsers: GetDomainUsers.md
     - GetDomainUsers1: GetDomainUsers1.md
     - GetManagedDomainsByUser: GetManagedDomainsByUser.md
@@ -322,6 +331,7 @@ nav:
     - GetFolderFlows: GetFolderFlows.md
     - GetDomainFlows: GetDomainFlows.md
     - GetWorkflowStatistics: GetWorkflowStatistics.md
+    - GetAllWorkflowStatistics: GetAllWorkflowStatistics.md
     - GetISOReviewAssignmentsOfUser: GetISOReviewAssignmentsOfUser.md
     - ActivateFlowDef: ActivateFlowDef.md
     - DeactivateFlowDef: DeactivateFlowDef.md
@@ -499,6 +509,7 @@ nav:
   - Recycle Bin:
     - GetRecycleBinContent: GetRecycleBinContent.md
     - SearchRecycledItems: SearchRecycledItems.md
+    - SearchRecycledItems1: SearchRecycledItems1.md
     - RestoreRecycleBinItem: RestoreRecycleBinItem.md
     - PurgeRecycleBinItem: PurgeRecycleBinItem.md
     - EmptyRecycleBin: EmptyRecycleBin.md
