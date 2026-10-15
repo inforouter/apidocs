@@ -19,7 +19,8 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [AuthenticateUser1](AuthenticateUser1.md) - Authenticate with user name, password, and an explicit session language
 - [AuthenticateUserViaWindows](AuthenticateUserViaWindows.md) - Authenticate using the Windows identity (NTLM/Kerberos) from the HTTP request context
 - [ChangePasswordUsingSecretText](ChangePasswordUsingSecretText.md) - Complete a password reset using the one-time token emailed by ForgotPassword
-- [ChangeUserPassword](ChangeUserPassword.md) - Change a user's password (self-service or User Manager)
+- [ChangeUserPassword](ChangeUserPassword.md) - **[Obsolete]** Set another user's password — use ChangeUserPassword1 instead
+- [ChangeUserPassword1](ChangeUserPassword1.md) - Change your own password with the current one, or another user's
 - [CreateTicketforUser](CreateTicketforUser.md) - Create an authentication ticket for any user using the server-side trusted password (server-to-server impersonation)
 - [CreateWebDavSession](CreateWebDavSession.md) - Create a WebDAV session ticket for mapping a drive in Windows File Explorer
 - [ForgotPassword](ForgotPassword.md) - Initiate a password reset by sending a one-time token to the user's registered email address

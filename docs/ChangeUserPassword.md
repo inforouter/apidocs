@@ -1,6 +1,8 @@
 # ChangeUserPassword API
 
-Changes the password of the specified infoRouter user. A user may change their own password; changing another user's password requires the **User Manager** administrative role.
+> **Obsolete.** Use [ChangeUserPassword1](ChangeUserPassword1.md) instead. `ChangeUserPassword` remains functional for backward compatibility - it still sets another user's password - but it refuses your own, and new integrations should use `ChangeUserPassword1`.
+
+Sets another infoRouter user's password; this requires the **User Manager** administrative role. **Your own password is not changed here:** use [ChangeUserPassword1](ChangeUserPassword1.md), which takes your current password.
 
 ## Endpoint
 
@@ -40,19 +42,12 @@ Changes the password of the specified infoRouter user. A user may change their o
 
 **An administrator's account** (the `sysadmin` account or a member of `[Administrators]`) can be changed by administrators only; anyone else is refused with `4030`. See [AdministrativeRoles](AdministrativeRoles.md).
 
-- **Own password:** Any authenticated user may change their own password (where `UserName` matches the caller's own login name).
-- **Another user's password:** The caller must hold the **User Manager** administrative role.
+- **Another user's password:** The caller must hold the **User Manager** administrative role, or manage a library the user belongs to.
+- **Own password:** Refused with `4000`, naming `CHANGEUSERPASSWORD1`. A ticket alone is not enough to change your own password - a stolen ticket would otherwise become a permanent takeover of the account. With Windows authentication on there is no infoRouter password to confirm, and your own password is still accepted here.
 
 ## Example
 
-### Request (GET) -" user changing their own password
-
-```
-GET /srv.asmx/ChangeUserPassword?AuthenticationTicket=abc123&UserName=jsmith&NewPassword=NewSecure!99 HTTP/1.1
-Host: server.example.com
-```
-
-### Request (POST) -" admin changing another user's password
+### Request (POST) - an administrator setting another user's password
 
 ```
 POST /srv.asmx/ChangeUserPassword HTTP/1.1
@@ -116,11 +111,12 @@ The old password stops working immediately, including any session holding a tick
 
 - **Same-password restriction:** The new password must differ from the user's current password. Submitting the same password is rejected.
 - **Password policy enforcement:** The new password is validated against the application's password complexity rules (minimum length, required character types, etc.) as configured in `GetAuthenticationAndPasswordPolicy`. If the password does not comply, the call fails and the response `error` attribute contains a descriptive message identifying the unmet rule.
-- **No old password required:** Unlike typical self-service password-change forms, this API does not require the user to supply their current password -" only the authentication ticket is used to verify the caller's identity. Administrative tooling or trusted integrations should therefore protect this endpoint accordingly.
+- **No current password:** Setting another user's password takes no password of theirs - the caller's right is what decides. Your own password needs your current one, through [ChangeUserPassword1](ChangeUserPassword1.md).
 - **Use `ChangePasswordUsingSecretText` for unauthenticated resets:** If the user has forgotten their password and cannot log in, use the `ForgotPassword` / `ForgotPasswordByUserName` + `ChangePasswordUsingSecretText` flow instead.
 
 ## Related APIs
 
+- [ChangeUserPassword1](ChangeUserPassword1.md) - Change your own password (takes the current one) or another user's
 - [ChangePasswordUsingSecretText](ChangePasswordUsingSecretText.md) - Reset password using a one-time email token (no ticket required)
 - [ForgotPassword](ForgotPassword.md) - Initiate a password reset by email address
 - [ForgotPasswordByUserName](ForgotPasswordByUserName.md) - Initiate a password reset by user name
@@ -132,6 +128,7 @@ The `errorCode` values this operation returns, checked against a running server:
 
 | `errorCode` | When |
 |---:|---|
+| `4000` | `UserName` is the caller: your own password is changed with ChangeUserPassword1 |
 | `4030` | the caller may not set another account’s password - including a caller with no ticket, who is the anonymous user |
 | `4010` | `[901]` the ticket is expired or unknown |
 

@@ -88,6 +88,7 @@ nav:
     - ForgotPasswordByUserName: ForgotPasswordByUserName.md
     - ChangePasswordUsingSecretText: ChangePasswordUsingSecretText.md
     - ChangeUserPassword: ChangeUserPassword.md
+    - ChangeUserPassword1: ChangeUserPassword1.md
 
   - Folders:
     - GetFolder: GetFolder.md
