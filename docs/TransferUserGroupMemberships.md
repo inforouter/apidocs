@@ -40,7 +40,7 @@ Transfers user group memberships from one user to another. The target user is ad
 ### Success Response (with warnings)
 
 ```xml
-<root success="true" warnings="Some group memberships could not be transferred." />
+<root success="true" warnings="Administrative role memberships were not transferred: only administrators can transfer them." />
 ```
 
 ### Error Response
@@ -55,7 +55,9 @@ Transfers user group memberships from one user to another. The target user is ad
 
 **An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
 
-**System administrator.** Only system administrators can transfer user data between accounts.
+**User Managers**, and library managers when **both** users are local to libraries they manage.
+
+**The role groups** (`[User Managers]`, `[Audit Managers]`, `[Policy Managers]`, `[R&D Managers]`, `[Administrators]`, `[Search & Category Administrators]`) are moved by administrators only, as only administrators add or remove their members. For anyone else they stay with `fromUserName`, the other memberships still move, and the answer carries the `warnings` attribute above. Otherwise a User Manager could take a role - a Policy Manager's, say - by transferring its holder's memberships to themselves.
 
 ---
 
@@ -131,8 +133,8 @@ const root = await call('TransferUserGroupMemberships', {
 const warnings = root.getAttribute('warnings');
 ```
 
-An answer may carry a `warnings` attribute when some of the group memberships could not be moved - a conflict at
-the destination, most often. It is absent when everything moved.
+An answer carries a `warnings` attribute when role-group memberships were left behind because the caller is not
+an administrator. It is absent when everything moved.
 
 This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
 not go with it.
@@ -141,6 +143,7 @@ not go with it.
 
 - The `toUserName` is added as a member of each user group where `fromUserName` is a member.
 - Groups where `toUserName` is already a member are skipped without error.
+- Role groups (ids up to 1000) move only when the caller is an administrator; see Required Permissions.
 - The response root element is `<root>`, not `<response>`.
 - Typically used as part of a user offboarding process before deleting the source user.
 
