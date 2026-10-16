@@ -1,6 +1,6 @@
 # GetCurrentUser API
 
-Returns the properties of the currently authenticated user. This is a convenience wrapper around `GetUser` that does not require a `userName` parameter " the user is determined from the authentication ticket.
+Returns the properties of the currently authenticated user. This is a convenience wrapper around `GetUser` that does not require a `userName` parameter - the user is determined from the authentication ticket.
 
 ## Endpoint
 
@@ -41,9 +41,19 @@ Returns the properties of the currently authenticated user. This is a convenienc
     <Preferences>
       <!-- User preferences -->
     </Preferences>
-    <TaskRedirection>
-      <!-- Task redirection settings -->
-    </TaskRedirection>
+    <TaskRedirectionTo>
+      <StartDate>2026-10-20T00:00:00Z</StartDate>
+      <EndDate>2026-10-27T00:00:00Z</EndDate>
+      <UserId>57</UserId>
+      <UserName>ajones</UserName>
+      <FullName>Anne Jones</FullName>
+      <Email>ajones@example.com</Email>
+    </TaskRedirectionTo>
+    <TaskRedirectionsFrom>
+      <TaskRedirection>
+        <!-- StartDate, EndDate, UserId, UserName, FullName, Email of a user redirecting to you -->
+      </TaskRedirection>
+    </TaskRedirectionsFrom>
   </User>
 </root>
 ```
@@ -141,7 +151,11 @@ dates filled in.
 ## Notes
 
 - This API internally calls the same logic as `GetUser` with the username resolved from the authentication ticket
-- The response includes user preferences and task redirection settings in detail mode
+- **Task redirections are in this answer only.** `TaskRedirectionTo` is where your own tasks are redirected,
+  `TaskRedirectionsFrom` lists the users redirecting their tasks to you; each is left out when there is none.
+  [GetUser](GetUser.md) and the user lists (`GetAllUsers`, `GetManagers`, `GetDomainMembers`...) do not carry them -
+  for another user, use [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) and
+  [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md).
 - See also: `GetUser` to retrieve properties of any user by username
 
 ## Error Codes
