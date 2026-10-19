@@ -40,7 +40,7 @@ The `path` parameter determines the scope of the security change log:
 <response success="true">
   <securitychanges>
     <change objectType="DOCUMENT" objectId="123" objectName="report.docx" objectPath="\corporate\accounting"
-            appliedById="5" appliedByName="John Smith" dateApplied="2026-02-01 14:30:00"
+            appliedById="5" appliedByName="John Smith" dateApplied="2026-02-01T14:30:00.000Z"
             isInherited="false" allowAnonymous="false">
       <everyone access="2" accessDescription="Read" />
       <usergroups>
@@ -51,7 +51,7 @@ The `path` parameter determines the scope of the security change log:
       </users>
     </change>
     <change objectType="FOLDER" objectId="456" objectName="accounting" objectPath="\corporate\accounting"
-            appliedById="5" appliedByName="John Smith" dateApplied="2026-01-15 09:00:00"
+            appliedById="5" appliedByName="John Smith" dateApplied="2026-01-15T09:00:00.000Z"
             isInherited="false" allowAnonymous="false">
       <everyone access="2" accessDescription="Read" />
       <usergroups>
@@ -89,7 +89,7 @@ Each `<change>` element contains:
 | `objectPath` | string | Parent path of the object |
 | `appliedById` | integer | User ID of who applied the security change |
 | `appliedByName` | string | Full name of who applied the security change |
-| `dateApplied` | DateTime | Date and time the security change was applied |
+| `dateApplied` | DateTime | Date and time the security change was applied, ISO 8601 in UTC (`yyyy-MM-ddTHH:mm:ss.fffZ`). Until 9.0 it was the server's local time in the server's own culture, e.g. `16.10.2026 09:12:00` on a Turkish server. |
 | `isInherited` | boolean | Whether security is inherited from parent |
 | `allowAnonymous` | boolean | Whether anonymous access is allowed |
 
