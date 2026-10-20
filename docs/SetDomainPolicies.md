@@ -263,7 +263,7 @@ by model binding with HTTP 400.
 - `RightRequired` is applied only when it names one of that policy's `AllowedRights`, which `GetDomainPolicies` reports; any other value leaves the current requirement alone
 - System policies cannot be modified and will be ignored
 - The `DocumentDelete` and `FolderDelete` actions always have logging enabled regardless of the `LogAction` setting
-- From 9.0 the same holds for `SecurityChange`: the security history ([GetSecurityChangeLog](GetSecurityChangeLog.md)) is always written, and `LogAction` on that policy is accepted but has no effect. Until 9.0 it decided whether anything was recorded.
+- From 9.0 the same holds for `SecurityChange`: the security history ([GetSecurityChangeLog](GetSecurityChangeLog.md)) is always written. The policy reports `LogOption="false"` and `LogAction="true"`, and a `LogAction` sent for it is accepted and ignored, as for the deletes. Until 9.0 it decided whether anything was recorded.
 - The `DocumentRead` action always applies to anonymous users regardless of the `RightAnonymous` setting
 - Archive domains have checkout disabled regardless of policy settings
 
