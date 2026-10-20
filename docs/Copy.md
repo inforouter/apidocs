@@ -200,6 +200,8 @@ the operation, not on a shared rule.
 
 ## Notes
 
+- **Access list.** A copied item that was taking its parent's list takes the list of the folder it is copied into; one with a list of its own keeps it, and what is copied under a folder follows the folder's as it did. From 9.0 a copy is one security history entry, on the new folder or document, made by the user copying: at the library it counts everything copied under it ([GetSecurityChangeLog](GetSecurityChangeLog.md)). A copied item that keeps a list of its own gets an entry with that list; one that follows its new folder's list gets none, as its history is the folder's. Until 9.0 a copy wrote no security history at all.
+
 - **infoRouter Connect.** A copied document is queued for whatever the destination folder's AI preferences ask for ([SetFolderAIPreferences](SetFolderAIPreferences.md)), as an upload into that folder would be - less what the copy already carries. The copy keeps the source's AI results and its `AIEnhanced` flags and `AIExtractConfidence`, so a summary the source already has is not asked for again. Copying a folder does this for each of its documents.
 - The source path is resolved as a **document first**. If no document is found at `SourcePath`, it is resolved as a **folder**.
 

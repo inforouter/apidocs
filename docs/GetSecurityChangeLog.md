@@ -2,6 +2,8 @@
 
 Returns the security change log for a library, folder, or document. This API merges the functionality of the library-wide security audit log and the object-specific security history into a single endpoint.
 
+From 9.0 the security history is always kept; it is no longer a library policy. It is kept as one entry per operation, on the item the change was made on, plus one entry for each item whose own list or parent that operation changed. An item that merely inherits a change has no entry of its own for it: its history is read from its own entries with the history of the folders it was following spliced in. So a document that has never been given a list of its own still answers with every change of the folders it has been under, each marked `isInherited="true"`, and a list applied to a tree of fifty thousand items is one entry, not fifty thousand.
+
 ## Endpoint
 
 ```
@@ -28,9 +30,9 @@ Returns the security change log for a library, folder, or document. This API mer
 
 The `path` parameter determines the scope of the security change log:
 
-- **Library path** (e.g. `/corporate/`): Returns all security changes for documents and folders within the library
-- **Folder path** (e.g. `/corporate/accounting/`): Returns security changes for that specific folder
-- **Document path** (e.g. `/corporate/accounting/report.docx`): Returns security changes for that specific document
+- **Library path** (e.g. `/corporate/`): Returns the security changes made in the library, one `<change>` per operation. A list set on a folder and applied to its tree is one entry: `objectType`, `objectId`, `objectName` and `objectPath` name the folder it was set on and `itemCount` says how many folders and documents it reached. A folder move, restore or copy that gave the folder's contents a list is one entry on that folder, counting what came along; a move or restore is made by the system account, a copy by the user copying. The list a library's root starts with is its first entry. Until 9.0 every item reached was an entry of its own, so one change on a large tree filled the whole result or went over its limit.
+- **Folder path** (e.g. `/corporate/accounting/`): Returns the folder's own history - what its list was, and every change that reached it from a folder above - together with every change made on an item under it, one entry per operation with `itemCount`. `objectType`, `objectId`, `objectName` and `objectPath` name the item each entry was made on. Until 9.0 a folder answered its own history alone.
+- **Document path** (e.g. `/corporate/accounting/report.docx`): Returns the document's history: the lists it was given, and the changes of the folders it was following while it had no list of its own, each as an entry on the document with `isInherited="true"`.
 
 ## Response Structure
 
@@ -40,7 +42,7 @@ The `path` parameter determines the scope of the security change log:
 <response success="true">
   <securitychanges>
     <change objectType="DOCUMENT" objectId="123" objectName="report.docx" objectPath="\corporate\accounting"
-            appliedById="5" appliedByName="John Smith" dateApplied="2026-02-01T14:30:00.000Z"
+            appliedById="5" appliedByName="John Smith" dateApplied="2026-02-01T14:30:00.000Z" itemCount="1"
             isInherited="false" allowAnonymous="false">
       <everyone access="2" accessDescription="Read" />
       <usergroups>
@@ -51,7 +53,7 @@ The `path` parameter determines the scope of the security change log:
       </users>
     </change>
     <change objectType="FOLDER" objectId="456" objectName="accounting" objectPath="\corporate\accounting"
-            appliedById="5" appliedByName="John Smith" dateApplied="2026-01-15T09:00:00.000Z"
+            appliedById="5" appliedByName="John Smith" dateApplied="2026-01-15T09:00:00.000Z" itemCount="38"
             isInherited="false" allowAnonymous="false">
       <everyone access="2" accessDescription="Read" />
       <usergroups>
@@ -83,14 +85,15 @@ Each `<change>` element contains:
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `objectType` | string | Object type: `DOCUMENT` or `FOLDER` |
+| `objectType` | string | Object type: `DOCUMENT` or `FOLDER`. For a library query, the item the change was made on |
 | `objectId` | integer | Object identifier |
 | `objectName` | string | Name of the document or folder |
 | `objectPath` | string | Parent path of the object |
 | `appliedById` | integer | User ID of who applied the security change |
 | `appliedByName` | string | Full name of who applied the security change |
 | `dateApplied` | DateTime | Date and time the security change was applied, ISO 8601 in UTC (`yyyy-MM-ddTHH:mm:ss.fffZ`). Until 9.0 it was the server's local time in the server's own culture, e.g. `16.10.2026 09:12:00` on a Turkish server. |
-| `isInherited` | boolean | Whether security is inherited from parent |
+| `itemCount` | integer | How many folders and documents the change reached, counting the one it was made on. `1` for an entry recorded before 9.0, which stands for one item. New in 9.0. |
+| `isInherited` | boolean | Whether the item took its parent's list by this change (`true`), or was given a list of its own (`false`). On an entry a document or folder has because it was following a folder, always `true`. For an entry recorded before 9.0, whether the item inherits now. |
 | `allowAnonymous` | boolean | Whether anonymous access is allowed |
 
 ### Child Elements
@@ -147,7 +150,7 @@ Each `<change>` element contains:
 ## Required Permissions
 
 - **Library-level queries** (the path is a library's root): an administrator, a member of `[Audit Managers]`, or a manager of that library. Up to 8.7 library managers were refused here, though allowed on the library's subfolders.
-- **Document/Folder queries**: the `ReadSecurityAccessList` right on the object; otherwise an administrator, a member of `[Audit Managers]`, or a manager of the object's library.
+- **Document/Folder queries**: the `ReadSecurityAccessList` right on the object; otherwise an administrator, a member of `[Audit Managers]`, or a manager of the object's library. The right on a folder covers the changes made under it.
 
 ## Example Requests
 
@@ -237,11 +240,12 @@ parameter is required." `userName` really is optional; leave it empty for anybod
 
 ## Notes
 
-- Results are ordered by date applied.
-- For library-level queries, a maximum record count is enforced (configured in system settings). If exceeded, an error is returned asking to narrow the query.
+- Results are ordered by date applied, newest first, for every scope. Until 9.0 a library-level query answered oldest first.
+- A library-level or folder-level query answers at most 10,000 changes. The limit is fixed, not a setting. Above it the call fails with `4000` and a message asking to narrow the query. Until 9.0 the limit counted the items reached rather than the changes, so one list applied to a tree of more than 10,000 items could not be read at all, and a smaller one was expanded item by item.
 - UTC dates are automatically converted to local server time.
-- Security change logging must be enabled in the domain policies for entries to be recorded.
-- Both document and folder security changes are included in library-level queries.
+- From 9.0 the security history is always recorded. The `SecurityChange` policy's `LogAction` ([SetDomainPolicies](SetDomainPolicies.md)) has no effect on it any more. Until 9.0 nothing was recorded where that policy was off.
+- An item's entries name the folder it was under when each change was made. A document or folder that inherits follows the folder it is under: the changes of the folder it was moved out of up to the move, and of the one it was moved into from then on, which is an entry of its own by the system account.
+- Both document and folder security changes are included in library-level and folder-level queries.
 
 ## Error Codes
 
@@ -273,3 +277,4 @@ Common error responses:
 ## Version History
 
 - **New**: Added to provide programmatic access to security change history, merging library-wide and object-specific security audit logs
+- **9.0**: A library query answers one `<change>` per operation, with `itemCount`, rather than one per item reached; the limit counts changes

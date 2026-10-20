@@ -161,6 +161,7 @@ than `true`/`false`.
 - The `WelcomeMessage` supports multi-line text; newlines are preserved.
 - Use `CreateFolder` to create sub-folders inside the new domain.
 - To check if a domain already exists before creating, use `DomainExists`.
+- The library's root folder starts with a list of its own: everyone may list. From 9.0 that list is the first entry on the library's security log ([GetSecurityChangeLog](GetSecurityChangeLog.md)), made by the creator, so the log says what the root had before any change to it, and the history of every item that inherits from the root has a floor to reach. The security history is always kept from 9.0; it is not a library policy.
 
 ---
 

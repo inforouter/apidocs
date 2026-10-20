@@ -164,8 +164,10 @@ for (const old of previous) {
 ```
 
 The first `<AccessList>` is the one in force; the rest are history, each with the `DateApplied` and
-`AppliedBy` of the change that replaced it. An item that has never been changed answers with one
-element, exactly as [GetAccessList](GetAccessList.md) does.
+`AppliedBy` of the change that replaced it. From 9.0 an item that has never been given a list of its
+own answers with the changes of the folders it has been under, each with `InheritedSecurity="true"`,
+since those were its lists; until 9.0 such an item answered with one element, exactly as
+[GetAccessList](GetAccessList.md) does, unless its library logged security changes.
 
 An access list is one `<AccessList>` element carrying the entries as children, and three attributes
 about the list itself: `InheritedSecurity` (`true` while the item has no list of its own),
@@ -181,6 +183,7 @@ and `<User>`.
 - The first `<AccessList>` element in the response is always the **current** access list.
 - Subsequent `<AccessList>` elements are historical records from previous security changes.
 - If there are no historical records, only the current access list is returned.
+- From 9.0 the history is always kept, and an item that inherits has the changes of the folders it followed for its history, read as described under [GetSecurityChangeLog](GetSecurityChangeLog.md). The `SecurityChange` policy's `LogAction` no longer decides whether anything is recorded.
 - To retrieve only the current access list (without history), use `GetAccessList`.
 - Global user groups have an empty `DomainName` attribute.
 
