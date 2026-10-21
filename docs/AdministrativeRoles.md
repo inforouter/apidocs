@@ -12,9 +12,9 @@ this page describes those checks as the server makes them.
 | Group id | Group name | Role | In short |
 |---:|---|---|---|
 | `104` | `[Administrators]` | Administrators | Everything. Passes every role check below. |
-| `100` | `[User Managers]` | UserManager | Users, user groups, library membership and managers, user transfers. |
+| `100` | `[User Managers]` | UserManager | Users, user groups, library membership and managers, user transfers. Sees every library. |
 | `101` | `[Audit Managers]` | AuditManager | Audit logs, licence, server and warehouse status. |
-| `102` | `[Policy Managers]` | PolicyManager | Application settings and library policies. |
+| `102` | `[Policy Managers]` | PolicyManager | Application settings and library policies. Sees every library. |
 | `103` | `[R&D Managers]` | RDManager | Retention and disposition schedules, disposition, freezing. |
 | `105` | `[Search & Category Administrators]` | SearchAdministrators | System-wide saved searches and search pages. |
 
@@ -49,6 +49,9 @@ There is no single "my roles" call. Use these:
   paths).
 - Whether the caller manages a library: [GetManagedDomainsByUser](GetManagedDomainsByUser.md) with the caller's
   own name, or an empty name.
+- Which libraries the caller may administer at all: [GetLibrariesForAdministration](GetLibrariesForAdministration.md),
+  which answers every library for Administrators, User Managers and Policy Managers, the managed ones for a library
+  manager, and nothing for anyone else. New in 9.0.
 
 ---
 
@@ -96,7 +99,7 @@ account was protected, so a User Manager could reset another administrator's pas
 |---|---|---|
 | Create a user, send them the welcome e-mail | [CreateUser](CreateUser.md), [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md) | lib managers, for users of their library |
 | List users | [GetAllUsers](GetAllUsers.md), [GetAllUsers1](GetAllUsers1.md), [GetAllUsers2](GetAllUsers2.md), [GetAllUsers3](GetAllUsers3.md), [GetAllUsersWithoutDetails](GetAllUsersWithoutDetails.md) | lib managers, when the library filter names their own library. GetAllUsers (no filter) is User Managers only. |
-| Look up another user | [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md), and every call that names a user other than the caller (see note) | self; lib managers; **co-workers** of that user (members of a library the caller is also a member of) |
+| Look up another user | [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetManagedDomainsByUser](GetManagedDomainsByUser.md), [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md), and every call that names a user other than the caller (see note) | self; lib managers; **co-workers** of that user (members of a library the caller is also a member of) |
 | Change a user's profile, status or type | [UpdateUserProfile](UpdateUserProfile.md), [ChangeUserStatus](ChangeUserStatus.md), [ChangeUserType](ChangeUserType.md) | lib managers. **Not** self. |
 | Change a user's preferences, contact details, e-mail | [UpdateUserPreferences](UpdateUserPreferences.md), [UpdateUserContactInfo](UpdateUserContactInfo.md), [UpdateUserEmail](UpdateUserEmail.md) | self, lib managers |
 | Set a user's password | [ChangeUserPassword](ChangeUserPassword.md), [ChangeUserPassword1](ChangeUserPassword1.md) | lib managers; self through ChangeUserPassword1 only, with the current password |
@@ -114,14 +117,15 @@ account was protected, so a User Manager could reset another administrator's pas
 | See members of a group that hides them | [GetUserGroupMembers](GetUserGroupMembers.md), [GetUserGroupMembers1](GetUserGroupMembers1.md) | lib managers, for local groups. Groups that show their members can be read by anyone. |
 | Add or remove library members | [AddUserAsDomainMember](AddUserAsDomainMember.md), [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md), [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), [RemoveUserGroupFromDomainMembership](RemoveUserGroupFromDomainMembership.md) | lib managers of that library |
 | Add or remove library managers | [AddManagerToDomain](AddManagerToDomain.md), [RemoveManagerFromDomain](RemoveManagerFromDomain.md) | nobody else - **not** library managers. A User Manager cannot appoint themselves. |
+| List every library, membership aside | [GetLibrariesForAdministration](GetLibrariesForAdministration.md) | Policy Managers; lib managers get the libraries they manage. [GetDomains](GetDomains.md) answers everyone, but only with the libraries they belong to. New in 9.0. |
 
 **Looking up another user.** Any call that names a user other than the caller first checks that the caller may
 see that user: self, administrators, User Managers, the managers of that user's library, and co-workers pass.
 This covers the user calls above, the Transfer… calls, the property-set-row-for-user calls, and [Search](Search.md)
 or GetFoldersAndDocumentsByPage2 when the criteria name a user. Search criteria that read a user's own lists (`SUBSCRIPTIONSOF`,
 `FAVORITESOF`, `DOWNLOADQUEOF`, `VIEWCRITERIA` with `USERNAME`) then need the *activity lists* right above. Most of these calls then make their own check
-from the table; GetUser, GetUserStatistics, GetDomainMembershipsOfUser and GetUserTaskRedirectionTo make no further check, so a co-worker
-can read them.
+from the table; GetUser, GetUserStatistics, GetDomainMembershipsOfUser, GetManagedDomainsByUser and GetUserTaskRedirectionTo make no further check, so a co-worker
+can read them. GetManagedDomainsByUser was administrators only up to 9.0.
 
 ---
 
@@ -146,6 +150,7 @@ can read them.
 | Change application settings | [SetGeneralAppSettings](SetGeneralAppSettings.md), [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md), [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md), [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md), [SetDefaultFolderColumns](SetDefaultFolderColumns.md) | nobody else |
 | Read system behaviour and e-mail settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md), [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) | nobody else |
 | Read and change library policies | [GetDomainPolicies](GetDomainPolicies.md), [SetDomainPolicies](SetDomainPolicies.md) | managers of that library: reading always, changing **only** when the system behaviour setting *Allow library managers to edit policies* is on |
+| List every library, membership aside | [GetLibrariesForAdministration](GetLibrariesForAdministration.md) | User Managers; lib managers get the libraries they manage. New in 9.0. |
 
 The other settings calls need no role: [GetGeneralAppSettings](GetGeneralAppSettings.md) and
 [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) answer any signed-in user, and
@@ -206,5 +211,9 @@ Administrators hold this role too, without being members of the group. Up to 8.7
 - **Library managers** are not one of these groups: a user is a library manager of a particular library
   ([AddManagerToDomain](AddManagerToDomain.md)). Only Administrators and User Managers can make someone one.
 - **Self-service** calls (marked *self*) work for every signed-in user on their own account, with no role.
+- **Which libraries to offer.** [GetDomains](GetDomains.md) lists only the libraries the caller belongs to, whatever
+  their role. A page that manages users, memberships, managers or policies should list
+  [GetLibrariesForAdministration](GetLibrariesForAdministration.md) instead: every library for Administrators, User
+  Managers and Policy Managers, the managed ones for a library manager, nothing for anyone else.
 - [UpdateRandDSchedule](UpdateRandDSchedule.md) is checked internally as "delete a schedule". Both are R&D Managers
   only, so the outcome is the same.

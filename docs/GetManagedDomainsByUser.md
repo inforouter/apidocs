@@ -1,6 +1,6 @@
 # GetManagedDomainsByUser API
 
-Returns the list of domains/libraries that a user has management (administration) rights on. Omitting `userName` retrieves the managed domains of the currently authenticated user. Querying another user's managed domains requires system administrator role.
+Returns the list of domains/libraries that a user has management (administration) rights on. Omitting `userName` retrieves the managed domains of the currently authenticated user. Another user's managed domains are answered to whoever may look that user up: administrators, User Managers, the managers of the user's library, and the user's co-workers. Up to 9.0 it was administrators only.
 
 ## Endpoint
 
@@ -74,7 +74,7 @@ When the user manages no domains the `<domains>` element is empty:
 ## Required Permissions
 
 - Any authenticated user may retrieve their **own** managed domains (omit `userName` or pass their own username).
-- Retrieving **another user's** managed domains requires **system administrator** role; a non-administrator querying another user receives an access-denied error.
+- Retrieving **another user's** managed domains is allowed to whoever may look that user up (see [AdministrativeRoles](AdministrativeRoles.md)): administrators, members of `[User Managers]`, the managers of the user's library, and the user's co-workers - members of a library the caller also belongs to. Anyone else receives `4030`. Up to 9.0 only an administrator could ask about another user, so a User Manager could not see who manages what.
 
 ## Example Requests
 
@@ -170,5 +170,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | Error | Description |
 |-------|-------------|
 | `[901]` | Session expired or invalid authentication ticket |
-| `[1573]` | Only the system administrator can perform this operation - a non-administrator asked about another user (`errorCode` 4030). Up to 8.7 this said only search administrators could. |
+| `[4030]` | Access denied - the caller may not look up the user asked about (`errorCode` 4030). Up to 9.0 this was `[1573]` "Only the system administrator can perform this operation" for every non-administrator; up to 8.7 it said only search administrators could. |
 | User not found | The specified `userName` does not exist |

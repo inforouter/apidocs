@@ -305,6 +305,7 @@ nav:
     - GetDomainUsers1: GetDomainUsers1.md
     - GetManagedDomainsByUser: GetManagedDomainsByUser.md
     - GetMemberDomains: GetMemberDomains.md
+    - GetLibrariesForAdministration: GetLibrariesForAdministration.md
     - GetGlobalGroups: GetGlobalGroups.md
     - GetLocalGroups: GetLocalGroups.md
     - DomainExists: DomainExists.md
