@@ -234,6 +234,13 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 
 ### Security & Access Control
 - [AdministrativeRoles](AdministrativeRoles.md) - The built-in administrative role groups and the calls each one unlocks
+- [AdministratorsRole](AdministratorsRole.md) - What only Administrators can do, and how an administrator is defined
+- [UserManagersRole](UserManagersRole.md) - What User Managers can and cannot do with users, groups and library membership
+- [AuditManagersRole](AuditManagersRole.md) - What Audit Managers can and cannot read: audit logs, licence, server and warehouse status
+- [PolicyManagersRole](PolicyManagersRole.md) - What Policy Managers can and cannot change: application settings and library policies
+- [RDManagersRole](RDManagersRole.md) - What R&D Managers can and cannot do: retention schedules, freezing, disposition
+- [SearchAdministratorsRole](SearchAdministratorsRole.md) - What Search & Category Administrators can and cannot do with saved searches
+- [LibraryManagersRole](LibraryManagersRole.md) - What a library manager can and cannot do, library by library
 - [ApplyInheritedAccessList](ApplyInheritedAccessList.md) - Apply the inherited (parent) access list to a document or folder, removing any custom security settings
 - [DocumentAccessAllowed](DocumentAccessAllowed.md) - Check whether the calling user is allowed to perform a specific action on a document
 - [FolderAccessAllowed](FolderAccessAllowed.md) - Check whether the calling user is allowed to perform a specific action on a folder

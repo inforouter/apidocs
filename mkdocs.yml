@@ -384,6 +384,13 @@ nav:
 
   - Security & Access:
     - AdministrativeRoles: AdministrativeRoles.md
+    - Administrators role: AdministratorsRole.md
+    - User Managers role: UserManagersRole.md
+    - Audit Managers role: AuditManagersRole.md
+    - Policy Managers role: PolicyManagersRole.md
+    - R&D Managers role: RDManagersRole.md
+    - Search & Category Administrators role: SearchAdministratorsRole.md
+    - Library Managers: LibraryManagersRole.md
     - GetAccessList: GetAccessList.md
     - GetAccessListHistory: GetAccessListHistory.md
     - GetFolderAccessListStatistics: GetFolderAccessListStatistics.md
