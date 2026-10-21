@@ -38,6 +38,16 @@ For an administrative action the server allows the call when **any** of these is
 
 A refusal is `errorCode="4030"`, and the message names the roles that would have been allowed.
 
+**Reaching a library by name.** The library calls that take a `DomainName` - [GetManagers](GetManagers.md),
+[GetDomainMembers](GetDomainMembers.md), [AddUserAsDomainMember](AddUserAsDomainMember.md),
+[AddManagerToDomain](AddManagerToDomain.md), [GetDomainPolicies](GetDomainPolicies.md) and the rest - first
+look the library up, and a library the caller cannot reach is `4041` "library not found", so that its existence
+is not given away. From 9.0 a library is reachable by its members, by anyone where it allows anonymous access, and
+by whoever may administer it: Administrators, User Managers and Policy Managers for every library, and a library's
+own managers for it. Up to 9.0 it was members only by name, so a User Manager had to join a library before
+managing it, and an administrator reached a library they did not belong to by id but not by name. Reaching the
+library is only the first step; each call then makes its own check from the tables on this page.
+
 ## Finding out which roles the signed-in user has
 
 There is no single "my roles" call. Use these:

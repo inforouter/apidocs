@@ -70,7 +70,7 @@ If no managers are assigned, the `<users>` element is empty:
 
 ## Required Permissions
 
-Any **authenticated user** can call this API. Anonymous (unauthenticated) users are rejected.
+Any **authenticated user** can call this API for a library they belong to or that allows anonymous access. From 9.0 a library is also reachable by whoever may administer it, whether or not they belong to it: administrators, members of `[User Managers]` and `[Policy Managers]`, and the library's own managers. Up to 9.0 a User Manager who was not a member got `4041` "library not found", and so did an administrator asking by name. Anonymous (unauthenticated) users are rejected.
 
 ---
 
@@ -167,7 +167,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
-| `4041` | no library by that name - including one the caller cannot see |
+| `4041` | no library by that name - including one the caller neither belongs to nor may administer |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
