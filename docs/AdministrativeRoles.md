@@ -47,8 +47,9 @@ through this list.
 **Reaching a library by name.** The library calls that take a `DomainName` first look the library up, and a
 library the caller cannot reach is `4041` "library not found". A library is reachable by its members, by
 anyone where it allows anonymous access, and by whoever may administer it: Administrators, User Managers and
-Policy Managers for every library, and a library's own managers for it. Audit Managers and R&D Managers are
-not on that list; see the warnings on their pages.
+Policy Managers for every library, and a library's own managers for it. Audit Managers are not on that list,
+but the audit logs resolve a path filter's library by name alone, so they may filter by any library. R&D
+Managers are not on it either; see the warning on their page.
 
 ## Finding out which roles the signed-in user has
 
@@ -72,10 +73,9 @@ meanwhile. The ones that most often surprise a Control Panel page:
 - **Administrators are not library members.** The item-level rights (documents, folders, access lists) have no
   administrator bypass: an administrator who is not a member of a library gets `4030` on its content, and
   [GetDomains](GetDomains.md) lists only member libraries. See [Administrators](AdministratorsRole.md).
-- **Audit Managers and R&D Managers reach only their own libraries by name.** They are not in the list of
-  roles that may reach any library, so a log filtered by a library they do not belong to is `4041`, and an
-  R&D Manager cannot open an item in a library they are not a member of. See
-  [Audit Managers](AuditManagersRole.md) and [R&D Managers](RDManagersRole.md).
+- **R&D Managers reach only their own libraries.** The role is not in the list of roles that may reach any
+  library, so an R&D Manager cannot open an item in a library they are not a member of. See
+  [R&D Managers](RDManagersRole.md). (Audit Managers may filter the audit logs by any library.)
 - **Co-workers read user details.** [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md),
   [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetManagedDomainsByUser](GetManagedDomainsByUser.md)
   and [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) answer any member of a library the user is also in.

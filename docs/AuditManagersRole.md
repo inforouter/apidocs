@@ -35,7 +35,7 @@ These eight calls take `startDate`, `endDate` and `pathFilter` and go through `L
 Conditions, from `LogOperations.IsLogAccessAllowed` and `DocumentsAndFoldersWs.BuildAuditFilter`:
 
 - With no `pathFilter`, the library id passed to the matrix is 0: only Audit Managers (and administrators) pass, and the log spans every library.
-- With a `pathFilter`, its first segment is looked up as a library name through `DomainOperations.GetLibraryByNameAsync`, and that library's id is passed to the matrix, which is why a library manager passes for their own library. The lookup itself answers `4041` `Library not found` unless the caller can reach the library (see the first warning below).
+- With a `pathFilter`, its first segment is looked up as a library name (a plain name lookup, not the reach rule the other library calls use), and that library's id is passed to the matrix, which is why a library manager passes for their own library and an Audit Manager passes for any library, member or not. A name that is not there answers `4041` `Library not found` only to a caller who holds the role (or an administrator); anyone else gets the `4030` they would get for an existing library, so the filter tells them nothing about which libraries exist.
 - A `pathFilter` that is only a library name is cleared to "the whole library"; a longer one filters rows by path. `BuildAuditFilter` sets only the two dates and the path, so the folder-id and document-id branches of `IsLogAccessAllowed` are never reached from the API.
 
 ### Logs of one document or folder
@@ -78,9 +78,6 @@ The weekly technical status report (`SendTechnicalStatusReport`) is a maintenanc
 
 ## Rules that look wrong
 
-!!! warning "A path filter names a library the Audit Manager must belong to"
-    `LogOperations.IsLogAccessAllowed` resolves the first segment of `pathFilter` with `DomainOperations.GetLibraryByNameAsync`, whose `MayReachAsync` admits a member of the library, anyone where it allows anonymous access, and whoever passes `ListLibrariesForAdministration`: administrators, User Managers, Policy Managers and the library's own managers. `AuditManager` is not in that action, so an Audit Manager who is not a member of the library gets `4041` `Library not found` from the eight date-range logs when filtering by that library, while the same call with no filter answers them with every library's rows, that library included. Task #20 of the fix list is still open for this role (commit 61e1fb36 fixed it for administrators, User and Policy Managers). Meanwhile the UI should offer an Audit Manager only the libraries [GetDomains](GetDomains.md) returns for them as filter values, or treat `4041` on a filtered query as "not reachable" rather than "no such library".
-
 !!! warning "The per-item logs are reachable only inside the caller's own libraries"
     `GetSoxLogs`, `GetISOLogs`, `GetClassificationLogs`, `GetAccessListHistory` and `GetSecurityChangeLog` load the item by path first. `DocumentLoadOperation.GetDocumentAsync` and `FolderOperations.GetFolderAsync` answer `4041` (`Document not found.` / `The folder has either been deleted or is not accessible.`) unless the item's library is in `DomainsStore.GetViewableLibraryListAsync` for the caller, which is the libraries the caller is a member of plus those allowing anonymous access. That lookup has no role or administrator bypass (only the internal system account, id 3, is exempt), so the `ViewAuditLogs` fallback in these calls is reached only for items in libraries the Audit Manager already belongs to. The UI should not offer these five calls for a path outside the caller's libraries, and should read `4041` on them as "not reachable", not as "the role is missing".
 
@@ -105,6 +102,7 @@ The weekly technical status report (`SendTechnicalStatusReport`) is a maintenanc
 - `GetLogStatistics` and `GetLogs` validate `logType` in `MiscServices` before `ServerLogs` checks the role, so a caller without the role sees `4000` for a bad type and `4030` for a good one.
 - The SOX and ISO logs refuse an offline document with `4230` before any permission check, for everyone.
 - The user named in `GetSecurityChangeLog`'s `userName` filter is looked up with `GetUserAsync(name, false)`, that is without the user-visibility check; an unknown name is `4041`.
+- Up to 2026-10-22 the path filter resolved the library through the reach rule, which has no audit role, so an Audit Manager who was not a member of the library got `4041` for a library whose rows the unfiltered call had just shown them (task #34). Test: `AuditLogBatchApiTests.GetCheckoutLog_FilteredByALibrary_AnswersAnAuditManagerWhoIsNotAMember`.
 - Tasks #17 and #31 of the fix list do not touch this role.
 
 ## Related
