@@ -393,6 +393,7 @@ nav:
     - Library Managers: LibraryManagersRole.md
     - GetAccessList: GetAccessList.md
     - GetAccessListHistory: GetAccessListHistory.md
+    - GetFolderAccessListCatalog: GetFolderAccessListCatalog.md
     - GetFolderAccessListStatistics: GetFolderAccessListStatistics.md
     - GetOwner: GetOwner.md
     - GetOwnershipChangeLog: GetOwnershipChangeLog.md

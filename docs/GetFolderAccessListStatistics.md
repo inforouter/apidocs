@@ -154,6 +154,7 @@ if (folders > 0 || documents > 0) {
 
 - Every count covers the whole tree below the folder, not just its direct children.
 - When both not-inherited numbers are `0`, `ApplyToTree=true` and `ApplyToTree=false` change the same items.
+- To show the user which items the numbers are made of, call [GetFolderAccessListCatalog](GetFolderAccessListCatalog.md) on the same folder.
 - The numbers are a snapshot: another user can change an access list between this call and `SetAccessList`.
 - A document path is answered `4041`; a document has no tree.
 
@@ -161,6 +162,7 @@ if (folders > 0 || documents > 0) {
 
 ## Related APIs
 
+- [GetFolderAccessListCatalog](GetFolderAccessListCatalog.md) - Which items the not-inherited numbers are made of, as paths with counts
 - [SetAccessList](SetAccessList.md) - Set the access list, optionally on the whole tree
 - [GetAccessList](GetAccessList.md) - Get the access list of one document or folder
 - [ApplyInheritedAccessList](ApplyInheritedAccessList.md) - Put an item back to inheriting from its parent

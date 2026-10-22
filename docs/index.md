@@ -246,6 +246,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [FolderAccessAllowed](FolderAccessAllowed.md) - Check whether the calling user is allowed to perform a specific action on a folder
 - [GetAccessList](GetAccessList.md) - Get the current access list (security permissions) for a document or folder
 - [GetAccessListHistory](GetAccessListHistory.md) - Get the current and historical access list records for a document or folder
+- [GetFolderAccessListCatalog](GetFolderAccessListCatalog.md) - List the subfolders and documents under a folder that hold an access list of their own, with counts of what inherits from each
 - [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) - Count the subfolders and documents under a folder that do not carry the folder's access list
 - [GetOwner](GetOwner.md) - Get the owner of a document or folder
 - [SetAccessList](SetAccessList.md) - Set the access list (security permissions) for a document or folder
