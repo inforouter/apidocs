@@ -28,6 +28,7 @@ Use this method when a client application needs to confirm that a previously obt
 
 ```xml
 <root success="true"
+      ticket="3f2a1b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c"
       userid="42"
       username="jsmith"
       firstName="John"
@@ -43,6 +44,7 @@ Use this method when a client application needs to confirm that a previously obt
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `success` | boolean | `true` on success |
+| `ticket` | GUID | The ticket that was validated: the one passed in, or the one read from the `ticket` cookie when none was passed |
 | `userid` | integer | Internal numeric user ID |
 | `username` | string | The user's login name |
 | `firstName` | string | User's first name |
@@ -133,6 +135,7 @@ try {
 
 - **Passive check only:** This method does not renew or extend the ticket's 30-day sliding expiration. The expiration timestamp returned in `expireOn` reflects the current value, unchanged by this call.
 - **Cookie fallback:** If `AuthenticationTicket` is not supplied as a parameter, the server checks for a `ticket` HTTP cookie. Browser-based clients that store the ticket in a cookie can omit the parameter entirely.
+- **Picking up the session after an OIDC sign-in:** the `/oidc/complete/{provider}` redirect stores the new ticket only in the `ticket` cookie, which is HttpOnly by default, so a script cannot read it. Call `isValidTicket` with no parameter: the `ticket` attribute of the answer is the cookie's ticket, ready for the calls that take `authenticationTicket`. An OIDC user with no matching infoRouter account gets an anonymous session, which this call reports with `isAuthenticated="False"`.
 - **No credentials required:** Unlike `RenewTicket`, no `UID` or `PWD` need to be supplied -" the ticket itself is the only input.
 - **Use `RenewTicket` to extend sessions:** If you want to both validate and reset the expiration window, use `RenewTicket` instead.
 - **Already-expired tickets return `[901]`:** Once a ticket has expired and been evicted from the session cache, it cannot be recovered. A new login via `AuthenticateUser` is required.
