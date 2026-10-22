@@ -281,6 +281,6 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | the ticket is expired or unknown |
-| `4041` | no set by that name, or the set has no such field |
-| `4200` | the caller is not a system administrator - the message says so, the code does not |
+| `4030` | the caller is not a system administrator - including a caller with no ticket at all; checked before the set is looked up |
+| `4041` | no set by that name, or the set has no such field - asked only of an administrator; the role is checked first |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

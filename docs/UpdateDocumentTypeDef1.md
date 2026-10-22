@@ -43,7 +43,7 @@ Updates an existing document type definition. Allows renaming the document type,
 
 ## Required Permissions
 
-The calling user must be an **authenticated user**. Anonymous users are not permitted.
+Only **system administrators** may call this API. An anonymous caller is refused with `4010`, any other non-administrator with `4030`, and both before the type is looked up.
 
 ---
 
@@ -179,7 +179,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4030` | the caller is not a system administrator |
-| `4041` | no document type with that id, or no property set or schedule by the name given |
+| `4041` | no document type with that id, or no property set or schedule by the name given - asked only of an administrator; the role is checked first |
 | `4090` | a document type of the new name already exists |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 

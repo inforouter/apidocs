@@ -140,7 +140,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4030` | the caller is not a system administrator - including a caller with no ticket at all |
-| `4041` | no set by that name, or the set has no such field |
+| `4041` | no set by that name, or the set has no such field - asked only of an administrator; the role is checked first |
 | `4090` | the field already offers that value |
-| `4000` | the field's control type does not take options |
+| `4000` | the field's control type does not take options - asked only of an administrator; the role is checked first |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

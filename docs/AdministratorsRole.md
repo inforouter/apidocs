@@ -82,9 +82,6 @@ Everything every other role page lists, plus the following. In the first table n
 
 ## Rules that look wrong
 
-!!! warning "Checks ahead of the administrator check leak what exists"
-    Four administrator-only writers validate or look things up before asking who the caller is, so a non-administrator can learn what exists (the pattern of task #26): `DocumentTypeOperations.CreateDocumentTypeAsync` resolves the required property set (4041 if missing) before the role; `DocumentTypeOperations.UpdateAsync` checks the reserved name first; `PropertySetFieldExtensions.AddFieldOptionAsync` checks the field's control type (4000) first; `PropertySetServices.SetPropertySetLookupFieldParametersAsync` looks up the property set and the field and checks the control type before the administrator check. Nothing is changed by a non-administrator; only the answer differs (4041 or 4000 instead of 4030). The UI should hide these for non-administrators rather than read the code.
-
 !!! warning "The sysadmin account: one call refuses, another silently ignores"
     `ChangeUserStatus` and `ChangeUserType` refuse to touch the `sysadmin` account (4030 "This is a system account and cannot be changed."), but `UpdateUserProfile` on the same account answers success and quietly keeps the status Enabled and the type Author (`UserExtensions.UpdateProfile`). The UI should not offer status or type for the `sysadmin` account at all, and should not take an UpdateUserProfile success on it as proof that status or type changed.
 

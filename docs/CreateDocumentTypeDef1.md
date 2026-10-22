@@ -175,7 +175,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all - the anonymous user is refused |
 | `4030` | the caller is not a system administrator |
 | `4090` | a document type of that name already exists |
-| `4041` | no property set, or no retention schedule, by the name given |
+| `4041` | no property set, or no retention schedule, by the name given - asked only of an administrator; the role is checked first |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 | Error | Description |
