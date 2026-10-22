@@ -50,8 +50,11 @@ any right or role is asked (`InfoRouter.GetDocumentByPathAsync`, `GetFolderByPat
 item's library is in `DomainsStore.GetViewableLibraryListAsync` for the caller: a library the caller is a
 member of (directly or through a group), or one that allows anonymous access. The R&D Manager role is not
 in that list, so **the role alone does not reach an item in a library the manager is not a member of**.
-Inside a library the manager is a member of, the role stands in for the missing right on any item, whatever
-the item's own access list says.
+That is by design: a library that keeps no records under retention has nothing for the role to see, and a
+library that does is opened to the role by its manager, who adds the `[R&D Managers]` group to the
+library's members with [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md). Inside a library the
+manager or the group is a member of, the role stands in for the missing right on any item, whatever the
+item's own access list says.
 
 ### Defining schedules and source authorities (role only)
 
@@ -142,14 +145,19 @@ its owner, the managers of its library, and users with CHANGE or Full Control on
 
 ## Notes
 
-- **Which items the role reaches.** The role is defined system-wide (every call site passes
+- **Which items the role reaches, and why.** The role is defined system-wide (every call site passes
   `localDomainId 0`), but every item call looks the item up first, and the lookup admits only libraries the
-  caller is a member of or that allow anonymous access. In a library that allows anonymous access an R&D
-  Manager who is not a member does reach the item: the right check then fails with `4030` ("library
+  caller is a member of or that allow anonymous access. This is intended (confirmed 2026-10-22): a library
+  whose content needs no records management has no reason to show its documents and folders to R&D
+  Managers, and a library that does is opened by its manager adding the `[R&D Managers]` group as a member
+  ([AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md)); from then on every member of the group
+  reaches its items and the role supplies the rights. In a library that allows anonymous access an R&D
+  Manager who is not a member reaches the item anyway: the right check then fails with `4030` ("library
   members with appropriate rights"), and `MayChangeRetentionAsync` lets the role replace that `4030`. In a
   members-only library the same manager gets `4041` from the lookup. Control Panel pages that offer R&D
-  actions per item should list the libraries from [GetDomains](GetDomains.md) (member libraries), not
-  assume every library.
+  actions per item should list the libraries from [GetDomains](GetDomains.md) (member libraries, which
+  include the ones the group was added to), not assume every library; "document not found" for an R&D
+  Manager in a library they expect to work in means the library's manager has not added the group.
 - **`SetDifferentRetentionDispostion` is live.** It is the action `MayChangeRetentionAsync`
   (`RetentionAndDispositionOperations.cs`) asks for whenever the role stands in for the missing right:
   document and folder schedule, document and folder freeze, and the schedule side of `UpdateDocumentType`.
@@ -162,7 +170,10 @@ its owner, the managers of its library, and users with CHANGE or Full Control on
   the first user in the result whose status is not Disabled. With 100 members or fewer the chooser returns
   the list as it is, so the same member (the first by name who is not disabled) receives every task and
   every notice; only with more than 100 members are they shuffled and ranked by open-task count. When the
-  group has no usable member the `sysadmin` account is used. For a document the job creates the task
+  group has no usable member the `sysadmin` account is used. The job does not check that the chosen
+  member reaches the document's library: a schedule applied in a library the `[R&D Managers]` group is not
+  a member of yields a task its assignee cannot complete, so the group is added before schedules are
+  applied there. For a document the job creates the task
   (requirement Dispose or Transfer, due in three days, assigned by SYSTEM, failing over to `sysadmin` if the
   assignee cannot be resolved) when the schedule has `CreateTask`, and sends the DOCUMENT_DISPOSE notice to
   the same user when it has `SendEmail`; for a folder no task is created, only the FOLDERDISPOSE notice when

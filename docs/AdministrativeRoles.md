@@ -49,7 +49,8 @@ library the caller cannot reach is `4041` "library not found". A library is reac
 anyone where it allows anonymous access, and by whoever may administer it: Administrators, User Managers and
 Policy Managers for every library, and a library's own managers for it. Audit Managers are not on that list,
 but the audit logs resolve a path filter's library by name alone, so they may filter by any library. R&D
-Managers are not on it either; see the warning on their page.
+Managers are not on it either, by design: a library that needs records management gets the `[R&D Managers]`
+group added as a member by its manager. See [R&D Managers](RDManagersRole.md).
 
 ## Finding out which roles the signed-in user has
 
@@ -73,8 +74,10 @@ meanwhile. The ones that most often surprise a Control Panel page:
 - **Administrators are not library members.** The item-level rights (documents, folders, access lists) have no
   administrator bypass: an administrator who is not a member of a library gets `4030` on its content, and
   [GetDomains](GetDomains.md) lists only member libraries. See [Administrators](AdministratorsRole.md).
-- **R&D Managers reach only their own libraries.** The role is not in the list of roles that may reach any
-  library, so an R&D Manager cannot open an item in a library they are not a member of. See
+- **R&D Managers reach only libraries they are a member of.** Intended: the role is system-wide, but an
+  R&D Manager opens an item only in a library that lists them, or the `[R&D Managers]` group, as a member.
+  A library that needs records management gets the group added by its manager
+  ([AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md)); elsewhere the role has nothing to see. See
   [R&D Managers](RDManagersRole.md). (Audit Managers may filter the audit logs by any library.)
 - **Co-workers read user details.** [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md),
   [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetManagedDomainsByUser](GetManagedDomainsByUser.md)
