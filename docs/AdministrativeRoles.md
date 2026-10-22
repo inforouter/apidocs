@@ -84,8 +84,7 @@ meanwhile. The ones that most often surprise a Control Panel page:
   and [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) answer any member of a library the user is also in.
   See [User Managers](UserManagersRole.md).
 - **Refusals that are not `4030`.** [GetUserGroupMembers](GetUserGroupMembers.md) and [GetSoxLogs](GetSoxLogs.md)
-  refuse with `4000`, [PurgeRecycleBinItem](PurgeRecycleBinItem.md) with `4200`. Check the message, not only
-  the code.
+  refuse with `4000`. Check the message, not only the code.
 - **Library managers and the policy flag.** A library manager cannot read the setting that decides whether
   they may edit policies. See [Library Managers](LibraryManagersRole.md).
 - **Transfer to an external agency** has no API, so the transfer tasks the disposition job creates cannot be

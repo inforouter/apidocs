@@ -63,7 +63,7 @@ If the item cannot be purged (e.g. a storage error for one file within a folder)
 
 ## Required Permissions
 
-**System administrators only.** Regular users and domain managers cannot call this API. Attempting to call it as a non-administrator returns a permission error.
+**System administrators only.** Regular users and library managers cannot call this API. A non-administrator is refused with `errorCode="4030"` before the handler is looked up, so the answer does not say whether the item is in the bin.
 
 ---
 
@@ -192,6 +192,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4000` | `ItemHandler` is not a handler: the letter and the id are checked before the lookup, and the message naming the parameter is an English literal that is not translated |
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator: "Only the system administrator can perform this operation" |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter
