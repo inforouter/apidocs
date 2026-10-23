@@ -82,8 +82,7 @@ Everything every other role page lists, plus the following. In the first table n
 
 ## Rules that look wrong
 
-!!! warning "The sysadmin account: one call refuses, another silently ignores"
-    `ChangeUserStatus` and `ChangeUserType` refuse to touch the `sysadmin` account (4030 "This is a system account and cannot be changed."), but `UpdateUserProfile` on the same account answers success and quietly keeps the status Enabled and the type Author (`UserExtensions.UpdateProfile`). The UI should not offer status or type for the `sysadmin` account at all, and should not take an UpdateUserProfile success on it as proof that status or type changed.
+None open. The three found on 2026-10-21 (PurgeRecycleBinItem answering 4200, lookups ahead of the administrator check, and UpdateUserProfile quietly keeping the `sysadmin` account's status and type) were fixed on 2026-10-22 and 2026-10-23.
 
 ## Finding out whether the signed-in user has this role
 

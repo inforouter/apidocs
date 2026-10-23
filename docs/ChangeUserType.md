@@ -156,6 +156,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4030` | the caller is not a system administrator |
+| `4030` | the account is `sysadmin`: "This is a system account and cannot be changed." - the same refusal UpdateUserProfile gives if asked to change its status or type |
 | `4041` | no user by that name |
 | `4000` | `userType` is anything but 1 or 2 - including 0, and the refusal does not say which values are allowed |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |

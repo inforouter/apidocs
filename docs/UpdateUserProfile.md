@@ -155,6 +155,7 @@ resolving and every later call has to use the new one. Send the existing name to
 - The `AuthenticateSource` determines how the user authenticates: `native` uses infoRouter's built-in password authentication, other values refer to configured LDAP, OAuth, or Windows domain authorities.
 - To update the user's email address, use `UpdateUserEmail`.
 - To update notification preferences, use `UpdateUserPreferences`.
+- The user's status and type are never changed by this call; use [ChangeUserStatus](ChangeUserStatus.md) and [ChangeUserType](ChangeUserType.md). On the `sysadmin` account those two refuse with `4030` "This is a system account and cannot be changed.", and the operation behind this call refuses the same way if it is ever asked to change them.
 
 ---
 
