@@ -137,58 +137,6 @@ home library.
 | Create or delete property set definitions | [CreatePropertySetDefinition](CreatePropertySetDefinition.md), [DeletePropertySetDefinition](DeletePropertySetDefinition.md) | Administrators (`PropertySetOperations.cs`, CreatePropertySet; `InfoRouter.cs`, DeletePropertySetAsync) | `4030` "Only the system administrator can perform this operation" |
 | Flush the application cache | [FlushApplicationCache](FlushApplicationCache.md) | Administrators | `4030`, the role list naming the system administrator only |
 
-## Rules that look wrong
-
-!!! warning "Co-workers read what only User Managers should (task list #17, deferred)"
-    [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md),
-    [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetManagedDomainsByUser](GetManagedDomainsByUser.md)
-    and [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) make only the visibility check
-    (`UserOperations.GetUserObjectAsync` with the check on; `UserServices.cs`, `LibraryServices.cs`), which a
-    co-worker passes. GetDomainMembershipsOfUser then lists every library the user belongs to, hidden ones the
-    caller is not in included, and GetUserStatistics gives task counts and workflow and ISO roles, while the
-    neighbouring reads (group memberships, workflow roles, activity lists) ask for a role. The UI may offer
-    these to any signed-in user; do not take a success for a sign that the caller holds the role.
-
-!!! warning "A User Manager can reroute an administrator's tasks but not set the redirection"
-    `IRSecurity.ChangesTheAccount` lists `SetUserTaskRedirections` but not `RerouteUserTaskRedirection`, so
-    [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) on the `sysadmin` account or a member of
-    `[Administrators]` passes for a User Manager (and for the managers of a local administrator's library) and
-    rewrites where that account's tasks go (`UserExtensions.cs`, RerouteTaskRedirectionAsync calls the same
-    SetRedirectionAsync), while [SetUserTaskRedirection](SetUserTaskRedirection.md) and
-    [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) on the same account are refused. Until it is
-    fixed, hide rerouting for administrator accounts as the UI hides setting it.
-
-!!! warning "A read refused by the change guard: GetUserTaskRedirectionsFrom on an administrator"
-    [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) is a read, but it is checked with
-    `SetUserTaskRedirections` (`UserExtensions.cs`, GetTaskRedirectionsToUser), which `ChangesTheAccount`
-    covers, so a User Manager asking for the redirections that point to an administrator gets `4030` "Only
-    administrators can change an administrator's account." The method also checks `RerouteUserTaskRedirection`
-    first, which adds nothing because the second check must pass as well (task list #31). Expect `4030` here
-    for administrator accounts even though the other reads answer.
-
-!!! warning "RemoveAllSubscriptions leaves User Managers out"
-    `UserExtensions.UnSubscribeAllAsync` allows the user, administrators and the managers of a local user's
-    library, and never asks the matrix, so a User Manager, who may transfer the same subscriptions with
-    [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) and
-    [TransferUserFolderSubscriptions](TransferUserFolderSubscriptions.md), gets `4030` "Access denied." from
-    [RemoveAllSubscriptions](RemoveAllSubscriptions.md) for anyone but themselves. Hide it for User Managers
-    who are not also library managers of the user.
-
-!!! warning "GetUserGroupMembers refuses with 4000, not 4030"
-    When a group hides its members, `UsergroupExtensions.GetMembersForPublic` turns the `ListGroups` refusal
-    into `Result.BadRequest`, so [GetUserGroupMembers](GetUserGroupMembers.md) and
-    [GetUserGroupMembers1](GetUserGroupMembers1.md) answer `errorCode="4000"` with "Cannot access user group
-    members. The user group is marked as a public user group." followed by the role text. A client that treats
-    only `4030` as access denied will read this as a malformed request. Treat `4000` with that message as a
-    refusal.
-
-!!! warning "AddUsergroupMember tells a caller without the right what exists"
-    `UsergroupOperations.AddMemberTransactionAsync` answers "User Group not found" (`4041`), "User not found"
-    (`4041`), "User is not a member of the library" and the local-user rules (`4000`) before it asks
-    `UpdateGroupMembers`, so anyone signed in can test whether a group or user name exists, and whether a user
-    belongs to a library, by trying to add them. Task list #26 fixed the same order in five other calls but not
-    this one. Nothing for the UI to do; noted so the `4041` before a `4030` is not taken for a rule.
-
 ## Finding out whether the signed-in user has this role
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own name: `ListingGroupMembershipOfUser`
@@ -202,14 +150,12 @@ home library.
 
 ## Notes
 
-- `DisplayUserProfile` and `ListLibraryMembers` name the role in `IRSecurity.IsAllowed` but no code outside
-  `IRSecurity.cs` and the enum refers to them (task list #31, deferred). The user profile is read through the
-  visibility check and library members through reaching the library, so the two rows above describe what
-  actually runs; a fix that wires the actions up would narrow both.
+- The user profile is read through the visibility check and library members through reaching the library;
+  the two rows above describe what actually runs.
 - The administrator's-account guard reads: a User Manager can list, look up and read the activity lists,
   group memberships and workflow roles of an administrator, and send the welcome e-mail (the reset link goes
-  to the administrator's own address, which the User Manager cannot change). The task list (#2) records that
-  up to 8.7 only the `sysadmin` account was guarded.
+  to the administrator's own address, which the User Manager cannot change). Up to 8.7 only the `sysadmin`
+  account was guarded.
 - A library manager's rights on this page are per user and per group: they pass only for users and groups
   whose home library they manage. For a global user or group there is no library and the library-manager
   step never passes, whatever library the manager runs. The exceptions are the library-scoped actions
@@ -221,9 +167,8 @@ home library.
   Administrators and User Managers may make someone one. Two User Managers may appoint each other.
 - GetAllUsers answers users by home library, so a library manager filtering by their library sees that
   library's local users, not the global users who are its members; the members are read with GetDomainMembers.
-- Task list #20 (library lookup by name without an administrator bypass) is not visible in the current code:
-  `DomainOperations.GetLibraryByNameAsync` goes through `MayReachAsync`, whose second step is
-  `ListLibrariesForAdministration`, which administrators pass first.
+- Library lookup by name (`DomainOperations.GetLibraryByNameAsync`) goes through `MayReachAsync`, whose
+  second step is `ListLibrariesForAdministration`, which administrators pass first.
 - A User Manager's own workflow task list is theirs alone: `getTasks` widens to every library only for
   administrators and to the managed libraries for library managers (`WorkflowOperations.cs`).
 

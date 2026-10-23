@@ -84,7 +84,7 @@ case does not arise in practice.
 | Reach the library by name | every call with a `DomainName`, e.g. [GetDomain](GetDomain.md), [GetManagers](GetManagers.md), [GetDomainMembers](GetDomainMembers.md), [GetDomainMembers1](GetDomainMembers1.md), [GetDomainUsers](GetDomainUsers.md), [GetDomainUsers1](GetDomainUsers1.md), [GetDomainGroups](GetDomainGroups.md), [GetLocalUsers](GetLocalUsers.md), [GetDomainStatistics](GetDomainStatistics.md) | members of the library, anyone where it allows anonymous access, User Managers and Policy Managers for every library | `DomainOperations.GetLibraryByNameAsync` and `GetLibraryByIdAsync` share `MayReachAsync`: membership, or `ListLibrariesForAdministration` with the library's id, which a manager passes. An unreachable library is 4041 "Library not found". These listing calls make no further check: any signed-in user who reaches the library gets them |
 | List the libraries to administer | [GetLibrariesForAdministration](GetLibrariesForAdministration.md) | User Managers and Policy Managers, who get every library | A manager gets the libraries they manage (`UserOperations.cs`, GetLibraryListForAdministrationAsync, `localDomainId` 0 so the role step fails and the managed list is read instead); anyone else gets an empty list |
 | See which members cannot open the library | [GetMembersWithoutAccess](GetMembersWithoutAccess.md) | nobody else: User and Policy Managers are refused | With no `domainName`, every managed library; with one, it must be managed (4030 "Access denied. Only library managers can perform this operation.") (`LibraryServices.cs`, GetMembersWithoutAccessAsync) |
-| Read the library's policies | [GetDomainPolicies](GetDomainPolicies.md) | Policy Managers | `Domain.AccessAllowedToReadPoliciesAsync`: `UpdateLibraryPolices`, or `CheckDomainManagementAsync` (task #19) |
+| Read the library's policies | [GetDomainPolicies](GetDomainPolicies.md) | Policy Managers | `Domain.AccessAllowedToReadPoliciesAsync`: `UpdateLibraryPolices`, or `CheckDomainManagementAsync` |
 | Change the library's policies | [SetDomainPolicies](SetDomainPolicies.md) | Policy Managers | `UpdateLibraryPolices`; `allowLibManagers` is set only when the system behaviour setting `AllowLibraryManagersToEditPolicy` is on (`IRSecurity.cs`, IsAllowed; stored as `LIBMANAGERS_EDITPOLICY`) |
 
 ### Audit logs of the library
@@ -94,9 +94,9 @@ case does not arise in practice.
 | Action | Web service calls | Who else may do it | Conditions |
 |---|---|---|---|
 | Read the library's operation logs | [GetCheckoutLog](GetCheckoutLog.md), [GetCheckInLog](GetCheckInLog.md), [GetVersionCreateLog](GetVersionCreateLog.md), [GetVersionDeleteLog](GetVersionDeleteLog.md), [GetNewDocumentsAndFoldersLog](GetNewDocumentsAndFoldersLog.md), [GetDeleteLog](GetDeleteLog.md), [GetDispositionLog](GetDispositionLog.md), [GetOwnershipChangeLog](GetOwnershipChangeLog.md) | Audit Managers | The path filter's first part is the library (`LogOperations.cs`, IsLogAccessAllowed); with no path filter the library is 0 and only Audit Managers pass |
-| Read the security change log | [GetSecurityChangeLog](GetSecurityChangeLog.md) | Audit Managers; anyone with `ReadSecurityAccessList` on the document or folder | The right on the item first (`FolderServices.cs`, GetSecurityChangeLogAsync); otherwise `ViewAuditLogs` with the item's library, the library root included (task #13, `LogOperations.cs`, GetAccessListHistoryAsync) |
+| Read the security change log | [GetSecurityChangeLog](GetSecurityChangeLog.md) | Audit Managers; anyone with `ReadSecurityAccessList` on the document or folder | The right on the item first (`FolderServices.cs`, GetSecurityChangeLogAsync); otherwise `ViewAuditLogs` with the item's library, the library root included (`LogOperations.cs`, GetAccessListHistoryAsync) |
 | Read SOX, ISO and classification logs | [GetSoxLogs](GetSoxLogs.md), [GetISOLogs](GetISOLogs.md), [GetClassificationLogs](GetClassificationLogs.md) | Audit Managers; anyone the library policy gives the read right | The policy on the item first (`DocumentReadSoxLog`, `DocumentReadIsoLog`, `DocumentReadClassificationLog`; all three default the library-manager flag to true, so a member manager passes there already); otherwise `ViewAuditLogs` with the item's library |
-| Read an item's access list history | [GetAccessListHistory](GetAccessListHistory.md) | Audit Managers; anyone with `ReadSecurityAccessList` on the item | The right first, otherwise `ViewAuditLogs` with the item's library; the current list is read with the same fallback (task #14, `DocumentExtensions.cs`, `FolderExtensions.cs`) |
+| Read an item's access list history | [GetAccessListHistory](GetAccessListHistory.md) | Audit Managers; anyone with `ReadSecurityAccessList` on the item | The right first, otherwise `ViewAuditLogs` with the item's library; the current list is read with the same fallback (`DocumentExtensions.cs`, `FolderExtensions.cs`) |
 
 ### Workflow in the library
 
@@ -107,7 +107,7 @@ These are outside the matrix.
 | Create a workflow definition | [CreateFlowDef](CreateFlowDef.md), [CreateFlowDef1](CreateFlowDef1.md), [CreateFlowDef2](CreateFlowDef2.md), [CreateFlowDef3](CreateFlowDef3.md) | nobody else | `CheckDomainManagementAsync` on the library (`WorkflowOperations.cs`, CreateWorkflowAsync); the licence must allow workflows; the active folder must be in the library |
 | Delete a workflow definition | [DeleteWorkflow](DeleteWorkflow.md) | nobody else | `CheckDomainManagementAsync` (`DomainExtensions.cs`, DeleteWorkflowAsync); the definition must be inactive |
 | Change a definition: activate, deactivate, update, steps, task definitions | [ActivateFlowDef](ActivateFlowDef.md), [DeactivateFlowDef](DeactivateFlowDef.md), [UpdateWorkflowDefinition](UpdateWorkflowDefinition.md), [AddFlowStepDef](AddFlowStepDef.md), [AddFlowStepDef1](AddFlowStepDef1.md), [DeleteFlowStepDef](DeleteFlowStepDef.md), [UpdateWorkflowStepDef](UpdateWorkflowStepDef.md), [AddFlowTaskDef](AddFlowTaskDef.md), [DeleteFlowTaskDef](DeleteFlowTaskDef.md), [UpdateWorkflowTaskDef](UpdateWorkflowTaskDef.md) | members of the definition's supervisor list | `SecurityFunctions.CheckWorkflowManagementAsync`: administrator, manager of the definition's library, or supervisor; refusal 4030 "Access denied. Only administrators, library managers, or workflow supervisors can perform this operation." |
-| See every task in the library | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | nobody else: User and Policy Managers see only their own | With no document or workflow filter and no own-user filter, the caller's own tasks plus every task of the managed libraries (`WorkflowOperations.cs`, GetTasksAsync, task #16) |
+| See every task in the library | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) | nobody else: User and Policy Managers see only their own | With no document or workflow filter and no own-user filter, the caller's own tasks plus every task of the managed libraries (`WorkflowOperations.cs`, GetTasksAsync) |
 | Supervise a running task in the library | [ReassignTask](ReassignTask.md), [ChangeTaskDueDate](ChangeTaskDueDate.md), [UpdateTaskFinishDate](UpdateTaskFinishDate.md), [SetTaskPriority](SetTaskPriority.md), [CreateRelatedTask](CreateRelatedTask.md) | the task's supervisor, the user who assigned it; the assignee for some of them | `WorkflowExecutingTaskExtensions.CheckAllowSupervisionAsync`: a `DOMAINMANAGERS` row for the task's library, read directly, membership not asked; refusal 4030 "Access denied." |
 | Edit a later step of a running workflow | [UpdateRunningWorkflowTaskDef](UpdateRunningWorkflowTaskDef.md) | the step's supervisor; an assignee of an earlier step with the edit-next-step or edit-all-steps permission | `WorkflowExecutingTaskDefExtensions.CheckAllowEditStepAsync`: a `DOMAINMANAGERS` row for the document's library |
 
@@ -139,51 +139,6 @@ These are outside the matrix.
 | See a library they do not manage and do not belong to | any call with that `DomainName` | members, Administrators, User Managers, Policy Managers | 4041 "Library not found" |
 | See the members without access of a library they do not manage | [GetMembersWithoutAccess](GetMembersWithoutAccess.md) | Administrators | 4030 "Access denied. Only library managers can perform this operation." |
 
-## Rules that look wrong
-
-!!! warning "TransferUserDomainManagerRoles lets a library manager hand their library's manager role to another local user"
-    `UserTakeOverOperations.RunAsync` checks `TransferUserOwnershipsAndTasks` on both users, which admits
-    the manager of their library, and the only extra guard on manager roles is "not to yourself" (:59).
-    `TransferDomainManagerRolesAsync` then moves every manager role of the from-user. When the from-user is
-    a local user who manages the library, a library manager appoints a new manager, which
-    `AddRemoveLibraryManagers` says only administrators and User Managers may do. A local user can be a
-    member, and so a manager, of their home library only, so the reach is that one library. The UI should
-    not offer the manager-role transfer to library managers; expect it to succeed if called.
-
-!!! warning "RemoveAllSubscriptions admits library managers but not User Managers"
-    `UserExtensions.UnSubscribeAllAsync` grants self, administrators and, for a local user, the managers of
-    their library through `CheckDomainManagementAsync`; it never consults the matrix, so a User Manager, who
-    may read and change the same user's subscriptions through every other user call, is refused with 4030
-    "Access denied.". Show the action to library managers for local users; hide it for User Managers until
-    the rule is aligned.
-
-!!! warning "The setting that lets managers edit policies cannot be read by managers"
-    `SetDomainPolicies` passes for a library manager only when `AllowLibraryManagersToEditPolicy` is on, but
-    the only call that returns it, [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md), needs
-    `UpdateApplicationSettingsAndPolicies` (Policy Managers). The 4030 message a manager gets when the
-    setting is off names only the system administrator and Policy Managers. The UI cannot tell in advance:
-    either show the policy editor to managers and handle the 4030, or expose the flag through a call any
-    signed-in user may make.
-
-!!! warning "Dead matrix entries name library managers (task #31, deferred)"
-    `IrAdminAction.ListLibraryMembers` and `DisplayUserProfile` set `allowLibManagers` in `IRSecurity.IsAllowed`
-    but no code checks them. Listing a library's members ([GetDomainMembers](GetDomainMembers.md) and the
-    rest) is open to any signed-in user who reaches the library; do not gate it on a manager check.
-    `UserOperations.GetLibraryListForAdministrationAsync` has a branch for listing another user's libraries
-    that nothing calls.
-
-!!! warning "Co-workers read what the manager gate protects (task #17, deferred)"
-    [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md)
-    and [GetManagedDomainsByUser](GetManagedDomainsByUser.md) check only that the caller may see the user,
-    and every member of the user's library is a co-worker of a local user. For local users the library
-    manager condition on these three calls adds nothing: any member of the library reads them.
-
-!!! warning "AddUsergroupMember tells a caller with no right whether the user and group exist"
-    `UsergroupOperations.AddMemberTransactionAsync` answers "User group not found", "User not found" and
-    "User is not a member of the library." before it checks `UpdateGroupMembers` (:200-229). Task #26 fixed
-    the same order in five other operations but not here. A caller who may add nobody to the group learns
-    which names exist. The UI is not affected; noted for the server.
-
 ## Finding out whether the signed-in user has this role
 
 - [GetManagedDomainsByUser](GetManagedDomainsByUser.md) with the caller's own name, or an empty name:
@@ -203,10 +158,8 @@ These are outside the matrix.
 - Library reachability by name changed in commit 61e1fb36 (dated 2026-10-21 in git): `GetLibraryByNameAsync`
   and `GetLibraryByIdAsync` share `MayReachAsync`, which is membership, or anonymous access, or
   `ListLibrariesForAdministration` with the library's id. Administrators, User Managers and Policy
-  Managers reach every library; a library's manager reaches it whether or not they are still a member. Task
-  #20 ("library lookup by name has no administrator bypass") is closed by this commit for administrators and
-  library managers, though the task list still marks it deferred; Audit Managers still reach by name only
-  what they belong to.
+  Managers reach every library; a library's manager reaches it whether or not they are still a member. Audit
+  Managers reach by name only what they belong to (their date-range log filters are the exception).
 - Can a manager be a non-member? Appointment requires membership, and `DeleteLibraryManagersWhoAreNotLibraryMemberAsync`
   runs on every path that takes a membership away (user removed, group removed, user removed from a member
   group), so by the code read here a manager is always a member. If a non-member manager row exists from
@@ -220,7 +173,7 @@ These are outside the matrix.
   memberships are transferred only when the to-user is global (`UserTakeOverOperations.cs`, RunAsync), and a
   local user holds only their home membership anyway. The call still answers success.
 - [TransferUserGroupMemberships](TransferUserGroupMemberships.md) by a library manager leaves the role
-  groups (ids up to 1000) with the from-user and says so in `warnings` (task #32).
+  groups (ids up to 1000) with the from-user and says so in `warnings`.
 - The matrix message lists "Library manager(s)" only when the library step was reachable. A manager refused
   on a global user sees a message that does not mention library managers; that is the message, not a sign
   that the role never applies.

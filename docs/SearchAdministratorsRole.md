@@ -71,27 +71,6 @@ however, administrators are treated like everyone else: the owner check has no a
 Running a search ([Search](Search.md), [GetNextSearchPage](GetNextSearchPage.md) and the rest) needs no role:
 `SearchServices.ExecuteSearchAsync` makes no administrative check.
 
-## Rules that look wrong
-
-!!! warning "The group name promises category administration that nothing checks"
-    No operation checks group 105 for anything called a category. The word survives in two places only:
-    `IRConstants.SearchTypeCategories` ("Categories") is the directory under the application directory where the
-    XML of the `savedSearch`-type entries is kept (`SearchPages.cs`, GetSearchXmlFileInfo and DeleteSearchPageAsync;
-    `searchPage`-type entries go under "SearchPages"), and the legacy portal header has a `TabCategories` flag
-    (`PortalLibrary/Models/PortalHeaderInfo.cs`) that no role check reads. For the UI the role means "administrator
-    of system-wide saved searches and search pages" and nothing else: do not key a category area on it.
-
-!!! warning "Sharing flags and groups are stored on personal entries, although they do nothing there"
-    `SearchServices.CreateOrUpdateSavedSearchAsync` passes `anonymousAccess`, `publicAccess` and `userGroupNames`
-    into the model whatever `isPersonal` is, and `SearchPageStore.AddNewSearchPageAsync` / `UpdateSearchPageAsync`
-    write them (ANONYMOUSACCESS, PUBLICACCESS, SEARCHGROUPS rows) for every owner. They have no effect on a personal
-    entry: the listing SQL applies them only where OWNERID=0, and `CanReadSearchPageAsync` answers "owner only"
-    before looking at them. But [GetSavedSearch](GetSavedSearch.md) and [GetSavedSearches](GetSavedSearches.md)
-    return them as stored, while the API pages say they are ignored and always `false` for personal entries, and
-    the comment in `SearchPages.UpdateSearchPageAsync` says writing them onto a personal page was the thing to
-    stop. Meanwhile: hide the sharing fields when `ownerId` > 0 and do not read the flags of a personal entry as
-    a sharing state.
-
 ## Finding out whether the signed-in user has this role
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own user name: the
@@ -107,14 +86,14 @@ Running a search ([Search](Search.md), [GetNextSearchPage](GetNextSearchPage.md)
 
 - **Administrators and personal entries.** Every rule in the IRSecurity matrix lets administrators through first,
   and `HasAdministrativeRoleAsync` gives them this role. The owner check in `SearchPages.UpdateSearchPageAsync`,
-  `DeleteSearchPageAsync` and `CanReadSearchPageAsync` has no such bypass, on purpose (task #28 of the role audit,
-  commit 0f6cb155): nobody reads, changes or deletes another user's personal entry, and nobody sees it in a list.
+  `DeleteSearchPageAsync` and `CanReadSearchPageAsync` has no such bypass, on purpose
+  (commit 0f6cb155): nobody reads, changes or deletes another user's personal entry, and nobody sees it in a list.
   A personal entry disappears with its owner: deleting the user deletes their entries
   (`UserOperations.cs`, `SearchPageStore.DeleteAllByOwnerAsync`). Deleting a user group removes it from every
   entry's sharing list (`UsergroupOperations.cs`, `DeleteSearchGroupsByGroupAsync`).
 - **Who is in the group.** The 8.6.105 update created group 105 with the `sysadmin` account and the users named in
   `config/searchadmins.xml` of that day, then deleted the file. Those members stay. Administrators added since are
-  not in the group and do not need to be (task #29, commit 0f6cb155, 2026-10-14; `HasAdministrativeRoleAsync` was
+  not in the group and do not need to be (commit 0f6cb155, 2026-10-14; `HasAdministrativeRoleAsync` was
   a plain membership test before that).
 - **The anonymous user** (a session with a negative user id, issued when a call carries no ticket and no ticket
   cookie) can list and read the system-wide entries with `anonymousAccess=true` and nothing else; create, update
@@ -129,10 +108,10 @@ Running a search ([Search](Search.md), [GetNextSearchPage](GetNextSearchPage.md)
 - **Existence of an entry is not hidden.** `GetSavedSearch` answers `4041` for an id that does not exist and
   `4030` for one the caller may not see; `UpdateSavedSearch` and `DeleteSavedSearch` likewise tell a personal
   entry ("only the search page owner") from a system-wide one ("only search administrators").
-- **Task #31 (deferred, dead code)** touches this role in one place: the extension
-  `UserExtensions.HasAdministrativeRoleAsync` (`IRNET/Extensions/UserExtensions.cs`) wraps the operation and has
-  no callers. Tasks #17 and #20 do not touch this role.
-- **Tests:** `TestProjects/WebApiTests/Tests/SavedSearchRoleApiTests.cs` covers the two audit fixes
+- **The name.** The group is `[Search & Category Administrators]`, and the role covers the system-wide saved
+  searches and search pages. No operation checks it for anything else; "Categories" is only the directory
+  under the application directory where the XML of `savedSearch` entries is kept (`SearchPages.cs`).
+- **Tests:** `TestProjects/WebApiTests/Tests/SavedSearchRoleApiTests.cs` covers the two rules above
   (a search administrator refused on another user's personal entry; an administrator outside group 105 creating a
   system-wide entry).
 

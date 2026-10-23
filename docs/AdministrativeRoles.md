@@ -2,7 +2,7 @@
 
 infoRouter has six built-in **administrative role groups**. A user holds a role by being a member of its
 group. Each role has its own page with the web service calls it unlocks, the related calls it does **not**
-unlock, and the rules in the code that look wrong. This page is the overview.
+unlock, and notes on how the checks run. This page is the overview.
 
 The roles are the values of `enum_IR.AdmistrativeRoles` (`IRBase\IRBaseEnum.cs`). The server checks them in
 `IRNET\IRSecurity.cs`; the pages describe those checks as the server makes them, read from the code.
@@ -66,31 +66,17 @@ There is no single "my roles" call. Use these:
   administer: every library for Administrators, User Managers and Policy Managers, the managed ones for a
   library manager, nothing for anyone else.
 
-## Rules that look wrong, at a glance
-
-Each role page has a "Rules that look wrong" section with the code behind the rule and what the UI should do
-meanwhile. The ones that most often surprise a Control Panel page:
+## Behaviour worth knowing
 
 - **Administrators are not library members.** The item-level rights (documents, folders, access lists) have no
   administrator bypass: an administrator who is not a member of a library gets `4030` on its content, and
   [GetDomains](GetDomains.md) lists only member libraries. See [Administrators](AdministratorsRole.md).
-- **R&D Managers reach only libraries they are a member of.** Intended: the role is system-wide, but an
-  R&D Manager opens an item only in a library that lists them, or the `[R&D Managers]` group, as a member.
-  A library that needs records management gets the group added by its manager
+- **R&D Managers reach only libraries they are a member of.** The role is system-wide, but an R&D Manager
+  opens an item only in a library that lists them, or the `[R&D Managers]` group, as a member. A library that
+  needs records management gets the group added by its manager
   ([AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md)); elsewhere the role has nothing to see. See
-  [R&D Managers](RDManagersRole.md). (Audit Managers may filter the audit logs by any library.)
-- **Co-workers read user details.** [GetUser](GetUser.md), [GetUserStatistics](GetUserStatistics.md),
-  [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md), [GetManagedDomainsByUser](GetManagedDomainsByUser.md)
-  and [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md) answer any member of a library the user is also in.
-  See [User Managers](UserManagersRole.md).
-- **Refusals that are not `4030`.** [GetUserGroupMembers](GetUserGroupMembers.md) and [GetSoxLogs](GetSoxLogs.md)
-  refuse with `4000`. Check the message, not only the code.
-- **Library managers and the policy flag.** A library manager cannot read the setting that decides whether
-  they may edit policies. See [Library Managers](LibraryManagersRole.md).
-- **Transfer to an external agency** has no API, so the transfer tasks the disposition job creates cannot be
-  completed. See [R&D Managers](RDManagersRole.md).
-- **"Category" in the group name** is checked by nothing. See
-  [Search & Category Administrators](SearchAdministratorsRole.md).
+  [R&D Managers](RDManagersRole.md). The same reach rule applies to the per-item audit logs; see
+  [Audit Managers](AuditManagersRole.md). (Audit Managers may filter the date-range logs by any library.)
 
 ## Notes for the Control Panel
 
@@ -102,5 +88,3 @@ meanwhile. The ones that most often surprise a Control Panel page:
 - **Which libraries to offer.** [GetDomains](GetDomains.md) lists only the libraries the caller belongs to,
   whatever their role. A page that manages users, memberships, managers or policies should list
   [GetLibrariesForAdministration](GetLibrariesForAdministration.md) instead.
-- **Rules that look wrong** are collected on each role page under that heading, with what the UI should do
-  meanwhile. They are tracked in the server's `administrative-roles-fix-tasklist.md`.

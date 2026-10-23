@@ -80,10 +80,6 @@ Everything every other role page lists, plus the following. In the first table n
 | Delete a user with [DeleteUser](DeleteUser.md) while the password re-prompt policy covers user deletion | [DeleteUser](DeleteUser.md) | nobody: use [DeleteUser1](DeleteUser1.md) with the password | 4000 "... Call the 'DELETEUSER1' method instead." (`UserServices.DeleteUserAsync`, everyone, Windows authentication off) |
 | Empty or list another user's recycle bin | [EmptyRecycleBin](EmptyRecycleBin.md), [GetRecycleBinContent](GetRecycleBinContent.md) | each user, their own; for others use [SearchRecycledItems](SearchRecycledItems.md) and [PurgeRecycleBinItem](PurgeRecycleBinItem.md) | none: both act on the caller's own bin (`RecycleBinServices`) |
 
-## Rules that look wrong
-
-None open. The three found on 2026-10-21 (PurgeRecycleBinItem answering 4200, lookups ahead of the administrator check, and UpdateUserProfile quietly keeping the `sysadmin` account's status and type) were fixed on 2026-10-22 and 2026-10-23.
-
 ## Finding out whether the signed-in user has this role
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own name: `IrAdminAction.ListingGroupMembershipOfUser` allows the self action, so every signed-in user may ask about themselves; a `GroupID` of `104` in the answer means the caller is an administrator. The `sysadmin` account (user id 4) is an administrator whether or not it is listed in the group (`ThreadVariables.IsAdministrator`).
@@ -97,11 +93,9 @@ None open. The three found on 2026-10-21 (PurgeRecycleBinItem answering 4200, lo
 - **Transferring an administrator's memberships.** An administrator running [TransferUserGroupMemberships](TransferUserGroupMemberships.md) moves the role-group memberships too, `[Administrators]` included, so the to-user becomes an administrator. That is the intended administrator-only path; for anyone else the role groups stay behind.
 - **UpdateApplicationLicense** refuses with the generic "Access denied." while the other administrator-only writers say "Only the system administrator can perform this operation". Same code (4030), different text.
 - **GetManagedDomainsByUser** for another user is no longer administrators only: `UserServices.cs` lets whoever may look the user up read their managed libraries (administrators, User Managers, the user's library managers, co-workers).
-- **Library lookup by name** has the administrator bypass since commit 61e1fb36 (`DomainOperations.MayReachAsync`, shared by the by-name and by-id lookups). Task #20 of `administrative-roles-fix-tasklist.md` describes the earlier behaviour.
-- **Dead code.** `RecycleBinOperations.ArchiveRecycledItemAsync` is administrators only and has no caller (its own comment says so). `UserOperations.GetLibraryListForAdministrationAsync` is reached only through [GetLibrariesForAdministration](GetLibrariesForAdministration.md), always for the caller's own id.
+- **Library lookup by name** has the administrator bypass since commit 61e1fb36 (`DomainOperations.MayReachAsync`, shared by the by-name and by-id lookups).
 - **Not an ISrv operation:** the REST controller `IRWebCore/Controllers/PortalsController.cs` has `api/Portals/UpdatePortalSecurity`, administrators only (HTTP 401 "Access denied." otherwise).
 - **The `sysadmin` user name** may be changed; the reserved names SYSADMIN, ADMINISTRATOR and SYSTEM are refused for every other account (`IrGeneral.IsValidFirstLastAndUserName`).
-- **Cost.** `IsAdministrator()` opens a database connection and runs a membership query every time it is called, and many operations call it more than once per request.
 
 ## Related
 

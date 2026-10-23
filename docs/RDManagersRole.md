@@ -108,30 +108,6 @@ its owner, the managers of its library, and users with CHANGE or Full Control on
 | List libraries they are not a member of | [GetLibrariesForAdministration](GetLibrariesForAdministration.md) | User Managers, Policy Managers (every library); library managers (theirs) | Not an error: the answer holds only the libraries the caller manages, usually none (`UserOperations.GetLibraryListForAdministrationAsync`). [GetDomains](GetDomains.md) lists the member libraries. |
 | Add or remove members of `[R&D Managers]` | [AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md) | Administrators | `4030` "Access denied. This action is restricted to the following roles: The system administrator" |
 
-## Rules that look wrong
-
-!!! warning "Transfer tasks are assigned to R&D Managers but cannot be completed"
-    The daily disposition job (`IRNET/Maintenance/DispositionCheck.cs`) creates a task with the `Transfer`
-    requirement for every document whose schedule has disposition type *Transfer to external agency* and
-    `CreateTask` on, and assigns it to an R&D Manager. Completing such a task needs
-    `DISPOSITIONSTATUS` to say the document was transferred (`WorkflowExecutingTaskExtensions`, "The
-    document has not been transferred"), and the only code that writes that,
-    `DocumentOperations.TransferToExternalAgencyAsync` / `FolderOperations.TransferToExternalAgencyAsync`
-    (the sites of `IrAdminAction.TransferToExternalAgency`), is called by no web service, SOAP or REST.
-    `DisposeItem` refuses the same document with "Disposition type of this document is 'transfer to
-    agency.' The document cannot be disposed." Task list #31 records the action as dead code. The UI has no
-    transfer action to offer; a Transfer task stays open until a transfer API exists.
-
-!!! warning "Cut-off dates do not take the role, while everything else about a schedule does"
-    `SetDocumentCutoffDate`, `RemoveDocumentCutoffDate`, `SetFolderCutoffDate` and
-    `RemoveFolderCutoffDate` ask `RetentionPeriodChange` on the item and nothing else
-    (`DocumentSetCutOffDateOperation.ExecuteAsync`, `FolderSetCutOffDateOPeration.ExecuteAsync`). The cut-off
-    date is what an *On cut-off* schedule computes its retention and disposition dates from, so an R&D
-    Manager who may put the schedule on an item without holding the right (through
-    `MayChangeRetentionAsync`) cannot then set the date the schedule runs from. Until the cut-off
-    operations go through the same helper, show the cut-off actions only to callers who hold the right on
-    the item, and handle `4030` from them for R&D Managers.
-
 ## Finding out whether the signed-in user has this role
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own user name: the check is
@@ -161,7 +137,7 @@ its owner, the managers of its library, and users with CHANGE or Full Control on
 - **`SetDifferentRetentionDispostion` is live.** It is the action `MayChangeRetentionAsync`
   (`RetentionAndDispositionOperations.cs`) asks for whenever the role stands in for the missing right:
   document and folder schedule, document and folder freeze, and the schedule side of `UpdateDocumentType`.
-  Its name is from the old rule (a document schedule other than its folder's); task #4 replaced that rule
+  Its name is from the old rule (a document schedule other than its folder's); that rule was replaced
   on 2026-10-14 with "the right on the item or the role" for every apply, remove, freeze and unfreeze,
   checked in `RetentionBatch2ApiTests.ApplyingAndFreezing_TakeTheRightOnTheItem_OrTheRdManagerRole`.
 - **Disposition tasks and e-mails from the daily job.** `DispositionCheck.GetRdTaskOwner` reads the

@@ -15,7 +15,7 @@ Four entries of the `IRSecurity.IsAllowed` matrix name the role:
 
 Order in `AccessAllowedforAdminFunctionsAsync`: an administrator (the `sysadmin` account or a member of `[Administrators]`) passes first; then membership of `[Audit Managers]`; then, for `ViewAuditLogs` only and only when a library id was passed, `SecurityFunctions.CheckDomainManagementAsync` (a row in DOMAINMANAGERS for that library). None of the four is a self action.
 
-Several audit calls ask for a right on the item first and fall back to `ViewAuditLogs` only when that right is missing; the tables below say which. A refusal from the matrix is `errorCode="4030"` with the message `Access denied. This action is restricted to the following roles: The system administrator, Audit managers`; when the call passed a library id the list also names `Library manager(s)`. One exception is noted under "Rules that look wrong": a refused `GetSoxLogs` answers `4000`.
+Several audit calls ask for a right on the item first and fall back to `ViewAuditLogs` only when that right is missing; the tables below say which. A refusal from the matrix is `errorCode="4030"` with the message `Access denied. This action is restricted to the following roles: The system administrator, Audit managers`; when the call passed a library id the list also names `Library manager(s)`.
 
 ## What the role can do
 
@@ -76,17 +76,6 @@ All four actions are checked with library id 0, so library managers never pass; 
 
 The weekly technical status report (`SendTechnicalStatusReport`) is a maintenance job in `IRDiagnostics.JobTypes()`, not a web service call; no role triggers it.
 
-## Rules that look wrong
-
-!!! warning "The per-item logs are reachable only inside the caller's own libraries"
-    `GetSoxLogs`, `GetISOLogs`, `GetClassificationLogs`, `GetAccessListHistory` and `GetSecurityChangeLog` load the item by path first. `DocumentLoadOperation.GetDocumentAsync` and `FolderOperations.GetFolderAsync` answer `4041` (`Document not found.` / `The folder has either been deleted or is not accessible.`) unless the item's library is in `DomainsStore.GetViewableLibraryListAsync` for the caller, which is the libraries the caller is a member of plus those allowing anonymous access. That lookup has no role or administrator bypass (only the internal system account, id 3, is exempt), so the `ViewAuditLogs` fallback in these calls is reached only for items in libraries the Audit Manager already belongs to. The UI should not offer these five calls for a path outside the caller's libraries, and should read `4041` on them as "not reachable", not as "the role is missing".
-
-!!! warning "A refused GetSoxLogs answers 4000, its siblings 4030"
-    `DocumentExtensions.GetSoxLogsAsync` keeps the refusal text in a string and returns `Result.BadRequest(responseStr)`, so a caller without `DocumentReadSoxLog` and without the audit role gets `errorCode="4000"` with the access-denied message. `GetIsoLogsAsync`, `GetClassificationLogsAsync` and the security logs return the matrix result unchanged, `4030`. A UI that hides on `4030` will not recognise this refusal; check the message, or treat `4000` from `GetSoxLogs` as a refusal too, until the code returns `AccessDenied`.
-
-!!! warning "View logs are not audit logs"
-    Who viewed what is held under `ListingAuditLogOfUser` for the user calls (`GetUserViewLog`, `GetUserViewLog1`, `GetUserViewLogLite`: self, User Managers, the user's library managers) and under the item right `DocumentReadViewLog` for `GetDocumentReadLogHistory`, with no `ViewAuditLogs` fallback in either (`UserExtensions.GetReadLogAsync`, `DocumentExtensions.GetAllViewLogsAsync`). An Audit Manager who reads every checkout, check-in, delete and security change in the system is refused a user's view log with a message naming User Managers. Whether the rule is wrong is for the product to decide; the UI should put the view logs under the User Managers role, not under this one, and expect `4030` here.
-
 ## Finding out whether the signed-in user has this role
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own user name: the check is `ListingGroupMembershipOfUser`, which allows a self action, so it always answers for yourself (`UserServices.GetGroupMembershipsOfUserAsync`, `UserExtensions.AccessAllowedForUserAsync`). A group with `GroupID` `101` in the answer is this role; `104` means the caller is an administrator and passes every check on this page.
@@ -95,15 +84,16 @@ The weekly technical status report (`SendTechnicalStatusReport`) is a maintenanc
 
 ## Notes
 
-- `ViewAuditLogs` is the only one of the four actions that admits library managers, and only through the library id the call passes. The date-range logs pass the id resolved from `pathFilter` (0 without one); the item logs pass the item's `DomainId`; `GetSecurityChangeLog` passes the folder's library, at the root included, which closed task #13 (`LogOperations.GetAccessListHistoryAsync`). Test: `AuditLogBatchApiTests.GetSecurityChangeLog_AtTheLibraryRoot_AnswersItsManager_ButNotAPlainMember`.
-- `GetAccessListHistory` passes `WithHistory=true` from `Srv.cs`, which sets `orAuditLogReader` on the current-list read; without it (`GetAccessList`) the item right alone decides. That closed task #14. Test: `AuditLogBatchApiTests.GetAccessListHistory_AnswersAnAuditManager_WithoutTheRightOnTheFolder`.
-- `GetClassificationLogs` tries the library's `DocumentReadClassificationLog` policy on the item before the role (task #15). Test: `AuditLogBatchApiTests.GetClassificationLogs_FollowsTheLibrarysPolicy_SoTheOwnerMayReadThem`.
-- The server log files were administrators only until `ServerLogs.CanReadLogsAsync` was changed to `ViewServerStatus` (task #12). Test: `ServerAndLicenseBatchApiTests.ServerLogs_ByAnAuditManager_Answer_ButNotForAUserManager`.
+- `ViewAuditLogs` is the only one of the four actions that admits library managers, and only through the library id the call passes. The date-range logs pass the id resolved from `pathFilter` (0 without one); the item logs pass the item's `DomainId`; `GetSecurityChangeLog` passes the folder's library, at the root included (`LogOperations.GetAccessListHistoryAsync`). Test: `AuditLogBatchApiTests.GetSecurityChangeLog_AtTheLibraryRoot_AnswersItsManager_ButNotAPlainMember`.
+- `GetAccessListHistory` passes `WithHistory=true` from `Srv.cs`, which sets `orAuditLogReader` on the current-list read; without it (`GetAccessList`) the item right alone decides. Test: `AuditLogBatchApiTests.GetAccessListHistory_AnswersAnAuditManager_WithoutTheRightOnTheFolder`.
+- `GetClassificationLogs` tries the library's `DocumentReadClassificationLog` policy on the item before the role. Test: `AuditLogBatchApiTests.GetClassificationLogs_FollowsTheLibrarysPolicy_SoTheOwnerMayReadThem`.
+- The server log files were administrators only until `ServerLogs.CanReadLogsAsync` was changed to `ViewServerStatus`. Test: `ServerAndLicenseBatchApiTests.ServerLogs_ByAnAuditManager_Answer_ButNotForAUserManager`.
 - `GetLogStatistics` and `GetLogs` validate `logType` in `MiscServices` before `ServerLogs` checks the role, so a caller without the role sees `4000` for a bad type and `4030` for a good one.
 - The SOX and ISO logs refuse an offline document with `4230` before any permission check, for everyone.
 - The user named in `GetSecurityChangeLog`'s `userName` filter is looked up with `GetUserAsync(name, false)`, that is without the user-visibility check; an unknown name is `4041`.
-- Up to 2026-10-22 the path filter resolved the library through the reach rule, which has no audit role, so an Audit Manager who was not a member of the library got `4041` for a library whose rows the unfiltered call had just shown them (task #34). Test: `AuditLogBatchApiTests.GetCheckoutLog_FilteredByALibrary_AnswersAnAuditManagerWhoIsNotAMember`.
-- Tasks #17 and #31 of the fix list do not touch this role.
+- Up to 2026-10-22 the path filter resolved the library through the reach rule, which has no audit role, so an Audit Manager who was not a member of the library got `4041` for a library whose rows the unfiltered call had just shown them. Test: `AuditLogBatchApiTests.GetCheckoutLog_FilteredByALibrary_AnswersAnAuditManagerWhoIsNotAMember`.
+- **The per-item logs reach only the caller's own libraries.** `GetSoxLogs`, `GetISOLogs`, `GetClassificationLogs`, `GetAccessListHistory` and `GetSecurityChangeLog` load the item by path first, and that lookup admits only the libraries the caller is a member of or that allow anonymous access, the same rule as for R&D Managers. An item elsewhere answers `4041` (`Document not found.` / `The folder has either been deleted or is not accessible.`); the `ViewAuditLogs` fallback applies inside the caller's libraries. A library whose item logs an Audit Manager must read gets the `[Audit Managers]` group added as a member ([AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md)). The date-range logs are not affected: their `pathFilter` names any library.
+- **View logs are not audit logs.** Who viewed what is held under `ListingAuditLogOfUser` for the user calls (`GetUserViewLog`, `GetUserViewLog1`, `GetUserViewLogLite`: self, User Managers, the user's library managers) and under the item right `DocumentReadViewLog` for `GetDocumentReadLogHistory`; `ViewAuditLogs` is not consulted. Put the view logs under the User Managers role, and expect `4030` from them for this role.
 
 ## Related
 
