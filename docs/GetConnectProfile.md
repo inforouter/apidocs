@@ -323,6 +323,7 @@ provisioned for is a wasted round trip.
 
 - Folders can have any of this produced automatically for documents added to them; see [SetFolderAIPreferences](SetFolderAIPreferences.md). A folder that asks for profiling gets the description, abstract, summary, keywords and document type from one call, the same way this API does. A folder cannot ask for a named property set — that is a per-request decision.
 - Generated keywords are a separate kind from the ones a user curated, so this API never destroys a keyword somebody entered — `ForceRefresh` replaces the generated ones and leaves the user's own alone. To clear those, set them with [UpdateDocumentKeywords](UpdateDocumentKeywords.md) first.
+- Every call tells Connect which document it is about (the document's path) and, when a person asked for it, that person's user id and login name, so the service can keep its own record of who requested what. A call a folder preference queued on upload names no user at all.
 - Every call this API queues can be recorded in the daily `IRConnect` log — what was asked for, what came back, how long it took, and what it cost. See `IRConnect.CallLogging` and [GetLogs](GetLogs.md).
 - Generation requires infoRouter Connect to be configured through the `IRConnect` application settings and covered by the licence: Connect stops the day after the maintenance contract's end date, with no grace period. See `ConnectIsOn` in [ServerInfo](ServerInfo.md).
 
