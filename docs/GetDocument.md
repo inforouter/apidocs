@@ -107,8 +107,6 @@ Returns a `<response>` root element with a single `<document>` child element con
 
             AIEnhanced="17"
 
-            AIExtractConfidence="65"
-
             VersionNumber="3000000"
 
             PublishedVersionNumber="3000000"
@@ -221,8 +219,7 @@ Returns a `<response>` root element with a single `<document>` child element con
 | `RegisteredBy` | Full name of the user who registered the document. |
 | `DocTypeID` | Document type definition ID (`0` if none assigned). |
 | `DocTypeName` | Document type name, or empty if none assigned. |
-| `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
-| `AIExtractConfidence` | How sure infoRouter Connect was about the weakest value it extracted into the document's property sets, as a percentage `0` - `100`. `0` means nothing needs reviewing. See [AIExtractConfidence](GetDocument.md#aiextractconfidence). |
+| `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits, and whether a property set row it extracted is still to be reviewed. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
 | `VersionNumber` | Latest (working) version number, in the large-integer scheme where version 1 is `1000000`. |
 | `PublishedVersionNumber` | Published version number, in the same scheme (`0` if no published version exists). |
 | `PublishingRule` | Publishing rule name: `LATEST`, `LASTAPPROVED`, `TAGGED`, `SPESIFICVERSION`, `UNPUBLISHED`, or `NONE`. |
@@ -309,6 +306,7 @@ attribute cannot carry attributes of its own.
 | 6 | `64` | `ExtractedData` - property set values read out of the document |
 | 7 | `128` | `Markdown` |
 | 8 | `256` | `RedactedText` |
+| 30 | `1073741824` | `ExtractedDataReviewPending` - a property set row Connect extracted has not been saved by a person yet. A state of the rows rather than an attribute; see [Reviewing values Connect extracted](#reviewing-values-connect-extracted) |
 
 `AIEnhanced="17"` is `1 | 16`: the summary and the document type.
 
@@ -324,33 +322,27 @@ A bit is cleared only when the attribute itself is removed - there is then nothi
 | `DocumentType` | `UpdateDocumentType` with `DocumentTypeID=0`, which removes the type |
 | `ExtractedData` | removing the property set from the document. Emptying its fields does **not** clear it - the set is still there, and it is still a set the service filled in. A multi-row set loses the flag when its last row goes. |
 | `Abstract`, `OcrText`, `Markdown`, `RedactedText` | nothing - these are produced by the server and there is no user operation that removes them |
+| `ExtractedDataReviewPending` | a person saving the last row still to review ([UpdatePropertySetRow](UpdatePropertySetRow.md)), or that row being removed. Recomputed from the rows on every row write, never cleared by hand |
 
-Whether the values still need somebody's attention is a **separate** question, answered by [AIExtractConfidence](GetDocument.md#aiextractconfidence), which a review does clear. The two together say more than either alone: `ExtractedData` set with `AIExtractConfidence` of `0` means "extracted, and somebody has been through it", which no single flag could express.
+Whether the values still need somebody's attention is a **separate** question, answered per row - see [Reviewing values Connect extracted](#reviewing-values-connect-extracted) - and summarised on the document by `ExtractedDataReviewPending`. The two together say more than either alone: `ExtractedData` set with `ExtractedDataReviewPending` clear means "extracted, and somebody has been through it", which no single flag could express.
 
 A document that predates the flag reports `0`: nothing was produced for it, which is what `0` means. There is no "unknown" state.
 
-### AIExtractConfidence
+### Reviewing values Connect extracted
 
-`AIExtractConfidence` says how sure infoRouter Connect was about the **weakest** value it extracted into the document's property sets, as a percentage from `0` to `100`. It is there so a listing can highlight a document whose extracted values are worth a person's attention.
+How sure Connect was about a value, and whether a person has looked at it since, are recorded on the **property set row** the value lives in, not on the document. Every row carries the confidence Connect had in it (`CPSETAICONFIDENCE`, the weakest of the fields it filled, as a percentage) and, like every row, who saved it last. [GetPropertySets](GetPropertySets.md#reviewing-values-connect-extracted) reports both on the row's `<Log>`, as `AIConfidence` and `ReviewState`:
 
-The lowest of the fields Connect actually filled, because a property set is only as trustworthy as its worst answer and a listing has room for one number. A field a person had already answered does not count towards it - it carries no confidence of the service's at all.
+| `ReviewState` | Meaning |
+|---|---|
+| `NotExtracted` | No confidence: a person typed the row, or it was applied or inherited from a folder. |
+| `NotReviewed` | Connect extracted it and nobody has saved it since - the last saver is still the system account. |
+| `Reviewed` | Connect extracted it and the person named in the `<Log>` saved it since, changed or not. |
 
-`0` means **nothing to review**. Saving a document's property set values clears it to `0` - that save is what marks the document reviewed. The `ExtractedData` bit of [AIEnhanced](GetDocument.md#aienhanced) is **not** cleared with it: the values are still the model's work, they have just been checked. To tell a reviewed document from one nothing was ever extracted for, read the two together - `ExtractedData` set with a confidence of `0` is "extracted, and reviewed".
+A person **saving the row is the review**, through [UpdatePropertySetRow](UpdatePropertySetRow.md) or the user interface: the saver changes, the confidence does not. The confidence is the service's claim about the values and is never rewritten by anybody else, so after a review it still says what Connect thought at the time.
 
-Suggested bands, as half-open intervals so they tile with no gap and nothing in two bands at once:
+The document carries one summary of this, the `ExtractedDataReviewPending` bit of `AIEnhanced` (bit 30, `1073741824`): set while any row of any of its property sets has a confidence and was last saved by the system account, clear when none has. It is recomputed from the rows whenever a row of the document is written or removed, so a listing can highlight the documents still to review, and a search can find them with `<criteria NAME="AIENHANCED" VALUE="ExtractedDataReviewPending" />` ([Search](Search.md#ai-enhanced-criteria)).
 
-| Band | Range |
-|------|-------|
-| Poor | `1` - `69` |
-| Low | `70` - `79` |
-| Medium | `80` - `89` |
-| High | `90` - `100` |
-
-> There is no confidence threshold. Whatever Connect finds is written, however unsure it was, on the reasoning that a value a person is going to review is worth more than the blank it would otherwise leave. So the scale runs the whole way: a value of `12` means Connect wrote something it had very little confidence in, and that document is exactly the one to send somebody to.
->
-> A written value never reports `0`, because `0` means "nothing here needs reviewing". The lowest a written value reports is `1`.
-
-> A field Connect found nothing for is still left empty and carries no confidence, so it does not enter this number. A document where two fields were extracted at `95` and eight were found nothing for reports `95`. This value reports how good the answers are, not how many of them there are.
+> Until 9.0 the document carried a single `AIExtractConfidence`, the lowest confidence across all of its property sets, reset to `0` by any property set save. It is gone: the number is on the row now, it is never reset, and the row says who reviewed it and when.
 
 ## Required Permissions
 

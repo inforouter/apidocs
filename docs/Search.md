@@ -136,8 +136,9 @@ is said in `VALUE`; there is no `OPERATOR`.
 
 The attribute names are the ones the `AIEnhanced` attribute reports on each document -
 `SUMMARY`, `DESCRIPTION`, `KEYWORDS`, `OCRTEXT`, `DOCUMENTTYPE`, `ABSTRACT`, `EXTRACTEDDATA`,
-`MARKDOWN`, `REDACTEDTEXT`. See [AIEnhanced](GetDocument.md#aienhanced) for what each one means.
-Case and spacing do not matter.
+`MARKDOWN`, `REDACTEDTEXT` - and `EXTRACTEDDATAREVIEWPENDING`, the documents with a property set
+row Connect extracted that nobody has saved since. See [AIEnhanced](GetDocument.md#aienhanced) for
+what each one means. Case and spacing do not matter.
 
 ```xml
 <!-- documents a model has touched at all -->
@@ -151,6 +152,9 @@ Case and spacing do not matter.
 
 <!-- documents carrying both a generated summary and a generated abstract -->
 <criteria NAME="AIENHANCED" VALUE="SUMMARY,ABSTRACT" />
+
+<!-- documents with extracted property set values still to be reviewed -->
+<criteria NAME="AIENHANCED" VALUE="EXTRACTEDDATAREVIEWPENDING" />
 ```
 
 Notes:
@@ -160,7 +164,10 @@ Notes:
 - A list means **all** of the names, not any of them. `SUMMARY,ABSTRACT` is a document carrying
   both. To find documents with either, run the two searches.
 - `ANY`, `ALL` and `NONE` cover every attribute, including ones added in later releases, so a
-  search written today keeps meaning what it says.
+  search written today keeps meaning what it says. `EXTRACTEDDATAREVIEWPENDING` is the one
+  exception: it is a state of the extracted rows, not an attribute Connect produced, so the three
+  words leave it out (`ALL` would otherwise stop matching a document once its rows were reviewed)
+  and it is asked for by name.
 - A `VALUE` that is neither one of the three words nor a known attribute name is rejected, and the
   error lists what it could have been. A misspelt attribute fails rather than quietly narrowing
   the search.

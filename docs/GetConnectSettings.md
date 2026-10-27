@@ -67,8 +67,8 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 >
 > Extracted field values have no threshold at all now: whatever Connect finds is written, however
 > unsure it was, because a value a person is going to review is worth more than the blank it would
-> otherwise leave. How sure it was is reported per document as
-> [AIExtractConfidence](GetDocument.md#aiextractconfidence).
+> otherwise leave. How sure it was is reported on the property set row it wrote, as `AIConfidence` in
+> [GetPropertySets](GetPropertySets.md#reviewing-values-connect-extracted).
 
 `<SupportedExtensions>` is the comma separated list of file types the service is expected to be able to read here. A document of any other type is refused before a call is made — except OCR, which exists for exactly the file types this list leaves out.
 

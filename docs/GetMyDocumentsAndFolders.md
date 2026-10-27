@@ -47,7 +47,7 @@ element each - both children of `<response>`, which has no attributes of its own
             CheckoutDate="" CheckoutBy="" CheckoutByUserName="" Size="204800" Type="Office Document"
             PercentComplete="0" CompletionDate="" Importance="Normal" RetentionDate="" DispositionDate=""
             CutoffDate="" RDDefId="0" ExpirationDate="" RegisterDate="2024-03-01T09:00:00.000Z"
-            RegisteredBy="John Smith" DocTypeID="0" DocTypeName="" AIEnhanced="0" AIExtractConfidence="0"
+            RegisteredBy="John Smith" DocTypeID="0" DocTypeName="" AIEnhanced="0"
             VersionNumber="3000000" PublishedVersionNumber="3000000" PublishingRule="LATEST"
             OwnerName="John Smith" WorkflowId="0" WorkflowName="" WorkflowStepNumber="0" WorkflowStepName=""
             Author="" Language="" Source="" ApprovalStatus="NoResult" ClassificationLevel="NoMarkings"
@@ -75,8 +75,8 @@ The element [GetDocument](GetDocument.md) returns - see its
 [optional child elements](GetDocument.md#optional-child-elements). `withOwner` adds a `<User>` child,
 `withpropertysets` the property sets, `withsecurity` an `<AccessList>` and `withVersions` the version
 history; a `<DescriptionLog>` is written whenever the description has a recorded author. `withrules`
-does not apply to documents. The element carries `AIEnhanced` and `AIExtractConfidence` - see
-[AIEnhanced](GetDocument.md#aienhanced) and [AIExtractConfidence](GetDocument.md#aiextractconfidence).
+does not apply to documents. The element carries `AIEnhanced` - see
+[AIEnhanced](GetDocument.md#aienhanced).
 
 ### Error Response
 

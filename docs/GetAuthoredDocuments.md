@@ -39,11 +39,9 @@ Returns a paged list of documents authored by a specified user.
 </root>
 ```
 
-Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced` and
-`AIExtractConfidence`. The first says which of the document's attributes infoRouter Connect
-produced, as a set of bits - `0` when none did; the second how sure it was about the weakest value
-it put in a property set, as a percentage. See [AIEnhanced](GetDocument.md#aienhanced) and
-[AIExtractConfidence](GetDocument.md#aiextractconfidence).
+Documents come back as the full `<document>` element. Since 9.0 it also carries `AIEnhanced`, which says which of the document's
+attributes infoRouter Connect produced, as a set of bits - `0` when none did - and whether a property
+set row it extracted is still to be reviewed. See [AIEnhanced](GetDocument.md#aienhanced).
 
 ### Error Response
 

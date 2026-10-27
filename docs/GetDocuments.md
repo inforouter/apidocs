@@ -89,8 +89,6 @@ Returns a `<response>` root element with one `<document>` child element per docu
 
             AIEnhanced="17"
 
-            AIExtractConfidence="65"
-
             VersionNumber="3"
 
             PublishedVersionNumber="3"
@@ -208,7 +206,6 @@ Returns a `<response>` root element with one `<document>` child element per docu
 | `DocTypeID` | Document type definition ID (`0` if none assigned). |
 | `DocTypeName` | Document type name, or empty if none assigned. |
 | `AIEnhanced` | Which of the document's attributes infoRouter Connect produced, as a set of bits. `0` when none did. See [AIEnhanced](GetDocument.md#aienhanced) for the bit values. |
-| `AIExtractConfidence` | How sure infoRouter Connect was about the weakest value it extracted into the document's property sets, as a percentage `0` - `100`. `0` means nothing needs reviewing. See [AIExtractConfidence](GetDocument.md#aiextractconfidence). |
 | `VersionNumber` | Latest (working) version number. |
 | `PublishedVersionNumber` | Published version number (`0` if no published version exists). |
 | `PublishingRule` | Publishing rule name (e.g. `PublishingNotRequired`, `MustBePublished`). |

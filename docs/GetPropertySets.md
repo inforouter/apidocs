@@ -33,20 +33,20 @@ Returns all property set rows that have been applied to a document or folder ide
                    PROJECT_CODE="PRJ-2024-001"
                    STATUS="Active"
                    NOTES="Initial entry">
-        <Log AppliedById="1042" AppliedBy="jsmith" DateApplied="2024-03-15 14:32" />
+        <Log AppliedById="1042" AppliedBy="jsmith" DateApplied="2024-03-15 14:32" ReviewState="NotExtracted" />
       </propertyrow>
       <propertyrow RowNbr="2"
                    PROJECT_CODE="PRJ-2024-002"
                    STATUS="Draft"
                    NOTES="">
-        <Log AppliedById="4" AppliedBy="admin" DateApplied="2024-03-16 09:10" />
+        <Log AppliedById="4" AppliedBy="admin" DateApplied="2024-03-16 09:10" ReviewState="NotExtracted" />
       </propertyrow>
     </propertyset>
     <propertyset Name="AUDITINFO">
       <propertyrow RowNbr="1"
                    AUDITOR="bjones"
                    AUDIT_DATE="2024-01-01">
-        <Log AppliedById="4" AppliedBy="admin" DateApplied="2024-01-05 08:00" />
+        <Log AppliedById="3" AppliedBy="infoRouter Connect" DateApplied="2024-01-05 08:00" AIConfidence="87" ReviewState="NotReviewed" />
       </propertyrow>
     </propertyset>
   </Propertysets>
@@ -88,9 +88,36 @@ Container element listing all property sets applied to the object.
 ### `<Log>` (child of `<propertyrow>`)
 | Attribute | Description |
 |-----------|-------------|
-| `AppliedById` | ID of the user who last saved this row. Use this to identify the user - a username is a label, not a key, and `0` where the row predates this being recorded. |
+| `AppliedById` | ID of the user who last saved this row. Use this to identify the user - a username is a label, not a key, and `0` where the row predates this being recorded. `3`, the system account, when infoRouter Connect wrote the row and nobody has saved it since. |
 | `AppliedBy` | Username of the user who last saved this row. |
 | `DateApplied` | Date and time the row was last saved, in `YYYY-MM-DD HH:mm` UTC format. |
+| `AIConfidence` | How sure infoRouter Connect was about the row when it extracted it, as a percentage `1` - `100`: the weakest of the fields it filled. **Omitted** when the row is not Connect's work. Written once and never changed by a person's save. Since 9.0. |
+| `ReviewState` | `NotExtracted`, `NotReviewed` or `Reviewed`; see [Reviewing values Connect extracted](#reviewing-values-connect-extracted). Since 9.0. |
+
+## Reviewing values Connect extracted
+
+A row infoRouter Connect extracted carries the service's confidence in it, and - like every row - who saved it last. The two together are the row's review state; nothing else is stored:
+
+| `ReviewState` | `AIConfidence` | `AppliedById` | Meaning |
+|---|---|---|---|
+| `NotExtracted` | omitted | anyone | A person typed the row, or it was applied or inherited from a folder. |
+| `NotReviewed` | present | `3` (the system account) | Connect wrote it and nobody has saved it since. |
+| `Reviewed` | present | anybody else | Connect wrote it and `AppliedBy` saved it on `DateApplied`, changed or not. |
+
+A person **saving the row is the review** ([UpdatePropertySetRow](UpdatePropertySetRow.md), or the user interface): the saver is restamped and the confidence left alone. Saving the row unchanged reviews it as much as correcting it does; whether anything was changed is not recorded. Connect filling empty fields of the row again - a new version, a re-run - puts the system account back as saver, so the row is to be reviewed again. A row Connect wrote and a person then removed is simply gone; a folder apply that overwrites the row with the folder's values takes the confidence with them.
+
+The confidence is what the service claimed at the time and is never rewritten: after a review it still says how sure Connect was, not whether the reviewer agreed. Suggested bands for showing it, as half-open intervals so they tile with no gap:
+
+| Band | Range |
+|------|-------|
+| Poor | `1` - `69` |
+| Low | `70` - `79` |
+| Medium | `80` - `89` |
+| High | `90` - `100` |
+
+> There is no confidence threshold. Whatever Connect finds is written, however unsure it was, on the reasoning that a value a person is going to review is worth more than the blank it would otherwise leave. So a row can report `12`, and that row is exactly the one to send somebody to. A written value never reports `0`: the lowest is `1`.
+
+The document summarises its rows in the `ExtractedDataReviewPending` bit of `AIEnhanced` - see [GetDocument](GetDocument.md#reviewing-values-connect-extracted) - which [Search](Search.md#ai-enhanced-criteria) can filter on, so the documents with a row still to review can be listed without reading every row.
 
 ## Required Permissions
 

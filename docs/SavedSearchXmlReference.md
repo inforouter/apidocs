@@ -59,7 +59,7 @@ Both are stored in the same format. What differs is what the UI does with it.
 | `TAGTEXT` | `VALUE` | Tag text |
 | `RDDEFID` | `VALUE` | Retention and disposition schedule id (`0` = none) |
 | `PUBLISHSTATUS` | `VALUE` | `0` any, `1` unpublished, `2` published |
-| `AIENHANCED` | `VALUE` | What infoRouter Connect produced: empty, `ANY`, `ALL`, `NONE`, or attribute names `Summary`, `Description`, `Keywords`, `OcrText`, `DocumentType`, `Abstract`, `ExtractedData`, `Markdown`, `RedactedText` comma-separated (documents carrying all of them) |
+| `AIENHANCED` | `VALUE` | What infoRouter Connect produced: empty, `ANY`, `ALL`, `NONE`, or attribute names `Summary`, `Description`, `Keywords`, `OcrText`, `DocumentType`, `Abstract`, `ExtractedData`, `Markdown`, `RedactedText`, `ExtractedDataReviewPending` comma-separated (documents carrying all of them; the last is a state of the extracted rows, not covered by `ANY`/`ALL`/`NONE`) |
 | `PROPERTYSETNAME` | `VALUE`, `ATTRIBUTES`, `CONDITIONS`, `VALUES` | See [Property set criteria](#property-set-criteria) |
 
 ### Date Criteria

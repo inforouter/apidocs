@@ -133,6 +133,7 @@ await call('UpdatePropertySetRow', {
 - The `Path` resolves to a **document** first; if not found, it is resolved as a **folder**. If neither is found, an error is returned.
 - The `rownbr` attribute is required for updates and must match an existing row number for the property set on that object.
 - Only fields listed as attributes in the `<row>` element are updated. Fields not mentioned are unchanged.
+- **Saving a row infoRouter Connect extracted is the review of it.** The row's saver becomes the caller and its `ReviewState` becomes `Reviewed`, whether or not anything was changed; the row's `AIConfidence` is left as Connect wrote it. When no row of the document is left to review, the document's `ExtractedDataReviewPending` bit is cleared. See [GetPropertySets](GetPropertySets.md#reviewing-values-connect-extracted).
 - To add a new row, use [AddPropertySetRow](AddPropertySetRow.md). To remove a row, use [DeletePropertySetRow](DeletePropertySetRow.md).
 - To update a property set row for a user, use [UpdatePropertySetRowForUser](UpdatePropertySetRowForUser.md).
 

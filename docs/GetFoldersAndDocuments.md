@@ -170,8 +170,6 @@ Folders appear first, followed by documents. All items are immediate children of
 
             AIEnhanced="17"
 
-            AIExtractConfidence="65"
-
             VersionNumber="3"
 
             PublishedVersionNumber="3"

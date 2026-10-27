@@ -34,7 +34,7 @@ once. Tasks whose document has been deleted, or that the caller can no longer re
             CheckoutDate="" CheckoutBy="" CheckoutByUserName="" Size="204800" Type="Office Document"
             PercentComplete="0" CompletionDate="" Importance="Normal" RetentionDate="" DispositionDate=""
             CutoffDate="" RDDefId="0" ExpirationDate="" RegisterDate="2024-03-01T09:00:00.000Z"
-            RegisteredBy="John Smith" DocTypeID="0" DocTypeName="" AIEnhanced="0" AIExtractConfidence="0"
+            RegisteredBy="John Smith" DocTypeID="0" DocTypeName="" AIEnhanced="0"
             VersionNumber="3000000" PublishedVersionNumber="3000000" PublishingRule="LATEST"
             OwnerName="John Smith" WorkflowId="12" WorkflowName="Contract Approval"
             WorkflowStepNumber="1" WorkflowStepName="Review"
@@ -80,8 +80,8 @@ in a library the caller administers.
 The element [GetDocument](GetDocument.md) returns with all four of its flags `false` - see its
 [attribute table](GetDocument.md#document-element-attributes) - plus `DueTaskRoles`. The only child it can have is a
 `<DescriptionLog>`, written when the description has a recorded author; there is no owner, property
-set, access list or version history. The element carries `AIEnhanced` and `AIExtractConfidence` - see
-[AIEnhanced](GetDocument.md#aienhanced) and [AIExtractConfidence](GetDocument.md#aiextractconfidence).
+set, access list or version history. The element carries `AIEnhanced` - see
+[AIEnhanced](GetDocument.md#aienhanced).
 
 The `<document>` tells you which document is due, not which task: use [getTasks](getTasks.md) for the
 tasks themselves.
