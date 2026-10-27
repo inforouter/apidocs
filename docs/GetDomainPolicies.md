@@ -27,7 +27,7 @@ Gets the policies and domain rules for a domain/library, including per-policy me
 
 ```xml
 <root success="true">
-  <DomainPolicies domainName="MyLibrary" isArchive="false">
+  <DomainPolicies domainName="MyLibrary" isArchive="false" editable="true">
     <DomainRules>
       <AnonymousHideIncomplete>false</AnonymousHideIncomplete>
       <ReaderHideIncomplete>false</ReaderHideIncomplete>
@@ -68,6 +68,14 @@ Gets the policies and domain rules for a domain/library, including per-policy me
 ```xml
 <root success="false" error="[ErrorCode] Error message" />
 ```
+
+## DomainPolicies Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `domainName` | string | The library the policies belong to |
+| `isArchive` | boolean | Whether the library is archived |
+| `editable` | boolean | Whether [SetDomainPolicies](SetDomainPolicies.md) would accept this caller for this library. Added in 9.0. Always `true` for administrators and Policy Managers. For a library manager it is `true` only while the system behaviour setting *Allow library managers to edit policies* is on; that setting can be read only through [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md), which needs the Policy Manager role, so this attribute is the manager's way to find out. A UI shows the policy editor when it is `true` and a read-only view otherwise. |
 
 ## DomainRules Elements
 
@@ -186,6 +194,8 @@ Either of:
 - being a **manager of the library**, whatever that setting says.
 
 Up to 8.7 reading needed the right to change, so a library manager could not read their own library's policies while the setting was off. Anyone else is refused with `4030`.
+
+Whether the caller may also *change* the policies is answered by the `editable` attribute, so a library manager does not have to try `SetDomainPolicies` and read the 4030 to find out.
 
 ## Example
 

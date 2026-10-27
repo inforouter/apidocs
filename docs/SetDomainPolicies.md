@@ -164,7 +164,9 @@ earlier. When both are present on one `Policy` element, the `GetDomainPolicies` 
 
 ## Required Permissions
 
-The caller must have **UpdateLibraryPolicies** permission on the specified domain.
+The caller must have **UpdateLibraryPolicies** permission on the specified domain: an administrator, a member of **[Policy Managers]**, or a manager of the library when the system behaviour setting *Allow library managers to edit policies* is on.
+
+A library manager cannot read that setting ([GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) needs the Policy Manager role), and the `4030` this call answers while it is off names only the roles that would have passed. [GetDomainPolicies](GetDomainPolicies.md) answers `editable="true"` on its `DomainPolicies` element exactly when this call would accept the caller, so read that before offering an editor.
 
 ## Example
 
