@@ -74,7 +74,7 @@ Errors that stop the call before any item is processed, such as an invalid ticke
 
 ## Required Permissions
 
-The caller must be allowed by the library's **Retention Period Change** policy on the folder, and on every subfolder and document the call changes. By default that is the library manager, the owner, and users with Change permission. Items the caller is not allowed to change are listed as failures.
+The caller must be allowed by the library's **Retention Period Change** policy on the folder, and on every subfolder and document the call changes, or be a member of **[Retention & Disposition Managers]** (administrators always pass). By default the policy allows the library manager, the owner, and users with Change permission. Items the caller is not allowed to change are listed as failures. The role stands in for a missing right only, as it does for a folder's schedule; up to 9.0 the cut-off date took the right alone.
 
 ---
 

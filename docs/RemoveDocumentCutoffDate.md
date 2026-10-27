@@ -45,7 +45,7 @@ Error text is returned in the calling user's language.
 
 ## Required Permissions
 
-The caller must be allowed by the library's **Retention Period Change** policy on the document. By default that is the library manager, the document owner, and users with Change permission on the document.
+The caller must be allowed by the library's **Retention Period Change** policy on the document, or be a member of **[Retention & Disposition Managers]** (administrators always pass). By default the policy allows the library manager, the document owner, and users with Change permission on the document. The role stands in for a missing right only, as it does for applying, removing, freezing and unfreezing a schedule; up to 9.0 the cut-off date took the right alone, so an R&D Manager who had put an *On cut-off* schedule on a document through the role could not set the date it runs from.
 
 ---
 
