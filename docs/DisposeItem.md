@@ -160,6 +160,7 @@ caller branching on `success` concluded the work was done when nothing was.
 - [`SetDocumentRandDSchedule`](SetDocumentRandDSchedule.md) — Assign an R&D schedule to a document
 - [`SetFolderRandDSchedule`](SetFolderRandDSchedule.md) — Assign an R&D schedule to a folder
 - [`GetDispositionLog`](GetDispositionLog.md) — Get disposition log entries
+- [`TransferToExternalAgency`](TransferToExternalAgency.md) — Record the transfer of an item under a transfer-type schedule, which DisposeItem refuses
 
 ## Error Codes
 

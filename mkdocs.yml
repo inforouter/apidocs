@@ -450,6 +450,7 @@ nav:
     - GetAppliedRDScheduleLogs: GetAppliedRDScheduleLogs.md
     - GetRdFreezeLogs: GetRdFreezeLogs.md
     - SetRdFreezeFlag: SetRdFreezeFlag.md
+    - TransferToExternalAgency: TransferToExternalAgency.md
     - GetISOReviewDefinition: GetISOReviewDefinition.md
     - SetISOReviewDefinition: SetISOReviewDefinition.md
     - RemoveISOReviewDefinition: RemoveISOReviewDefinition.md

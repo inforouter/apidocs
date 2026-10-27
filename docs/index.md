@@ -380,6 +380,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md) - Assign an R&D schedule to a document
 - [SetFolderRandDSchedule](SetFolderRandDSchedule.md) - Assign an R&D schedule to a folder, optionally cascading to subfolders and documents
 - [SetRdFreezeFlag](SetRdFreezeFlag.md) - Set or clear the R&D freeze flag on a document or folder by path (auto-detects path type; folder update is recursive)
+- [TransferToExternalAgency](TransferToExternalAgency.md) - Record the transfer of a document or folder to the external agency its R&D schedule names; completes the Transfer disposition task
 - [UpdateRandDSchedule](UpdateRandDSchedule.md) - Update an existing R&D schedule definition with optional date recalculation for assigned objects
 - [UpdateRetentionSourceAuthority](UpdateRetentionSourceAuthority.md) - Update (rename) a retention source authority
 
