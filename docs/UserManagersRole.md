@@ -24,17 +24,19 @@ values: `ListingGroupMembershipOfUser`, `CreateUser`, `ListUsers`, `UpdateUserPr
    `[Administrators]`) passes everything.
 2. The administrator's-account guard: for the actions that change an account (`UpdateUserProfile`,
    `UpdateUserPreferences`, `SetUserPassword`, `DeleteUser`, `SetUserTaskRedirections`,
-   `ApplyRemoveCustomMetaData`; method `ChangesTheAccount`), a non-administrator acting on the `sysadmin`
-   account or on a member of `[Administrators]` is refused before the matrix is asked: `4030`, "Access denied.
-   Only administrators can change an administrator's account." Reads, transfers and rerouting are not in that
-   list (transfers have their own guard, see the Transfers table).
+   `RerouteUserTaskRedirection`, `ApplyRemoveCustomMetaData`; method `ChangesTheAccount`), a non-administrator
+   acting on the `sysadmin` account or on a member of `[Administrators]` is refused before the matrix is asked:
+   `4030`, "Access denied. Only administrators can change an administrator's account." Reads and transfers are
+   not in that list (transfers have their own guard, see the Transfers table). Rerouting joined it in 9.0.200;
+   the user an administrator's tasks are redirected to may still pass them on (step 4 is asked first).
 3. `IsAllowed`: self first (only for the actions marked *self* below, and only when the object is a USER and is
    the caller), then membership of a required role group, then, when the action allows it and a library id was
    passed, the library managers of that library (`SecurityFunctions.CheckDomainManagementAsync`). A library id
    of 0 (a global user, a global group, an application-wide action) means the library-manager step can never
    pass.
-4. For `RerouteUserTaskRedirection` only: after a refusal, the caller passes anyway when the user's current
-   redirection points to the caller.
+4. For `RerouteUserTaskRedirection` only: the caller passes when the user's current redirection points to
+   the caller. Since 9.0.200 this is asked first, before the guard of step 2, so it holds for an administrator's
+   account too.
 
 A refusal from the matrix is `errorCode="4030"` with "Access denied. This action is restricted to the
 following roles: The system administrator, Library manager(s), User managers" (the library managers part only
@@ -78,7 +80,7 @@ that guard applies.
 | Read a user's workflow roles | [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) | self, lib managers | `ListingUserOwnerships` (`WorkflowDefinitionServices.cs`). The lookup is made without the visibility check, so an unknown name is `4041` for everyone. |
 | Set or remove a user's task redirection | [SetUserTaskRedirection](SetUserTaskRedirection.md), [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) | self, lib managers | `SetUserTaskRedirections`. Administrator's-account guard. The target user must exist and be enabled. |
 | Read the redirections that point to a user | [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) | self, lib managers | `RerouteUserTaskRedirection` and then `SetUserTaskRedirections`, so the second one decides. The administrator's-account guard applies to this read (see warnings). |
-| Reroute a user's existing redirection | [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) | self, lib managers, and the user the redirection currently points to | `RerouteUserTaskRedirection`. The general setting `RerouteRedirections` must be on (`4030`, "Rerouting of redirected tasks is not allowed by the application settings."). No redirection is `4041`. Not blocked by the administrator's-account guard (see warnings). |
+| Reroute a user's existing redirection | [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md) | self, lib managers, and the user the redirection currently points to | `RerouteUserTaskRedirection`. The general setting `RerouteRedirections` must be on (`4030`, "Rerouting of redirected tasks is not allowed by the application settings."). No redirection is `4041`. On an administrator's account the guard applies, except to the user the tasks currently go to. |
 | Add, update or delete property set rows on a user | [AddPropertySetRowForUser](AddPropertySetRowForUser.md), [UpdatePropertySetRowForUser](UpdatePropertySetRowForUser.md), [DeletePropertySetRowForUser](DeletePropertySetRowForUser.md) | lib managers | `ApplyRemoveCustomMetaData` per row (`PropertySetOperations.cs`, PsetApplySecurityCheck). Not self. Administrator's-account guard. The user is looked up with the visibility check, so a co-worker reaches the row check and is refused there; a single refusal is answered with the code the check gave. |
 
 ### User groups

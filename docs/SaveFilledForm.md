@@ -89,7 +89,7 @@ A form input can carry `replicateto="DOCUMENT.PROPERTYSET.<SET>.<FIELD>[.<ROWNBR
 
 ### Detaching from the template
 
-A document saved from a form template stays bound to it: every new version is rendered from the template again, [EditFilledForm](EditFilledForm.md) edits its fields, and a file checked in to it is **not** kept: the check-in succeeds, but what is stored is the template rendered again with no form data. Pass `detachDocumentFromTemplate=true` to save it as usual and then leave it an **ordinary document**, checked out and in as the `.docx`, `.pdf` or `.htm` file it became:
+A document saved from a form template stays bound to it: submitting the form again through this operation renders a new version from the template, and [EditFilledForm](EditFilledForm.md) edits its fields. A file checked in to it - a save from Word, an upload - is stored as sent and the link stays. (Until 9.0.200 such a file was **not** kept: what was stored was the template rendered again with no form data.) Pass `detachDocumentFromTemplate=true` to save it as usual and then leave it an **ordinary document**, with no form behind it at all:
 
 - The document is rendered from the template first, exactly as without the flag.
 - Then its template and dynamic content flag are removed, in the same transaction as the save: a new document is created already detached; for a new version, the version is rendered and the document detached together.

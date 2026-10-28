@@ -46,7 +46,7 @@ The calling user must be one of:
 - A **User Manager**, or
 - A **Library Manager**.
 
-Anonymous access is not permitted.
+Anonymous access is not permitted. The `sysadmin` account and members of `[Administrators]` are an exception: their redirection is rerouted only by an administrator or by the user their tasks currently go to (`4030`, "Access denied. Only administrators can change an administrator's account." for anyone else), as every other change to an administrator's account.
 
 ## Preconditions
 
