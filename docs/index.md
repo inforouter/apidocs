@@ -233,6 +233,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [VerifyVersionHash](VerifyVersionHash.md) - Verify the integrity of a document version by comparing its stored content hash
 
 ### Security & Access Control
+- [Server rules](rules/index.md) - How the server decides, by subject: who may do what, tasks, documents, WebDAV, libraries, retention; with a [questions index](rules/questions.md)
 - [AdministrativeRoles](AdministrativeRoles.md) - The built-in administrative role groups and the calls each one unlocks
 - [AdministratorsRole](AdministratorsRole.md) - What only Administrators can do, and how an administrator is defined
 - [UserManagersRole](UserManagersRole.md) - What User Managers can and cannot do with users, groups and library membership

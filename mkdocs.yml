@@ -71,6 +71,20 @@ copyright: Copyright &copy; 2026 infoRouter. All rights reserved.
 
 nav:
   - Home: index.md
+  - Server rules:
+    - Overview: rules/index.md
+    - Questions index: rules/questions.md
+    - Who may do what:
+      - Administrative roles: AdministrativeRoles.md
+      - Administrators: AdministratorsRole.md
+      - User Managers: UserManagersRole.md
+      - Audit Managers: AuditManagersRole.md
+      - Policy Managers: PolicyManagersRole.md
+      - R&D Managers: RDManagersRole.md
+      - Search & Category Administrators: SearchAdministratorsRole.md
+      - Library Managers: LibraryManagersRole.md
+    - Tasks and workflows:
+      - Who may change a task's due date: rules/tasks-due-date.md
 
   - Authentication:
     - AuthenticateUser: AuthenticateUser.md
@@ -384,14 +398,6 @@ nav:
     - RemoveWorkflowAttachment: RemoveWorkflowAttachment.md
 
   - Security & Access:
-    - AdministrativeRoles: AdministrativeRoles.md
-    - Administrators role: AdministratorsRole.md
-    - User Managers role: UserManagersRole.md
-    - Audit Managers role: AuditManagersRole.md
-    - Policy Managers role: PolicyManagersRole.md
-    - R&D Managers role: RDManagersRole.md
-    - Search & Category Administrators role: SearchAdministratorsRole.md
-    - Library Managers: LibraryManagersRole.md
     - GetAccessList: GetAccessList.md
     - GetAccessListHistory: GetAccessListHistory.md
     - GetFolderAccessListCatalog: GetFolderAccessListCatalog.md

@@ -43,8 +43,10 @@ The task must be in **InProgress** or **DueDateChanged** status -" the due date 
 
 The calling user must satisfy **one** of the following conditions:
 
-- The calling user is the **task assignee** and the task definition has the **"Postpone" (change due date) permission** enabled for assignees.
-- The calling user is a **workflow supervisor** for this task.
+- The calling user is the **task assignee** and the task was created with the **"Postpone" (change due date) permission** (`PermissionChangeDueDate`, off by default).
+- The calling user **assigned the task**, is a **workflow supervisor** for it, or is a **manager of the library** the task belongs to. These pass whatever the permission says.
+
+There is no administrator bypass. The rule in full, with where the permission comes from: [Who may change a task's due date](rules/tasks-due-date.md).
 
 ## Example
 

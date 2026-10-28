@@ -59,9 +59,11 @@ Reassigns an active workflow task to a different user with a new due date and in
 
 ## Required Permissions
 
-The calling user must be either:
-- The **current task assignee**, or
-- A **workflow supervisor** for the task.
+The calling user must be one of:
+- The **current task assignee** (no task permission is needed), or
+- The user who **assigned the task**, a **workflow supervisor** for it, or a **manager of the library** the task belongs to.
+
+The new due date must not be in the past. See [Who may change a task's due date](rules/tasks-due-date.md#reassigning-sets-a-due-date-too).
 
 Anonymous access is not permitted.
 
