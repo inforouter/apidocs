@@ -174,6 +174,8 @@ await call('UpdateTaskStatus', {
 - `dateTransferSubmitted` is never stored empty: it is the mark of a transfer, and a call without it records the current date and time.
 - The folder itself gets a disposition status row from the daily job like a document does, but no task; only documents get Transfer tasks.
 
+Who may change retention at all, and the role's reach: [Who may change retention and disposition](rules/retention-who-may.md).
+
 ## Related APIs
 
 - [`DisposeItem`](DisposeItem.md) — Dispose a document or folder under a final-disposition schedule

@@ -11,15 +11,15 @@ its page changes in the same commit, and the page says since which version.
 
 | Subject | What it answers |
 |---|---|
-| **Who may do what** | The six administrative roles and the library manager ([overview](../AdministrativeRoles.md)): [Administrators](../AdministratorsRole.md), [User Managers](../UserManagersRole.md), [Audit Managers](../AuditManagersRole.md), [Policy Managers](../PolicyManagersRole.md), [R&D Managers](../RDManagersRole.md), [Search & Category Administrators](../SearchAdministratorsRole.md), [Library Managers](../LibraryManagersRole.md). |
-| **Tasks and workflows** | [Who may change a task's due date](tasks-due-date.md). To come: reassigning and completing, supervisors, task redirections, disposition tasks. |
-| **Documents** | To come: versions and publishing requirements, checkout and check-in, documents made from forms and templates, what Copy and Move carry, classification. |
-| **WebDAV** | To come: locks are checkouts, a MOVE onto a document is a new version, ETags, how Office saves. |
-| **Libraries** | To come: membership and visibility, hidden and anonymous libraries, a library made from a template, deletion and recycle bins. |
-| **Retention and disposition** | To come: schedules, freeze, cut-off dates, the daily job, transfer to an agency. |
-| **Audit logs** | To come: which logs exist and who reads each. |
-| **Connect** | To come: extraction, confidence, review state. |
-| **Conventions** | To come: error code bands, MultiStatus answers, name rules. |
+| **Who may do what** | The six administrative roles and the library manager ([overview](../AdministrativeRoles.md)): [Administrators](../AdministratorsRole.md), [User Managers](../UserManagersRole.md), [Audit Managers](../AuditManagersRole.md), [Policy Managers](../PolicyManagersRole.md), [R&D Managers](../RDManagersRole.md), [Search & Category Administrators](../SearchAdministratorsRole.md), [Library Managers](../LibraryManagersRole.md). [Who may change an administrator's account](administrator-account.md). [Which libraries a caller can reach](libraries-reach.md). |
+| **Tasks and workflows** | [Who may change a task's due date](tasks-due-date.md). To come: completing tasks, supervisors, task redirections, disposition tasks. |
+| **Documents** | [Documents made from forms and templates](documents-from-forms.md). To come: versions and publishing requirements, checkout and check-in, what Copy and Move carry, classification. |
+| **WebDAV** | [How WebDAV maps onto documents](webdav.md): locks are checkouts, a MOVE onto a document is a new version, ETags, how Office saves. |
+| **Libraries** | [Which libraries a caller can reach](libraries-reach.md), membership and deletion. [A library made from a model library](library-from-template.md). |
+| **Retention and disposition** | [Who may change retention and disposition](retention-who-may.md): schedules, freeze, cut-off dates, the role's reach, transfer to an agency. |
+| **Audit logs** | [Which logs exist, and who reads each](audit-logs-who-reads.md). |
+| **Connect** | [Values Connect extracted, and whether somebody reviewed them](connect-review-state.md). |
+| **Conventions** | [How an answer is read](conventions.md): error code bands, MultiStatus, what surprises first-time callers. |
 
 The [questions index](questions.md) lists the questions people ask and points at the paragraph that answers
 each.

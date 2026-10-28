@@ -83,8 +83,24 @@ nav:
       - R&D Managers: RDManagersRole.md
       - Search & Category Administrators: SearchAdministratorsRole.md
       - Library Managers: LibraryManagersRole.md
+      - Who may change an administrator's account: rules/administrator-account.md
+      - Which libraries a caller can reach: rules/libraries-reach.md
     - Tasks and workflows:
       - Who may change a task's due date: rules/tasks-due-date.md
+    - Documents:
+      - Documents made from forms and templates: rules/documents-from-forms.md
+    - WebDAV:
+      - How WebDAV maps onto documents: rules/webdav.md
+    - Libraries:
+      - A library made from a model library: rules/library-from-template.md
+    - Retention and disposition:
+      - Who may change retention and disposition: rules/retention-who-may.md
+    - Audit logs:
+      - Which logs exist, and who reads each: rules/audit-logs-who-reads.md
+    - Connect:
+      - Values Connect extracted, and whether somebody reviewed them: rules/connect-review-state.md
+    - Conventions:
+      - How an answer is read: rules/conventions.md
 
   - Authentication:
     - AuthenticateUser: AuthenticateUser.md

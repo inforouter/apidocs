@@ -389,6 +389,8 @@ console.log(root.getAttribute('DocumentID'), root.getAttribute('DocumentName'));
 [EditFilledForm](EditFilledForm.md) is the other half of the pair - though note the warning on its
 page before using it.
 
+The rule behind the link to the form, in plain words: [Documents made from forms and templates](rules/documents-from-forms.md).
+
 ## Notes
 
 - This API produces **HTML documents** (`.html` / `.htm`). If the document name in `path` does not end with `.html` or `.htm`, the extension `.htm` is automatically appended to the created file name. The exception is a PDF or Word template, used directly or as a form's `render-with`: the document is then the filled `.pdf` or `.docx`, named with that extension instead (see [Filling a PDF or Word template directly](#filling-a-pdf-or-word-template-directly)).

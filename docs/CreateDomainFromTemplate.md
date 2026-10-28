@@ -204,6 +204,8 @@ if (root.getAttribute('errorCode') === '2070') {
 - **Calling it twice makes two libraries**, as long as the names differ. The template is read, never written: its members, lists, folders and documents are what they were.
 - Subscriptions and access list entries of the template's users and global groups keep working in the new library, because those are the same users and groups. The template's local groups are the ones made again.
 
+The rule in plain words: [A library made from a model library](rules/library-from-template.md).
+
 ## Related APIs
 
 - [CreateDomain](CreateDomain.md) - Make an empty library
