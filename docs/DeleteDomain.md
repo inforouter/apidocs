@@ -120,12 +120,14 @@ Deleting one that is not there is `4041`, so a delete that runs twice reports th
 - **Recycle Bin**: Deleted domain contents do not go to the recycle bin.
 - For a non-destructive alternative, consider archiving the domain with `ArchiveDomain` instead of deleting it.
 - It is recommended to verify the domain exists with `DomainExists` before attempting deletion.
+- A library [CreateDomainFromTemplate](CreateDomainFromTemplate.md) made with a `2070` answer - some items of the template refused - exists; this operation is the undo for a caller that wanted all or nothing.
 
 ---
 
 ## Related APIs
 
 - [CreateDomain](CreateDomain.md) - Create a new domain/library
+- [CreateDomainFromTemplate](CreateDomainFromTemplate.md) - Make a library from a model library; `2070` leaves one to delete or keep
 - [ArchiveDomain](ArchiveDomain.md) - Archive (deactivate) a domain without deleting it
 - [DomainExists](DomainExists.md) - Check if a domain exists before deleting
 - [GetDomains](GetDomains.md) - List all domains

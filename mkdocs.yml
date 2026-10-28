@@ -310,6 +310,7 @@ nav:
     - GetLocalGroups: GetLocalGroups.md
     - DomainExists: DomainExists.md
     - CreateDomain: CreateDomain.md
+    - CreateDomainFromTemplate: CreateDomainFromTemplate.md
     - UpdateDomain: UpdateDomain.md
     - DeleteDomain: DeleteDomain.md
     - ArchiveDomain: ArchiveDomain.md

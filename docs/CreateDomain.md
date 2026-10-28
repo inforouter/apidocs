@@ -156,6 +156,7 @@ than `true`/`false`.
 ## Notes
 
 - `DomainName` must be unique; creating a domain with an existing name returns an error.
+- To make a library that starts as a copy of another - a model library's folders, documents, members and access lists under a new name - use [CreateDomainFromTemplate](CreateDomainFromTemplate.md) instead; this operation makes an empty one.
 - After creation, use `AddUserAsDomainMember` or `AddUserGroupAsDomainMember` to populate the domain with members.
 - Use `AddManagerToDomain` to assign managers to the new domain.
 - The `WelcomeMessage` supports multi-line text; newlines are preserved.
@@ -167,6 +168,7 @@ than `true`/`false`.
 
 ## Related APIs
 
+- [CreateDomainFromTemplate](CreateDomainFromTemplate.md) - Make a library from a model library
 - [DeleteDomain](DeleteDomain.md) - Delete a domain/library
 - [UpdateDomain](UpdateDomain.md) - Update domain properties (name, visibility, welcome message)
 - [DomainExists](DomainExists.md) - Check if a domain exists

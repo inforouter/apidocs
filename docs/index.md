@@ -258,6 +258,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md) - Add a global user group to the member list of a domain/library
 - [ArchiveDomain](ArchiveDomain.md) - Archive a domain/library to make it an archived (offline) library
 - [CreateDomain](CreateDomain.md) - Create a new domain/library with name, access, and visibility settings
+- [CreateDomainFromTemplate](CreateDomainFromTemplate.md) - Create a library from a model library: policies, members, groups, folders, lists and documents
 - [DeleteDomain](DeleteDomain.md) - Permanently delete a domain/library and all its contents
 - [DomainExists](DomainExists.md) - Check whether a domain/library with the given name exists
 - [GetDomain](GetDomain.md) - Get the properties of a domain/library (ID, name, archive status, visibility)
