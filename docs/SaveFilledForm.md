@@ -395,6 +395,7 @@ page before using it.
 - The destination folder (the parent of `path`) must already exist. It is not created automatically.
 - When creating a **new version** of an existing document, the document is **checked in** after the call: one that is not checked out is checked out and the new version published, and one **already checked out by the current user** (for example by [EditFilledForm](EditFilledForm.md)) is checked in with the new version.
 - If the document at `path` is checked out by a **different user**, the call fails with an error.
+- A new version that arrives as a **file** - [UploadDocument](UploadDocument.md), a WebDAV save from Word, the import tool - is stored as uploaded. The document is only rendered from its template again when the form is submitted again through this operation. Until 9.0.200 a file upload to a form document was replaced by the template filled from nothing, a blank letter. The link to the form stays either way, until `detachDocumentFromTemplate` drops it.
 - Pass `templatePath = "999"` to generate the document content from a blank template rather than an existing template file.
 - The response root element differs between the two modes: `<response>` when creating a new document, `<root>` when creating a new version.
 
