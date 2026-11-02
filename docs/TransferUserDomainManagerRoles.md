@@ -55,7 +55,7 @@ Transfers domain/library manager roles from one user to another. The target user
 
 **An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
 
-An **administrator**, a **User Manager**, or a manager of the libraries of **both** users (for users local to them).
+An **administrator** or a **User Manager**. Unlike the other transfers, the managers of the users' library are not admitted: moving manager roles appoints a manager, which [AddManagerToDomain](AddManagerToDomain.md) reserves for administrators and User Managers, and they are refused with `4030` before anything moves.
 
 The target must already be a member of each library; where they are not, that library's manager role stays with the source user. A User Manager cannot name **themselves** as the target: like [AddManagerToDomain](AddManagerToDomain.md), it would make them a manager of those libraries. That is refused with `4030` before anything is transferred.
 

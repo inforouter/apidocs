@@ -244,6 +244,8 @@ The calling user must satisfy **one of** the following conditions:
 
 2. **`ViewAuditLogs`** system administration permission on the document's library.
 
+Anyone else is refused with `4030`.
+
 
 
 

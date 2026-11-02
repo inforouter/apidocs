@@ -66,7 +66,7 @@ however, administrators are treated like everyone else: the owner check has no a
 | Administer the content search index: re-index, rebuild, index server settings | none exists: `ISrv.cs` has no operation for it | n/a | n/a |
 | Flush the application cache | [FlushApplicationCache](FlushApplicationCache.md) | Administrators only (`IRSecurity.cs`, IsAllowed adds no role) | `4030` |
 | Make someone a search administrator | [AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md) on group 105 | Administrators only (UpdateGroupMembers, ids up to 1000) | `4030` |
-| List the members of group 105 | [GetUserGroupMembers](GetUserGroupMembers.md), [GetUserGroupMembers1](GetUserGroupMembers1.md) | Administrators and User Managers (`ListGroups`); the 8.6.105 insert sets no SHOWMEMBERS, so the group hides its members (`UsergroupExtensions.GetMembersForPublic`) | `4000` "Cannot access user group members. The user group is marked as a public user group." followed by the roles text |
+| List the members of group 105 | [GetUserGroupMembers](GetUserGroupMembers.md), [GetUserGroupMembers1](GetUserGroupMembers1.md) | Administrators and User Managers (`ListGroups`); the 8.6.105 insert sets no SHOWMEMBERS, so the group hides its members (`UsergroupExtensions.GetMembersForPublic`) | `4030` "Cannot access user group members. The user group is marked as a public user group." followed by the roles text |
 
 Running a search ([Search](Search.md), [GetNextSearchPage](GetNextSearchPage.md) and the rest) needs no role:
 `SearchServices.ExecuteSearchAsync` makes no administrative check.

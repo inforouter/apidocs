@@ -138,7 +138,7 @@ Returns activity and membership statistics for a specified user, including docum
 
 - The caller must be authenticated.
 - A user may call this API for themselves.
-- Allowed for yourself; for system administrators and User Managers; for library managers of the user's home library; and for any user who shares a library with the target (coworker). Otherwise refused with 4030 'Access denied. You need to be a coworker, administrator, library manager, or user manager to access this information.'
+- Allowed for yourself, for administrators and User Managers, and for the managers of the user's home library (`ListingUserOwnerships`, the role [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) asks). Anyone else is refused with `4030`. A co-worker (a user who shares a library with the target) may look the user up with [GetUser](GetUser.md) but is refused here: the answer carries task counts and workflow, ISO and manager roles.
 
 ## Example
 

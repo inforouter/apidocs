@@ -79,7 +79,7 @@ The `<TaskRedirections>` element contains zero or more `<TaskRedirection>` entri
 
 ## Required Permissions
 
-Any authenticated user may call this API.
+The user themselves, administrators, User Managers, and the managers of a local user's home library (`ListingUserOwnerships`). Anyone else is refused with `4030`. This is a read, so the administrator's-account guard does not apply: a User Manager may ask which redirections point to an administrator.
 
 ## Example
 

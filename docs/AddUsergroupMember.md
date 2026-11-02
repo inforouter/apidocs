@@ -43,7 +43,7 @@ Adds the specified user to the member list of the specified user group.
 
 ## Required Permissions
 
-**Domain manager or system administrator.** The calling user must be a manager of the domain containing the group, or a system administrator.
+Administrators, User Managers and, for a library group, the managers of that library (`UpdateGroupMembers`). The role groups (`[Administrators]`, `[User Managers]` and the rest) are administrators only. The right is checked before the user is looked up, so a caller without it is refused with `4030` whether or not the user exists or belongs to the library.
 
 ---
 

@@ -40,7 +40,10 @@ Removes all folder and document subscriptions for the specified user. This is a 
 Access is granted if any of the following conditions are met:
 - The caller is the same user as the specified `userName`
 - The caller is a system administrator
-- The caller is a domain manager of the domain the specified user belongs to
+- The caller is a User Manager
+- The caller is a manager of the library the specified user is local to
+
+These are the callers who may move the user's subscriptions with [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) and [TransferUserFolderSubscriptions](TransferUserFolderSubscriptions.md). An administrator's account (the `sysadmin` account or a member of `[Administrators]`) can be cleared by administrators only; anyone else is refused with `4030`.
 
 If none of these conditions are met, an access denied error is returned.
 

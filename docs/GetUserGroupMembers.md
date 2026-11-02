@@ -68,7 +68,7 @@ Returns a `<users>` collection with one `<User>` element per member with full us
 
 ## Required Permissions
 
-Any **authenticated user** can call this API.
+Any **authenticated user**, for a group that shows its members. For a group that hides them (`ShowMembers` false, which a global group is unless told otherwise): administrators, User Managers and, for a library group, the managers of that library (`ListGroups`). Anyone else is refused with `4030`.
 
 ---
 

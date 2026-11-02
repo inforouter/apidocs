@@ -76,7 +76,7 @@ If the user has no domain memberships, the `<domains>` element is empty:
 
 ## Required Permissions
 
-Any **authenticated user** can call this API. A user can retrieve their own memberships as well as other users' memberships.
+A user may read their own memberships. Another user's are read by administrators, User Managers and the managers of the user's home library (`ListingGroupMembershipOfUser`, the role [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) asks); anyone else is refused with `4030`, co-workers included. The list names every library the user belongs to, hidden ones the caller is not in included.
 
 ---
 
