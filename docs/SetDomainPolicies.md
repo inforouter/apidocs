@@ -20,7 +20,7 @@ Sets the policies for a domain/library.
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `domainName` | string | Yes | Name of the domain/library to update |
-| `xmlPolicies` | string | Yes | XML containing policy settings (see format below) |
+| `xmlPolicies` | string | Yes | XML containing policy settings (see format below), or `<Policies reset="defaults" />` to put the library back on the factory defaults |
 
 ## XML Format
 
@@ -54,6 +54,26 @@ Sets the policies for a domain/library.
   </ActionPolicies>
 </Policies>
 ```
+
+## Resetting to the factory defaults
+
+```xml
+<Policies reset="defaults" />
+```
+
+Puts the library back on the factory defaults: its own policy rows are deleted, so it follows the built-in policy table from then on (a later release that changes a default changes it for this library too), and every library rule is switched off. The change is written to the policy update log like any other, marked `Reset="defaults"`.
+
+A reset may carry children. They are applied on top of the defaults, so a caller can start from a clean slate and set only what differs:
+
+```xml
+<Policies reset="defaults">
+  <ActionPolicies>
+    <Policy Action="DocumentDelete" RightDomainManager="true" RightObjectOwner="false" RightRequired="FULLCONTROL" LogAction="true"/>
+  </ActionPolicies>
+</Policies>
+```
+
+`defaults` is the only value `reset` accepts; any other is refused with `4000` and nothing changes. The same right applies as for any other change.
 
 ## DomainRules Elements
 
@@ -261,7 +281,8 @@ by model binding with HTTP 400.
 ## Notes
 
 - The XML `GetDomainPolicies` returns can be fed straight back in: pass its `<DomainPolicies>` element as `xmlPolicies`, the root element name being ignored
-- Policies not specified in the XML will retain their current values
+- Policies not specified in the XML will retain their current values; a `<Policy>` that is specified replaces every flag of that action, and a flag left out is off
+- A `reset="defaults"` attribute on the root puts the library back on the factory defaults before any child is applied (see above). Without it, an empty `<Policies />` switches every library rule off and leaves the action policies alone
 - `RightRequired` is applied only when it names one of that policy's `AllowedRights`, which `GetDomainPolicies` reports; any other value leaves the current requirement alone
 - System policies cannot be modified and will be ignored
 - The `DocumentDelete` and `FolderDelete` actions always have logging enabled regardless of the `LogAction` setting
