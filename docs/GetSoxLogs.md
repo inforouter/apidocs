@@ -244,7 +244,7 @@ The calling user must satisfy **one of** the following conditions:
 
 2. **`ViewAuditLogs`** system administration permission on the document's library.
 
-Anyone else is refused with `4030`.
+The document is reached through the audit role as well: an Audit Manager reads the SOX log of a document in a library they are not a member of. Anyone else is refused with `4030`.
 
 
 

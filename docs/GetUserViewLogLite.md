@@ -101,7 +101,7 @@ Returns a `<response>` root element with pagination attributes and an optional `
 
 ## Required Permissions
 
-The calling user must be authenticated. Any authenticated user can retrieve view logs for **any user** — there is no permission check restricting this to administrators or the user themselves.
+The user themselves, administrators, User Managers and the managers of a local user's home library (`ListingAuditLogOfUser`), and Audit Managers (`ViewAuditLogs`, the fallback). Anyone else is refused with `4030`.
 
 ---
 

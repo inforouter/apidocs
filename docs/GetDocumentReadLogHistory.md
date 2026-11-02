@@ -155,7 +155,7 @@ When the specified user has never accessed the document, or the document has no 
 
 
 
-The calling user must have at least **read access** to the document AND must have the **`DocumentReadViewLog`** permission on the document. This permission is typically granted to document owners, domain managers, and system administrators. Regular read-only users cannot retrieve the view log unless explicitly granted the `DocumentReadViewLog` permission.
+The **`DocumentReadViewLog`** permission on the document (the owner, the library's managers and whoever the access list grants it to); without it, an administrator or a member of `[Audit Managers]` (`ViewAuditLogs` for the document's library). The document is reached through the audit role as well, so an Audit Manager reads the log of a document in a library they are not a member of. Anyone else is refused with `4030`; a document the caller cannot reach is `4041`.
 
 
 

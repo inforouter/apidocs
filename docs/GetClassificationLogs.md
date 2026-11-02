@@ -30,6 +30,8 @@ The `Path` is resolved to a document or folder, and the caller passes when **eit
 - the library's **read classification log** policy grants them the item. By default that is the item's **owner**, the library's **managers**, and users with **Full Control** on it; each library can change this in its policies ([SetDomainPolicies](SetDomainPolicies.md));
 - they are an **administrator**, a member of **[Audit Managers]**, or a **manager of the item's library**.
 
+The item is reached through the audit role as well: an Audit Manager reads the log of an item in a library they are not a member of.
+
 Up to 8.7 only the second was checked: the policy was ignored, so the owner and the users it named were refused. This is how [GetSoxLogs](GetSoxLogs.md) and [GetISOLogs](GetISOLogs.md) already worked.
 
 | Scenario | Result |

@@ -151,6 +151,7 @@ Each `<change>` element contains:
 
 - **Library-level queries** (the path is a library's root): an administrator, a member of `[Audit Managers]`, or a manager of that library. Up to 8.7 library managers were refused here, though allowed on the library's subfolders.
 - **Document/Folder queries**: the `ReadSecurityAccessList` right on the object; otherwise an administrator, a member of `[Audit Managers]`, or a manager of the object's library. The right on a folder covers the changes made under it.
+- The item or library is reached through the audit role as well: an Audit Manager reads the changes of an item in a library they are not a member of.
 
 ## Example Requests
 

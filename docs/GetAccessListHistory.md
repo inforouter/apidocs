@@ -87,7 +87,7 @@ The response contains the current access list followed by zero or more historica
 
 **Read security access list permission** (ActionId 26) on the target document or folder; or, without it, an administrator, a member of `[Audit Managers]`, or a manager of the item's library. Up to 8.7 the role could not stand in for the permission, because the current list was read first.
 
-[GetAccessList](GetAccessList.md), the current list alone, still needs the permission.
+The item is reached through the audit role as well, so an Audit Manager reads the history of an item in a library they are not a member of. [GetAccessList](GetAccessList.md), the current list alone, still needs the permission and the ordinary reach.
 
 ---
 
