@@ -289,6 +289,7 @@ by model binding with HTTP 400.
 - From 9.0 the same holds for `SecurityChange`: the security history ([GetSecurityChangeLog](GetSecurityChangeLog.md)) is always written. The policy reports `LogOption="false"` and `LogAction="true"`, and a `LogAction` sent for it is accepted and ignored, as for the deletes. Until 9.0 it decided whether anything was recorded.
 - The `DocumentRead` action always applies to anonymous users regardless of the `RightAnonymous` setting
 - Archive domains have checkout disabled regardless of policy settings
+- Setting `PublishReqDoctype` to `true` unpublishes every document in the library that has no document type (their publishing rules go with it). From 9.0 that runs right after the policies are saved, 500 documents a statement, so a large library no longer holds the global lock for the whole sweep; the call still returns when it is through. Should the server stop part-way, saving the policies again finishes it
 
 ## Error Codes
 
