@@ -132,7 +132,10 @@ const warnings = root.getAttribute('warnings');
 ```
 
 An answer may carry a `warnings` attribute when some of the tasks could not be moved - a conflict at
-the destination, most often. It is absent when everything moved.
+the destination, most often - or when the tasks left a member of `[R&D Managers]` for a user who is not
+one ("The designated task assignee is not a member of the retention & disposition managers system
+group."): a Dispose or Transfer task can only be completed by a member of that group, so it will have
+to move again. It is absent when everything moved and nothing is lost.
 
 This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
 not go with it.
@@ -141,6 +144,7 @@ not go with it.
 
 - Transfers all **open** (not yet completed) workflow tasks assigned to `fromUserName`.
 - If some tasks cannot be transferred (e.g., due to workflow rules), a `warnings` attribute is included in the success response describing the issue.
+- When `fromUserName` is a member of `[R&D Managers]` and `toUserName` is not, the tasks still move and the `warnings` attribute says that the new assignee is not in the group; the disposition tasks among them cannot be completed until they are given to a member.
 - The response root element is `<root>`, not `<response>`.
 - Typically used as part of a user offboarding process. Run all relevant `TransferUser*` APIs before deleting a user.
 

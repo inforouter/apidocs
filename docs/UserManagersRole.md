@@ -15,8 +15,7 @@ values: `ListingGroupMembershipOfUser`, `CreateUser`, `ListUsers`, `UpdateUserPr
 `RerouteUserTaskRedirection`, `ApplyRemoveCustomMetaData`, `DeleteUser`, `UpdateGroupMembers` (group ids above
 1000 only), `ListGroups`, `CreateUserGroup`, `UpdateUserGroupProperties`, `DeleteUserGroup`,
 `ListLibrariesForAdministration` (shared with Policy Managers), `AddRemoveLibraryMembers`,
-`AddRemoveLibraryManagers` and `TransferUserOwnershipsAndTasks`. Two more, `DisplayUserProfile` and
-`ListLibraryMembers`, name the role but nothing calls them (see Notes).
+`AddRemoveLibraryManagers` and `TransferUserOwnershipsAndTasks`.
 
 `IRSecurity.AccessAllowedforAdminFunctionsAsync` decides, in this order:
 
@@ -104,7 +103,7 @@ that guard applies.
 | Add or remove a library member | [AddUserAsDomainMember](AddUserAsDomainMember.md), [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md), [RemoveUserGroupFromDomainMembership](RemoveUserGroupFromDomainMembership.md) | the managers of that library | `AddRemoveLibraryMembers` with the library's id, checked before the user or group is looked up (`DomainExtensions.cs`, `DomainOperations.cs`). Only global users and groups can be added (`4000`). A User Manager may add themselves. |
 | Appoint a library manager | [AddManagerToDomain](AddManagerToDomain.md) | nobody else: library managers are not allowed | `AddRemoveLibraryManagers` (no library-manager step). The user must already be a member of the library (`4000`). A non-administrator naming themselves is refused: `4030`, "Access denied. Only administrators can make themselves a library manager." (`DomainExtensions.cs`, SetDomainManagerAsync). |
 | Remove a library manager | [RemoveManagerFromDomain](RemoveManagerFromDomain.md) | nobody else | `AddRemoveLibraryManagers`. No self guard: a User Manager may remove anyone, themselves included. |
-| Read a library's members, users and managers | [GetDomainMembers](GetDomainMembers.md), [GetDomainMembers1](GetDomainMembers1.md), [GetDomainUsers](GetDomainUsers.md), [GetDomainUsers1](GetDomainUsers1.md), [GetLocalUsers](GetLocalUsers.md), [GetManagers](GetManagers.md) | anyone signed in who can reach the library | No role check beyond reaching the library (`LibraryServices.cs`). The `ListLibraryMembers` action exists for this but is never asked. |
+| Read a library's members, users and managers | [GetDomainMembers](GetDomainMembers.md), [GetDomainMembers1](GetDomainMembers1.md), [GetDomainUsers](GetDomainUsers.md), [GetDomainUsers1](GetDomainUsers1.md), [GetLocalUsers](GetLocalUsers.md), [GetManagers](GetManagers.md) | anyone signed in who can reach the library | No role check beyond reaching the library (`LibraryServices.cs`); there is no role action for it. |
 
 ### Transfers
 
