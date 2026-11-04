@@ -55,6 +55,8 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetLogStatistics](GetLogStatistics.md) - Get log dates and entry counts by log type, fixed 90-day window (admin only)
 - [GetLogStatistics1](GetLogStatistics1.md) - Get log dates and entry counts by log type with a caller-supplied lookback window (admin only)
 - [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) - Get status of all system maintenance jobs (admin only)
+- [GetTransactionStatistics](GetTransactionStatistics.md) - Get the transaction runner's counters: calls, outcomes, retries, lock waits and holds per operation (admin only)
+- [RunMaintenanceJob](RunMaintenanceJob.md) - Run one maintenance job now and answer when it is through (admin only)
 - [GetWarehouseStatus](GetWarehouseStatus.md) - Get warehouse storage status, document counts, and disk information (admin only)
 - [ServerInfo](ServerInfo.md) - Get server version, time, and basic license info (no authentication required)
 - [UpdateApplicationLicense](UpdateApplicationLicense.md) - Update the application license file (admin only)

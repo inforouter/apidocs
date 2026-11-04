@@ -571,6 +571,8 @@ nav:
     - GetLogs: GetLogs.md
     - GetLogStatistics: GetLogStatistics.md
     - GetMaintenanceJobsStatus: GetMaintenanceJobsStatus.md
+    - GetTransactionStatistics: GetTransactionStatistics.md
+    - RunMaintenanceJob: RunMaintenanceJob.md
     - GetWarehouseStatus: GetWarehouseStatus.md
     - GetGeneralAppSettings: GetGeneralAppSettings.md
     - SetGeneralAppSettings: SetGeneralAppSettings.md
