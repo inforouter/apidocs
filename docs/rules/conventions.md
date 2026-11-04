@@ -23,7 +23,7 @@ HTTP knows the bands. The text is for people and changes with the language; bran
 | `4200` | Unclassified | A refusal the server could not place in a band; rare, and each site is being classified |
 | `4230` | Locked | Checked out by somebody else, frozen, offline, in a workflow: the caller may get it later |
 | `5000` | Server error | Something went wrong on the server; the text names it |
-| `5030` | Service unavailable | A service the server depends on is down: Connect, search, mail |
+| `5030` | Service unavailable | A service the server depends on is down: Connect, search, mail. Also "busy": the rows the action needed were held by another operation for every attempt the server made, or the wait for the serialization lock ran out. Nothing about the request was wrong; send it again in a moment |
 | `6000` | Licence | The licence does not allow it: library count, user count |
 | `2070` | MultiStatus | Part of the work was done and part refused; see below |
 
