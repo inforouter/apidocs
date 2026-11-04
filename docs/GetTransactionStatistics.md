@@ -46,7 +46,7 @@ On the root:
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `Since` | DateTime | When the counters started: server start or the last reset |
-| `Serialization` | string | The `TransactionSerialization` setting the server runs with: `Global` (the heavy transactions take one lock) or `Off` |
+| `Serialization` | string | The mode the server runs with: `Global` (the heavy transactions take one lock) or `Off`. From 9.0 the default is `Off` on SQL Server and `Global` on MySQL and Oracle; the `TransactionSerialization` setting in appsettings.json overrides it |
 | `Database` | string | The database engine: `SqlServer`, `MySQL` or `Oracle` |
 
 On each `Transaction`:
