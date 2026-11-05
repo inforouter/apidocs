@@ -247,7 +247,7 @@ Oracle returns the name of an unquoted column or alias in upper case, so `AS Nam
 ## Notes
 
 - The target field **must have control type `LOOKUP`**. Calling this API on a field with any other control type (TEXT BOX, COMBO BOX, etc.) returns an error.
-- Connection parameters (service name, credentials) and the SQL sentence are stored in a configuration XML file on the infoRouter server: `lookup_<propertySetId>_<FieldName>.xml`.
+- Connection parameters (service name, credentials) and the SQL sentence are stored in the database, in the `PROPERTYLOOKUPS` table, one row per field, with the password encrypted. Until 9.0 they were a configuration XML file on the server, `config/lookup_<propertySetId>_<FieldName>.xml`; the 9.0 upgrade moves each file into the table and deletes it.
 - **Passwords are stored encrypted**. They are never returned in plain text by read APIs such as [GetPropertySetDefinition](GetPropertySetDefinition.md) (shown as `****`).
 - Oracle connections use the **service name** (not a server host name or port number). The service name is the TNS alias or Easy Connect string configured in the Oracle listener.
 - There is no separate `DatabaseName` parameter for Oracle -" the service name identifies both the host and database instance.

@@ -49,7 +49,7 @@ Anonymous access is not permitted.
 | Field definition | The field record in `CATEGORYDETAILS`. |
 | Field options | All static option values for this field (from `PROPERTYOPTIONS`). |
 | Stored values | The column is `ALTER TABLE ... DROP COLUMN`-ed from `CUSTOM_<PropertySetName>`, permanently removing all values stored in this field. |
-| Lookup config | Any lookup field XML definition file on disk for this field. |
+| Lookup definition | The field's lookup row (`PROPERTYLOOKUPS`), in the same transaction. |
 
 ## Constraints
 

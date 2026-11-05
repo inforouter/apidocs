@@ -52,7 +52,7 @@ Deleting a property set definition is a cascading, irreversible operation:
 | Applied rows | All property set data rows applied to documents, folders, and users (from `CUSTOM_<name>` table). |
 | Domain associations | All library-scoped assignments of this property set. |
 | Class assignments | The document/folder/user target configuration. |
-| Lookup config files | Any lookup field XML definition files on disk. |
+| Lookup definitions | The lookup rows of its fields (`PROPERTYLOOKUPS`), in the same transaction. |
 | Database table | The `CUSTOM_<PropertySetName>` table is `DROP`ped from the database. |
 | Folder auto-assign | Any folders set to automatically apply this property set have that configuration cleared. |
 

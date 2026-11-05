@@ -259,7 +259,7 @@ MySQL keeps the case of an alias as written, so `AS Name` comes back as the attr
 ## Notes
 
 - The target field **must have control type `LOOKUP`**. Calling this API on a field with any other control type (TEXT BOX, COMBO BOX, etc.) returns an error.
-- Connection parameters (server name, port, credentials, database) and the SQL sentence are stored in a configuration XML file on the infoRouter server: `lookup_<propertySetId>_<FieldName>.xml`.
+- Connection parameters (server name, port, credentials, database) and the SQL sentence are stored in the database, in the `PROPERTYLOOKUPS` table, one row per field, with the password encrypted. Until 9.0 they were a configuration XML file on the server, `config/lookup_<propertySetId>_<FieldName>.xml`; the 9.0 upgrade moves each file into the table and deletes it.
 - **Passwords are stored encrypted**. They are never returned in plain text by read APIs such as [GetPropertySetDefinition](GetPropertySetDefinition.md) (shown as `****`).
 - `MYSQL_PortNumber` must be a number from 1 to 65535. Send `3306` for the MySQL default; an empty value is refused by model binding before the operation runs.
 - To test the lookup configuration, call [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) after saving the parameters.

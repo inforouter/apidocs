@@ -92,8 +92,8 @@ async function call(action, params) {
 }
 ```
 
-Points a field at a SQL Server query. The parameters are written to
-`config/lookup_<propertySetId>_<FIELDNAME>.xml` and **the connection is never tested**, so a server
+Points a field at a SQL Server query. The parameters are written to the
+`PROPERTYLOOKUPS` table and **the connection is never tested**, so a server
 that does not exist and a sentence that is not SQL are both accepted.
 
 ```javascript
@@ -259,7 +259,7 @@ SQL Server keeps the case of an alias as written, so `AS Name` comes back as the
 ## Notes
 
 - The target field **must have control type `LOOKUP`**. Calling this API on a field with any other control type (TEXT BOX, COMBO BOX, etc.) returns an error.
-- Connection parameters (server name, credentials, database) and the SQL sentence are stored in a configuration XML file on the infoRouter server: `lookup_<propertySetId>_<FieldName>.xml`.
+- Connection parameters (server name, credentials, database) and the SQL sentence are stored in the database, in the `PROPERTYLOOKUPS` table, one row per field, with the password encrypted. Until 9.0 they were a configuration XML file on the server, `config/lookup_<propertySetId>_<FieldName>.xml`; the 9.0 upgrade moves each file into the table and deletes it.
 - **Passwords are stored encrypted**. They are never returned in plain text by read APIs such as [GetPropertySetDefinition](GetPropertySetDefinition.md) (shown as `****`).
 - The `SQLSERVER_ServerName` parameter accepts SQL Server instance notation: e.g. `myserver\SQLEXPRESS` for named instances.
 - There is no port number parameter for SQL Server -" the default SQL Server port (1433) is used, or the port is resolved via SQL Browser for named instances.
