@@ -48,7 +48,7 @@ The `TaskDefXML` parameter must be a valid XML document whose root element carri
 ### Child elements
 
 **`<instruction>`** (required)
-Contains the plain-text instructions shown to the assignee.
+Contains the plain-text instructions shown to the assignee. At most 4000 characters; a longer one is refused with `4000` and nothing is saved. Stored with the task definition in the database (`TASKDEFS.INSTRUCTION`) since 9.0; until then it was a file under `config	askdefs`, which the 9.0 upgrade moves into the database and deletes.
 
 ```xml
 <instruction>Please review and approve the document before the deadline.</instruction>
@@ -270,7 +270,7 @@ await call('AddFlowTaskDef', {
 - The `TaskDefXML` value must be URL-encoded when sent via GET or form-encoded POST.
 - `TaskName` follows the same validation rules as step names: alphanumeric only, maximum 32 characters.
 - `DeadLine` is required and must be greater than `0`. The API will return an error if `DeadLine` is `0`.
-- `instruction` is required and must not be empty.
+- `instruction` is required, must not be empty, and may be at most 4000 characters.
 - `SupervisorNotificationOnDue` is in days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. The same notice also goes to the workflow's supervisors (users and group members). A task without its own supervisor sends none.
 - If `StepNumber` does not match any existing step the call fails with `errorCode="4041"` and the message "this step has been deleted". Verify step numbers with `GetFlowDef` first.
 - Multiple tasks can be added to the same step by calling this API repeatedly.

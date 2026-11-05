@@ -49,7 +49,7 @@ The `taskDefXML` parameter uses the same XML format as `AddFlowTaskDef`. The roo
 ### Child elements
 
 **`<instruction>`** (required)
-Contains the plain-text instructions shown to the assignee.
+Contains the plain-text instructions shown to the assignee. At most 4000 characters; a longer one is refused with `4000` and nothing is saved. Stored with the task definition in the database (`TASKDEFS.INSTRUCTION`) since 9.0; until then it was a file under `config	askdefs`, which the 9.0 upgrade moves into the database and deletes.
 
 ```xml
 <instruction>Please review and approve the document before the deadline.</instruction>
@@ -255,7 +255,7 @@ await call('UpdateWorkflowTaskDef', {
 - The `taskDefXML` value must be URL-encoded when sent via GET or form-encoded POST.
 - The entire task definition is replaced by the supplied `taskDefXML`. Any attributes or child elements omitted from the XML will revert to their defaults. In particular `OnCompleteNotice` resets to false and `righttype` to 0 (No access) when omitted. GetFlowDef does not return `OnCompleteNotice`, and returns the right as a `<RightType RightTypeId>` element rather than a `righttype` attribute.
 - `DeadLine` is required and must be greater than `0`.
-- `instruction` is required and must not be empty.
+- `instruction` is required, must not be empty, and may be at most 4000 characters.
 - `SupervisorNotificationOnDue` is in days relative to the task due date when the task supervisor (`SuperVisorId`) is notified: negative = before due (`-1` = one day before), `0` = at the due date, positive = after. Only sent if `SuperVisorId` > 0. The same notice also goes to the workflow's supervisors (users and group members). A task without its own supervisor sends none.
 
 ## Related APIs
