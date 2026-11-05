@@ -74,6 +74,8 @@ nav:
   - Server rules:
     - Overview: rules/index.md
     - Questions index: rules/questions.md
+    - Topic list: rules/topics.md
+    - Glossary: rules/glossary.md
     - Who may do what:
       - Administrative roles: AdministrativeRoles.md
       - Administrators: AdministratorsRole.md

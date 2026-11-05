@@ -21,8 +21,10 @@ its page changes in the same commit, and the page says since which version.
 | **Connect** | [Values Connect extracted, and whether somebody reviewed them](connect-review-state.md). |
 | **Conventions** | [How an answer is read](conventions.md): error code bands, MultiStatus, what surprises first-time callers. |
 
-The [questions index](questions.md) lists the questions people ask and points at the paragraph that answers
-each.
+The [topic list](topics.md) is the inventory of everything the server does, read from the code, with the
+rule page each subject has or still lacks. The [glossary](glossary.md) defines the terms the pages use, with
+the fact behind each. The [questions index](questions.md) lists the questions people ask and points at the
+paragraph that answers each.
 
 ## How a page is written
 
