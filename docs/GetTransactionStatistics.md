@@ -1,6 +1,6 @@
 # GetTransactionStatistics API
 
-Returns the transaction runner's counters: for every database operation that runs inside a retried transaction, how many times it ran, how each call ended, how often it was retried after a deadlock, how long it waited for the serialization lock and how long it held it. The counters start when the server starts, or at the last reset. Restricted to callers who may view the server status.
+Returns the transaction runner's counters: for every database operation that runs inside a retried transaction, how many times it ran, how each call ended, how often it was retried after a deadlock and how long it held its rows. The counters start when the server starts, or at the last reset. Restricted to callers who may view the server status.
 
 ## Endpoint
 
@@ -26,10 +26,10 @@ Returns the transaction runner's counters: for every database operation that run
 ### Success Response
 
 ```xml
-<response success="true" Since="2026-11-04T09:12:30" Serialization="Global" Database="SqlServer">
-  <Transaction Operation="FolderMoveOperation.RunAsync" Calls="41" Committed="40" RolledBack="1" Failed="0" Retries="2" RetriesExhausted="0" RefusedAsBusy="0" WaitedAvgMs="3.1" WaitedMaxMs="48" HeldAvgMs="210.5" HeldMaxMs="1840" HeldTotalMs="8630" />
-  <Transaction Operation="DocumentImportOperation.ImportAsync" Calls="1200" Committed="1200" RolledBack="0" Failed="0" Retries="0" RetriesExhausted="0" RefusedAsBusy="0" WaitedAvgMs="0.4" WaitedMaxMs="12" HeldAvgMs="6.2" HeldMaxMs="95" HeldTotalMs="7440" />
-  <!-- one element per operation, the one that held the lock longest in total first -->
+<response success="true" Since="2026-11-04T09:12:30" Database="SqlServer">
+  <Transaction Operation="FolderMoveOperation.RunAsync" Calls="41" Committed="40" RolledBack="1" Failed="0" Retries="2" RetriesExhausted="0" HeldAvgMs="210.5" HeldMaxMs="1840" HeldTotalMs="8630" />
+  <Transaction Operation="DocumentImportOperation.ImportAsync" Calls="1200" Committed="1200" RolledBack="0" Failed="0" Retries="0" RetriesExhausted="0" HeldAvgMs="6.2" HeldMaxMs="95" HeldTotalMs="7440" />
+  <!-- one element per operation, the one that held its rows longest in total first -->
 </response>
 ```
 
@@ -46,7 +46,6 @@ On the root:
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `Since` | DateTime | When the counters started: server start or the last reset |
-| `Serialization` | string | The mode the server runs with: `Global` (the heavy transactions take one lock) or `Off`. From 9.0 the default is `Off` on SQL Server and `Global` on MySQL and Oracle; the `TransactionSerialization` setting in appsettings.json overrides it |
 | `Database` | string | The database engine: `SqlServer`, `MySQL` or `Oracle` |
 
 On each `Transaction`:
@@ -59,10 +58,8 @@ On each `Transaction`:
 | `RolledBack` | integer | Calls the operation itself rolled back, with a refusal for the caller and no exception |
 | `Failed` | integer | Calls that ended in an exception that was not a deadlock, a taken name for instance |
 | `RetriesExhausted` | integer | Calls whose every attempt was a deadlock victim or a lock-wait timeout, answered `5030` |
-| `RefusedAsBusy` | integer | Calls that waited the whole limit for the serialization lock and were answered `5030` |
 | `Retries` | integer | Attempts beyond the first, over all calls: how often a deadlock made an operation run again |
-| `WaitedAvgMs`, `WaitedMaxMs` | double | Time spent waiting for the serialization lock, average and longest. 0 for an operation that takes no lock |
-| `HeldAvgMs`, `HeldMaxMs`, `HeldTotalMs` | double | Time from taking the lock, or from the start of the body for an unlocked operation, to the commit or rollback |
+| `HeldAvgMs`, `HeldMaxMs`, `HeldTotalMs` | double | Time from the start of the transaction's body to its commit or rollback, over every attempt: how long it kept its rows |
 
 ## Required Permissions
 
@@ -90,5 +87,6 @@ authenticationTicket=abc123-def456&reset=true
 ## Notes
 
 - The counters live in the server process. A restart starts them again, and on a farm each server answers its own.
+- Until 9.0.300 the answer also carried `Serialization`, `RefusedAsBusy`, `WaitedAvgMs` and `WaitedMaxMs`, for the lock the heavy transactions took on the `IRTRANS` row. The lock is gone and so are they.
 - The same totals are written to the Maintenance log once a day by the maintenance run.
 - `reset` is for measuring one period on its own, as the load tool does: reset at the start, read at the end.
