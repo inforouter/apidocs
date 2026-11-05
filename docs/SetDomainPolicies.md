@@ -63,15 +63,7 @@ Sets the policies for a domain/library.
 
 Puts the library back on the factory defaults: its own policy rows are deleted, so it follows the built-in policy table from then on (a later release that changes a default changes it for this library too), and every library rule is switched off. The change is written to the policy update log like any other, marked `Reset="defaults"`.
 
-A reset may carry children. They are applied on top of the defaults, so a caller can start from a clean slate and set only what differs:
-
-```xml
-<Policies reset="defaults">
-  <ActionPolicies>
-    <Policy Action="DocumentDelete" RightDomainManager="true" RightObjectOwner="false" RightRequired="FULLCONTROL" LogAction="true"/>
-  </ActionPolicies>
-</Policies>
-```
+A reset is the whole request: the element must be empty. A reset with any child (`DomainRules`, `ActionPolicies`) is refused with `4000` "A reset takes no children" and nothing changes, so one call never half resets and half sets. To get the defaults plus a few changes, reset in one call and send the changes in a second.
 
 `defaults` is the only value `reset` accepts; any other is refused with `4000` and nothing changes. The same right applies as for any other change.
 
@@ -257,18 +249,22 @@ Writes a library's rules and action policies, in the shape
 [GetDomainPolicies](GetDomainPolicies.md) returns.
 
 ```javascript
-// Read, change one thing, write it back.
-const current = await call('GetDomainPolicies', {
-  authenticationTicket: ticket, domainName: 'Finance'
-});
-
-const rules = current.querySelector('DomainRules');
-rules.querySelector('AnonymousHideUnpublished').textContent = 'true';
-
+// Change one thing: send that one thing. Every rule and policy the XML does not name stays as it is.
 await call('SetDomainPolicies', {
   authenticationTicket: ticket,
   domainName: 'Finance',
-  xmlPolicies: `<DomainPolicies>${rules.outerHTML}</DomainPolicies>`
+  xmlPolicies: '<Policies><DomainRules><AnonymousHideUnpublished>true</AnonymousHideUnpublished></DomainRules></Policies>'
+});
+
+// Or read, change, and write the whole thing back; the shape GetDomainPolicies returns is accepted as it is.
+const current = await call('GetDomainPolicies', {
+  authenticationTicket: ticket, domainName: 'Finance'
+});
+current.querySelector('DomainRules > AnonymousHideUnpublished').textContent = 'true';
+await call('SetDomainPolicies', {
+  authenticationTicket: ticket,
+  domainName: 'Finance',
+  xmlPolicies: current.querySelector('DomainPolicies').outerHTML
 });
 ```
 
@@ -281,8 +277,9 @@ by model binding with HTTP 400.
 ## Notes
 
 - The XML `GetDomainPolicies` returns can be fed straight back in: pass its `<DomainPolicies>` element as `xmlPolicies`, the root element name being ignored
-- Policies not specified in the XML will retain their current values; a `<Policy>` that is specified replaces every flag of that action, and a flag left out is off
-- A `reset="defaults"` attribute on the root puts the library back on the factory defaults before any child is applied (see above). Without it, an empty `<Policies />` switches every library rule off and leaves the action policies alone
+- What the XML names changes, and what it leaves out stays as it is, at every level: an action with no `<Policy>` keeps its policy; a `<Policy>` changes only the attributes it carries; a `DomainRules` element changes only the rules it names; a request without `DomainRules` leaves every rule. So a caller changes one flag by sending that one flag. (Until 2026-11-05 a left-out attribute read as off and a left-out rule was switched off.)
+- `RightRequired` present but empty clears the requirement; absent, it stays
+- A `reset="defaults"` attribute on the root puts the library back on the factory defaults; the element must be empty (see above). Without `reset`, an empty `<Policies />` names nothing and changes nothing
 - `RightRequired` is applied only when it names one of that policy's `AllowedRights`, which `GetDomainPolicies` reports; any other value leaves the current requirement alone
 - System policies cannot be modified and will be ignored
 - The `DocumentDelete` and `FolderDelete` actions always have logging enabled regardless of the `LogAction` setting
