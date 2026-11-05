@@ -1,6 +1,6 @@
 # GetCustomMenus API
 
-Returns the custom menus this infoRouter installation adds to the document list, as defined in `appdir\config\CustomMenus.xml`. These are the entries an administrator wires up to reach pages or external systems of their own — the document list menu bar and the right-click menu are extended with them.
+Returns the custom menus this infoRouter installation adds to the document list, as an administrator set them with [SetCustomMenus](SetCustomMenus.md). These are the entries an administrator wires up to reach pages or external systems of their own — the document list menu bar and the right-click menu are extended with them.
 
 The definitions are installation-wide: every signed-in user sees the same set, and the response does not vary by folder, domain, or permissions.
 
@@ -43,7 +43,7 @@ The definitions are installation-wide: every signed-in user sees the same set, a
 </response>
 ```
 
-An installation with no `CustomMenus.xml` returns an empty `<CustomMenus ignoredEntries="0" />`.
+An installation with no custom menus returns an empty `<CustomMenus ignoredEntries="0" />`.
 
 ### Error Response
 
@@ -166,7 +166,7 @@ async function call(action, params) {
 }
 ```
 
-The menus this installation adds to the document list, from `config\CustomMenus.xml`.
+The menus this installation adds to the document list.
 
 ```javascript
 const root = await call('GetCustomMenus', { authenticationTicket: ticket });
@@ -182,17 +182,16 @@ for (const menu of root.querySelectorAll('Menu')) {
 }
 ```
 
-Nothing here is per user: the file is read when settings load and every caller sees the same set.
-`<CustomMenus ignoredEntries="0">` counts the entries that were dropped because they had no name -
-a non-zero count means the installation's file has a mistake in it.
+Nothing here is per user: every caller sees the same set. `ignoredEntries` is kept for callers that
+read it and is always `0` from 9.0, since SetCustomMenus refuses an entry without a name instead of
+storing it.
 
 ## Notes
 
-- Menus and items are returned in the order the configuration file lists them.
+- Menus and items are returned in the order SetCustomMenus was given them.
 - A menu with no items is still returned. The old document list drew such a menu's heading but no drop-down; a caller is free to skip it.
-- Captions and tooltips come from the configuration file verbatim and are not run through infoRouter's resource files, so an installation serving several languages has to write them in whichever language it chooses.
-- The file is read when application settings are loaded. Editing `CustomMenus.xml` takes effect after the application cache is flushed (`FlushApplicationCache`) or the application restarts.
-- A `CustomMenus.xml` that is not well-formed XML makes this call fail rather than returning an empty set.
+- Captions and tooltips are returned as they were set and are not run through infoRouter's resource files, so an installation serving several languages has to write them in whichever language it chooses.
+- **Storage:** from 9.0 the `CUSTOMMENUS` and `CUSTOMMENUITEMS` tables, changed with [SetCustomMenus](SetCustomMenus.md). Until 9.0 the file `config\CustomMenus.xml`, edited by hand; the 9.0 upgrade moves it into the tables and deletes it. A change shows at once on the server that took it, and on the other servers of a farm within 15 minutes.
 
 ## Error Codes
 
@@ -202,10 +201,10 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 
-An installation with no `CustomMenus.xml` answers an empty set, which is still a success. A file
-that no longer parses is reported as an error naming it, rather than answered as an empty menu bar.
+An installation with no custom menus answers an empty set, which is still a success.
 
 ## Related APIs
 
-- `FlushApplicationCache` - Reload application settings, including `CustomMenus.xml`
+- [SetCustomMenus](SetCustomMenus.md) - Replace the custom menus
+- `FlushApplicationCache` - Reload application settings, including the cached custom menus
 - `getApplicationParameters` - Other installation-wide settings

@@ -594,6 +594,7 @@ nav:
     - SetEmailAndNotificationSettings: SetEmailAndNotificationSettings.md
     - GetAddIns: GetAddIns.md
     - GetCustomMenus: GetCustomMenus.md
+    - SetCustomMenus: SetCustomMenus.md
     - GetUserFolderColumns: GetUserFolderColumns.md
     - SetUserFolderColumns: SetUserFolderColumns.md
     - SendEmail: SendEmail.md

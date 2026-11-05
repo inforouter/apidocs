@@ -509,6 +509,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 
 ### User Interface Settings
 - [GetCustomMenus](GetCustomMenus.md) - Get the custom document list menus defined for this installation
+- [SetCustomMenus](SetCustomMenus.md) - Replace every custom document list menu and its entries
 - [GetUserFolderColumns](GetUserFolderColumns.md) - Get the column layout and property set preference for the authenticated user on a folder
 - [SetUserFolderColumns](SetUserFolderColumns.md) - Save the column layout and property set preference for the authenticated user on a folder
 
