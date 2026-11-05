@@ -126,13 +126,13 @@ const suggestions = [...root.querySelectorAll('TagDefinition')].map(d => d.textC
 
 **The list is a set of suggestions, not a constraint.**
 [SetTagToDocument](SetTagToDocument.md) takes any text, and applying one that is not on the list
-neither fails nor adds to it. Nothing in this API changes the list.
+neither fails nor adds to it. An administrator changes the list with [SetTagDefinitions](SetTagDefinitions.md).
 
 ## Notes
 
-- **Server-Side Configuration:** Tag definitions are loaded from the server-side configuration file `config/tagdefs.xml` when the infoRouter service starts. Changes to the tag list require a server-side configuration update and a service restart; they cannot be managed via the API.
+- **Storage:** from 9.0 the list is the `TAGDEFINITIONS` table, changed with [SetTagDefinitions](SetTagDefinitions.md) and returned in the order it was set. Until 9.0 it was the file `config/tagdefs.xml`, read once at start-up; the 9.0 upgrade moves it into the table and deletes the file. A change shows at once on the server that took it, and on the other servers of a farm within 15 minutes.
 - **Tag Text is Case-Sensitive:** Tag values are returned exactly as configured. When calling `SetTagToDocument` or `RemoveTagFromDocument`, use the tag text exactly as returned by this API.
-- **Read-Only:** This API only reads the tag list. To apply a tag to a document use `SetTagToDocument`; to remove a tag use `RemoveTagFromDocument`.
+- **Read-Only:** This API only reads the tag list; [SetTagDefinitions](SetTagDefinitions.md) replaces it. To apply a tag to a document use `SetTagToDocument`; to remove a tag use `RemoveTagFromDocument`.
 - **Replaces GetTagDefintions:** This API replaces the older [GetTagDefintions](GetTagDefintions.md) endpoint (which contained a typo in its name). Both endpoints return identical results; existing integrations using the old name will continue to work.
 
 ---

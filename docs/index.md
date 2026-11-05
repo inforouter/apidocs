@@ -441,6 +441,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetTagDefinitions](GetTagDefinitions.md) - Get the list of all tag definitions configured in the system
 - [GetTagDefintions](GetTagDefintions.md) - **Obsolete** (typo in name) — use GetTagDefinitions instead
 - [RemoveTagFromDocument](RemoveTagFromDocument.md) - Remove a tag from a document
+- [SetTagDefinitions](SetTagDefinitions.md) - Replace the whole list of tag definitions offered in the tag picker
 - [SetTagToDocument](SetTagToDocument.md) - Apply a tag to the latest version of a document
 
 ### Subscription Management

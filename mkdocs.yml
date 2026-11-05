@@ -509,6 +509,7 @@ nav:
     - SetTagToDocument: SetTagToDocument.md
     - RemoveTagFromDocument: RemoveTagFromDocument.md
     - GetTagDefinitions: GetTagDefinitions.md
+    - SetTagDefinitions: SetTagDefinitions.md
     - GetAppliedTags: GetAppliedTags.md
 
   - Document Associations:
