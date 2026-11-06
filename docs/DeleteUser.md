@@ -127,6 +127,7 @@ left pointing at an account that is gone.
 - The `UserName` parameter accepts either a plain username string (e.g., `jdoe`) or a short ID reference in the format `ID:userid` (e.g., `ID:123`).
 - If the system is configured to require administrator password confirmation for user deletion (`PasswordRePromptActions.UserDelete = true`) and Windows Authentication is not enabled, this method returns error `[2767]` and requires `DeleteUser1` instead.
 - Deleting a user is permanent and cannot be undone.
+- The user's Recycle Bin is emptied into the system recycle bin first, as `EmptyRecycleBin` would do it: nothing in it is purged, and an administrator can still restore or purge the items there.
 - Before deleting a user, consider using the `TransferUser*` APIs to transfer the user's data (documents, tasks, subscriptions) to another user.
 
 ---

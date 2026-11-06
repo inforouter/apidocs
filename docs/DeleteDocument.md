@@ -165,7 +165,7 @@ a missing document.
 
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a document from the recycle bin
 
-- [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's recycle bin
+- [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's recycle bin into the system recycle bin
 
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List documents currently in the recycle bin
 

@@ -69,5 +69,5 @@ authenticationTicket=abc123-def456&jobId=14
 
 - The job runs on the request, not on the maintenance service, and the call lasts as long as the job. A purge of a full recycle bin can take minutes; set the client's timeout accordingly.
 - The scheduler does not know about the run. A job the scheduler is running at that moment runs a second time beside it; both log what they could not do. Use it on a test server, or in a quiet hour.
-- The purge job (`14`) purges up to 1,000 queued items a run. Items reach the queue through `EmptyRecycleBin` or `PurgeRecycleBinItem`; call the job again until the queue is empty.
+- The purge job (`14`) purges up to 1,000 queued items a run. Items reach the queue through `PurgeRecycleBinItem`, `DisposeItem` and the system recycle bin's automatic purge (`SystemRecycleBinAutoPurgeOption`), not through `EmptyRecycleBin`, which only moves items to the system recycle bin; call the job again until the queue is empty.
 - Made for the load tool of the IRTRANS removal plan, which needs the purge to run when it says, not once a day.

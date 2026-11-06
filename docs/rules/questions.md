@@ -31,6 +31,13 @@ Add a question here whenever one is asked and answered; a question with no page 
 - When is a document made from a form rendered again? → [Documents made from forms and templates](documents-from-forms.md#the-rule)
 - Can a document be detached from its form later? → [Documents made from forms and templates](documents-from-forms.md#when-the-document-stops-being-a-form-document)
 - What does copying a folder or document carry with it? → [Copy](../Copy.md) (*rules page to come*)
+- Where does a deleted document go, and can it come back? → [What happens to a deleted document or folder](recycle-bin.md#the-stages)
+- Does emptying the recycle bin delete the documents for good? → [What happens to a deleted document or folder, emptying](recycle-bin.md#emptying)
+- Can an administrator restore what a user emptied from their recycle bin? → [What happens to a deleted document or folder, restoring](recycle-bin.md#restoring)
+- When are purged documents removed from the warehouse? → [What happens to a deleted document or folder, purging](recycle-bin.md#purging)
+- Can a user purge an item themselves? → [What happens to a deleted document or folder, the user's recycle bin](recycle-bin.md#the-users-recycle-bin)
+- Why can a document not be deleted ("use the dispose function instead")? → [What happens to a deleted document or folder, disposal](recycle-bin.md#disposal)
+- How do I free disk space taken by deleted documents? → [What happens to a deleted document or folder, emptying](recycle-bin.md#emptying)
 
 ## WebDAV
 

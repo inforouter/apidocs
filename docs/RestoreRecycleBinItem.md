@@ -50,7 +50,7 @@ Restores a single document or folder from the Recycle Bin back into the infoRout
 
 ## Required Permissions
 
-- **Any authenticated user** may restore items they personally deleted (the item's `DeletedById` must match the calling user).
+- **Any authenticated user** may restore items they personally deleted, **while they are still in their own recycle bin**. Once an item has been emptied into the system recycle bin (by `EmptyRecycleBin`, `EmptyAllUserRecycleBins`, the monthly move or deleting the user), only a system administrator can restore it; the user is refused with `4030`. Until 2026-11-06 the user could still restore an emptied item by its handler, as in 8.7.
 
 - **System administrators** may restore any item regardless of who deleted it.
 
@@ -206,7 +206,7 @@ sent - it is declared as a plain string, so leaving it out is an HTTP 400.
 
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single Recycle Bin item instead of restoring it
 
-- [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's Recycle Bin
+- [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's Recycle Bin into the system recycle bin
 
 ---
 
@@ -220,6 +220,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4090` | an item of the same name appeared in the target folder between the name check and the restore (two requests at the same moment); before 9.0 this surfaced as `5000` "Internal Error" |
 | `4000` | `ItemHandler` is not a handler: the letter and the id are checked before the lookup, and the message naming the parameter is an English literal that is not translated |
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
+| `4030` | the caller is not a system administrator and the item is not theirs, or it is theirs but has been emptied into the system recycle bin ("Only the system administrator can perform this operation") |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter

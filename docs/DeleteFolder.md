@@ -1,6 +1,6 @@
 # DeleteFolder API
 
-Deletes the folder at the specified path, including all its contents (subfolders and documents). This operation is permanent and cannot be undone unless items are in the recycle bin.
+Deletes the folder at the specified path, including all its contents (subfolders and documents). The folder goes to the caller's recycle bin with everything in it, and can be restored from there with [RestoreRecycleBinItem](RestoreRecycleBinItem.md) until it is purged.
 
 ## Endpoint
 
@@ -119,7 +119,7 @@ second attempt rather than passing silently.
 
 - Top-level folders (domains/libraries) **cannot** be deleted using this API. Use `DeleteDomain` instead.
 - Deleting a folder removes all subfolders and documents within it.
-- Depending on server configuration, deleted items may be moved to the recycle bin rather than being permanently deleted.
+- The folder always goes to the recycle bin; no setting deletes it outright. It is removed for good only when it is purged: by [PurgeRecycleBinItem](PurgeRecycleBinItem.md), or by the system recycle bin's automatic purge once it has been emptied there.
 - Checked-out documents within the folder may prevent deletion unless the user has administrator rights.
 - Folder rules (`DisallowFolderDelete`) may restrict this operation.
 

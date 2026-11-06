@@ -97,7 +97,7 @@ Returns a `<response>` element with `success="true"` containing a `<logs>` eleme
 |-------|-------------|
 | `RECYCLE` | Item was moved to the Recycle Bin (soft delete). |
 | `PURGE` | Item was permanently deleted from the Recycle Bin. |
-| `RECYCLE EMPTIED` | Item was removed when a user emptied their Recycle Bin. |
+| `RECYCLE EMPTIED` | Item was moved from a user's Recycle Bin to the system recycle bin: the user emptied their bin (`EmptyRecycleBin`), an administrator emptied every user's (`EmptyAllUserRecycleBins`), the monthly move ran, or the user was deleted. Not a purge; the item can still be restored. |
 | `RESTORE` | Item was restored from the Recycle Bin back to the library. |
 
 ### Empty Result

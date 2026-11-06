@@ -149,7 +149,8 @@ caller branching on `success` concluded the work was done when nothing was.
 
 ## Notes
 
-- Disposal is **permanent and irreversible** — the item goes into the purge queue (recycle-bin status InPurgeState: hidden and not restorable) and is purged permanently by the background purge job within minutes
+- Disposal is **permanent and irreversible** — the item goes into the purge queue (recycle-bin status InPurgeState: hidden and not restorable) and is purged permanently by the background purge job within minutes. It never goes through a recycle bin.
+- A **folder** is disposed of from the inside out: each document and subfolder first, on its own, then the folder itself, and the folder goes to the purge queue **only if it is empty by then**. Anything that could not be disposed of stays where it is with its folder, and the answer is `2070` with one entry per item left. Until 2026-11-06 the folder was moved into the caller's own recycle bin with whatever was left in it, restorable. See [What happens to a deleted document or folder](rules/recycle-bin.md#disposing-of-a-folder)
 - The path type is resolved automatically: document paths trigger single-document disposal; folder paths trigger recursive folder disposal
 - If the path resolves to neither a document nor a folder, an error is returned
 - For folder paths, per-item failures (checked-out documents, active workflows, etc.) do **not** abort the operation — they are reported as `<log>` child elements alongside `success="true"`

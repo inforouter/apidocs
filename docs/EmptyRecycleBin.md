@@ -1,6 +1,6 @@
 ﻿# EmptyRecycleBin API
 
-Permanently deletes all items in the Recycle Bin of the currently authenticated user. Once emptied, the items cannot be recovered. Use this API to programmatically clean up a user's recycle bin as part of maintenance routines or end-of-period housekeeping.
+Empties the Recycle Bin of the currently authenticated user: its items move to the system recycle bin. The user no longer sees them in [GetRecycleBinContent](GetRecycleBinContent.md) and can no longer restore them; a system administrator can still find, restore or purge them there. Nothing is deleted for good. To empty every user's Recycle Bin at once, an administrator uses [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md).
 
 ## Endpoint
 
@@ -121,27 +121,27 @@ async function call(action, params) {
 }
 ```
 
-Destroys everything in the caller's recycle bin. There is no undo and no report of what went.
+Moves everything in the caller's recycle bin to the system recycle bin. The caller can no longer see or restore it, and the answer does not say what went.
 
 ```javascript
-// Read the bin first - this is the only chance to know what is about to be destroyed.
+// Read the bin first - after this the caller can no longer see the items.
 const doomed = await call('GetRecycleBinContent', { authenticationTicket: ticket });
 await call('EmptyRecycleBin', { authenticationTicket: ticket });
 ```
 
 ## Notes
 
-- **Irreversible**: Once the recycle bin is emptied, all deleted documents and folders are permanently removed and cannot be recovered.
+- **Not a purge**: The emptied items move to the system recycle bin. Only a system administrator can restore them from there ([RestoreRecycleBinItem](RestoreRecycleBinItem.md)) or remove them for good ([PurgeRecycleBinItem](PurgeRecycleBinItem.md)), or the system recycle bin's automatic purge removes them.
 
 - **Current User Only**: The API operates solely on the recycle bin of the user who owns the authentication ticket. There is no parameter to target another user's recycle bin.
 
 - **Empty Bin is Not an Error**: If the recycle bin is already empty, the API returns `success="true"` without error.
 
-- **Admin Recycle Bin**: System administrators with access to the admin recycle bin must use the administration interface to empty other users' bins; this API cannot do so.
+- **Other Users' Bins**: This API cannot empty another user's bin. A system administrator empties every user's bin at once with [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md).
 
 - **Selective Deletion**: To permanently delete individual items rather than the entire bin, use `PurgeRecycleBinItem`.
 
-- **Restore Before Empty**: To recover items before emptying, use `RestoreRecycleBinItem` first.
+- **Restore Before Empty**: A user who wants an item back restores it with `RestoreRecycleBinItem` before emptying, while `GetRecycleBinContent` still lists it. Afterwards only a system administrator can restore it.
 
 ---
 

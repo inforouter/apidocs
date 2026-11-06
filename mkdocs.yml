@@ -91,6 +91,7 @@ nav:
       - Who may change a task's due date: rules/tasks-due-date.md
     - Documents:
       - Documents made from forms and templates: rules/documents-from-forms.md
+      - What happens to a deleted document or folder: rules/recycle-bin.md
     - WebDAV:
       - How WebDAV maps onto documents: rules/webdav.md
     - Libraries:
@@ -550,6 +551,7 @@ nav:
     - RestoreRecycleBinItem: RestoreRecycleBinItem.md
     - PurgeRecycleBinItem: PurgeRecycleBinItem.md
     - EmptyRecycleBin: EmptyRecycleBin.md
+    - EmptyAllUserRecycleBins: EmptyAllUserRecycleBins.md
 
   - Transfer Operations:
     - TransferUserCheckedOutDocuments: TransferUserCheckedOutDocuments.md

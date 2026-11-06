@@ -32,7 +32,7 @@ The API page counts are the groups of the [API index](../index.md). Terms are de
 | Retention and disposition | 4 | 1 | 29 |
 | Notifications | 3 | 0 | 18 (with favourites) |
 | Audit logs | 1 | 1 | 17 |
-| Recycle bins | 2 | 0 | 6 |
+| Recycle bins | 2 | 1 | 7 |
 | Personal lists | 3 | 0 | 7 associations |
 | WebDAV and Office | 2 | 1 | – |
 | System and administration | 5 | 0 | 30 |
@@ -176,8 +176,8 @@ The rule pages so far: [administrator account](administrator-account.md), [libra
 
 | Subject | What it is made of | Where in the code | Rule page |
 |---|---|---|---|
-| User and system recycle bins | Each user has a recycle bin library named `~RECYCLE_<id>` of type UserRecycleBin; items move from it to the system recycle bin after a configured number of months, then to a purge state; restore to the original or another path. | `RecycleBinOperations`, `RecycledItemStatus`, `GeneralSettings.MoveUsersRecycleBinToSystemRecycleBinIn` | ○ |
-| Purging | Purge requests are queued for the daily job; auto-purge option; what a purge removes from the warehouse. | `DocumentPurgeOperation`, `FolderPurgeOperation`, `SystemRecycleBinAutoPurgeOption` | ○ |
+| User and system recycle bins | Each user has a recycle bin library named `~RECYCLE_<id>` of type UserRecycleBin; items move from it to the system recycle bin after a configured number of months, then to a purge state; restore to the original or another path; an administrator empties every user's bin at once. | `RecycleBinOperations`, `RecycledItemStatus`, `GeneralSettings.MoveUsersRecycleBinToSystemRecycleBinIn` | ✅ [What happens to a deleted document or folder](recycle-bin.md) |
+| Purging | A purge puts the item in the purge queue, with no way back; the purge job removes queued items every five minutes, 1,000 a run, each document with its warehouse files in one transaction; auto-purge option; disposal goes straight to the queue. | `DocumentPurgeOperation`, `FolderPurgeOperation`, `SystemRecycleBin.RunAutoPurgeAsync`, `SystemRecycleBinAutoPurgeOption` | ✅ [What happens to a deleted document or folder, purging](recycle-bin.md#purging) |
 
 ## Personal lists
 

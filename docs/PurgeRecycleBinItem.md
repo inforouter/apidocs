@@ -1,6 +1,6 @@
 ﻿# PurgeRecycleBinItem API
 
-Permanently and irreversibly deletes a single document or folder from the system Recycle Bin. The item is identified by its `Handler` value, which is obtained from `GetRecycleBinContent`. Use this API to selectively remove individual items rather than emptying the entire bin. This is an administrator-only operation.
+Permanently and irreversibly deletes a single document or folder from a Recycle Bin: a user's or the system recycle bin. The item is identified by its `Handler` value, which an administrator gets from [SearchRecycledItems1](SearchRecycledItems1.md) (every bin) or `GetRecycleBinContent` (their own). Use this API to selectively remove individual items rather than emptying the entire bin. This is an administrator-only operation.
 
 ## Endpoint
 
@@ -156,7 +156,7 @@ success here as proof that something was destroyed by this call.
 
 - **Admin Only**: The authenticated user must be a system administrator. The check is enforced server-side regardless of how the API is called.
 
-- **Irreversible**: Once purged, the item is permanently deleted from storage and cannot be recovered. Always confirm the correct `ItemHandler` before calling.
+- **Irreversible**: The item is put in the purge state at once: it leaves every recycle bin list and can no longer be restored. The purge job, which runs every five minutes and takes up to 1,000 items a run, then removes its files from storage. Always confirm the correct `ItemHandler` before calling.
 
 - **Handler Source**: The `ItemHandler` value must be obtained from the `Handler` attribute of a recycled item returned by `GetRecycleBinContent` or `SearchRecycledItems`. Constructing a handler manually (e.g. `D9871`) is possible but not recommended.
 
@@ -168,7 +168,7 @@ success here as proof that something was destroyed by this call.
 
 - **Folder Purge**: Purging a folder recursively deletes all documents and sub-folders contained within it. This is a deep, permanent deletion.
 
-- **EmptyRecycleBin vs PurgeRecycleBinItem**: `EmptyRecycleBin` removes all items for a specific user but requires the user themselves (not admin). `PurgeRecycleBinItem` removes a single item and requires admin rights.
+- **EmptyRecycleBin vs PurgeRecycleBinItem**: `EmptyRecycleBin` (the caller's own bin) and `EmptyAllUserRecycleBins` (every user's, administrators only) destroy nothing: they move the items to the system recycle bin. `PurgeRecycleBinItem` destroys a single item and requires admin rights.
 
 ---
 
@@ -180,7 +180,7 @@ success here as proof that something was destroyed by this call.
 
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a recycled item instead of permanently deleting it
 
-- [EmptyRecycleBin](EmptyRecycleBin.md) - Permanently delete all items in the current user's Recycle Bin
+- [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's Recycle Bin into the system recycle bin
 
 ---
 
