@@ -119,7 +119,10 @@ The system recycle bin is not a place a user can open. It is every recycled item
   sorted on (`DateEmptied`) but is not in the answer. Items in the purge queue are never listed, whatever
   `searchIn` says.
 - The filters are the name (exact, or with `*` for any run of characters), the deletion date range, the size
-  range and who deleted it. Leaving them all out lists everything.
+  range and who deleted it, and on [SearchRecycledItems1](../SearchRecycledItems1.md) where it was deleted
+  from: `path=/Accounting/` for a library, `path=/Accounting/Invoices` for a folder and everything below it.
+  A library is matched on the library itself, a folder on the item's recorded `DeletePath`, so items from a
+  library deleted afterwards can still be found. Leaving them all out lists everything.
 - The handler of each result restores ([RestoreRecycleBinItem](../RestoreRecycleBinItem.md)) or purges
   ([PurgeRecycleBinItem](../PurgeRecycleBinItem.md)) the item.
 
@@ -260,7 +263,8 @@ A folder's entry is written for the folder and for every document and subfolder 
 ## Since
 
 - **9.0 (2026-11-06):** `searchIn` on [SearchRecycledItems1](../SearchRecycledItems1.md), to search the system
-  recycle bin or the users' recycle bins alone. Before, both were always searched together.
+  recycle bin or the users' recycle bins alone. Before, both were always searched together. And `path`, to
+  search the items deleted from one library or folder.
 - **9.0 (2026-11-06):** an item emptied into the system recycle bin is restored by administrators only. Before,
   as in 8.7, the user who deleted it could still restore it by its handler, since the rule looked only at the
   recycle bin the item came from.

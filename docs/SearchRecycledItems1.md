@@ -1,6 +1,6 @@
 # SearchRecycledItems1 API
 
-Searches the deleted documents and folders of the whole instance, one page at a time, sorted, with the total number of matches. `searchIn` says where to look: the users' recycle bins, the system recycle bin, or both (the default). It takes the filters of [SearchRecycledItems](SearchRecycledItems.md), which always searches both bins and returns every match at once, and returns the same item elements. See [What happens to a deleted document or folder](rules/recycle-bin.md#the-system-recycle-bin-and-searching-it).
+Searches the deleted documents and folders of the whole instance, one page at a time, sorted, with the total number of matches. `searchIn` says where to look: the users' recycle bins, the system recycle bin, or both (the default); `path` narrows it to the items deleted from one library or folder. It takes the filters of [SearchRecycledItems](SearchRecycledItems.md), which always searches both bins and returns every match at once, and returns the same item elements. See [What happens to a deleted document or folder](rules/recycle-bin.md#the-system-recycle-bin-and-searching-it).
 
 ## Endpoint
 
@@ -10,7 +10,7 @@ Searches the deleted documents and folders of the whole instance, one page at a 
 
 ## Methods
 
-- **GET** `/srv.asmx/SearchRecycledItems1?authenticationTicket=...&objectName=...&startingRowNumber=...&numberOfRows=...&sortBy=...&sortAscending=...&searchIn=...`
+- **GET** `/srv.asmx/SearchRecycledItems1?authenticationTicket=...&objectName=...&startingRowNumber=...&numberOfRows=...&sortBy=...&sortAscending=...&searchIn=...&path=...`
 - **POST** `/srv.asmx/SearchRecycledItems1` (form data)
 - **SOAP** Action: `http://tempuri.org/SearchRecycledItems1`
 
@@ -30,6 +30,7 @@ Searches the deleted documents and folders of the whole instance, one page at a 
 | `sortBy` | string | No | `DateDeleted` (default), `Name`, `Size`, `OriginalLocation`, `DeletedBy`, `RecycleStatus` or `DateEmptied`. Not case-sensitive. |
 | `sortAscending` | bool | Yes | `true` for ascending order, `false` for descending. |
 | `searchIn` | int | No | Where to search. `0` or empty: everywhere, the users' recycle bins and the system recycle bin. `1`: the system recycle bin only, the items that have been emptied there. `2`: the users' recycle bins only, the items no one has emptied yet. Any other value is refused with `4000`. SOAP callers that leave it out get `0`. |
+| `path` | string | No | A library or folder path, such as `/Accounting/` or `/Accounting/Invoices`: only the items deleted from there or from any folder below it. Empty or `/` for anywhere. `/` and `\` are both separators; a trailing one makes no difference. A path that matches nothing is not an error: the answer is empty. |
 
 ## Response
 
@@ -74,6 +75,14 @@ GET /srv.asmx/SearchRecycledItems1?authenticationTicket=abc123&startingRowNumber
 Each item's `Handler` then goes to [PurgeRecycleBinItem](PurgeRecycleBinItem.md) to purge it, or to
 [RestoreRecycleBinItem](RestoreRecycleBinItem.md) to bring it back.
 
+### Request (GET): what was deleted from the Accounting library, in either recycle bin
+
+`path=/Accounting/Invoices/` would keep what was deleted from the Invoices folder and its subfolders.
+
+```
+GET /srv.asmx/SearchRecycledItems1?authenticationTicket=abc123&startingRowNumber=0&numberOfRows=25&sortBy=DateDeleted&sortAscending=false&path=/Accounting/
+```
+
 ## Notes
 
 - A `startingRowNumber` past the last match returns no items and the same `totalCount`.
@@ -81,7 +90,13 @@ Each item's `Handler` then goes to [PurgeRecycleBinItem](PurgeRecycleBinItem.md)
 - Only items still in a recycle bin are searched; items already queued for purging are not, whatever `searchIn` says.
 - `searchIn=1` is how an administrator works through the system recycle bin alone, for instance to purge what [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) moved there, item by item, without touching what users can still restore themselves. [SearchRecycledItems](SearchRecycledItems.md) has no such filter. (8.7 did this in its user interface, by opening the system recycle bin as a library.)
 - The numbers of `searchIn` are its own, not the `RecycledItemStatusId` values: `searchIn=1` finds the items with `RecycledItemStatusId="1"`, but `searchIn=2` finds those with `RecycledItemStatusId="0"`, and `0` is everywhere.
-- `searchIn` is checked after the caller is found to be a system administrator, so anyone else is refused with `4030` whatever it says.
+- `searchIn` and `path` are checked after the caller is found to be a system administrator, so anyone else is refused with `4030` whatever they say.
+- `path` matches where each item was **deleted from**, which is recorded with the item when it is deleted: its library, and `DeletePath`, the folder it was in. It is not where the item is now: a deleted item sits in a recycle bin.
+  - **A library alone** (`/Accounting/`) is matched on the library, so a library renamed after the delete is found by its current name.
+  - **A folder** (`/Accounting/Invoices`) is matched on `DeletePath` as it was at the delete: that folder and every folder below it, on whole folder names (`/Accounting/Inv` does not match `/Accounting/Invoices`). When the library still exists, the search is kept to it as well.
+  - **A library that no longer exists** is matched on `DeletePath` too, so what was deleted from a library that was deleted afterwards can still be found.
+  - The item **at** the path is not included, only what was in it: a deleted folder `/Accounting/Invoices` is found with `path=/Accounting/`, since its `DeletePath` is `\Accounting`.
+  - Whether letter case must match depends on the database collation: on the usual SQL Server and MySQL setups it does not; on Oracle it does. `DeletePath` is cut at 255 characters, so a path longer than that matches nothing.
 
 ## Related APIs
 
@@ -104,3 +119,4 @@ Each item's `Handler` then goes to [PurgeRecycleBinItem](PurgeRecycleBinItem.md)
 
 - **9.0 (2026-10-09):** the call.
 - **9.0 (2026-11-06):** `searchIn`, to search one recycle bin only. Before, it always searched both.
+- **9.0 (2026-11-06):** `path`, to search the items deleted from one library or folder.
