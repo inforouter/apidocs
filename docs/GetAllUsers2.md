@@ -29,7 +29,7 @@ Returns a paged and filtered list of infoRouter users with full detail, supporti
 | `domainNameFilter` | string | No | Filters local users by their home library. It does not test library membership, and global users never match. Exact match unless the value contains wildcard characters. It may also be `~L<id>`, the library's id. Pass empty or null for no filter. |
 | `userStatusFilter` | int | Yes | Filter by account status. Valid values: `-1` = no filter (all users), `0` = disabled only, `1` = enabled only. |
 | `userTypeFilter` | int | Yes | Filter by user type. Valid values: `-1` = no filter (all types), `1` = authors only, `2` = read-only users only. |
-| `sortBy` | int | Yes | Sort field. Valid values: `0` = default, `1` = username, `2` = first name + last name, `3` = last name + first name, `4` = email, `5` = status, `6` = authentication source, `7` = domain/library, `8` = user type. |
+| `sortBy` | int | Yes | Sort field. Valid values: `0` = default, `1` = username, `2` = first name + last name, `3` = last name + first name, `4` = email, `5` = status, `6` = authentication source, `7` = domain/library, `8` = user type, `9` = last sign-in (ascending: those who never signed in first, then the longest unused; added 2026-11-06). |
 | `sortAscending` | bool | Yes | If `true`, sort in ascending order; if `false`, sort in descending order. |
 
 ---
@@ -204,8 +204,9 @@ Every filter has to be present - they are declared as plain strings, so an omitt
 HTTP 400 rather than "no filter". Send an empty string for the ones you do not want, `-1` for the
 status and type filters.
 
-`sortBy` is one of the eight: `1` user name, `2` first name then last, `3` last name then first,
-`4` email, `5` status, `6` authentication source, `7` library, `8` user type. Anything else is
+`sortBy` is `0` (the default order) or one of the nine: `1` user name, `2` first name then last,
+`3` last name then first, `4` email, `5` status, `6` authentication source, `7` library, `8` user type,
+`9` last sign-in. Anything else is
 refused `4000`, as [GetCoWorkers1](GetCoWorkers1.md) and
 [GetUserGroupMembers1](GetUserGroupMembers1.md) have always refused it. Until 9.0 this one accepted
 any number without a word and answered the list in whatever order the default gives, so a caller

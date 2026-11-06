@@ -29,7 +29,7 @@ Returns a paged and filtered list of infoRouter users without preference detail 
 | `domainNameFilter` | string | No | Filters local users by their home library, given by name or as `~L<id>` with the library's id. It does not test library membership, and global users never match. A library that is not there is refused. Pass empty or null for no filter. |
 | `userStatusFilter` | int | Yes | Filter by account status. Valid values: `-1` = no filter (all users), `0` = disabled only, `1` = enabled only. |
 | `userTypeFilter` | int | Yes | Filter by user type. Valid values: `-1` = no filter (all types), `1` = authors only, `2` = read-only users only. |
-| `sortBy` | int | Yes | Sort field. Valid values: `0` = default, `1` = username, `2` = first name + last name, `3` = last name + first name, `4` = email, `5` = status, `6` = authentication source, `7` = domain/library, `8` = user type. |
+| `sortBy` | int | Yes | Sort field. Valid values: `0` = default, `1` = username, `2` = first name + last name, `3` = last name + first name, `4` = email, `5` = status, `6` = authentication source, `7` = domain/library, `8` = user type, `9` = last sign-in (ascending: those who never signed in first, then the longest unused; added 2026-11-06). |
 | `sortAscending` | bool | Yes | If `true`, sort in ascending order; if `false`, sort in descending order. |
 
 ---

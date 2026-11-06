@@ -1,6 +1,6 @@
 # GetAllUsers3 API
 
-Returns a list of users with paging, filtering and sorting, and one parameter more than [GetAllUsers2](GetAllUsers2.md): `onlyUsersInNoLibrary`, to list the users who belong to no library.
+Returns a list of users with paging, filtering and sorting, and two parameters more than [GetAllUsers2](GetAllUsers2.md): `onlyUsersInNoLibrary`, to list the users who belong to no library, and `lastLogonBefore`, to list the accounts nobody has used since a date.
 
 A user who is not a member of any library, and is in no user group that is, can sign in and reach nothing. `onlyUsersInNoLibrary=true` finds them.
 
@@ -12,7 +12,7 @@ A user who is not a member of any library, and is in no user group that is, can 
 
 ## Methods
 
-- **GET** `/srv.asmx/GetAllUsers3?authenticationTicket=...&startingRowNumber=...&numberOfRow=...&...&onlyUsersInNoLibrary=...`
+- **GET** `/srv.asmx/GetAllUsers3?authenticationTicket=...&startingRowNumber=...&numberOfRow=...&...&onlyUsersInNoLibrary=...&lastLogonBefore=...`
 - **POST** `/srv.asmx/GetAllUsers3` (form data)
 - **SOAP** Action: `http://tempuri.org/GetAllUsers3`
 
@@ -31,9 +31,10 @@ A user who is not a member of any library, and is in no user group that is, can 
 | `domainNameFilter` | string | No | The library that local users belong to, by name or as `~L<id>` with the library's id. Empty for no filter. |
 | `userStatusFilter` | int | Yes | `-1` no filter, `0` disabled, `1` enabled. |
 | `userTypeFilter` | int | Yes | `-1` no filter, `1` author, `2` reader. |
-| `sortBy` | int | Yes | Sort column, as in `GetAllUsers2`. |
+| `sortBy` | int | Yes | Sort column, as in `GetAllUsers2`: `0` default, `1` user name, `2` first name then last, `3` last name then first, `4` email, `5` status, `6` authentication source, `7` library, `8` user type, `9` last sign-in. With `9` ascending, those who never signed in come first, then the longest unused. |
 | `sortAscending` | bool | Yes | `true` for ascending order. |
 | `onlyUsersInNoLibrary` | bool | Yes | `true` returns only the users who belong to no library. `false` returns all users: the call is then `GetAllUsers2`. |
+| `lastLogonBefore` | DateTime | No | Only the users whose last sign-in is before this date/time (`yyyy-MM-dd` or `yyyy-MM-ddTHH:mm:ss`; UTC values are converted to server local time). Those who never signed in are included: they are unused too. Empty, or left out over SOAP, for no filter. |
 
 ## Response
 
@@ -77,6 +78,8 @@ authenticationTicket=abc123&startingRowNumber=1&numberOfRow=25&userStatusFilter=
 - **The built-in roles do not count.** Being in `[Administrators]` or another bracketed role group is not library membership; the system administrator account is listed if it is a member of no library.
 - **Being a local user does not count by itself.** A user created in a library is listed if that library has not also been given the user as a member.
 - **The other filters apply too.** `userStatusFilter=1` with `onlyUsersInNoLibrary=true` returns the enabled users who belong to nothing.
+- **Never signed in, and unused since a date.** `sortBy=9&sortAscending=true` lists those who never signed in first (their `LastLogonDate` is empty), then everyone else from the longest unused. `lastLogonBefore=2026-01-01` keeps only the accounts not used since then, never-signed-in ones included; with `sortBy=9` they still come first. To list only those who never signed in, take the leading rows with an empty `LastLogonDate`.
+- **totalusercount counts the filtered list**, with `lastLogonBefore` and `onlyUsersInNoLibrary` applied, not the page.
 - **Which groups are the cause.** [GetGlobalGroups](GetGlobalGroups.md) returns `MemberOfLibraryCount` for each group; a group with `0` gives its users no library.
 
 ## Related APIs
@@ -93,3 +96,8 @@ authenticationTicket=abc123&startingRowNumber=1&numberOfRow=25&userStatusFilter=
 | `4000` | `sortBy`, `userStatusFilter` or `userTypeFilter` is not a known value |
 | `4010` | `[901]` the ticket is expired or unknown |
 | `4030` | The caller may not list users |
+
+## Since
+
+- **9.0 (2026-10-09):** the call, with `onlyUsersInNoLibrary`.
+- **9.0 (2026-11-06):** `lastLogonBefore`, and `sortBy=9` (last sign-in) on this call and on GetAllUsers1, GetAllUsers2 and GetAllUsersWithoutDetails.
