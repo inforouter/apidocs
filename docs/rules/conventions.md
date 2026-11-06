@@ -25,6 +25,7 @@ HTTP knows the bands. The text is for people and changes with the language; bran
 | `5000` | Server error | Something went wrong on the server; the text names it |
 | `5030` | Service unavailable | A service the server depends on is down: Connect, search, mail. Also "busy": the rows the action needed were held by another operation for every attempt the server made, or the wait for the serialization lock ran out. Nothing about the request was wrong; send it again in a moment |
 | `6000` | Licence | The licence does not allow it: library count, user count |
+| `6010` | No Anonymous Access | The licence has no Anonymous Access: the anonymous account cannot sign in, a call with no ticket is not taken as a guest, and a guest ticket issued before the licence changed stops working. Every call answers it in place of the guest session, so a client can tell "no guest access here" from an expired ticket (`4010`) |
 | `2070` | MultiStatus | Part of the work was done and part refused; see below |
 
 ## MultiStatus

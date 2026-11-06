@@ -153,6 +153,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | `[901]` the ticket is expired, cancelled, or never issued |
+| `6010` | no ticket, or a guest ticket, on a licence without Anonymous Access - including a guest ticket issued before the licence lost it |
 
 
 | Error | Description |

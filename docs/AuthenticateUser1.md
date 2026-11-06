@@ -158,6 +158,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `errorCode` | When |
 |---:|---|
 | `4010` | `[900]` wrong password, unknown user, or a disabled account |
+| `6010` | `[900]` the anonymous account, on a licence without Anonymous Access; a client can stop offering guest access |
 
 
 | Error | Description |

@@ -115,9 +115,9 @@ await call('RemoveManagerFromDomain', {
 });
 ```
 
-**Removing somebody who is not a manager is a success**, so this is safe to call blindly - unlike
-[RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), which answers `4041` for a user
-it does not know. Removing a manager does not remove their membership.
+**Removing somebody who is not a manager of the library answers `4041`** ("User is not a manager of
+the library."), so a caller can tell that nothing changed. Until 2026-11-06 it answered success with
+nothing removed. Removing a manager does not remove their membership.
 
 ## Notes
 
@@ -145,6 +145,7 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4030` | the caller is neither an administrator nor a User Manager |
 | `4041` | no user by that name |
+| `4041` | the user is not a manager of the library |
 | `4041` | no library by that name - including one the caller cannot see |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 

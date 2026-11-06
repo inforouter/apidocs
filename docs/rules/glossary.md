@@ -385,7 +385,7 @@ extracted by Connect and is never reset by the server.
 
 **Error code.** A number whose first three digits are the HTTP status it corresponds to: 4000 bad request,
 4010 not authenticated, 4030 denied, 4041 not found, 4090 already exists, 4230 locked, 5000 server error, 6000
-licence, 2070 MultiStatus. The [conventions page](conventions.md) has the bands.
+licence, 6010 no Anonymous Access, 2070 MultiStatus. The [conventions page](conventions.md) has the bands.
 
 **MultiStatus.** An answer that succeeded for some items and not others, code 2070, with a log per item.
 
