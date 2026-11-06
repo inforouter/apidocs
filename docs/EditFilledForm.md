@@ -1,7 +1,5 @@
 # EditFilledForm API
 
-<!-- {% raw %} -->
-
 Opens a document that was saved from a form, for the user to edit its values, and checks the document out to the caller. It is the edit counterpart of [UseFormTemplate](UseFormTemplate.md), and answers in the same two shapes, with the saved values filled in:
 
 | The document was saved from | Response `formType` | What the UI gets | What the UI does |
@@ -262,5 +260,3 @@ await post('UnLock', { authenticationTicket: ticket, path: documentPath, force: 
 - [UseFormTemplate](UseFormTemplate.md): Open a template as a new, empty form.
 - [SaveFilledForm](SaveFilledForm.md): Save the form as a new document, or a new version of an existing one.
 - [UnLock](UnLock.md): Release the checkout this call takes, when the edit is cancelled.
-
-<!-- {% endraw %} -->

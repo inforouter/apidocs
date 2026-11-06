@@ -1,7 +1,5 @@
 # UploadZipWithHandler API
 
-<!-- {% raw %} -->
-
 Imports a ZIP archive as a folder and document structure into the specified folder. The ZIP file is supplied as a pre-uploaded chunked upload handler GUID rather than raw bytes, making this the recommended approach for large ZIP archives.
 
 ## Endpoint
@@ -313,5 +311,3 @@ The `errorCode` values this operation returns, checked against a running server:
 - `DeleteUploadHandler` — Release the server-side temp file after a successful import
 - `UploadZip` — Import a ZIP archive supplied as raw bytes (no chunking)
 - `GetFoldersAndDocuments` — Browse folder contents to find the destination folder path
-
-<!-- {% endraw %} -->

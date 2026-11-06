@@ -1,7 +1,5 @@
 # UploadDocumentWithHandler3 API
 
-<!-- {% raw %} -->
-
 Finalizes a chunked file upload and creates a new document or a new version of an existing document at the specified path, with extended options supplied through an XML parameters string. This is the most flexible handler-finalization method and supports all upload options including version comment, publish option, checkout, keywords, text-only content, manual version numbers, custom dates, and email notifications.
 
 ## Endpoint
@@ -324,5 +322,3 @@ The `errorCode` values this operation returns, checked against a running server:
 | `SystemError:...` | An unexpected server-side error occurred. |
 
 ---
-
-<!-- {% endraw %} -->
