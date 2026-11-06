@@ -1,10 +1,10 @@
 ﻿# SearchRecycledItems API
 
-Searches documents and folders across the entire infoRouter Recycle Bin (all users) using optional filter criteria. Returns matching recycled items with the same attributes as `GetRecycleBinContent`, including the `Handler` value needed to purge or restore individual items. This is an administrator-only API that provides system-wide visibility into all recycled content. Use it to audit deletion activity, identify items to recover, or build administrative cleanup tooling.
+Searches the deleted documents and folders of the whole instance, in the users' recycle bins and the system recycle bin together, using optional filter criteria. To search one of the two only, or a page at a time, use [SearchRecycledItems1](SearchRecycledItems1.md) with `searchIn`. Returns matching recycled items with the same attributes as `GetRecycleBinContent`, including the `Handler` value needed to purge or restore individual items. This is an administrator-only API that provides system-wide visibility into all recycled content. Use it to audit deletion activity, identify items to recover, or build administrative cleanup tooling.
 
-> **This reads the whole instance's recycled items**, not the caller's own. Four of its six
-> filters do not narrow the result the way their names read - see the table under the error codes
-> before relying on one.
+> **This reads the whole instance's recycled items**, not the caller's own, in both recycle bins at
+> once: it cannot be narrowed to the system recycle bin. `RecycledItemStatusId` on each item says which
+> bin it is in (`0` a user's, `1` the system's).
 
 ## Endpoint
 
@@ -24,7 +24,7 @@ Searches documents and folders across the entire infoRouter Recycle Bin (all use
 
 ## Parameters
 
-All filter parameters are optional. When all filters are omitted the API returns all recycled items across all users.
+All filter parameters are optional. When all filters are omitted the API returns every item in the users' recycle bins and the system recycle bin.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -260,13 +260,13 @@ const root = await call('SearchRecycledItems', {
 
 - **Admin Only**: The authenticated user must be a system administrator. The check is enforced server-side.
 
-- **System-Wide Search**: Unlike `GetRecycleBinContent` which is scoped to a single user's bin, `SearchRecycledItems` searches across all users' recycle bins and the system recycle bin.
+- **System-Wide Search**: Unlike `GetRecycleBinContent` which is scoped to a single user's bin, `SearchRecycledItems` searches across all users' recycle bins and the system recycle bin, always both. [SearchRecycledItems1](SearchRecycledItems1.md) with `searchIn=1` or `searchIn=2` searches one of them. Items already queued for purging are never found.
 
-- **All Filters Optional**: Calling with only `authenticationTicket` returns every recycled item in the system. Add filters to narrow results.
+- **All Filters Optional**: Calling with only `authenticationTicket` returns every item in either recycle bin. Add filters to narrow results.
 
 - **ObjectName is an Exact Match Unless It Has a Wildcard**: `objectName=Report` finds only an item named exactly `Report`. Use `*` for a partial match: `*Report*` finds any name containing it. (This page used to say the filter was a substring match; it never was.)
 
-- **Paging**: This call returns every match at once. [SearchRecycledItems1](SearchRecycledItems1.md) returns them a page at a time, sorted, with the total.
+- **Paging**: This call returns every match at once. [SearchRecycledItems1](SearchRecycledItems1.md) returns them a page at a time, sorted, with the total, and can search one bin only.
 
 - **Date Filters**: Both `dateDeletedMinDate` and `dateDeletedMaxDate` can be sent in UTC -" the server automatically converts them to local time for comparison. Either bound can be omitted independently.
 
@@ -288,6 +288,8 @@ const root = await call('SearchRecycledItems', {
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's Recycle Bin into the system recycle bin
 
+- [SearchRecycledItems1](SearchRecycledItems1.md) - The same search a page at a time, sorted, in one bin or both
+
 ---
 
 ## Error Codes
@@ -298,7 +300,6 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4030` | there is no ticket at all - this operation reports access denied where GetRecycleBinContent, reading the same bin, reports 4010 |
 | `4041` | no user by the name given in deletedByUsername |
-| `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 An item in the bin is named by its **handler**: the letter `D` and a document id, or the letter
 `F` and a folder id - `D4512`, `F183`. It is read off the `Handler` attribute of an item returned

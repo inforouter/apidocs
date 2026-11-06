@@ -116,7 +116,7 @@ const result = await call('EmptyAllUserRecycleBins', { authenticationTicket: tic
 console.log(`${result.getAttribute('recycleBinCount')} recycle bins emptied`);
 
 // If the request was dropped before an answer came back, calling it again carries on.
-// The items are now in the system recycle bin: SearchRecycledItems1 finds them, and
+// The items are now in the system recycle bin: SearchRecycledItems1 with searchIn=1 finds them, and
 // PurgeRecycleBinItem removes them for good, one by one.
 ```
 
@@ -140,7 +140,7 @@ console.log(`${result.getAttribute('recycleBinCount')} recycle bins emptied`);
 ## Related APIs
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's own Recycle Bin into the system recycle bin
-- [SearchRecycledItems1](SearchRecycledItems1.md) - Search all Recycle Bins a page at a time (admin only)
+- [SearchRecycledItems1](SearchRecycledItems1.md) - Search the Recycle Bins a page at a time; `searchIn=1` for the system recycle bin only (admin only)
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a recycled item
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)
 

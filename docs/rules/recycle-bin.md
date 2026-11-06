@@ -110,9 +110,14 @@ The system recycle bin is not a place a user can open. It is every recycled item
 - [SearchRecycledItems1](../SearchRecycledItems1.md) answers a page at a time, sorted (`DateDeleted`, `Name`,
   `Size`, `OriginalLocation`, `DeletedBy`, `RecycleStatus`, `DateEmptied`), with `totalCount` for the whole
   search. [SearchRecycledItems](../SearchRecycledItems.md) answers every match at once.
-- Both search the users' recycle bins **and** the system recycle bin together. Each result carries
-  `RecycledItemStatusId` (`0` user's, `1` system); the date an item was emptied can be sorted on
-  (`DateEmptied`) but is not in the answer. Items in the purge queue are never listed.
+- **Where they look.** [SearchRecycledItems1](../SearchRecycledItems1.md) takes `searchIn`: `0` or empty
+  searches everywhere, the users' recycle bins and the system recycle bin together; `1` the system recycle bin
+  only; `2` the users' recycle bins only. [SearchRecycledItems](../SearchRecycledItems.md) always searches both.
+  So to purge only what has been emptied, search with `searchIn=1` and purge each result. 8.7 did this in its
+  user interface by opening the system recycle bin as a library; 9.0 does it with the parameter.
+- Each result carries `RecycledItemStatusId` (`0` user's, `1` system); the date an item was emptied can be
+  sorted on (`DateEmptied`) but is not in the answer. Items in the purge queue are never listed, whatever
+  `searchIn` says.
 - The filters are the name (exact, or with `*` for any run of characters), the deletion date range, the size
   range and who deleted it. Leaving them all out lists everything.
 - The handler of each result restores ([RestoreRecycleBinItem](../RestoreRecycleBinItem.md)) or purges
@@ -254,6 +259,8 @@ A folder's entry is written for the folder and for every document and subfolder 
 
 ## Since
 
+- **9.0 (2026-11-06):** `searchIn` on [SearchRecycledItems1](../SearchRecycledItems1.md), to search the system
+  recycle bin or the users' recycle bins alone. Before, both were always searched together.
 - **9.0 (2026-11-06):** an item emptied into the system recycle bin is restored by administrators only. Before,
   as in 8.7, the user who deleted it could still restore it by its handler, since the rule looked only at the
   recycle bin the item came from.

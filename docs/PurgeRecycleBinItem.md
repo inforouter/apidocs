@@ -1,6 +1,6 @@
 ﻿# PurgeRecycleBinItem API
 
-Permanently and irreversibly deletes a single document or folder from a Recycle Bin: a user's or the system recycle bin. The item is identified by its `Handler` value, which an administrator gets from [SearchRecycledItems1](SearchRecycledItems1.md) (every bin) or `GetRecycleBinContent` (their own). Use this API to selectively remove individual items rather than emptying the entire bin. This is an administrator-only operation.
+Permanently and irreversibly deletes a single document or folder from a Recycle Bin: a user's or the system recycle bin. The item is identified by its `Handler` value, which an administrator gets from [SearchRecycledItems1](SearchRecycledItems1.md) (every bin, or with `searchIn=1` the system recycle bin only) or `GetRecycleBinContent` (their own). Use this API to selectively remove individual items rather than emptying the entire bin. This is an administrator-only operation.
 
 ## Endpoint
 

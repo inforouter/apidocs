@@ -1,6 +1,6 @@
 # SearchRecycledItems1 API
 
-Searches documents and folders across all users' Recycle Bins, one page at a time, with a sort order and the total number of matches. It takes the filters of [SearchRecycledItems](SearchRecycledItems.md), which returns every match at once, and returns the same item elements.
+Searches the deleted documents and folders of the whole instance, one page at a time, sorted, with the total number of matches. `searchIn` says where to look: the users' recycle bins, the system recycle bin, or both (the default). It takes the filters of [SearchRecycledItems](SearchRecycledItems.md), which always searches both bins and returns every match at once, and returns the same item elements. See [What happens to a deleted document or folder](rules/recycle-bin.md#the-system-recycle-bin-and-searching-it).
 
 ## Endpoint
 
@@ -10,7 +10,7 @@ Searches documents and folders across all users' Recycle Bins, one page at a tim
 
 ## Methods
 
-- **GET** `/srv.asmx/SearchRecycledItems1?authenticationTicket=...&objectName=...&startingRowNumber=...&numberOfRows=...&sortBy=...&sortAscending=...`
+- **GET** `/srv.asmx/SearchRecycledItems1?authenticationTicket=...&objectName=...&startingRowNumber=...&numberOfRows=...&sortBy=...&sortAscending=...&searchIn=...`
 - **POST** `/srv.asmx/SearchRecycledItems1` (form data)
 - **SOAP** Action: `http://tempuri.org/SearchRecycledItems1`
 
@@ -29,12 +29,13 @@ Searches documents and folders across all users' Recycle Bins, one page at a tim
 | `numberOfRows` | int | Yes | Number of items per page. `0` or less returns every match, and `startingRowNumber` is then not used. |
 | `sortBy` | string | No | `DateDeleted` (default), `Name`, `Size`, `OriginalLocation`, `DeletedBy`, `RecycleStatus` or `DateEmptied`. Not case-sensitive. |
 | `sortAscending` | bool | Yes | `true` for ascending order, `false` for descending. |
+| `searchIn` | int | No | Where to search. `0` or empty: everywhere, the users' recycle bins and the system recycle bin. `1`: the system recycle bin only, the items that have been emptied there. `2`: the users' recycle bins only, the items no one has emptied yet. Any other value is refused with `4000`. SOAP callers that leave it out get `0`. |
 
 ## Response
 
 ### Success Response
 
-`totalCount` is the number of items the whole search matches, not the number on the page. The child elements are the `<document>` and `<folder>` elements of [SearchRecycledItems](SearchRecycledItems.md).
+`totalCount` is the number of items the whole search matches, not the number on the page. The child elements are the `<document>` and `<folder>` elements of [SearchRecycledItems](SearchRecycledItems.md). `RecycledItemStatusId` on each one says where it is: `0` in a user's recycle bin, `1` in the system recycle bin.
 
 ```xml
 <response success="true" error="" totalCount="801">
@@ -64,15 +65,28 @@ Content-Type: application/x-www-form-urlencoded
 authenticationTicket=abc123&objectName=*.pdf&startingRowNumber=0&numberOfRows=25&sortBy=DateDeleted&sortAscending=false
 ```
 
+### Request (GET): what has been emptied into the system recycle bin, oldest first
+
+```
+GET /srv.asmx/SearchRecycledItems1?authenticationTicket=abc123&startingRowNumber=0&numberOfRows=100&sortBy=DateEmptied&sortAscending=true&searchIn=1
+```
+
+Each item's `Handler` then goes to [PurgeRecycleBinItem](PurgeRecycleBinItem.md) to purge it, or to
+[RestoreRecycleBinItem](RestoreRecycleBinItem.md) to bring it back.
+
 ## Notes
 
 - A `startingRowNumber` past the last match returns no items and the same `totalCount`.
 - Items that tie on the sort column keep one order from page to page, so no item is repeated or skipped while the bin does not change. An item deleted or purged between two calls shifts the pages after it.
-- Only items still in a recycle bin are searched; items already queued for purging are not.
+- Only items still in a recycle bin are searched; items already queued for purging are not, whatever `searchIn` says.
+- `searchIn=1` is how an administrator works through the system recycle bin alone, for instance to purge what [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) moved there, item by item, without touching what users can still restore themselves. [SearchRecycledItems](SearchRecycledItems.md) has no such filter. (8.7 did this in its user interface, by opening the system recycle bin as a library.)
+- The numbers of `searchIn` are its own, not the `RecycledItemStatusId` values: `searchIn=1` finds the items with `RecycledItemStatusId="1"`, but `searchIn=2` finds those with `RecycledItemStatusId="0"`, and `0` is everywhere.
+- `searchIn` is checked after the caller is found to be a system administrator, so anyone else is refused with `4030` whatever it says.
 
 ## Related APIs
 
-- [SearchRecycledItems](SearchRecycledItems.md) - The same search, returning every match at once
+- [SearchRecycledItems](SearchRecycledItems.md) - The same search in both bins, returning every match at once
+- [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin into the system recycle bin
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List the current user's own Recycle Bin
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore an item by its handler
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete an item by its handler
@@ -81,7 +95,12 @@ authenticationTicket=abc123&objectName=*.pdf&startingRowNumber=0&numberOfRows=25
 
 | `errorCode` | When |
 |---:|---|
-| `4000` | `sortBy` is not one of the listed values |
+| `4000` | `sortBy` is not one of the listed values, or `searchIn` is not `0`, `1` or `2` |
 | `4010` | `[901]` the ticket is expired or unknown |
 | `4030` | The caller is not a system administrator |
 | `4041` | `deletedByUsername` is not a user |
+
+## Since
+
+- **9.0 (2026-10-09):** the call.
+- **9.0 (2026-11-06):** `searchIn`, to search one recycle bin only. Before, it always searched both.
