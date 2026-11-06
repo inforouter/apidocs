@@ -32,16 +32,31 @@ recycle bin's automatic purge, if it is configured, applies to them from then on
 ### Success Response
 
 ```xml
-<response success="true" error="" recycleBinCount="2" folderCount="1" documentCount="2" />
+<response success="true" error="" recycleBinCount="2" folderCount="1244" documentCount="232" totalSize="410046">
+  <recyclebin username="utkuc" folderCount="22" documentCount="220" totalSize="200023" />
+  <recyclebin username="jane" folderCount="1222" documentCount="12" totalSize="210023" />
+</response>
 ```
+
+On the root, the totals of the whole call:
 
 | Attribute | Description |
 |-----------|-------------|
-| `recycleBinCount` | How many users' recycle bins this call emptied (bins it found already empty are not counted). |
+| `recycleBinCount` | How many users' recycle bins this call emptied (bins it found already empty are not counted); the number of `<recyclebin>` elements. |
 | `folderCount` | How many recycled folders this call moved. A folder counts once, with everything in it. |
-| `documentCount` | How many recycled documents this call moved. |
+| `documentCount` | How many recycled documents this call moved, not counting the documents inside the moved folders. |
+| `totalSize` | The total size of what this call moved, in bytes, as a plain integer (no separators). |
 
-All three are `0` when every user's Recycle Bin was already empty.
+One `<recyclebin>` per user recycle bin this call emptied, in the order it emptied them, with the same three
+numbers for that bin alone (the answer of [EmptyUserRecycleBin](EmptyUserRecycleBin.md) for that user):
+
+| Attribute | Description |
+|-----------|-------------|
+| `username` | The user the recycle bin belongs to. Empty for a recycle bin nobody owns any more. |
+| `folderCount`, `documentCount`, `totalSize` | What this call moved from that recycle bin. A folder's size is that of its contents when it was deleted. |
+
+The root's four numbers are `0`, and there is no `<recyclebin>`, when every user's Recycle Bin was already empty.
+The root's `totalSize` and the `<recyclebin>` elements are new on 2026-11-06.
 
 ### Error Response
 
@@ -114,6 +129,10 @@ at a time.
 ```javascript
 const result = await call('EmptyAllUserRecycleBins', { authenticationTicket: ticket });
 console.log(`${result.getAttribute('recycleBinCount')} recycle bins emptied`);
+for (const bin of result.getElementsByTagName('recyclebin')) {
+  console.log(`${bin.getAttribute('username')}: ${bin.getAttribute('documentCount')} documents, ` +
+              `${bin.getAttribute('folderCount')} folders, ${Number(bin.getAttribute('totalSize')).toLocaleString()} bytes`);
+}
 
 // If the request was dropped before an answer came back, calling it again carries on.
 // The items are now in the system recycle bin: SearchRecycledItems1 with searchIn=1 finds them, and
@@ -126,7 +145,8 @@ console.log(`${result.getAttribute('recycleBinCount')} recycle bins emptied`);
   item moves to the system recycle bin in a transaction of its own, together with its delete-log entries. A call
   that is cut off (a timeout, a dropped connection, a server restart) leaves every item either moved and logged
   or untouched. **Calling it again carries on** with what the users' Recycle Bins still hold, so a client that
-  got no answer simply calls it again. The counts of a repeated call cover only what that call moved.
+  got no answer simply calls it again. The counts of a repeated call cover only what that call moved; a call that
+  is cut off answers nothing, so what it did is not reported anywhere but in the delete log.
 - **Nothing is destroyed.** To remove the items for good, purge them from the system recycle bin with
   [PurgeRecycleBinItem](PurgeRecycleBinItem.md).
 - **Logged.** Every moved item is written to the delete log as a recycle-bin empty by the calling administrator,
@@ -140,6 +160,7 @@ console.log(`${result.getAttribute('recycleBinCount')} recycle bins emptied`);
 ## Related APIs
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's own Recycle Bin into the system recycle bin
+- [EmptyUserRecycleBin](EmptyUserRecycleBin.md) - Empty one user's Recycle Bin, with counts and total size (admin only)
 - [SearchRecycledItems1](SearchRecycledItems1.md) - Search the Recycle Bins a page at a time; `searchIn=1` for the system recycle bin only (admin only)
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a recycled item
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)

@@ -31,10 +31,18 @@ Empties the Recycle Bin of the currently authenticated user: its items move to t
 ### Success Response
 
 ```xml
-
-<response success="true" error="" />
-
+<response success="true" error="" folderCount="2" documentCount="14" totalSize="5242880" />
 ```
+
+| Attribute | Description |
+|-----------|-------------|
+| `folderCount` | How many recycled folders this call moved. A folder counts once, with everything in it. |
+| `documentCount` | How many recycled documents this call moved, not counting the documents inside the moved folders. |
+| `totalSize` | The total size of what this call moved, in bytes, as a plain integer (no separators). A folder's size is that of its contents when it was deleted, as recorded with it. |
+
+All three are `0` when the recycle bin was already empty. The same three attributes as
+[EmptyUserRecycleBin](EmptyUserRecycleBin.md) and each `<recyclebin>` of
+[EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md). Until 2026-11-06 the answer carried none of them.
 
 ### Error Response
 
@@ -121,12 +129,14 @@ async function call(action, params) {
 }
 ```
 
-Moves everything in the caller's recycle bin to the system recycle bin. The caller can no longer see or restore it, and the answer does not say what went.
+Moves everything in the caller's recycle bin to the system recycle bin. The caller can no longer see or restore it. The answer says how much went, not which items: read the bin first for that.
 
 ```javascript
 // Read the bin first - after this the caller can no longer see the items.
 const doomed = await call('GetRecycleBinContent', { authenticationTicket: ticket });
-await call('EmptyRecycleBin', { authenticationTicket: ticket });
+const moved = await call('EmptyRecycleBin', { authenticationTicket: ticket });
+console.log(`${moved.getAttribute('documentCount')} documents, ${moved.getAttribute('folderCount')} folders, ` +
+            `${Number(moved.getAttribute('totalSize')).toLocaleString()} bytes`);
 ```
 
 ## Notes
@@ -135,9 +145,9 @@ await call('EmptyRecycleBin', { authenticationTicket: ticket });
 
 - **Current User Only**: The API operates solely on the recycle bin of the user who owns the authentication ticket. There is no parameter to target another user's recycle bin.
 
-- **Empty Bin is Not an Error**: If the recycle bin is already empty, the API returns `success="true"` without error.
+- **Empty Bin is Not an Error**: If the recycle bin is already empty, the API returns `success="true"` with all three counts `0`.
 
-- **Other Users' Bins**: This API cannot empty another user's bin. A system administrator empties every user's bin at once with [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md).
+- **Other Users' Bins**: This API cannot empty another user's bin. A system administrator empties one user's bin with [EmptyUserRecycleBin](EmptyUserRecycleBin.md), or every user's bin at once with [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md).
 
 - **Selective Deletion**: To permanently delete individual items rather than the entire bin, use `PurgeRecycleBinItem`.
 

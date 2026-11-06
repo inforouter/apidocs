@@ -86,11 +86,12 @@ folder. The rights on each document inside are not asked, but the state of every
 ## Emptying
 
 Emptying moves every item still in a user's recycle bin to the system recycle bin and records the date it was
-emptied. Nothing is destroyed. There are four ways:
+emptied. Nothing is destroyed. There are five ways:
 
 | How | Who | Which bins |
 |---|---|---|
 | [EmptyRecycleBin](../EmptyRecycleBin.md) | Any signed-in user | Their own |
+| [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) | System administrators | One user's, named; answers the counts and the total size |
 | [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md) | System administrators | Every user's, one after another |
 | The monthly move (setting `MoveUsersRecycleBinToSystemRecycleBinIn`) | The daily job | Every item deleted more than that many months ago |
 | Deleting the user ([DeleteUser](../DeleteUser.md)) | Whoever deletes the user | That user's |
@@ -244,7 +245,7 @@ A folder's entry is written for the folder and for every document and subfolder 
 
 - Delete: `DocumentRecycleOperation` (checks in `DocumentDeleteCheckAsync`), `FolderRecycleOperation`
   (`FolderDeleteCheck`). The per-user recycle library is created by `UserOperations.GetRecycleBinIdAsync`.
-- Empty: `RecycleBinOperations.EmptyUserRecycleBinAsync`, `EmptyAllUserRecycleBinsAsync`,
+- Empty: `RecycleBinOperations.EmptyUserRecycleBinAsync` (also behind EmptyUserRecycleBin and DeleteUser), `EmptyAllUserRecycleBinsAsync`,
   `MoveUsersRecycleBinToSystemRecycleBinAsync`; one transaction per item in `MoveToSystemRecycleBinAsync`.
 - Search: `RecycleBinStore.SearchInRecycledItemsAsync` / `SearchInRecycledItemsPageAsync`. A status of
   "unspecified" means user's and system, never the purge state.
@@ -257,7 +258,7 @@ A folder's entry is written for the folder and for every document and subfolder 
 - Disposal: `DocumentExtensions.DisposeDocumentAsync`; for folders `FolderOperations.DisposeDocumentsRecursivelyAsync`
   then `DisposeFolderAsync`, which queues the folder through `FolderMoveOperation.RunOnlyTransactionAsync`
   (`recycleStatus: InPurgeState, onlyIfEmpty: true`). The disposition check: `Maintenance/DispositionCheck`.
-- Tests: `RecycleBinBatchApiTests`, `EmptyAllUserRecycleBinsApiTests`, `RecycleBinSettingsApiTests`,
+- Tests: `RecycleBinBatchApiTests`, `EmptyAllUserRecycleBinsApiTests`, `EmptyUserRecycleBinApiTests`, `RecycleBinSettingsApiTests`,
   `DisposeFolderApiTests`, `RetentionBatchApiTests` (the dispose refusals).
 
 ## Since
@@ -271,6 +272,7 @@ A folder's entry is written for the folder and for every document and subfolder 
 - **9.0 (2026-11-06):** a disposed folder goes to the purge queue, and only when it is empty. Before, it was
   moved into the disposer's own recycle bin together with whatever could not be disposed of. It could be
   restored from there, and the log recorded all of it as purged.
+- **9.0 (2026-11-06):** [EmptyUserRecycleBin](../EmptyUserRecycleBin.md), for one user's recycle bin.
 - **9.0 (2026-11-06):** [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md). Emptying moves each item
   with its log in one transaction. Before, an item two empties reached at once was logged twice, and an emptying
   cut off between the two writes left a moved item without its log entry.

@@ -552,6 +552,7 @@ nav:
     - PurgeRecycleBinItem: PurgeRecycleBinItem.md
     - EmptyRecycleBin: EmptyRecycleBin.md
     - EmptyAllUserRecycleBins: EmptyAllUserRecycleBins.md
+    - EmptyUserRecycleBin: EmptyUserRecycleBin.md
 
   - Transfer Operations:
     - TransferUserCheckedOutDocuments: TransferUserCheckedOutDocuments.md
