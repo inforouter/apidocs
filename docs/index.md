@@ -464,6 +464,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's Recycle Bin into the system recycle bin
 - [EmptyUserRecycleBin](EmptyUserRecycleBin.md) - Empty one user's Recycle Bin into the system recycle bin, with counts and total size (admin only)
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List all documents and folders currently in the current user's Recycle Bin
+- [GetRecycleBinStatistics](GetRecycleBinStatistics.md) - Folders, documents and total size in the system recycle bin, the users' recycle bins and the purge queue (admin only)
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single item from the Recycle Bin by handler (admin only)
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a single Recycle Bin item to its original or a specified folder location
 - [SearchRecycledItems](SearchRecycledItems.md) - Search the users' Recycle Bins and the system recycle bin together, with optional filters (admin only)

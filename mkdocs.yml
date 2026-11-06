@@ -553,6 +553,7 @@ nav:
     - EmptyRecycleBin: EmptyRecycleBin.md
     - EmptyAllUserRecycleBins: EmptyAllUserRecycleBins.md
     - EmptyUserRecycleBin: EmptyUserRecycleBin.md
+    - GetRecycleBinStatistics: GetRecycleBinStatistics.md
 
   - Transfer Operations:
     - TransferUserCheckedOutDocuments: TransferUserCheckedOutDocuments.md

@@ -124,6 +124,9 @@ The system recycle bin is not a place a user can open. It is every recycled item
   from: `path=/Accounting/` for a library, `path=/Accounting/Invoices` for a folder and everything below it.
   A library is matched on the library itself, a folder on the item's recorded `DeletePath`, so items from a
   library deleted afterwards can still be found. Leaving them all out lists everything.
+- [GetRecycleBinStatistics](../GetRecycleBinStatistics.md) counts instead of listing: folders, documents and
+  total size in the system recycle bin, the users' recycle bins (each one with `withDetails=true`) and the purge
+  queue.
 - The handler of each result restores ([RestoreRecycleBinItem](../RestoreRecycleBinItem.md)) or purges
   ([PurgeRecycleBinItem](../PurgeRecycleBinItem.md)) the item.
 
@@ -272,6 +275,7 @@ A folder's entry is written for the folder and for every document and subfolder 
 - **9.0 (2026-11-06):** a disposed folder goes to the purge queue, and only when it is empty. Before, it was
   moved into the disposer's own recycle bin together with whatever could not be disposed of. It could be
   restored from there, and the log recorded all of it as purged.
+- **9.0 (2026-11-06):** [GetRecycleBinStatistics](../GetRecycleBinStatistics.md).
 - **9.0 (2026-11-06):** [EmptyUserRecycleBin](../EmptyUserRecycleBin.md), for one user's recycle bin.
 - **9.0 (2026-11-06):** [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md). Emptying moves each item
   with its log in one transaction. Before, an item two empties reached at once was logged twice, and an emptying
