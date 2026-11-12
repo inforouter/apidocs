@@ -30,6 +30,8 @@ Returns the content search settings in effect: whether content search is on, whe
     <IndexCatalog>http://search01:5000/corp/</IndexCatalog>
     <RemoteSearchApiKey>3f9c0d...</RemoteSearchApiKey>
     <RemoteSearchIndexNotify>true</RemoteSearchIndexNotify>
+    <CheckSecurityOnSearch>false</CheckSecurityOnSearch>
+    <MaxContentSearchResult>100000</MaxContentSearchResult>
   </ContentSearchSettings>
 </response>
 ```
@@ -40,6 +42,8 @@ Returns the content search settings in effect: whether content search is on, whe
 | `IndexCatalog` | string | The catalog's address on the infoRouter Search Service, `http://server:port/catalog-name/`, or `SYSTEMINDEX` for Windows Search. Empty when none is set. |
 | `RemoteSearchApiKey` | string | The catalog's API key, sent to the search service with every request. Empty: no key is sent. |
 | `RemoteSearchIndexNotify` | bool | `true`: infoRouter tells the search service which documents changed, so they are searchable within seconds. `false`: the service's nightly rescan finds the changes. |
+| `CheckSecurityOnSearch` | bool | `true`: while search result pages are built, each hit's permission is checked again (for hits the search could not already mark as allowed). Applies to every search, not only content search. Default `false`. |
+| `MaxContentSearchResult` | int | The most hits a content search takes from the search engine, 1 to 1,000,000. Default `100000`. |
 | `SettingsProblem` | string | Present only when the settings file could not be read (see Notes). Says what is wrong with it; content search is off until it is corrected or the settings are saved. |
 
 ### Error Response

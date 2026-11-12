@@ -10,7 +10,7 @@ Replaces the content search settings and applies them at once, without restartin
 
 ## Methods
 
-- **GET** `/srv.asmx/SetContentSearchSettings?authenticationTicket=...&indexSrv=...&indexCatalog=...&remoteSearchApiKey=...&remoteSearchIndexNotify=...`
+- **GET** `/srv.asmx/SetContentSearchSettings?authenticationTicket=...&indexSrv=...&indexCatalog=...&remoteSearchApiKey=...&remoteSearchIndexNotify=...&checkSecurityOnSearch=...&maxContentSearchResult=...`
 - **POST** `/srv.asmx/SetContentSearchSettings` (form data)
 - **SOAP** Action: `http://tempuri.org/SetContentSearchSettings`
 
@@ -23,8 +23,10 @@ Replaces the content search settings and applies them at once, without restartin
 | `indexCatalog` | string | When `indexSrv` is `true` | The catalog's address on the infoRouter Search Service, `http://server:port/catalog-name/` (http:// or https://), as the service's administration page shows it; or `SYSTEMINDEX` for Windows Search. May be empty while content search is off |
 | `remoteSearchApiKey` | string | No | The catalog's API key, as the search service's administration page shows it. Empty: no key is sent |
 | `remoteSearchIndexNotify` | bool | No | `true` (default): the search service is told which documents changed, so they are searchable within seconds. `false`: its nightly rescan finds the changes |
+| `checkSecurityOnSearch` | bool | No | `true`: each search hit's permission is checked again while result pages are built (every search, not only content search). Left out: unchanged |
+| `maxContentSearchResult` | int | No | The most hits a content search takes from the search engine, 1 to 1,000,000. Left out: unchanged |
 
-All four settings are replaced. To change one, send the others as GetContentSearchSettings returned them. `indexCatalog` and `remoteSearchApiKey` are trimmed.
+The first four settings are replaced: to change one, send the others as GetContentSearchSettings returned them. `checkSecurityOnSearch` and `maxContentSearchResult` are optional; left out, they stay as they are. `indexCatalog` and `remoteSearchApiKey` are trimmed.
 
 ## Response
 
@@ -69,6 +71,7 @@ A search service that does not answer does not stop the save:
 |-----------|------|
 | 4000 | `indexCatalog` is neither an http:// or https:// address nor `SYSTEMINDEX`, or it is empty while `indexSrv` is `true` |
 | 4000 | `SYSTEMINDEX` with `indexSrv` `true` on an infoRouter that does not run on Windows |
+| 4000 | `maxContentSearchResult` is not between 1 and 1,000,000 |
 | 4010 | No authentication ticket, or an invalid or expired one |
 | 4030 | The user is not allowed to change application settings |
 
