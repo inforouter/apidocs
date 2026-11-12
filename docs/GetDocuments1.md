@@ -86,10 +86,10 @@ No folder at `Path`, including one the caller may not see:
 ```
 
 A refusal raised while the folder's contents are being read - the caller not being allowed to list it -
-carries no `errorCode`:
+carries `errorCode` 4030:
 
 ```xml
-<response success="false" error="..." />
+<response success="false" error="..." errorCode="4030" />
 ```
 
 ---
@@ -235,7 +235,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown, or there is no ticket at all |
 | `4041` | no folder at that path, including one the caller may not see |
-| none | a refusal raised while the folder's contents are read, such as the caller not being allowed to list it; the error document has no `errorCode` attribute |
+| `4030` | the caller is not allowed to list the folder's contents |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 A missing folder answers `4041`, as [GetDocuments](GetDocuments.md) does.

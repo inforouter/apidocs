@@ -96,10 +96,10 @@ No folder at `Path`, including one the caller may not see:
 ```
 
 A refusal raised while the folder's contents are being read - the caller not being allowed to list it -
-carries no `errorCode`:
+carries `errorCode` 4030:
 
 ```xml
-<response success="false" error="..." />
+<response success="false" error="..." errorCode="4030" />
 ```
 
 ---
@@ -261,7 +261,7 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4041` | no folder at that path, including one the caller may not see |
-| none | a refusal raised while the folder's contents are read, such as the caller not being allowed to list it; the error document has no `errorCode` attribute |
+| `4030` | the caller is not allowed to list the folder's contents |
 | `HTTP 400` | `Path` was empty; refused by model binding, so there is no error document |
 
 A call with no ticket at all is not automatically refused: it signs in as the anonymous user, so a

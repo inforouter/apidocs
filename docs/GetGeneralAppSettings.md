@@ -71,6 +71,7 @@ Returns the general application settings including upload limits, work days conf
     <SearchPageSize>20</SearchPageSize>
     <ServiceTimerPeriod>5</ServiceTimerPeriod>
     <KeepErrorLogsFor>30</KeepErrorLogsFor>
+    <MaximumDisplayFolderCount>1000</MaximumDisplayFolderCount>
   </GeneralSettings>
 </response>
 ```
@@ -98,6 +99,7 @@ Returns the general application settings including upload limits, work days conf
 | `HolidayList` | array | List of Holiday objects — see Holiday Properties below |
 | `ZipDownloadSetting` | object | ZIP download configuration |
 | `SearchPageSize` | integer | Default number of results per search page |
+| `MaximumDisplayFolderCount` | integer | The most items under one folder the folders panel lists ([GetFolders2](GetFolders2.md)); a folder holding more is refused as having too many folders to navigate. 1–100,000; other values are refused by SetGeneralAppSettings (4000). Default `1000`. |
 | `KeepErrorLogsFor` | integer | Days the error log files are kept; the daily log cleanup deletes older ones. `0` keeps them forever. 0–3650; other values are refused by SetGeneralAppSettings (4000). Default `30`. |
 | `ServiceTimerPeriod` | integer | Minutes between two runs of the maintenance job (sending queued email, the scheduled and daily jobs, recycle bin purging). 1–60; the job cannot be turned off, so 0 and other values are refused by SetGeneralAppSettings (4000). Default `5`. A change applies within a minute, without a restart. |
 

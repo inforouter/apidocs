@@ -65,11 +65,11 @@ No folder at `Path`, including one the caller may not see:
 <response success="false" error="Target folder cannot be found." errorCode="4041" />
 ```
 
-A refusal raised while the folder's contents are being read - the folder holding more subfolders than
-`MaximumDisplayFolderCount` allows, or the caller not being allowed to list it - carries no `errorCode`:
+A folder holding more items than `MaximumDisplayFolderCount` allows is refused with `errorCode` 4000; the caller
+not being allowed to list it, with 4030:
 
 ```xml
-<response success="false" error="Too many folders to navigate." />
+<response success="false" error="Too many folders to navigate." errorCode="4000" />
 ```
 
 ---
@@ -137,7 +137,7 @@ async function call(action, params) {
 ```
 
 The same answer as [GetFolders1](GetFolders1.md), with one difference: the number of subfolders is
-capped by the `MaximumDisplayFolderCount` UI setting, and a folder holding more than that is refused
+capped by the `MaximumDisplayFolderCount` general setting, and a folder holding more than that is refused
 rather than listed. It exists for the folder tree in the web UI, which must not try to draw ten
 thousand nodes.
 
@@ -157,7 +157,7 @@ For a folder that may hold more than the cap, page through it with
 
 ## Notes
 
-- The maximum number of returned folders is controlled by the `MaximumDisplayFolderCount` UI setting in infoRouter's system configuration.
+- The maximum number of returned folders is the `MaximumDisplayFolderCount` general setting (1–100,000, default 1000), read with [GetGeneralAppSettings](GetGeneralAppSettings.md) and changed with [SetGeneralAppSettings](SetGeneralAppSettings.md); a change applies to the next call.
 - If a folder has more subfolders than the limit allows, the call fails with `Too many folders to navigate.` rather than returning part of the list.
 - For unlimited folder listing, use `GetFolders1`.
 - This API is primarily used by the infoRouter web UI folder tree panel.
@@ -181,7 +181,8 @@ The `errorCode` values this operation returns, checked against a running server:
 |---:|---|
 | `4010` | the ticket is expired or unknown |
 | `4041` | no folder at that path, including one the caller may not see |
-| none | the folder holds more subfolders than `MaximumDisplayFolderCount` allows, or the caller may not list it; the error document has no `errorCode` attribute |
+| `4000` | the folder holds more items than `MaximumDisplayFolderCount` allows (`Too many folders to navigate.`) |
+| `4030` | the caller is not allowed to list the folder's contents |
 | `HTTP 400` | a required string parameter was empty; refused by model binding, so there is no error document |
 
 A call with no ticket is not automatically refused: it signs in as the anonymous user, so a folder in
