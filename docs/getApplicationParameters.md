@@ -150,6 +150,8 @@ These additional parameters are returned only when the authenticated user is a s
 
 ### SMTP Configuration
 
+These come from `config\smtp-setting.json`. [GetSmtpSettings](GetSmtpSettings.md) returns all the SMTP settings, and [SetSmtpSettings](SetSmtpSettings.md) changes them.
+
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `SMTPSERVER` | string | SMTP server hostname |

@@ -587,6 +587,8 @@ nav:
     - SetSystemBehaviorSettings: SetSystemBehaviorSettings.md
     - GetContentSearchSettings: GetContentSearchSettings.md
     - SetContentSearchSettings: SetContentSearchSettings.md
+    - GetSmtpSettings: GetSmtpSettings.md
+    - SetSmtpSettings: SetSmtpSettings.md
     - GetMimeTypes: GetMimeTypes.md
     - FlushApplicationCache: FlushApplicationCache.md
     - GetLocalizedResources: GetLocalizedResources.md

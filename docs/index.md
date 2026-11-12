@@ -42,12 +42,14 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) - Get email and notification settings (subscription alerts, Send To email, attachment policies)
 - [GetGeneralAppSettings](GetGeneralAppSettings.md) - Get general application settings including upload limits, work days, holidays, and system preferences
 - [GetMimeTypes](GetMimeTypes.md) - Get the list of all defined MIME types in the system
+- [GetSmtpSettings](GetSmtpSettings.md) - Get the SMTP settings: system email address, server, port, encryption, sign-in account (admin only)
 - [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) - Get system behavior settings (login logging, anti-brute-force, library manager permissions)
 - [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md) - Update authentication and password policy settings (complexity rules, expiration policies)
 - [SetContentSearchSettings](SetContentSearchSettings.md) - Change the content search settings, applied without a restart, and check the connection (admin only)
 - [SetDefaultFolderColumns](SetDefaultFolderColumns.md) - Set the system default folder columns using comma-separated column names
 - [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md) - Update email and notification settings (subscription alerts, Send To email, attachment policies)
 - [SetGeneralAppSettings](SetGeneralAppSettings.md) - Update general application settings (upload limits, recycle bin policies, workdays/holidays)
+- [SetSmtpSettings](SetSmtpSettings.md) - Change the SMTP settings, applied without a restart, and check the connection and sign-in (admin only)
 - [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md) - Update system behavior settings (login logging and login delay configuration)
 
 ### Server & License Management
