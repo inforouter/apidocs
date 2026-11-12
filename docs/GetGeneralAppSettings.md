@@ -30,7 +30,7 @@ Returns the general application settings including upload limits, work days conf
     <UploadSettings>
       <DocumentMaxSize>78643200</DocumentMaxSize>
       <FileUploadTimeOut>900</FileUploadTimeOut>
-      <DefaultUploadFileChunkSize>262144</DefaultUploadFileChunkSize>
+      <DefaultUploadFileChunkSize>1048576</DefaultUploadFileChunkSize>
     </UploadSettings>
     <AllowOwnershipTransfer>false</AllowOwnershipTransfer>
     <WebDav>false</WebDav>
@@ -105,7 +105,7 @@ Returns the general application settings including upload limits, work days conf
 |----------|------|-------------|
 | `DocumentMaxSize` | long | Maximum document size in bytes (default: 75 MB = 78643200, max: 1 GB) |
 | `FileUploadTimeOut` | integer | Upload timeout in seconds (default 900). Applied by the server to the REST upload calls (`/srv.asmx/Upload...`: UploadDocument*, UploadFileChunk, UploadZip*, UploadTiffAsPDF*, UploadNewDocumentWidthHandler): a request that has not finished arriving within this time is ended and answered with `errorCode` `4080`. It limits each request, so a chunked upload gets this time per chunk. `0` or less means no limit. SOAP and WebDAV uploads are not timed. The range is not checked: a very small value makes every upload fail. A change applies to the next request. |
-| `DefaultUploadFileChunkSize` | integer | Chunk size for chunked uploads in bytes (min: 256 KB, max: 32 MB). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings. |
+| `DefaultUploadFileChunkSize` | integer | Chunk size, in bytes, offered for chunked uploads ([CreateUploadHandler](CreateUploadHandler.md) with `PreferedChunkSize` 0). 256 KB to 32 MB; SetGeneralAppSettings brings a value outside that range inside it. Default 1 MB (1048576). Kept in the database with the other upload settings. |
 
 ## Workdays Properties
 
@@ -301,7 +301,7 @@ using (var client = new SrvSoapClient())
 ## Notes
 
 - **DocumentMaxSize**: Value in bytes. Default is 75 MB (78643200). Maximum is 1 GB (1073741824). 0 (or a negative value) means the 75 MB default. Values above 1 GB are clamped to 1 GB, and values below 1 MB are raised to 1 MB. Administrators are not limited by it.
-- **DefaultUploadFileChunkSize**: Minimum 256 KB (262144), maximum 32 MB (33554432). Read-only: comes from appsettings.json `DefaultUploadFileChunkSize` and is ignored by SetGeneralAppSettings.
+- **DefaultUploadFileChunkSize**: Minimum 256 KB (262144), maximum 32 MB (33554432), default 1 MB (1048576). Changed with SetGeneralAppSettings; it was appsettings.json's `DefaultUploadFileChunkSize`, and 8.7's web.config value is carried over by the upgrade.
 - **SystemRecycleBinAutoPurgeOption** and **MoveUsersRecycleBinToSystemRecycleBinIn**: months; 0 means disabled. SetGeneralAppSettings refuses values outside 0–36 with 4000.
 - **Workdays**: Used for business day calculations in workflows and due dates.
 - **Recurring Holidays**: A `HolidayDate` with year `2000` means the holiday recurs on that month/day every year.
