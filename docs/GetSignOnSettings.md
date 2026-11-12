@@ -44,8 +44,6 @@ Returns the sign-on settings in effect: the external authentication authorities,
       <DavExpirationTimeOffsetInDays>30</DavExpirationTimeOffsetInDays>
       <HttpOnlyCookies>true</HttpOnlyCookies>
       <ShareTicketWithCustomPageAndForms>false</ShareTicketWithCustomPageAndForms>
-      <AllowClearTextCredentialsInUrl>false</AllowClearTextCredentialsInUrl>
-      <AllowClearTextCredentialsInForm>false</AllowClearTextCredentialsInForm>
     </Session>
     <Warnings />
   </SignOnSettings>
@@ -72,10 +70,8 @@ Returns the sign-on settings in effect: the external authentication authorities,
 | `DavExpirationTimeOffsetInDays` | `30` | Days a WebDAV session lasts, 1 to 365. |
 | `HttpOnlyCookies` | `true` | The `ticket` cookie is hidden from page scripts, so injected code cannot steal a session. `false` is logged as a warning. |
 | `ShareTicketWithCustomPageAndForms` | `false` | The user's session ticket is written into custom pages and forms, for their scripts to call the API with. |
-| `AllowClearTextCredentialsInUrl` | `false` | Legacy compatibility: a user name and password (`_UID`/`_PWD`) are accepted in a URL query string. Only for an existing integration that needs it; `true` is logged as a warning. |
-| `AllowClearTextCredentialsInForm` | `false` | Legacy compatibility: `_UID`/`_PWD` are accepted in a posted form. Only for an existing integration that needs it; `true` is logged as a warning. |
 
-A number outside its range is brought inside it, with a warning in `Warnings`. The values are those in effect.
+A number outside its range is brought inside it, with a warning in `Warnings`. The values are those in effect. `Session` may also hold elements for compatibility switches support turns on for a particular integration; each appears only while it is on, and its being on is listed in `Warnings`.
 
 ### Error Response
 ```xml
@@ -115,8 +111,7 @@ authenticationTicket=abc123
     "TrustedLDAPAccount": "svc-tickets@LDAP1",
     "SysadminTempPassword": "...",
     "Session": { "ProfileExpirationTime": 30, "OfficeEditExpirationTimeOffsetInHours": 48, "DavExpirationTimeOffsetInDays": 30,
-                 "HttpOnlyCookies": true, "ShareTicketWithCustomPageAndForms": false,
-                 "AllowClearTextCredentialsInUrl": false, "AllowClearTextCredentialsInForm": false }
+                 "HttpOnlyCookies": true, "ShareTicketWithCustomPageAndForms": false }
   }
   ```
 
