@@ -86,6 +86,7 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
           <MinYearInDateControls>1950</MinYearInDateControls>
           <SendDiagnosticsAndStatistics>true</SendDiagnosticsAndStatistics>
           <ServiceTimerPeriod>5</ServiceTimerPeriod>
+          <KeepErrorLogsFor>30</KeepErrorLogsFor>
           <Workdays>
             <Monday>true</Monday>
             <Tuesday>true</Tuesday>
@@ -144,6 +145,7 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
   <MinYearInDateControls>1950</MinYearInDateControls>
   <SendDiagnosticsAndStatistics>true</SendDiagnosticsAndStatistics>
   <ServiceTimerPeriod>5</ServiceTimerPeriod>
+  <KeepErrorLogsFor>30</KeepErrorLogsFor>
   <Workdays>
     <Monday>true</Monday>
     <Tuesday>true</Tuesday>
@@ -258,6 +260,7 @@ await call('SetGeneralAppSettings', {
 - Failure responses always include a localized message in the `error` attribute.
 - Because this API overwrites the entire `GeneralSettings` object, avoid sending partial XML documents.
 - `UploadSettings/DefaultUploadFileChunkSize` (bytes offered for a chunked upload) is stored too: a value below 256 KB or above 32 MB is brought inside that range rather than refused. XML without the element keeps the chunk size as it is.
+- `KeepErrorLogsFor` (days the error logs are kept, 0 = forever, 0–3650, default 30) is handled the same way: XML without the element keeps it as it is. It was `KeepErrorLogsFor` in `appsettings.json`; the upgrade carries 8.7's `web.config` value over.
 - `ServiceTimerPeriod` (minutes between two runs of the maintenance job, 1–60, default 5) is handled the same way: XML without the element keeps the period as it is, so a client written before the setting existed does not reset it. It was `ServiceTimerPeriod` in `appsettings.json` / `web.config`, which no version read; it is now kept in the database. A change applies within a minute, without a restart.
 - Audit and change tracking should be handled at the application level by storing copies of previous XML payloads.
 
@@ -272,4 +275,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4000` | `settingsXml` is not well formed, or does not deserialize into the settings document |
 | `4000` | `SystemRecycleBinAutoPurgeOption` or `MoveUsersRecycleBinToSystemRecycleBinIn` is outside 0–36; the error names the setting and nothing is saved |
 | `4000` | `ServiceTimerPeriod` is outside 1–60 minutes (the maintenance job cannot be turned off); the error names the setting and nothing is saved |
+| `4000` | `KeepErrorLogsFor` is outside 0–3650 days; the error names the setting and nothing is saved |
 
