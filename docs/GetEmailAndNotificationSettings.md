@@ -122,7 +122,7 @@ const settings = root.querySelector('EmailAndNotificationSettings');
 ## Notes
 
 - Use the returned XML as the input template for `SetEmailAndNotificationSettings`.
-- SMTP server connection settings (server, port, username, password) are read-only and configured in `appsettings.json`; they are not returned by this API.
+- SMTP server connection settings (server, port, username, password) are not returned by this API: they are kept in `config\smtp-setting.json`, and [GetSmtpSettings](GetSmtpSettings.md) returns them.
 - `AttachmentSizeLimit` is in bytes; the UI displays it in KB.
 
 ## Error Codes

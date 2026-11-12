@@ -325,7 +325,7 @@ provisioned for is a wasted round trip.
 - Generated keywords are a separate kind from the ones a user curated, so this API never destroys a keyword somebody entered — `ForceRefresh` replaces the generated ones and leaves the user's own alone. To clear those, set them with [UpdateDocumentKeywords](UpdateDocumentKeywords.md) first.
 - Every call tells Connect which document it is about (the document's path) and, when a person asked for it, that person's user id and login name, so the service can keep its own record of who requested what. A call a folder preference queued on upload names no user at all.
 - Every call this API queues can be recorded in the daily `IRConnect` log — what was asked for, what came back, how long it took, and what it cost. See `IRConnect.CallLogging` and [GetLogs](GetLogs.md).
-- Generation requires infoRouter Connect to be configured through the `IRConnect` application settings and covered by the licence: Connect stops the day after the maintenance contract's end date, with no grace period. See `ConnectIsOn` in [ServerInfo](ServerInfo.md).
+- Generation requires infoRouter Connect to be configured, in `config\irconnect-setting.json` in infoRouter's application folder (the `IRConnect.*` settings on this page are the values in that file), and covered by the licence: Connect stops the day after the maintenance contract's end date, with no grace period. See `ConnectIsOn` in [ServerInfo](ServerInfo.md).
 
 ## Error Codes
 

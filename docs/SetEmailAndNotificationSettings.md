@@ -134,7 +134,7 @@ await call('SetEmailAndNotificationSettings', {
 
 - `SendToLogCcAddress` and `FaxQue` take 255 characters each; a longer value is refused with `4000`.
 - The recommended workflow is: call `GetEmailAndNotificationSettings`, modify the returned XML, then pass it to `SetEmailAndNotificationSettings`.
-- SMTP server connection settings (server, port, username, password) are managed in `appsettings.json` and cannot be changed through this API.
+- SMTP server connection settings (server, port, username, password) cannot be changed through this API: they are kept in `config\smtp-setting.json`, and [SetSmtpSettings](SetSmtpSettings.md) changes them.
 - `AttachmentSizeLimit` must be provided in bytes; the UI displays this value in KB.
 - `FaxQue` is accepted in the XML but only persisted if it differs from the default value (`c:\faxque`).
 - Settings take effect immediately; the in-memory cache is invalidated on a successful update.
