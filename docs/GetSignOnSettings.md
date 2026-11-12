@@ -1,6 +1,6 @@
 # GetSignOnSettings API
 
-Returns the sign-on settings in effect: the external authentication authorities, the OpenID Connect providers, the account sysadmin's password is also checked against, the trusted LDAP account, and whether a temporary sysadmin password is set. Secrets are never returned: a client secret only masked, the temporary password not at all. Administrators only. Read-only: the settings are changed in their file (see Notes).
+Returns the sign-on settings in effect: the external authentication authorities, the OpenID Connect providers, the account sysadmin's password is also checked against, the trusted LDAP account, whether a temporary sysadmin password is set, and how a signed-in session behaves. Secrets are never returned: a client secret only masked, the temporary password not at all. Administrators only. Read-only: the settings are changed in their file (see Notes).
 
 ## Endpoint
 
@@ -38,6 +38,15 @@ Returns the sign-on settings in effect: the external authentication authorities,
     <SysadminCheckAccount>admin@LDAP1</SysadminCheckAccount>
     <TrustedLDAPAccount>svc-tickets@LDAP1</TrustedLDAPAccount>
     <SysadminTempPasswordSet>false</SysadminTempPasswordSet>
+    <Session>
+      <ProfileExpirationTime>30</ProfileExpirationTime>
+      <OfficeEditExpirationTimeOffsetInHours>48</OfficeEditExpirationTimeOffsetInHours>
+      <DavExpirationTimeOffsetInDays>30</DavExpirationTimeOffsetInDays>
+      <HttpOnlyCookies>true</HttpOnlyCookies>
+      <ShareTicketWithCustomPageAndForms>false</ShareTicketWithCustomPageAndForms>
+      <AllowClearTextCredentialsInUrl>false</AllowClearTextCredentialsInUrl>
+      <AllowClearTextCredentialsInForm>false</AllowClearTextCredentialsInForm>
+    </Session>
     <Warnings />
   </SignOnSettings>
 </response>
@@ -50,8 +59,23 @@ Returns the sign-on settings in effect: the external authentication authorities,
 | `SysadminCheckAccount` | `user@authority`. When set, sysadmin's password is also accepted when that authority accepts it for that account. Empty: not used. |
 | `TrustedLDAPAccount` | `user@authority`. [CreateTicketforUser](CreateTicketforUser.md) callers sign in with this account's password. Empty: not used. |
 | `SysadminTempPasswordSet` | Whether a temporary password is set for sysadmin. It is stored only as a salted hash and cannot be read back. |
+| `Session` | How a signed-in session behaves; see Session below. |
 | `Warnings` | Entries in the file that are not in use (a provider without a ClientId, a name listed twice, ...), and accounts naming an authority that is not listed. Empty when all is in use. |
 | `SettingsProblem` | Present only when the file could not be read at all. Only infoRouter passwords are accepted until it is corrected. |
+
+### Session
+
+| Element | Default | Description |
+|---------|---------|-------------|
+| `ProfileExpirationTime` | `30` | Minutes of inactivity before a session expires, 5 to 240. |
+| `OfficeEditExpirationTimeOffsetInHours` | `48` | Extra hours a session opened for editing in Microsoft Office lasts, 1 to 240. |
+| `DavExpirationTimeOffsetInDays` | `30` | Days a WebDAV session lasts, 1 to 365. |
+| `HttpOnlyCookies` | `true` | The `ticket` cookie is hidden from page scripts, so injected code cannot steal a session. `false` is logged as a warning. |
+| `ShareTicketWithCustomPageAndForms` | `false` | The user's session ticket is written into custom pages and forms, for their scripts to call the API with. |
+| `AllowClearTextCredentialsInUrl` | `false` | Legacy compatibility: a user name and password (`_UID`/`_PWD`) are accepted in a URL query string. Only for an existing integration that needs it; `true` is logged as a warning. |
+| `AllowClearTextCredentialsInForm` | `false` | Legacy compatibility: `_UID`/`_PWD` are accepted in a posted form. Only for an existing integration that needs it; `true` is logged as a warning. |
+
+A number outside its range is brought inside it, with a warning in `Warnings`. The values are those in effect.
 
 ### Error Response
 ```xml
@@ -89,13 +113,16 @@ authenticationTicket=abc123
                          "UsernameClaim": "preferred_username", "UsePkce": false, "GetClaimsFromUserInfoEndpoint": true } ],
     "SysadminCheckAccount": "admin@LDAP1",
     "TrustedLDAPAccount": "svc-tickets@LDAP1",
-    "SysadminTempPassword": "..."
+    "SysadminTempPassword": "...",
+    "Session": { "ProfileExpirationTime": 30, "OfficeEditExpirationTimeOffsetInHours": 48, "DavExpirationTimeOffsetInDays": 30,
+                 "HttpOnlyCookies": true, "ShareTicketWithCustomPageAndForms": false,
+                 "AllowClearTextCredentialsInUrl": false, "AllowClearTextCredentialsInForm": false }
   }
   ```
 
-  Without the file only infoRouter's own passwords are accepted. An authority may also be written the 8.7 way, `AuthorityName` and `AuthorityUrl`.
+  Without the file only infoRouter's own passwords are accepted, and the session values are the defaults. Any value of the `Session` section may be left out. An authority may also be written the 8.7 way, `AuthorityName` and `AuthorityUrl`.
 - A `ClientSecret` typed into the file in plain text is encrypted in the file, and a `SysadminTempPassword` typed in plain text is replaced by its salted hash, when infoRouter reads it.
 - Edit the file and call [FlushApplicationCache](FlushApplicationCache.md) to apply a change without a restart. OpenID Connect providers follow too: a new one can be signed in with at once, a changed one uses its new settings from its next sign-in, a removed one is no longer offered.
 - Every sign-in with the temporary password is written to the error log, unless it is also sysadmin's own password. Remove `SysadminTempPassword` from the file once it is no longer needed.
-- infoRouter 8.7 kept the authorities, `TrustedLDAPAccount`, `SysadminCheckAccount` and `SysadminTempPassword` in `web.config`; the upgrade to 9.0 moves them to this file.
+- infoRouter 8.7 kept the authorities, `TrustedLDAPAccount`, `SysadminCheckAccount`, `SysadminTempPassword` and the session values in `web.config`; the upgrade to 9.0 moves them to this file. An 8.7 `web.config` without `httpOnlyCookies` gets `true`.
 - [GetSignInOptions](GetSignInOptions.md) returns the provider and authority names to everyone, and [GetApplicationParameters](getApplicationParameters.md) the authority names to administrators.
