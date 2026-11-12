@@ -69,6 +69,7 @@ Returns the general application settings including upload limits, work days conf
       <MaxTotalCount>1000</MaxTotalCount>
     </ZipDownloadSetting>
     <SearchPageSize>20</SearchPageSize>
+    <ServiceTimerPeriod>5</ServiceTimerPeriod>
   </GeneralSettings>
 </response>
 ```
@@ -96,6 +97,7 @@ Returns the general application settings including upload limits, work days conf
 | `HolidayList` | array | List of Holiday objects — see Holiday Properties below |
 | `ZipDownloadSetting` | object | ZIP download configuration |
 | `SearchPageSize` | integer | Default number of results per search page |
+| `ServiceTimerPeriod` | integer | Minutes between two runs of the maintenance job (sending queued email, the scheduled and daily jobs, recycle bin purging). 1–60; the job cannot be turned off, so 0 and other values are refused by SetGeneralAppSettings (4000). Default `5`. A change applies within a minute, without a restart. |
 
 ## UploadSettings Properties
 

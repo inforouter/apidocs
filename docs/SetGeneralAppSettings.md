@@ -85,6 +85,7 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
           <RerouteRedirections>false</RerouteRedirections>
           <MinYearInDateControls>1950</MinYearInDateControls>
           <SendDiagnosticsAndStatistics>true</SendDiagnosticsAndStatistics>
+          <ServiceTimerPeriod>5</ServiceTimerPeriod>
           <Workdays>
             <Monday>true</Monday>
             <Tuesday>true</Tuesday>
@@ -142,6 +143,7 @@ SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
   <RerouteRedirections>false</RerouteRedirections>
   <MinYearInDateControls>1950</MinYearInDateControls>
   <SendDiagnosticsAndStatistics>true</SendDiagnosticsAndStatistics>
+  <ServiceTimerPeriod>5</ServiceTimerPeriod>
   <Workdays>
     <Monday>true</Monday>
     <Tuesday>true</Tuesday>
@@ -255,6 +257,7 @@ await call('SetGeneralAppSettings', {
 - A `HolidayDate` with year `2000` marks a recurring annual holiday (matched by month/day only). Any other year marks a one-time holiday matched by exact date.
 - Failure responses always include a localized message in the `error` attribute.
 - Because this API overwrites the entire `GeneralSettings` object, avoid sending partial XML documents.
+- `ServiceTimerPeriod` (minutes between two runs of the maintenance job, 1–60, default 5) is the exception: XML without the element keeps the period as it is, so a client written before the setting existed does not reset it. It was `ServiceTimerPeriod` in `appsettings.json` / `web.config`, which no version read; it is now kept in the database. A change applies within a minute, without a restart.
 - Audit and change tracking should be handled at the application level by storing copies of previous XML payloads.
 
 ## Error Codes
@@ -267,4 +270,5 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4030` | a caller with no ticket, or one who may not update settings |
 | `4000` | `settingsXml` is not well formed, or does not deserialize into the settings document |
 | `4000` | `SystemRecycleBinAutoPurgeOption` or `MoveUsersRecycleBinToSystemRecycleBinIn` is outside 0–36; the error names the setting and nothing is saved |
+| `4000` | `ServiceTimerPeriod` is outside 1–60 minutes (the maintenance job cannot be turned off); the error names the setting and nothing is saved |
 
