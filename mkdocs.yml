@@ -585,6 +585,8 @@ nav:
     - SetGeneralAppSettings: SetGeneralAppSettings.md
     - GetSystemBehaviorSettings: GetSystemBehaviorSettings.md
     - SetSystemBehaviorSettings: SetSystemBehaviorSettings.md
+    - GetContentSearchSettings: GetContentSearchSettings.md
+    - SetContentSearchSettings: SetContentSearchSettings.md
     - GetMimeTypes: GetMimeTypes.md
     - FlushApplicationCache: FlushApplicationCache.md
     - GetLocalizedResources: GetLocalizedResources.md

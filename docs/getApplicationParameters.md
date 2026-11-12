@@ -127,7 +127,7 @@ These parameters are returned for all authenticated users.
 | `ATTACHMENTSIZELIMIT` | integer | Maximum attachment size in bytes (0 = unlimited) |
 | `APPLICATIONURL` | string | Base URL of the infoRouter application |
 | `SYSTEMEMAILADDRESS` | string | System email address used for notifications |
-| `INDEXSRV` | TRUE/FALSE | Whether full-text search indexing is enabled |
+| `INDEXSRV` | TRUE/FALSE | Whether content (full-text) search is on. Public: the user interface uses it to offer keyword search |
 | `SEARCHPAGESIZE` | integer | Default number of results per search page |
 | `FILEUPLOADLIMIT` | long | Same value as GeneralSettings.UploadSettings.DocumentMaxSize (bytes): the maximum document size for non-administrators. Administrators are not limited by it. |
 | `ALLOWPARTIALEMAILUPLOADS` | TRUE/FALSE | Whether partial email uploads are allowed |
@@ -140,7 +140,7 @@ These additional parameters are returned only when the authenticated user is a s
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `INDEXCATALOG` | string | Name of the search index catalog |
+| `INDEXCATALOG` | string | Where content search goes: a search service catalog's address or SYSTEMINDEX. Kept for existing integrations; new code should use [GetContentSearchSettings](GetContentSearchSettings.md) |
 | `LOGLOGINS` | TRUE/FALSE | Whether user logins are logged |
 | `FILEUPLOADTIMEOUT` | integer | Upload timeout in seconds (default 900). Applied by the server to the REST upload calls: a request that has not finished arriving within this time is ended with `errorCode` `4080`. `0` or less means no limit. See `FileUploadTimeOut` in [GetGeneralAppSettings](GetGeneralAppSettings.md). |
 | `ALLOWOWNERSHIPTRANSFER` | TRUE/FALSE | Whether document ownership transfer is allowed |

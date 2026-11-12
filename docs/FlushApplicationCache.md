@@ -1,6 +1,6 @@
 # FlushApplicationCache API
 
-Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. Only administrators can call it: the `sysadmin` account and members of `[Administrators]`.
+Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. It also reads the content search settings file, `config\content-search-setting.json`, again and switches content search to it, so a change made to that file by hand needs no restart. Only administrators can call it: the `sysadmin` account and members of `[Administrators]`.
 
 ## Endpoint
 
@@ -146,6 +146,10 @@ using (var client = new SrvSoapClient())
 ## Notes
 
 - This operation calls `Settings.FlushCache()` which clears the in-memory application settings cache.
+- The content search settings file is read again, as at start, and content search switches to it at once; searches already running finish with the settings they started with. The file's content never makes the call fail:
+  - no file: content search is off;
+  - a file that cannot be read: content search is off, the problem is written to the error log, and [GetContentSearchSettings](GetContentSearchSettings.md) returns it as `SettingsProblem`;
+  - a catalog that cannot be used here (`SYSTEMINDEX` on an infoRouter that does not run on Windows, or neither an http:// or https:// address nor `SYSTEMINDEX`): the settings are kept and the problem is written to the error log; keyword searches fail, saying why, until the settings are corrected.
 - The cache will be repopulated on the next request that accesses cached settings.
 - This operation does not affect user sessions or authentication tickets.
 - Use sparingly in production environments as cache rebuilding may temporarily impact performance.
