@@ -587,6 +587,7 @@ nav:
     - SetSystemBehaviorSettings: SetSystemBehaviorSettings.md
     - GetContentSearchSettings: GetContentSearchSettings.md
     - SetContentSearchSettings: SetContentSearchSettings.md
+    - GetSignOnSettings: GetSignOnSettings.md
     - GetSmtpSettings: GetSmtpSettings.md
     - SetSmtpSettings: SetSmtpSettings.md
     - GetMimeTypes: GetMimeTypes.md

@@ -42,6 +42,7 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) - Get email and notification settings (subscription alerts, Send To email, attachment policies)
 - [GetGeneralAppSettings](GetGeneralAppSettings.md) - Get general application settings including upload limits, work days, holidays, and system preferences
 - [GetMimeTypes](GetMimeTypes.md) - Get the list of all defined MIME types in the system
+- [GetSignOnSettings](GetSignOnSettings.md) - Get the sign-on settings: authentication authorities, OpenID Connect providers (secrets masked), sysadmin accounts (admin only)
 - [GetSmtpSettings](GetSmtpSettings.md) - Get the SMTP settings: system email address, server, port, encryption, sign-in account (admin only)
 - [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) - Get system behavior settings (login logging, anti-brute-force, library manager permissions)
 - [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md) - Update authentication and password policy settings (complexity rules, expiration policies)

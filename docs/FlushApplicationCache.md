@@ -1,6 +1,6 @@
 # FlushApplicationCache API
 
-Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. It also reads the content search settings file, `config\content-search-setting.json`, the SMTP settings file, `config\smtp-setting.json`, and the infoRouter Connect settings file, `config\irconnect-setting.json`, again and puts them in effect, so a change made to any of these files by hand needs no restart. Only administrators can call it: the `sysadmin` account and members of `[Administrators]`.
+Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. It also reads the content search settings file, `config\content-search-setting.json`, the SMTP settings file, `config\smtp-setting.json`, the infoRouter Connect settings file, `config\irconnect-setting.json`, and the sign-on settings file, `config\signon-setting.json`, again and puts them in effect, so a change made to any of these files by hand needs no restart. Only administrators can call it: the `sysadmin` account and members of `[Administrators]`.
 
 ## Endpoint
 
@@ -152,6 +152,7 @@ using (var client = new SrvSoapClient())
   - a catalog that cannot be used here (`SYSTEMINDEX` on an infoRouter that does not run on Windows, or neither an http:// or https:// address nor `SYSTEMINDEX`): the settings are kept and the problem is written to the error log; keyword searches fail, saying why, until the settings are corrected.
 - The SMTP settings file is read again the same way, and email sent from then on uses it. No file means no SMTP server (email is queued but not sent); a file that cannot be read means none either, the problem is written to the error log, and [GetSmtpSettings](GetSmtpSettings.md) returns it as `SettingsProblem`. A password typed into the file in plain text is encrypted in the file. When the system email address changed, email still queued under the previous one is sent with the new settings.
 - The infoRouter Connect settings file is read again the same way, and the Connect calls and the AI job queue use it from then on. No file means Connect is not configured; a file that cannot be read means not configured either, and the problem is written to the error log. An `ApiKey` pasted into the file in plain text is encrypted in the file.
+- The sign-on settings file is read again the same way ([GetSignOnSettings](GetSignOnSettings.md)): authentication authorities, the sysadmin check and trusted LDAP accounts and the temporary sysadmin password apply at once, and the OpenID Connect providers follow: a new one is offered and can be signed in with, a changed one uses its new settings from its next sign-in, a removed one is no longer offered. Entries that cannot be used, and a file that cannot be read, are written to the error log.
 - The cache will be repopulated on the next request that accesses cached settings.
 - This operation does not affect user sessions or authentication tickets.
 - Use sparingly in production environments as cache rebuilding may temporarily impact performance.

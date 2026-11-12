@@ -146,7 +146,7 @@ const providers = [...options.querySelectorAll('OidcProvider')].map(p => ({
 
 ## Server Configuration
 
-The providers and authorities come from the `AppSettings` section of the server's `appsettings.json`. `DisplayName` is optional; without it the provider's `Name` is shown.
+The providers and authorities come from `config\signon-setting.json` in infoRouter's application folder; [GetSignOnSettings](GetSignOnSettings.md) describes the whole file. `DisplayName` is optional; without it the provider's `Name` is shown.
 
 ```json
 "OidcProviders": [
@@ -159,11 +159,11 @@ The providers and authorities come from the `AppSettings` section of the server'
   }
 ],
 "AuthenticationAuthorities": [
-  { "AuthorityName": "CORPLDAP", "AuthorityUrl": "http://authserver/irAuthenticationSrv.asmx" }
+  { "Name": "CORPLDAP", "Url": "http://authserver/irAuthenticationSrv.asmx" }
 ]
 ```
 
-A change to these takes effect when the server is restarted.
+A change to these takes effect after [FlushApplicationCache](FlushApplicationCache.md), without a restart. A `ClientSecret` typed in plain text is encrypted in the file when infoRouter reads it.
 
 ## Notes
 
