@@ -42,36 +42,16 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [RenewTicket](RenewTicket.md) - Validate credentials and renew an existing ticket or issue a fresh one
 
 ### Application Settings & Configuration
-- [FlushApplicationCache](FlushApplicationCache.md) - Flush the in-memory application cache (admin only)
 - [getApplicationParameters](getApplicationParameters.md) - Get application parameters (role-based response: public, regular user, or full admin view)
 - [GetAllFolderColumns](GetAllFolderColumns.md) - Get all 34 available folder column definitions
-- [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) - Get authentication and password policy settings (complexity requirements, re-prompt actions)
-- [GetContentSearchSettings](GetContentSearchSettings.md) - Get the content search settings: on/off, search service catalog, API key, change notices (admin only)
 - [GetDefaultFolderColumns](GetDefaultFolderColumns.md) - Get the system default folder columns for list views
-- [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) - Get email and notification settings (subscription alerts, Send To email, attachment policies)
-- [GetGeneralAppSettings](GetGeneralAppSettings.md) - Get general application settings including upload limits, work days, holidays, and system preferences
 - [GetMimeTypes](GetMimeTypes.md) - Get the list of all defined MIME types in the system
-- [GetSignOnSettings](GetSignOnSettings.md) - Get the sign-on settings: authentication authorities, OpenID Connect providers (secrets masked), sysadmin accounts (admin only)
-- [GetSmtpSettings](GetSmtpSettings.md) - Get the SMTP settings: system email address, server, port, encryption, sign-in account (admin only)
-- [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) - Get system behavior settings (login logging, anti-brute-force, library manager permissions)
-- [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md) - Update authentication and password policy settings (complexity rules, expiration policies)
-- [SetContentSearchSettings](SetContentSearchSettings.md) - Change the content search settings, applied without a restart, and check the connection (admin only)
 - [SetDefaultFolderColumns](SetDefaultFolderColumns.md) - Set the system default folder columns using comma-separated column names
-- [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md) - Update email and notification settings (subscription alerts, Send To email, attachment policies)
-- [SetGeneralAppSettings](SetGeneralAppSettings.md) - Update general application settings (upload limits, recycle bin policies, workdays/holidays)
-- [SetSmtpSettings](SetSmtpSettings.md) - Change the SMTP settings, applied without a restart, and check the connection and sign-in (admin only)
-- [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md) - Update system behavior settings (login logging and login delay configuration)
 
 ### Server & License Management
-- [GetLicenseInfo](GetLicenseInfo.md) - Get application license details, user counts, and subscription dates (admin only)
-- [GetSystemStatistics](GetSystemStatistics.md) - Get system-wide statistics: user counts, document counts, total document size, and checked-out documents (admin only)
 - [GetLogs](GetLogs.md) - Get server log entries by type and date (admin only)
 - [GetLogStatistics](GetLogStatistics.md) - Get log dates and entry counts by log type, fixed 90-day window (admin only)
 - [GetLogStatistics1](GetLogStatistics1.md) - Get log dates and entry counts by log type with a caller-supplied lookback window (admin only)
-- [GetServerAlerts](GetServerAlerts.md) - Get the server's current alerts: full disk, internet outage (admin only)
-- [DismissServerAlert](DismissServerAlert.md) - Dismiss one server alert for all administrators (admin only)
-- [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) - Get status of all system maintenance jobs (admin only)
-- [GetWarehouseStatus](GetWarehouseStatus.md) - Get warehouse storage status, document counts, and disk information (admin only)
 - [ServerInfo](ServerInfo.md) - Get server version, time, and basic license info (no authentication required)
 - [UpdateApplicationLicense](UpdateApplicationLicense.md) - Update the application license file (admin only)
 
@@ -161,7 +141,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked out documents for a specified user
-- [GetConnectSettings](GetConnectSettings.md) - Read what the infoRouter Connect AI service can do here, and which capabilities are usable
 - [GetConnectProfile](GetConnectProfile.md) - Have infoRouter Connect profile a document version - summary, description, abstract, keywords, document type, OCR text or property set values
 - [GetDocumentExpirationDate](GetDocumentExpirationDate.md) - Get the expiration date set on a document
 - [GetDocumentsOwnedByUser](GetDocumentsOwnedByUser.md) - Get a paged list of documents owned by a specified user

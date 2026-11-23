@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetMaintenanceJobsStatus API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the status of all system maintenance jobs including their last execution time, duration, success status, schedule type, and whether they are overdue. This API is restricted to system administrators with the `ViewServerStatus` permission.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetMaintenanceJobsStatus
+/api/UIInternals/GetMaintenanceJobsStatus
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetMaintenanceJobsStatus?authenticationTicket=...`
-- **POST** `/srv.asmx/GetMaintenanceJobsStatus` (form data)
-- **SOAP** Action: `http://tempuri.org/GetMaintenanceJobsStatus`
+- **GET** `/api/UIInternals/GetMaintenanceJobsStatus?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetMaintenanceJobsStatus` (form data)
 
 ## Parameters
 
@@ -95,34 +104,17 @@ Returns the status of all system maintenance jobs including their last execution
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetMaintenanceJobsStatus?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetMaintenanceJobsStatus?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetMaintenanceJobsStatus HTTP/1.1
+POST /api/UIInternals/GetMaintenanceJobsStatus HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetMaintenanceJobsStatus"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetMaintenanceJobsStatus xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetMaintenanceJobsStatus>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -132,7 +124,7 @@ SOAPAction: "http://tempuri.org/GetMaintenanceJobsStatus"
 ```javascript
 async function getMaintenanceJobsStatus() {
     const ticket = getUserAuthTicket();
-    const url = `/srv.asmx/GetMaintenanceJobsStatus?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetMaintenanceJobsStatus?authenticationTicket=${encodeURIComponent(ticket)}`;
 
     const response = await fetch(url);
     const xmlText = await response.text();
@@ -179,50 +171,6 @@ async function displayMaintenanceStatus() {
         });
     } catch (error) {
         console.error("Failed to get maintenance jobs status:", error);
-    }
-}
-```
-
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var response = await client.GetMaintenanceJobsStatusAsync(authTicket);
-        var root = XElement.Parse(response.ToString());
-
-        if (root.Attribute("success")?.Value == "true")
-        {
-            var jobs = root.Elements("MaintenanceJob")
-                .Select(job => new
-                {
-                    JobId = int.Parse(job.Attribute("JobId")?.Value ?? "0"),
-                    JobName = job.Attribute("JobName")?.Value ?? "",
-                    ScheduleType = job.Attribute("ScheduleType")?.Value ?? "",
-                    StartDate = job.Attribute("StartDate")?.Value ?? "",
-                    TimeElapsedMs = double.Parse(job.Attribute("TimeElapsedMs")?.Value ?? "0"),
-                    Success = job.Attribute("Success")?.Value == "true",
-                    IsLate = job.Attribute("IsLate")?.Value == "true"
-                })
-                .ToList();
-
-            foreach (var job in jobs)
-            {
-                var status = job.IsLate ? "LATE" : (job.Success ? "OK" : "FAILED");
-                Console.WriteLine($"[{status}] {job.JobName} ({job.ScheduleType}) - Last: {(string.IsNullOrEmpty(job.StartDate) ? "Never" : job.StartDate)}");
-            }
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
     }
 }
 ```

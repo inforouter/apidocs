@@ -40,12 +40,12 @@ All of these call `AccessAllowedforAdminFunctionsAsync(UpdateApplicationSettings
 
 | Action | Web service calls | Who else may do it | Conditions |
 |---|---|---|---|
-| Change the general settings | [SetGeneralAppSettings](SetGeneralAppSettings.md) | nobody else | `InfoRouterExtensions.UpdateGeneralApplicationSettings` after `SettingServices.SetGeneralAppSettingsAsync`; both check. Recycle bin months 0 to 36, holiday description length checked after the role. |
-| Change the authentication and password policy | [SetAuthenticationAndPasswordPolicy](SetAuthenticationAndPasswordPolicy.md) | nobody else | `SettingServices.SetAuthenticationAndPasswordPolicyAsync` and `InfoRouterExtensions.UpdateAuthenticationAndPasswordPolicySettings` both check. |
-| Change the system behaviour settings | [SetSystemBehaviorSettings](SetSystemBehaviorSettings.md) | nobody else | Includes `AllowLibraryManagersToEditPolicy` (stored as `LIBMANAGERS_EDITPOLICY`), the flag that decides whether library managers may change library policies. |
-| Read the system behaviour settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) | nobody else | `SettingServices.GetSystemBehaviorSettingsAsync`. |
-| Change the e-mail and notification settings | [SetEmailAndNotificationSettings](SetEmailAndNotificationSettings.md) | nobody else | Role checked before the XML is parsed; a refused caller gets 4030, not 4000. |
-| Read the e-mail and notification settings | [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) | nobody else | `SettingServices.GetEmailAndNotificationSettingsAsync` checks the same action as the writer. No SMTP server or credentials are in it. |
+| Change the general settings | SetGeneralAppSettings | nobody else | `InfoRouterExtensions.UpdateGeneralApplicationSettings` after `SettingServices.SetGeneralAppSettingsAsync`; both check. Recycle bin months 0 to 36, holiday description length checked after the role. |
+| Change the authentication and password policy | SetAuthenticationAndPasswordPolicy | nobody else | `SettingServices.SetAuthenticationAndPasswordPolicyAsync` and `InfoRouterExtensions.UpdateAuthenticationAndPasswordPolicySettings` both check. |
+| Change the system behaviour settings | SetSystemBehaviorSettings | nobody else | Includes `AllowLibraryManagersToEditPolicy` (stored as `LIBMANAGERS_EDITPOLICY`), the flag that decides whether library managers may change library policies. |
+| Read the system behaviour settings | GetSystemBehaviorSettings | nobody else | `SettingServices.GetSystemBehaviorSettingsAsync`. |
+| Change the e-mail and notification settings | SetEmailAndNotificationSettings | nobody else | Role checked before the XML is parsed; a refused caller gets 4030, not 4000. |
+| Read the e-mail and notification settings | GetEmailAndNotificationSettings | nobody else | `SettingServices.GetEmailAndNotificationSettingsAsync` checks the same action as the writer. No SMTP server or credentials are in it. |
 | Set the system default folder columns | [SetDefaultFolderColumns](SetDefaultFolderColumns.md) | nobody else | Anonymous callers get 4010 first; then the role (`SettingServices.SetDefaultFolderColumnsAsync`), then `InfoRouter.SaveSystemDefaultColumnSettings` checks it again. No administrators-only check remains. |
 
 ### Library policies
@@ -63,19 +63,19 @@ These are listed so the UI does not hide them from anyone; they are not what the
 
 | Action | Web service calls | Who may do it | Conditions |
 |---|---|---|---|
-| Read the general settings | [GetGeneralAppSettings](GetGeneralAppSettings.md) | anyone signed in | Anonymous callers get 4010 (`IsAuthenticatedUser()`). |
-| Read the authentication and password policy | [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) | anyone signed in | Same check. |
+| Read the general settings | GetGeneralAppSettings | anyone signed in | Anonymous callers get 4010 (`IsAuthenticatedUser()`). |
+| Read the authentication and password policy | GetAuthenticationAndPasswordPolicy | anyone signed in | Same check. |
 | Read the default and available folder columns | [GetDefaultFolderColumns](GetDefaultFolderColumns.md), [GetAllFolderColumns](GetAllFolderColumns.md) | anyone, the anonymous user included | No check in `SettingServices`; a call with no ticket runs as the anonymous user (`GetUserInfoFromInfoRouterAsync.IRServiceLogin`). |
 | Read the public application parameters | [getApplicationParameters](getApplicationParameters.md) | anyone signed in | `SettingsWebServices.GetApplicationParametersAsync`. The block after `ALLOWPARTIALEMAILUPLOADS` (`INDEXCATALOG`, `LOGLOGINS`, `FILEUPLOADTIMEOUT`, `ALLOWOWNERSHIPTRANSFER`, `SUBSCRIPTIONNOTIFICATIONS`, `SENDEMAIL`, `SENDTO_DISPLAYUSERLIST`, `SMTPSERVER`, `SMTPSERVERPORT`, `SMTPCONNECTIONTIMEOUT`, `SMTPSENDUSERNAME`, `SMTPSENDPASSWORD` masked, `PWD*`, `AuthenticationAuthorities`, `ServerName`, `IPAddressList`, `WarehousePaths`) is written only when `IsAdministrator()` is true. A Policy Manager gets the public block only. |
-| Read the Connect settings report | [GetConnectSettings](GetConnectSettings.md) | anyone signed in | `ConnectServices.GetConnectSettingsAsync`: 4010 for anonymous, no role. |
+| Read the Connect settings report | GetConnectSettings | anyone signed in | `ConnectServices.GetConnectSettingsAsync`: 4010 for anonymous, no role. |
 
 ## What the role cannot do
 
 | Action | Web service calls | Who can | Error returned |
 |---|---|---|---|
-| Flush the application cache | [FlushApplicationCache](FlushApplicationCache.md) | Administrators only: `IsAllowed` adds no role for `FlushApplicationCache` | 4030 `Access denied. This action is restricted to the following roles: The system administrator` |
+| Flush the application cache | FlushApplicationCache | Administrators only: `IsAllowed` adds no role for `FlushApplicationCache` | 4030 `Access denied. This action is restricted to the following roles: The system administrator` |
 | Update the licence | [UpdateApplicationLicense](UpdateApplicationLicense.md) | Administrators only (`InfoRouterExtensions.UpdateLicenseInformation`, `IsAdministrator()`) | 4030 `Access denied.` |
-| See the licence, server status, maintenance jobs, warehouse status | [GetLicenseInfo](GetLicenseInfo.md), [GetSystemStatistics](GetSystemStatistics.md), [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md), [GetWarehouseStatus](GetWarehouseStatus.md) | Audit Managers (`ViewLicenseInformation`, `ViewServerStatus`, `ViewWarehouseStatus`; `MiscServices.cs`, `InfoRouter.cs:1235`) | 4030, roles listed: the system administrator, Audit managers |
+| See the licence, server status, maintenance jobs, warehouse status | GetLicenseInfo, GetSystemStatistics, GetMaintenanceJobsStatus, GetWarehouseStatus | Audit Managers (`ViewLicenseInformation`, `ViewServerStatus`, `ViewWarehouseStatus`; `MiscServices.cs`, `InfoRouter.cs:1235`) | 4030, roles listed: the system administrator, Audit managers |
 | See the extended block of `getApplicationParameters` | [getApplicationParameters](getApplicationParameters.md) | Administrators only (`IsAdministrator()`) | No error: the call succeeds with the public block only |
 | Create, rename, delete, archive or unarchive a library | [CreateDomain](CreateDomain.md), [UpdateDomain](UpdateDomain.md), [DeleteDomain](DeleteDomain.md), [ArchiveDomain](ArchiveDomain.md), [UnarchiveDomain](UnarchiveDomain.md) | Administrators only (`DomainOperations.CreateAsync`, `DeleteAsync`; `DomainExtensions.UpdateAsync`, `ArchiveAsync`, `UnArchiveAsync`: `IsAdministrator()`) | 4030 `Only the system administrator can perform this operation` |
 | Add or remove library members | [AddUserAsDomainMember](AddUserAsDomainMember.md), [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md), [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), [RemoveUserGroupFromDomainMembership](RemoveUserGroupFromDomainMembership.md) | User Managers; the library's managers (`AddRemoveLibraryMembers`; `DomainExtensions.cs`, `DomainOperations.cs:44`) | 4030, roles listed: the system administrator, Library manager(s), User managers |
@@ -90,7 +90,7 @@ These are listed so the UI does not hide them from anyone; they are not what the
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own name: `ListingGroupMembershipOfUser` allows self (`UserServices.cs:992`, `User.AccessAllowedForUserAsync` passes `USER` and the user's id). A `GroupID` of `102` in the answer is this role; `104` is an administrator, who passes every check on this page without being in group 102.
 - [GetLibrariesForAdministration](GetLibrariesForAdministration.md): every library for a Policy Manager, User Manager or administrator; only the managed ones for a library manager; empty for anyone else. It does not say which of the three the caller is.
-- [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md) succeeds only for a Policy Manager or an administrator, so a 4030 from it means the caller is neither.
+- GetSystemBehaviorSettings succeeds only for a Policy Manager or an administrator, so a 4030 from it means the caller is neither.
 - [getApplicationParameters](getApplicationParameters.md): the `SMTPSERVER` or `WarehousePaths` element is present only for an administrator; it says nothing about this role.
 
 ## Notes

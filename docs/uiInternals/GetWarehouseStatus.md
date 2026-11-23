@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetWarehouseStatus API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns warehouse storage status information including total document count, total warehouse size, per-warehouse path statistics, and disk drive information. This API is restricted to system administrators with the `ViewWarehouseStatus` permission.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetWarehouseStatus
+/api/UIInternals/GetWarehouseStatus
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetWarehouseStatus?authenticationTicket=...`
-- **POST** `/srv.asmx/GetWarehouseStatus` (form data)
-- **SOAP** Action: `http://tempuri.org/GetWarehouseStatus`
+- **GET** `/api/UIInternals/GetWarehouseStatus?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetWarehouseStatus` (form data)
 
 ## Parameters
 
@@ -111,34 +120,17 @@ Returns warehouse storage status information including total document count, tot
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetWarehouseStatus?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetWarehouseStatus?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetWarehouseStatus HTTP/1.1
+POST /api/UIInternals/GetWarehouseStatus HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetWarehouseStatus"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetWarehouseStatus xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetWarehouseStatus>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -148,7 +140,7 @@ SOAPAction: "http://tempuri.org/GetWarehouseStatus"
 ```javascript
 async function getWarehouseStatus() {
     const ticket = getUserAuthTicket();
-    const url = `/srv.asmx/GetWarehouseStatus?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetWarehouseStatus?authenticationTicket=${encodeURIComponent(ticket)}`;
 
     const response = await fetch(url);
     const xmlText = await response.text();
@@ -205,47 +197,6 @@ async function displayWarehouseStatus() {
         });
     } catch (error) {
         console.error("Failed to get warehouse status:", error);
-    }
-}
-```
-
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var response = await client.GetWarehouseStatusAsync(authTicket);
-        var root = XElement.Parse(response.ToString());
-
-        if (root.Attribute("success")?.Value == "true")
-        {
-            var totalSize = double.Parse(root.Attribute("TotalWarehouseSize")?.Value ?? "0");
-            var totalDocs = int.Parse(root.Attribute("TotalDocumentCount")?.Value ?? "0");
-
-            Console.WriteLine($"Total documents: {totalDocs}");
-            Console.WriteLine($"Total size: {totalSize / 1024 / 1024 / 1024:F2} GB");
-
-            foreach (var disk in root.Descendants("Disk"))
-            {
-                var volumeName = disk.Attribute("VolumeName")?.Value;
-                var diskSize = double.Parse(disk.Attribute("DiskSize")?.Value ?? "0");
-                var freeSpace = double.Parse(disk.Attribute("FreeSpace")?.Value ?? "0");
-                var critical = disk.Attribute("CriticalFreeSpace")?.Value == "true";
-
-                Console.WriteLine($"{volumeName}: {freeSpace / 1024 / 1024 / 1024:F2} GB free of {diskSize / 1024 / 1024 / 1024:F2} GB {(critical ? "(CRITICAL)" : "")}");
-            }
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
     }
 }
 ```

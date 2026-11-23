@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetLicenseInfo API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Retrieves the application license information including company details, licensed user counts, subscription dates, and feature flags. This API is restricted to system administrators with the `ViewLicenseInformation` permission.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetLicenseInfo
+/api/UIInternals/GetLicenseInfo
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetLicenseInfo?authenticationTicket=...`
-- **POST** `/srv.asmx/GetLicenseInfo` (form data)
-- **SOAP** Action: `http://tempuri.org/GetLicenseInfo`
+- **GET** `/api/UIInternals/GetLicenseInfo?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetLicenseInfo` (form data)
 
 ## Parameters
 
@@ -88,7 +97,7 @@ Retrieves the application license information including company details, license
 | `AnonymousAccess` | boolean | Whether anonymous (guest) access is licensed |
 | `Workflow` | boolean | Whether workflow features are licensed |
 | `ComplianceModule` | boolean | Whether the compliance module is licensed. Currently reports `true` on every instance. Not enforced by the server; it will be read from the license, so read it rather than assuming. |
-| `IRConnect` | boolean | Whether the licence allows infoRouter Connect (AI): its signed `IRConnect` option. `false` for every licence issued before 9.0, which has no options. This is the licence's flag alone: Connect also stops the day after `SubscriptionEndDate` (no grace period) and needs a configured Connect service. Whether it is usable now is `ConnectIsOn` in [ServerInfo](ServerInfo.md). |
+| `IRConnect` | boolean | Whether the licence allows infoRouter Connect (AI): its signed `IRConnect` option. `false` for every licence issued before 9.0, which has no options. This is the licence's flag alone: Connect also stops the day after `SubscriptionEndDate` (no grace period) and needs a configured Connect service. Whether it is usable now is `ConnectIsOn` in [ServerInfo](../ServerInfo.md). |
 | `TrialCopy` | boolean | Whether this is a trial license |
 | `ExpirationDate` | DateTime | License expiration date (ISO 8601) |
 | `SubscriptionStartDate` | DateTime | Subscription start date (ISO 8601) |
@@ -120,34 +129,17 @@ Retrieves the application license information including company details, license
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetLicenseInfo?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetLicenseInfo?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetLicenseInfo HTTP/1.1
+POST /api/UIInternals/GetLicenseInfo HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetLicenseInfo"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetLicenseInfo xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetLicenseInfo>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -157,7 +149,7 @@ SOAPAction: "http://tempuri.org/GetLicenseInfo"
 ```javascript
 async function getLicenseInfo() {
     const ticket = getUserAuthTicket();
-    const url = `/srv.asmx/GetLicenseInfo?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetLicenseInfo?authenticationTicket=${encodeURIComponent(ticket)}`;
 
     const response = await fetch(url);
     const xmlText = await response.text();
@@ -209,50 +201,6 @@ async function displayLicenseStatus() {
 }
 ```
 
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var response = await client.GetLicenseInfoAsync(authTicket);
-        var root = XElement.Parse(response.ToString());
-
-        if (root.Attribute("success")?.Value == "true")
-        {
-            var info = root.Element("LicenseInfo");
-            var license = new
-            {
-                CompanyName = info.Element("CompanyName")?.Value ?? "",
-                UserCount = int.Parse(info.Element("UserCount")?.Value ?? "0"),
-                ActiveUserCount = int.Parse(info.Element("ActiveUserCount")?.Value ?? "0"),
-                DisabledUserCount = int.Parse(info.Element("DisabledUserCount")?.Value ?? "0"),
-                IsConcurrent = info.Element("IsConcurrent")?.Value == "true",
-                Workflow = info.Element("Workflow")?.Value == "true",
-                ComplianceModule = info.Element("ComplianceModule")?.Value == "true",
-                TrialCopy = info.Element("TrialCopy")?.Value == "true",
-                SubscriptionEndDate = info.Element("SubscriptionEndDate")?.Value ?? ""
-            };
-
-            Console.WriteLine($"Company: {license.CompanyName}");
-            Console.WriteLine($"Licensed seats: {license.UserCount}");
-            Console.WriteLine($"Active users: {license.ActiveUserCount}");
-            Console.WriteLine($"Subscription ends: {license.SubscriptionEndDate}");
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
-    }
-}
-```
-
 ## Notes
 
 - **ActiveUserCount** is the sum of `AuthorUserCount` and `ReaderUserCount`. To check the licence, use
@@ -261,7 +209,7 @@ using (var client = new SrvSoapClient())
 - **MaxDocumentCount** and **MaxLibraryCount** of 0 means unlimited.
 - **ExpirationDate**, **SubscriptionStartDate**, and **SubscriptionEndDate** are returned in ISO 8601 format.
 - Boolean values (`IsConcurrent`, `AnonymousAccess`, `Workflow`, `ComplianceModule`, `IRConnect`, `TrialCopy`) are returned as lowercase strings ("true"/"false").
-- `AnonymousAccess`, `Workflow` and `ComplianceModule` are also reported by [ServerInfo](ServerInfo.md), which needs no ticket - use that one when the answer is needed before anybody has signed in.
+- `AnonymousAccess`, `Workflow` and `ComplianceModule` are also reported by [ServerInfo](../ServerInfo.md), which needs no ticket - use that one when the answer is needed before anybody has signed in.
 - License data is read from a `license.lic` file in the application configuration path.
 
 ## Error Codes

@@ -223,7 +223,7 @@ item.
 
 ## Settings
 
-| Setting ([GetGeneralAppSettings](../GetGeneralAppSettings.md)) | Months, 0–36 | What it does |
+| Setting (GetGeneralAppSettings) | Months, 0–36 | What it does |
 |---|---|---|
 | `MoveUsersRecycleBinToSystemRecycleBinIn` | `0` = never | Items deleted more than that many months ago leave the users' recycle bins for the system recycle bin. Daily. |
 | `SystemRecycleBinAutoPurgeOption` | `0` = never | Items emptied into the system recycle bin more than that many months ago go to the purge queue. Daily. |

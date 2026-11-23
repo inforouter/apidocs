@@ -38,7 +38,7 @@ To control the lookback window explicitly, use [`GetLogStatistics1`](GetLogStati
 | `Upgrade` | What an upgrade did |
 | `Maintenance` | What the daily maintenance jobs did |
 | `IRConnect` | One record per infoRouter Connect call — see below |
-| `Alerts` | What happened to the server alerts: raised, severity changed, dismissed (by whom), cleared — see [GetServerAlerts](GetServerAlerts.md) |
+| `Alerts` | What happened to the server alerts: raised, severity changed, dismissed (by whom), cleared — see GetServerAlerts |
 
 > **New in 9.2.** `Information`, `Warning`, `Upgrade` and `Maintenance` have always been written by
 > the server but could not be read back through this API until 9.2. `IRConnect` is new.

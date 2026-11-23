@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetContentSearchSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the content search settings in effect: whether content search is on, where it goes (a catalog on the infoRouter Search Service, or Windows Search), the search service's API key, and whether the service is told which documents changed. Administrators only; [SetContentSearchSettings](SetContentSearchSettings.md) changes them.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetContentSearchSettings
+/api/UIInternals/GetContentSearchSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetContentSearchSettings?authenticationTicket=...`
-- **POST** `/srv.asmx/GetContentSearchSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/GetContentSearchSettings`
+- **GET** `/api/UIInternals/GetContentSearchSettings?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetContentSearchSettings` (form data)
 
 ## Parameters
 
@@ -62,13 +71,13 @@ Returns the content search settings in effect: whether content search is on, whe
 
 The `UpdateApplicationSettingsAndPolicies` administrative right (system administrators), the same as the other application settings APIs.
 
-Whether content search is on is public: [GetApplicationParameters](getApplicationParameters.md) returns it to everyone as `INDEXSRV`.
+Whether content search is on is public: [GetApplicationParameters](../getApplicationParameters.md) returns it to everyone as `INDEXSRV`.
 
 ## Example
 
 ### Request (POST)
 ```
-POST /srv.asmx/GetContentSearchSettings HTTP/1.1
+POST /api/UIInternals/GetContentSearchSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123

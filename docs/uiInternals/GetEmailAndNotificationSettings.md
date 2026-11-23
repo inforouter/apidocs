@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetEmailAndNotificationSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns all email and notification settings for the infoRouter system. Requires an administrator or a Policy Manager.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetEmailAndNotificationSettings
+/api/UIInternals/GetEmailAndNotificationSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetEmailAndNotificationSettings?authenticationTicket=...`
-- **POST** `/srv.asmx/GetEmailAndNotificationSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/GetEmailAndNotificationSettings`
+- **GET** `/api/UIInternals/GetEmailAndNotificationSettings?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetEmailAndNotificationSettings` (form data)
 
 ## Parameters
 
@@ -84,12 +93,12 @@ Caller must be an **administrator** or a member of **[Policy Managers]**: the sa
 
 ### Request (GET)
 ```
-GET /srv.asmx/GetEmailAndNotificationSettings?authenticationTicket=abc123 HTTP/1.1
+GET /api/UIInternals/GetEmailAndNotificationSettings?authenticationTicket=abc123 HTTP/1.1
 ```
 
 ### Request (POST)
 ```
-POST /srv.asmx/GetEmailAndNotificationSettings HTTP/1.1
+POST /api/UIInternals/GetEmailAndNotificationSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123
@@ -102,7 +111,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

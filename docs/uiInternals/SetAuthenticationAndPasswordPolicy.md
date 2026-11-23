@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetAuthenticationAndPasswordPolicy API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Updates the authentication and password policy settings by sending a serialized `AuthenticationAndPasswordPolicy` object. This API allows you to configure password complexity rules, expiration policies, and actions that require password re-confirmation.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetAuthenticationAndPasswordPolicy
+/api/UIInternals/SetAuthenticationAndPasswordPolicy
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetAuthenticationAndPasswordPolicy?authenticationTicket=...&settingsXml=...`
-- **POST** `/srv.asmx/SetAuthenticationAndPasswordPolicy` (form data)
-- **SOAP** Action: `http://tempuri.org/SetAuthenticationAndPasswordPolicy`
+- **GET** `/api/UIInternals/SetAuthenticationAndPasswordPolicy?authenticationTicket=...&settingsXml=...`
+- **POST** `/api/UIInternals/SetAuthenticationAndPasswordPolicy` (form data)
 
 > The `settingsXml` value must contain the `AuthenticationAndPasswordPolicy` XML. Always URL-encode the XML when calling the GET endpoint.
 
@@ -53,51 +62,11 @@ Typical errors:
 ## Example (REST POST)
 
 ```
-POST /srv.asmx/SetAuthenticationAndPasswordPolicy HTTP/1.1
+POST /api/UIInternals/SetAuthenticationAndPasswordPolicy HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=6F9C2A...&
 settingsXml=%3CAuthenticationAndPasswordPolicy%3E...%3C%2FAuthenticationAndPasswordPolicy%3E
-```
-
-### SOAP Request
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/SetAuthenticationAndPasswordPolicy"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <SetAuthenticationAndPasswordPolicy xmlns="http://tempuri.org/">
-      <authenticationTicket>6F9C2A...</authenticationTicket>
-      <settingsXml><![CDATA[
-        <AuthenticationAndPasswordPolicy>
-          <PasswordPolicy>
-            <Expires>90</Expires>
-            <MinLen>8</MinLen>
-            <MustIncludeAlphaNumericCharacters>true</MustIncludeAlphaNumericCharacters>
-            <MustIncludeNumericCharacters>true</MustIncludeNumericCharacters>
-            <MustIncludeNonAlphaNumericCharacters>true</MustIncludeNonAlphaNumericCharacters>
-            <MustNotEqualEmailAddress>true</MustNotEqualEmailAddress>
-            <MustNotEqualUserName>true</MustNotEqualUserName>
-            <MustNotInCommonPasswordList>true</MustNotInCommonPasswordList>
-          </PasswordPolicy>
-          <PasswordRePromptActions>
-            <DomainDelete>true</DomainDelete>
-            <OnDelete>true</OnDelete>
-            <UserDelete>true</UserDelete>
-            <SecurityApply>true</SecurityApply>
-            <OnOwnerChange>true</OnOwnerChange>
-            <OnClassify>false</OnClassify>
-            <OnReviewTask>false</OnReviewTask>
-          </PasswordRePromptActions>
-        </AuthenticationAndPasswordPolicy>
-      ]]></settingsXml>
-    </SetAuthenticationAndPasswordPolicy>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Sample `settingsXml` Payload
@@ -171,7 +140,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -299,7 +268,6 @@ else
 
 - Compatible with infoRouter 8.7 and later
 - `AuthenticationAndPasswordPolicy` is serializable for XML transport
-- Supports both SOAP and REST endpoints
 - Requires Workflow and Security modules for full functionality
 
 ## Error Codes

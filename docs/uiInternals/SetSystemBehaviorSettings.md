@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetSystemBehaviorSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Updates the system behavior settings including login logging configuration and login delay (anti-brute-force) settings.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetSystemBehaviorSettings
+/api/UIInternals/SetSystemBehaviorSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetSystemBehaviorSettings?authenticationTicket=...&settingsXml=...`
-- **POST** `/srv.asmx/SetSystemBehaviorSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/SetSystemBehaviorSettings`
+- **GET** `/api/UIInternals/SetSystemBehaviorSettings?authenticationTicket=...&settingsXml=...`
+- **POST** `/api/UIInternals/SetSystemBehaviorSettings` (form data)
 
 ## Parameters
 
@@ -67,42 +76,18 @@ Updates the system behavior settings including login logging configuration and l
 ### Request (GET)
 
 ```
-GET /srv.asmx/SetSystemBehaviorSettings?authenticationTicket=abc123-def456&settingsXml=%3CSystemBehaviorSettings%3E%3CLogLogins%3Etrue%3C%2FLogLogins%3E%3CLogLoginAttempts%3Etrue%3C%2FLogLoginAttempts%3E%3CLoginDelay%3E500%3C%2FLoginDelay%3E%3C%2FSystemBehaviorSettings%3E HTTP/1.1
+GET /api/UIInternals/SetSystemBehaviorSettings?authenticationTicket=abc123-def456&settingsXml=%3CSystemBehaviorSettings%3E%3CLogLogins%3Etrue%3C%2FLogLogins%3E%3CLogLoginAttempts%3Etrue%3C%2FLogLoginAttempts%3E%3CLoginDelay%3E500%3C%2FLoginDelay%3E%3C%2FSystemBehaviorSettings%3E HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/SetSystemBehaviorSettings HTTP/1.1
+POST /api/UIInternals/SetSystemBehaviorSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456&settingsXml=<SystemBehaviorSettings><LogLogins>true</LogLogins><LogLoginAttempts>true</LogLoginAttempts><LoginDelay>500</LoginDelay></SystemBehaviorSettings>
 ```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/SetSystemBehaviorSettings"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <SetSystemBehaviorSettings xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-      <settingsXml><![CDATA[<SystemBehaviorSettings>
-      <LogLogins>true</LogLogins>
-      <LogLoginAttempts>true</LogLoginAttempts>
-      <LoginDelay>500</LoginDelay>
-      <AllowLibraryManagersToEditPolicy>true</AllowLibraryManagersToEditPolicy>
-      </SystemBehaviorSettings>]]></settingsXml>
-    </SetSystemBehaviorSettings>
-  </soap:Body>
-</soap:Envelope>
-```
-
 
 ## Workflow
 
@@ -118,7 +103,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetSmtpSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the SMTP settings in effect: the address infoRouter's email comes from, the SMTP server, its port, encryption and timeout, the account infoRouter signs in with, and who receives the technical status reports. The password is never returned. Administrators only; [SetSmtpSettings](SetSmtpSettings.md) changes them.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetSmtpSettings
+/api/UIInternals/GetSmtpSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetSmtpSettings?authenticationTicket=...`
-- **POST** `/srv.asmx/GetSmtpSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/GetSmtpSettings`
+- **GET** `/api/UIInternals/GetSmtpSettings?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetSmtpSettings` (form data)
 
 ## Parameters
 
@@ -70,7 +79,7 @@ The `UpdateApplicationSettingsAndPolicies` administrative right (system administ
 
 ### Request (POST)
 ```
-POST /srv.asmx/GetSmtpSettings HTTP/1.1
+POST /api/UIInternals/GetSmtpSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123
@@ -81,4 +90,4 @@ authenticationTicket=abc123
 - The settings are kept in their own file, `config\smtp-setting.json` in infoRouter's application folder, not in `appsettings.json`. The password is stored encrypted. Without that file there is no SMTP server: the values are empty, and email is queued but not sent.
 - The answer is what infoRouter is using now: the file as it was last read (at start or by [FlushApplicationCache](FlushApplicationCache.md)), or as SetSmtpSettings last saved it. A change made to the file by hand is used after FlushApplicationCache or a restart.
 - infoRouter 8.7 kept these settings in `web.config`; the upgrade to 9.0 moves them to this file and encrypts the password.
-- [GetApplicationParameters](getApplicationParameters.md) also returns the system email address to everyone, and the SMTP server, port, timeout and user name to administrators.
+- [GetApplicationParameters](../getApplicationParameters.md) also returns the system email address to everyone, and the SMTP server, port, timeout and user name to administrators.

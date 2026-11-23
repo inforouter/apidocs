@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetServerAlerts API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the server's current alerts: the things an administrator should know about right now, such as a warehouse disk that is almost full or an internet outage. An alert is removed by the server when its problem is gone, so the list is always the present state. Call it every few minutes to show the alerts in the user interface.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetServerAlerts
+/api/UIInternals/GetServerAlerts
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetServerAlerts?authenticationTicket=...`
-- **POST** `/srv.asmx/GetServerAlerts` (form data)
-- **SOAP** Action: `http://tempuri.org/GetServerAlerts`
+- **GET** `/api/UIInternals/GetServerAlerts?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetServerAlerts` (form data)
 
 ## Parameters
 
@@ -83,7 +92,7 @@ System administrators only.
 
 ### Request (GET)
 ```
-GET /srv.asmx/GetServerAlerts?authenticationTicket=abc123 HTTP/1.1
+GET /api/UIInternals/GetServerAlerts?authenticationTicket=abc123 HTTP/1.1
 ```
 
 ## Notes
@@ -91,6 +100,6 @@ GET /srv.asmx/GetServerAlerts?authenticationTicket=abc123 HTTP/1.1
 - The server checks for the problems in its maintenance job, so an alert appears or disappears within a few minutes of the problem, not at once.
 - An alert goes away by itself when the problem is gone; nobody has to dismiss it. To hide one meanwhile, use [DismissServerAlert](DismissServerAlert.md).
 - A dismissed alert is shown again (`Dismissed="false"`) when its severity rises.
-- Everything that happens to an alert - raised, severity changed, dismissed, cleared - is written to the `Alerts` log, readable with [GetLogs](GetLogs.md).
+- Everything that happens to an alert - raised, severity changed, dismissed, cleared - is written to the `Alerts` log, readable with [GetLogs](../GetLogs.md).
 - When an alert is raised, and again when its severity rises, one email goes to the technical contact of the mail settings, or to the sysadmin account when there is none.
 - While the application is stopped by a Fatal `CustomerServicesUnreachable` alert, every API answers with that alert's text as the error, this one included.

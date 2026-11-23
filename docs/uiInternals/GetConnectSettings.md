@@ -1,6 +1,16 @@
-﻿# GetConnectSettings API
+---
+search:
+  exclude: true
+---
+
+# GetConnectSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns what this infoRouter instance can ask the **infoRouter Connect** AI service for: the capabilities the service offers, whether each one is usable right now, and the rules infoRouter applies to them.
 
@@ -9,14 +19,13 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 ## Endpoint
 
 ```
-/srv.asmx/GetConnectSettings
+/api/UIInternals/GetConnectSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetConnectSettings?AuthenticationTicket=...`
-- **POST** `/srv.asmx/GetConnectSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/GetConnectSettings`
+- **GET** `/api/UIInternals/GetConnectSettings?AuthenticationTicket=...`
+- **POST** `/api/UIInternals/GetConnectSettings` (form data)
 
 ## Parameters
 
@@ -70,7 +79,7 @@ Written for a caller building a UI — deciding which AI actions to offer, and w
 > Extracted field values have no threshold at all now: whatever Connect finds is written, however
 > unsure it was, because a value a person is going to review is worth more than the blank it would
 > otherwise leave. How sure it was is reported on the property set row it wrote, as `AIConfidence` in
-> [GetPropertySets](GetPropertySets.md#reviewing-values-connect-extracted).
+> [GetPropertySets](../GetPropertySets.md#reviewing-values-connect-extracted).
 
 `<SupportedExtensions>` is the comma separated list of file types the service is expected to be able to read here. A document of any other type is refused before a call is made — except OCR, which exists for exactly the file types this list leaves out.
 
@@ -124,19 +133,7 @@ Any signed-in user. Anonymous access is refused.
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetConnectSettings?AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301 HTTP/1.1
-```
-
-### Request (SOAP)
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:GetConnectSettings>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-    </tns:GetConnectSettings>
-  </soap:Body>
-</soap:Envelope>
+GET /api/UIInternals/GetConnectSettings?AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301 HTTP/1.1
 ```
 
 ## JavaScript
@@ -146,7 +143,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -184,7 +181,7 @@ A `<Capability>` says three separate things: `enabledOnService` is whether the s
 
 - Cache it. The report changes when an administrator changes something, not between two documents.
 - A capability being `usable` is not a promise that a particular document can be processed: the file still has to be one the service can read. See `<SupportedExtensions>`.
-- Ask for the work itself with [GetConnectProfile](GetConnectProfile.md), which reports per answer what became of the request.
+- Ask for the work itself with [GetConnectProfile](../GetConnectProfile.md), which reports per answer what became of the request.
 
 ## Error Codes
 
@@ -202,6 +199,6 @@ The `errorCode` values this operation returns, checked against a running server:
 
 ## Related APIs
 
-- [GetConnectProfile](GetConnectProfile.md) - Ask the service to produce content for a document
-- [SetFolderAIPreferences](SetFolderAIPreferences.md) - Have content produced automatically on upload
-- [GetLogs](GetLogs.md) - Read the daily record of the calls made to the service
+- [GetConnectProfile](../GetConnectProfile.md) - Ask the service to produce content for a document
+- [SetFolderAIPreferences](../SetFolderAIPreferences.md) - Have content produced automatically on upload
+- [GetLogs](../GetLogs.md) - Read the daily record of the calls made to the service

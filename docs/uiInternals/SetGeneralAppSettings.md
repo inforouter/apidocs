@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetGeneralAppSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Updates the global *General Application Settings* by sending a serialized `GeneralSettings` object. Use this API when you need to modify upload limits, recycle bin policies, workdays/holidays, or other platform-wide configuration options in a single atomic operation.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetGeneralAppSettings
+/api/UIInternals/SetGeneralAppSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetGeneralAppSettings?authenticationTicket=...&settingsXml=...`
-- **POST** `/srv.asmx/SetGeneralAppSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/SetGeneralAppSettings`
+- **GET** `/api/UIInternals/SetGeneralAppSettings?authenticationTicket=...&settingsXml=...`
+- **POST** `/api/UIInternals/SetGeneralAppSettings` (form data)
 
 > The `settingsXml` value must contain the `GeneralSettings` XML. Always URL-encode the XML when calling the GET endpoint.
 
@@ -52,82 +61,11 @@ Typical errors:
 ## Example (REST POST)
 
 ```
-POST /srv.asmx/SetGeneralAppSettings HTTP/1.1
+POST /api/UIInternals/SetGeneralAppSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=6F9C2A...&
 settingsXml=%3CGeneralSettings%3E...%3C%2FGeneralSettings%3E
-```
-
-### SOAP Request
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/SetGeneralAppSettings"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <SetGeneralAppSettings xmlns="http://tempuri.org/">
-      <authenticationTicket>6F9C2A...</authenticationTicket>
-      <settingsXml><![CDATA[
-        <GeneralSettings>
-          <UploadSettings>
-            <DocumentMaxSize>524288000</DocumentMaxSize>
-            <FileUploadTimeOut>900</FileUploadTimeOut>
-            <DefaultUploadFileChunkSize>8388608</DefaultUploadFileChunkSize>
-          </UploadSettings>
-          <AllowOwnershipTransfer>true</AllowOwnershipTransfer>
-          <WebDav>false</WebDav>
-          <DisplayAddIns>true</DisplayAddIns>
-          <SearchPageSize>50</SearchPageSize>
-          <SystemRecycleBinAutoPurgeOption>6</SystemRecycleBinAutoPurgeOption>
-          <MoveUsersRecycleBinToSystemRecycleBinIn>3</MoveUsersRecycleBinToSystemRecycleBinIn>
-          <RerouteRedirections>false</RerouteRedirections>
-          <MinYearInDateControls>1950</MinYearInDateControls>
-          <SendDiagnosticsAndStatistics>true</SendDiagnosticsAndStatistics>
-          <ServiceTimerPeriod>5</ServiceTimerPeriod>
-          <KeepErrorLogsFor>30</KeepErrorLogsFor>
-          <MaximumDisplayFolderCount>1000</MaximumDisplayFolderCount>
-          <InheritCustomPropertiesAutomatically>true</InheritCustomPropertiesAutomatically>
-          <Workdays>
-            <Monday>true</Monday>
-            <Tuesday>true</Tuesday>
-            <Wednesday>true</Wednesday>
-            <Thursday>true</Thursday>
-            <Friday>true</Friday>
-            <Saturday>false</Saturday>
-            <Sunday>false</Sunday>
-            <StartHour>8</StartHour>
-            <StartMinute>0</StartMinute>
-            <EndHour>18</EndHour>
-            <EndMinute>0</EndMinute>
-          </Workdays>
-          <HolidayList>
-            <Holiday>
-              <HolidayDate>2000-01-01T00:00:00</HolidayDate>
-              <Description>New Year (recurring every Jan 1)</Description>
-            </Holiday>
-            <Holiday>
-              <HolidayDate>2000-12-25T00:00:00</HolidayDate>
-              <Description>Christmas Day (recurring every Dec 25)</Description>
-            </Holiday>
-            <Holiday>
-              <HolidayDate>2025-07-04T00:00:00</HolidayDate>
-              <Description>Independence Day (one-time, 2025 only)</Description>
-            </Holiday>
-          </HolidayList>
-          <ZipDownloadSetting>
-            <Enabled>true</Enabled>
-            <MaxTotalSize>209715200</MaxTotalSize>
-            <MaxTotalCount>500</MaxTotalCount>
-          </ZipDownloadSetting>
-        </GeneralSettings>
-      ]]></settingsXml>
-    </SetGeneralAppSettings>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Sample `settingsXml` Payload
@@ -228,7 +166,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetSystemStatistics API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Retrieves system-wide statistics including user counts, document counts, total document storage size, the number of checked-out documents, and the number of documents registered in the last 30, 60, and 90 days.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetSystemStatistics
+/api/UIInternals/GetSystemStatistics
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetSystemStatistics?authenticationTicket=...`
-- **POST** `/srv.asmx/GetSystemStatistics` (form data)
-- **SOAP** Action: `http://tempuri.org/GetSystemStatistics`
+- **GET** `/api/UIInternals/GetSystemStatistics?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetSystemStatistics` (form data)
 
 ## Parameters
 
@@ -86,12 +95,12 @@ The caller must have the **ViewServerStatus** admin permission.
 
 ### Request (GET)
 ```
-GET /srv.asmx/GetSystemStatistics?authenticationTicket=abc123-...
+GET /api/UIInternals/GetSystemStatistics?authenticationTicket=abc123-...
 ```
 
 ### Request (POST)
 ```
-POST /srv.asmx/GetSystemStatistics HTTP/1.1
+POST /api/UIInternals/GetSystemStatistics HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-...
@@ -104,7 +113,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

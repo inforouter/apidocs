@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # DismissServerAlert API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Dismisses one server alert. The alert stays in the list of [GetServerAlerts](GetServerAlerts.md), marked dismissed, so the user interface can stop showing it. The mark is one for all administrators.
 
 ## Endpoint
 
 ```
-/srv.asmx/DismissServerAlert
+/api/UIInternals/DismissServerAlert
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/DismissServerAlert?authenticationTicket=...&alertType=...&subject=...`
-- **POST** `/srv.asmx/DismissServerAlert` (form data)
-- **SOAP** Action: `http://tempuri.org/DismissServerAlert`
+- **GET** `/api/UIInternals/DismissServerAlert?authenticationTicket=...&alertType=...&subject=...`
+- **POST** `/api/UIInternals/DismissServerAlert` (form data)
 
 ## Parameters
 
@@ -51,7 +60,7 @@ System administrators only.
 
 ### Request (POST)
 ```
-POST /srv.asmx/DismissServerAlert HTTP/1.1
+POST /api/UIInternals/DismissServerAlert HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&alertType=WarehouseDiskSpaceLow&subject=D%3A%5C

@@ -318,7 +318,7 @@ const root = await call('GetConnectProfile', {
 });
 ```
 
-Check with [GetConnectSettings](GetConnectSettings.md) first: asking for something the service is not
+Check with GetConnectSettings first: asking for something the service is not
 provisioned for is a wasted round trip.
 
 ## Notes

@@ -122,7 +122,7 @@ The old password stops working immediately, including any session holding a tick
 - [ChangePasswordUsingSecretText](ChangePasswordUsingSecretText.md) - Reset password using a one-time email token (no ticket required)
 - [ForgotPassword](ForgotPassword.md) - Initiate a password reset by email address
 - [ForgotPasswordByUserName](ForgotPasswordByUserName.md) - Initiate a password reset by user name
-- [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) - Retrieve the current password complexity policy
+- GetAuthenticationAndPasswordPolicy - Retrieve the current password complexity policy
 
 ## Error Codes
 

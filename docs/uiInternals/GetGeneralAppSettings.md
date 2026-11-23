@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetGeneralAppSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the general application settings including upload limits, work days configuration, holidays, and system preferences.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetGeneralAppSettings
+/api/UIInternals/GetGeneralAppSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetGeneralAppSettings?authenticationTicket=...`
-- **POST** `/srv.asmx/GetGeneralAppSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/GetGeneralAppSettings`
+- **GET** `/api/UIInternals/GetGeneralAppSettings?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetGeneralAppSettings` (form data)
 
 ## Parameters
 
@@ -96,14 +105,14 @@ Returns the general application settings including upload limits, work days conf
 | `MinYearInDateControls` | integer | Minimum year allowed in date picker controls |
 | `SystemRecycleBinAutoPurgeOption` | integer | Months an item stays in the system recycle bin before it is automatically purged. 0 = off. 0–36; other values are refused by SetGeneralAppSettings (4000). |
 | `MoveUsersRecycleBinToSystemRecycleBinIn` | integer | Months after which items in users' recycle bins are moved to the system recycle bin (daily job). 0 = never. 0–36; other values are refused by SetGeneralAppSettings (4000). |
-| `RerouteRedirections` | boolean | "Allow rerouting of redirected tasks". When `true`, an existing task redirection can be pointed at another user with [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md), including by the user the tasks are redirected to. When `false` that call is refused (4030) for every caller. Setting and removing a redirection ([SetUserTaskRedirection](SetUserTaskRedirection.md), [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md)) do not depend on it. Default `true`: a server where the setting was never saved allows rerouting, and so does a SetGeneralAppSettings call that leaves the element out. |
+| `RerouteRedirections` | boolean | "Allow rerouting of redirected tasks". When `true`, an existing task redirection can be pointed at another user with [RerouteUserTaskRedirection](../RerouteUserTaskRedirection.md), including by the user the tasks are redirected to. When `false` that call is refused (4030) for every caller. Setting and removing a redirection ([SetUserTaskRedirection](../SetUserTaskRedirection.md), [RemoveUserTaskRedirection](../RemoveUserTaskRedirection.md)) do not depend on it. Default `true`: a server where the setting was never saved allows rerouting, and so does a SetGeneralAppSettings call that leaves the element out. |
 | `SendDiagnosticsAndStatistics` | boolean | Whether the server sends its daily status report to crm.inforouter.com: license company name, machine name, version, database type/name/server, object counts and OS version, no document content or user names. `false` stops it, except on a license that requires the instance to be online: there the report is always sent. Default `true`. |
 | `Workdays` | object | Work days and hours configuration |
 | `HolidayList` | array | List of Holiday objects — see Holiday Properties below |
 | `ZipDownloadSetting` | object | ZIP download configuration |
 | `SearchPageSize` | integer | Default number of results per search page |
 | `InheritCustomPropertiesAutomatically` | boolean | Whether a new folder, and a document added to a folder, take the parent folder's property sets (custom properties) with them. Default `true`. |
-| `MaximumDisplayFolderCount` | integer | The most items under one folder the folders panel lists ([GetFolders2](GetFolders2.md)); a folder holding more is refused as having too many folders to navigate. 1–100,000; other values are refused by SetGeneralAppSettings (4000). Default `1000`. |
+| `MaximumDisplayFolderCount` | integer | The most items under one folder the folders panel lists ([GetFolders2](../GetFolders2.md)); a folder holding more is refused as having too many folders to navigate. 1–100,000; other values are refused by SetGeneralAppSettings (4000). Default `1000`. |
 | `KeepErrorLogsFor` | integer | Days the error log files are kept; the daily log cleanup deletes older ones. `0` keeps them forever. 0–3650; other values are refused by SetGeneralAppSettings (4000). Default `30`. |
 | `ServiceTimerPeriod` | integer | Minutes between two runs of the maintenance job (sending queued email, the scheduled and daily jobs, recycle bin purging). 1–60; the job cannot be turned off, so 0 and other values are refused by SetGeneralAppSettings (4000). Default `5`. A change applies within a minute, without a restart. |
 
@@ -113,7 +122,7 @@ Returns the general application settings including upload limits, work days conf
 |----------|------|-------------|
 | `DocumentMaxSize` | long | Maximum document size in bytes (default: 75 MB = 78643200, max: 1 GB) |
 | `FileUploadTimeOut` | integer | Upload timeout in seconds (default 900). Applied by the server to the REST upload calls (`/srv.asmx/Upload...`: UploadDocument*, UploadFileChunk, UploadZip*, UploadTiffAsPDF*, UploadNewDocumentWidthHandler): a request that has not finished arriving within this time is ended and answered with `errorCode` `4080`. It limits each request, so a chunked upload gets this time per chunk. `0` or less means no limit. SOAP and WebDAV uploads are not timed. The range is not checked: a very small value makes every upload fail. A change applies to the next request. |
-| `DefaultUploadFileChunkSize` | integer | Chunk size, in bytes, offered for chunked uploads ([CreateUploadHandler](CreateUploadHandler.md) with `PreferedChunkSize` 0). 256 KB to 32 MB; SetGeneralAppSettings brings a value outside that range inside it. Default 1 MB (1048576). Kept in the database with the other upload settings. |
+| `DefaultUploadFileChunkSize` | integer | Chunk size, in bytes, offered for chunked uploads ([CreateUploadHandler](../CreateUploadHandler.md) with `PreferedChunkSize` 0). 256 KB to 32 MB; SetGeneralAppSettings brings a value outside that range inside it. Default 1 MB (1048576). Kept in the database with the other upload settings. |
 
 ## Workdays Properties
 
@@ -189,34 +198,17 @@ When processing holidays for business-day calculations, check the year of `Holid
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetGeneralAppSettings?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetGeneralAppSettings?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetGeneralAppSettings HTTP/1.1
+POST /api/UIInternals/GetGeneralAppSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetGeneralAppSettings"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetGeneralAppSettings xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetGeneralAppSettings>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -226,7 +218,7 @@ SOAPAction: "http://tempuri.org/GetGeneralAppSettings"
 ```javascript
 async function getGeneralAppSettings() {
     const ticket = getUserAuthTicket();
-    const url = `/srv.asmx/GetGeneralAppSettings?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetGeneralAppSettings?authenticationTicket=${encodeURIComponent(ticket)}`;
     const response = await fetch(url);
     const xmlText = await response.text();
     const parser = new DOMParser();
@@ -263,46 +255,6 @@ async function getGeneralAppSettings() {
         workdays,
         holidays
     };
-}
-```
-
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    var response = await client.GetGeneralAppSettingsAsync(authTicket);
-    var root = XElement.Parse(response.ToString());
-
-    if (root.Attribute("success")?.Value == "true")
-    {
-        var settings = root.Element("GeneralSettings");
-        var uploadSettings = settings.Element("UploadSettings");
-        var zipSettings = settings.Element("ZipDownloadSetting");
-
-        var config = new
-        {
-            DocumentMaxSize = long.Parse(uploadSettings.Element("DocumentMaxSize")?.Value ?? "0"),
-            FileUploadTimeOut = int.Parse(uploadSettings.Element("FileUploadTimeOut")?.Value ?? "900"),
-            ChunkSize = int.Parse(uploadSettings.Element("DefaultUploadFileChunkSize")?.Value ?? "262144"),
-            WebDavEnabled = bool.Parse(settings.Element("WebDav")?.Value ?? "false"),
-            SearchPageSize = int.Parse(settings.Element("SearchPageSize")?.Value ?? "20"),
-            ZipEnabled = bool.Parse(zipSettings.Element("Enabled")?.Value ?? "false")
-        };
-
-        // Parse holidays — year 2000 = recurring
-        var holidays = settings.Element("HolidayList")?
-            .Elements("Holiday")
-            .Select(h => new {
-                Date = DateTime.Parse(h.Element("HolidayDate")?.Value ?? ""),
-                Description = h.Element("Description")?.Value ?? "",
-                IsRecurring = DateTime.Parse(h.Element("HolidayDate")?.Value ?? "").Year == 2000
-            }).ToList();
-    }
-    else
-    {
-        Console.WriteLine($"Error: {root.Attribute("error")?.Value}");
-    }
 }
 ```
 

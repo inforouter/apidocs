@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetSystemBehaviorSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the system behavior settings including login logging configuration, login delay (anti-brute-force) settings, and library manager policy editing permissions. This API is restricted to system administrators with the `UpdateApplicationSettingsAndPolicies` permission.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetSystemBehaviorSettings
+/api/UIInternals/GetSystemBehaviorSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetSystemBehaviorSettings?authenticationTicket=...`
-- **POST** `/srv.asmx/GetSystemBehaviorSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/GetSystemBehaviorSettings`
+- **GET** `/api/UIInternals/GetSystemBehaviorSettings?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetSystemBehaviorSettings` (form data)
 
 ## Parameters
 
@@ -80,34 +89,17 @@ Returns the system behavior settings including login logging configuration, logi
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetSystemBehaviorSettings?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetSystemBehaviorSettings?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetSystemBehaviorSettings HTTP/1.1
+POST /api/UIInternals/GetSystemBehaviorSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetSystemBehaviorSettings"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetSystemBehaviorSettings xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetSystemBehaviorSettings>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -117,7 +109,7 @@ SOAPAction: "http://tempuri.org/GetSystemBehaviorSettings"
 ```javascript
 async function getSystemBehaviorSettings() {
     const ticket = getUserAuthTicket();
-    const url = `/srv.asmx/GetSystemBehaviorSettings?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetSystemBehaviorSettings?authenticationTicket=${encodeURIComponent(ticket)}`;
 
     const response = await fetch(url);
     const xmlText = await response.text();
@@ -151,45 +143,6 @@ async function displaySecuritySettings() {
 
     } catch (error) {
         console.error("Failed to get system behavior settings:", error);
-    }
-}
-```
-
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var response = await client.GetSystemBehaviorSettingsAsync(authTicket);
-        var root = XElement.Parse(response.ToString());
-
-        if (root.Attribute("success")?.Value == "true")
-        {
-            var settings = root.Element("SystemBehaviorSettings");
-            var config = new
-            {
-                LogLogins = bool.Parse(settings.Element("LogLogins")?.Value ?? "false"),
-                LogLoginAttempts = bool.Parse(settings.Element("LogLoginAttempts")?.Value ?? "false"),
-                LoginDelay = int.Parse(settings.Element("LoginDelay")?.Value ?? "0"),
-                AllowLibraryManagersToEditPolicy = bool.Parse(settings.Element("AllowLibraryManagersToEditPolicy")?.Value ?? "false")
-            };
-
-            Console.WriteLine($"Log logins: {config.LogLogins}");
-            Console.WriteLine($"Log login attempts: {config.LogLoginAttempts}");
-            Console.WriteLine($"Login delay: {config.LoginDelay}ms");
-            Console.WriteLine($"Library managers can edit policy: {config.AllowLibraryManagersToEditPolicy}");
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
     }
 }
 ```

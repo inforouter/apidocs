@@ -159,7 +159,7 @@ For a folder that may hold more than the cap, page through it with
 
 ## Notes
 
-- The maximum number of returned folders is the `MaximumDisplayFolderCount` general setting (1–100,000, default 1000), read with [GetGeneralAppSettings](GetGeneralAppSettings.md) and changed with [SetGeneralAppSettings](SetGeneralAppSettings.md); a change applies to the next call.
+- The maximum number of returned folders is the `MaximumDisplayFolderCount` general setting (1–100,000, default 1000), read with GetGeneralAppSettings and changed with SetGeneralAppSettings; a change applies to the next call.
 - If a folder has more subfolders than the limit allows, the call fails with `Too many folders to navigate.` rather than returning part of the list.
 - For unlimited folder listing, use `GetFolders1`.
 - This API is primarily used by the infoRouter web UI folder tree panel.

@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetContentSearchSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Replaces the content search settings and applies them at once, without restarting infoRouter. Then asks the search service whether it answers with them and returns the answer. Administrators only; [GetContentSearchSettings](GetContentSearchSettings.md) reads them.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetContentSearchSettings
+/api/UIInternals/SetContentSearchSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetContentSearchSettings?authenticationTicket=...&indexSrv=...&indexCatalog=...&remoteSearchApiKey=...&remoteSearchIndexNotify=...&checkSecurityOnSearch=...&maxContentSearchResult=...`
-- **POST** `/srv.asmx/SetContentSearchSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/SetContentSearchSettings`
+- **GET** `/api/UIInternals/SetContentSearchSettings?authenticationTicket=...&indexSrv=...&indexCatalog=...&remoteSearchApiKey=...&remoteSearchIndexNotify=...&checkSecurityOnSearch=...&maxContentSearchResult=...`
+- **POST** `/api/UIInternals/SetContentSearchSettings` (form data)
 
 ## Parameters
 
@@ -87,7 +96,7 @@ The `UpdateApplicationSettingsAndPolicies` administrative right (system administ
 
 ### Request (POST)
 ```
-POST /srv.asmx/SetContentSearchSettings HTTP/1.1
+POST /api/UIInternals/SetContentSearchSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&indexSrv=true&indexCatalog=http%3A%2F%2Fsearch01%3A5000%2Fcorp%2F&remoteSearchApiKey=3f9c0d...&remoteSearchIndexNotify=true
@@ -96,7 +105,7 @@ authenticationTicket=abc123&indexSrv=true&indexCatalog=http%3A%2F%2Fsearch01%3A5
 ## Notes
 
 - The settings are saved to `config\content-search-setting.json` in infoRouter's application folder, and searches started after the call use them; a search already running finishes with the settings it started with. Change notices switch at the same time, and those queued for the previous search service are still sent to it.
-- [GetApplicationParameters](getApplicationParameters.md) shows the new `INDEXSRV` at once.
+- [GetApplicationParameters](../getApplicationParameters.md) shows the new `INDEXSRV` at once.
 - To change the file by hand instead, edit it and call [FlushApplicationCache](FlushApplicationCache.md); infoRouter reads it again without a restart. A catalog this call refuses (see Error Response) is accepted from the file but does not work: keyword searches fail, saying why.
 - The catalog's address and key come from the infoRouter Search Service's administration page, under *Connection for infoRouter*. The address must name the catalog; the service's address alone is refused by the service.
 - A search service that has no change notices (the infoRouter 8.7 dtSearch web service) answers them with "not found"; infoRouter then stops sending them until the settings are saved again or infoRouter restarts.

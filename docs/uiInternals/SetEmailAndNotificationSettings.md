@@ -1,20 +1,29 @@
-﻿# SetEmailAndNotificationSettings API
+---
+search:
+  exclude: true
+---
+
+# SetEmailAndNotificationSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Updates the email and notification settings for the infoRouter system. Requires system administrator privileges.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetEmailAndNotificationSettings
+/api/UIInternals/SetEmailAndNotificationSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetEmailAndNotificationSettings?authenticationTicket=...&settingsXml=...`
-- **POST** `/srv.asmx/SetEmailAndNotificationSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/SetEmailAndNotificationSettings`
+- **GET** `/api/UIInternals/SetEmailAndNotificationSettings?authenticationTicket=...&settingsXml=...`
+- **POST** `/api/UIInternals/SetEmailAndNotificationSettings` (form data)
 
 ## Parameters
 
@@ -91,7 +100,7 @@ Caller must be a **system administrator** with `UpdateApplicationSettingsAndPoli
 
 ### Request (POST)
 ```
-POST /srv.asmx/SetEmailAndNotificationSettings HTTP/1.1
+POST /api/UIInternals/SetEmailAndNotificationSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&settingsXml=<EmailAndNotificationSettings>...</EmailAndNotificationSettings>
@@ -104,7 +113,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

@@ -120,7 +120,7 @@ await call('ChangeUserPassword1', {
 
 - [ChangeUserPassword](ChangeUserPassword.md) - **Obsolete**, superseded by this API: sets another user's password and refuses your own
 - [ChangePasswordUsingSecretText](ChangePasswordUsingSecretText.md) - Reset password using a one-time email token (no ticket required)
-- [GetAuthenticationAndPasswordPolicy](GetAuthenticationAndPasswordPolicy.md) - Retrieve the current password complexity policy
+- GetAuthenticationAndPasswordPolicy - Retrieve the current password complexity policy
 
 ## Error Codes
 

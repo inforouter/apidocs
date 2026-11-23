@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetAuthenticationAndPasswordPolicy API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the authentication and password policy settings including password complexity requirements and password re-prompt actions.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetAuthenticationAndPasswordPolicy
+/api/UIInternals/GetAuthenticationAndPasswordPolicy
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetAuthenticationAndPasswordPolicy?authenticationTicket=...`
-- **POST** `/srv.asmx/GetAuthenticationAndPasswordPolicy` (form data)
-- **SOAP** Action: `http://tempuri.org/GetAuthenticationAndPasswordPolicy`
+- **GET** `/api/UIInternals/GetAuthenticationAndPasswordPolicy?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetAuthenticationAndPasswordPolicy` (form data)
 
 ## Parameters
 
@@ -133,34 +142,17 @@ This API returns different data based on the user's permissions:
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetAuthenticationAndPasswordPolicy?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetAuthenticationAndPasswordPolicy?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetAuthenticationAndPasswordPolicy HTTP/1.1
+POST /api/UIInternals/GetAuthenticationAndPasswordPolicy HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetAuthenticationAndPasswordPolicy"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetAuthenticationAndPasswordPolicy xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetAuthenticationAndPasswordPolicy>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -171,7 +163,7 @@ SOAPAction: "http://tempuri.org/GetAuthenticationAndPasswordPolicy"
 async function getAuthenticationAndPasswordPolicy() {
     const ticket = getUserAuthTicket();
 
-    const url = `/srv.asmx/GetAuthenticationAndPasswordPolicy?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetAuthenticationAndPasswordPolicy?authenticationTicket=${encodeURIComponent(ticket)}`;
 
     const response = await fetch(url);
     const xmlText = await response.text();
@@ -236,48 +228,6 @@ function validatePassword(password, email, username, policy) {
 }
 ```
 
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var response = await client.GetAuthenticationAndPasswordPolicyAsync(authTicket);
-
-        var root = XElement.Parse(response.ToString());
-        if (root.Attribute("success")?.Value == "true")
-        {
-            var policy = root.Element("AuthenticationAndPasswordPolicy");
-            var passwordPolicy = policy.Element("PasswordPolicy");
-            var rePromptActions = policy.Element("PasswordRePromptActions");
-
-            var config = new
-            {
-                LibraryManagersEditPolicy = bool.Parse(policy.Element("LibraryManagersEditPolicy")?.Value ?? "false"),
-                PasswordExpires = int.Parse(passwordPolicy.Element("Expires")?.Value ?? "0"),
-                MinPasswordLength = int.Parse(passwordPolicy.Element("MinLen")?.Value ?? "1"),
-                RequireSpecialChars = bool.Parse(passwordPolicy.Element("MustIncludeNonAlphaNumericCharacters")?.Value ?? "false"),
-                RePromptOnDelete = bool.Parse(rePromptActions.Element("OnDelete")?.Value ?? "false")
-            };
-
-            Console.WriteLine($"Password expires in: {config.PasswordExpires} days");
-            Console.WriteLine($"Minimum password length: {config.MinPasswordLength}");
-            Console.WriteLine($"Require special characters: {config.RequireSpecialChars}");
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
-    }
-}
-```
-
 ## Notes
 
 - **PasswordExpires**: Value of 0 means passwords never expire. Otherwise, users must change their password after the specified number of days.
@@ -323,7 +273,6 @@ Common error responses:
 - Compatible with infoRouter 8.7 and later
 - **Current version**: Login logging settings (`LogLogins`, `LogLoginAttempts`, `LoginDelay`) have been moved to `SystemBehaviorSettings`
 - Settings model is serializable for client-side deserialization
-- Supports both synchronous SOAP and REST access patterns
 
 ## See Also
 

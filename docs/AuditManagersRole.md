@@ -65,10 +65,10 @@ All four actions are checked with library id 0, so library managers never pass; 
 
 | Action | Web service calls | Who else may do it | Conditions |
 |---|---|---|---|
-| See the licence and the licensed-user counts | [GetLicenseInfo](GetLicenseInfo.md) | nobody else | `ViewLicenseInformation` (`MiscServices.GetLicenseInfoAsync`) |
-| See the system statistics | [GetSystemStatistics](GetSystemStatistics.md) | nobody else | `ViewServerStatus` (`MiscServices.GetSystemStatisticsAsync`) |
-| See the maintenance jobs' last runs | [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) | nobody else | `ViewServerStatus` (`MiscServices.GetMaintenanceJobsStatusAsync`) |
-| See the warehouse paths and totals | [GetWarehouseStatus](GetWarehouseStatus.md) | nobody else | `ViewWarehouseStatus` (`InfoRouter.WarehouseInfoAsync`) |
+| See the licence and the licensed-user counts | GetLicenseInfo | nobody else | `ViewLicenseInformation` (`MiscServices.GetLicenseInfoAsync`) |
+| See the system statistics | GetSystemStatistics | nobody else | `ViewServerStatus` (`MiscServices.GetSystemStatisticsAsync`) |
+| See the maintenance jobs' last runs | GetMaintenanceJobsStatus | nobody else | `ViewServerStatus` (`MiscServices.GetMaintenanceJobsStatusAsync`) |
+| See the warehouse paths and totals | GetWarehouseStatus | nobody else | `ViewWarehouseStatus` (`InfoRouter.WarehouseInfoAsync`) |
 | Read the server log files | [GetLogStatistics](GetLogStatistics.md), [GetLogStatistics1](GetLogStatistics1.md), [GetLogs](GetLogs.md) | nobody else | `ViewServerStatus` (`ServerLogs.CanReadLogsAsync`). An unknown `logType` is `4000` before the role check; `lastNDays` over 365 is `4000` |
 
 ## What the role cannot do
@@ -76,17 +76,17 @@ All four actions are checked with library id 0, so library managers never pass; 
 | Action | Web service calls | Who can | Error returned |
 |---|---|---|---|
 | Replace the licence | [UpdateApplicationLicense](UpdateApplicationLicense.md) | administrators only (`IsAdministrator()` in `InfoRouterExtensions.UpdateLicenseInformation`) | `4030` `Access denied.` |
-| Flush the application cache | [FlushApplicationCache](FlushApplicationCache.md) | administrators only (no role in the matrix) | `4030` `Access denied. This action is restricted to the following roles: The system administrator` |
+| Flush the application cache | FlushApplicationCache | administrators only (no role in the matrix) | `4030` `Access denied. This action is restricted to the following roles: The system administrator` |
 | Read an item's current access list without the history | [GetAccessList](GetAccessList.md) | anyone with `ReadSecurityAccessList` on the item; `orAuditLogReader` is false here | `4030` from the item permission check |
 | Add or remove members of `[Audit Managers]` or any role group | [AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md) | administrators only | `4030` `Access denied. This action is restricted to the following roles: The system administrator` |
-| Read or change application settings | [GetSystemBehaviorSettings](GetSystemBehaviorSettings.md), [GetEmailAndNotificationSettings](GetEmailAndNotificationSettings.md) and the `Set…` settings calls | Policy Managers (`UpdateApplicationSettingsAndPolicies`, `SettingServices.cs`) | `4030` naming Policy managers |
+| Read or change application settings | GetSystemBehaviorSettings, GetEmailAndNotificationSettings and the `Set…` settings calls | Policy Managers (`UpdateApplicationSettingsAndPolicies`, `SettingServices.cs`) | `4030` naming Policy managers |
 
 The weekly technical status report (`SendTechnicalStatusReport`) is a maintenance job in `IRDiagnostics.JobTypes()`, not a web service call; no role triggers it.
 
 ## Finding out whether the signed-in user has this role
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own user name: the check is `ListingGroupMembershipOfUser`, which allows a self action, so it always answers for yourself (`UserServices.GetGroupMembershipsOfUserAsync`, `UserExtensions.AccessAllowedForUserAsync`). A group with `GroupID` `101` in the answer is this role; `104` means the caller is an administrator and passes every check on this page.
-- [GetLicenseInfo](GetLicenseInfo.md) is a cheap probe for the server area as a whole: it has no fallback, so `success="true"` means the caller is an Audit Manager or an administrator, and `4030` means neither.
+- GetLicenseInfo is a cheap probe for the server area as a whole: it has no fallback, so `success="true"` means the caller is an Audit Manager or an administrator, and `4030` means neither.
 - For the audit-log area a library manager passes too, so a `4030` on a filtered log does not mean the caller lacks the role for every library; the Library Managers page says how to list the libraries someone manages.
 
 ## Notes

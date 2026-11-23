@@ -52,7 +52,7 @@ Anonymous access is not permitted. The `sysadmin` account and members of `[Admin
 
 ## Preconditions
 
-Rerouting must be allowed: the application setting **Allow rerouting of redirected tasks** (`RerouteRedirections` in [GetGeneralAppSettings](GetGeneralAppSettings.md) / [SetGeneralAppSettings](SetGeneralAppSettings.md)) must be `true`. It is `true` by default (a server where it was never saved allows rerouting); once an administrator turns it off, this call is refused with `4030` for every caller, the system administrator included. The setting applies to this call only: [SetUserTaskRedirection](SetUserTaskRedirection.md) and [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) work whatever it says.
+Rerouting must be allowed: the application setting **Allow rerouting of redirected tasks** (`RerouteRedirections` in GetGeneralAppSettings / SetGeneralAppSettings) must be `true`. It is `true` by default (a server where it was never saved allows rerouting); once an administrator turns it off, this call is refused with `4030` for every caller, the system administrator included. The setting applies to this call only: [SetUserTaskRedirection](SetUserTaskRedirection.md) and [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md) work whatever it says.
 
 The user specified by `userName` must **already have an active task redirection** configured. If no redirection exists, the call returns an error. Use [SetUserTaskRedirection](SetUserTaskRedirection.md) to create a new redirection.
 

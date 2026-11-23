@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # FlushApplicationCache API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. It also reads the content search settings file, `config\content-search-setting.json`, the SMTP settings file, `config\smtp-setting.json`, the infoRouter Connect settings file, `config\irconnect-setting.json`, and the sign-on settings file, `config\signon-setting.json`, again and puts them in effect, so a change made to any of these files by hand needs no restart. Only administrators can call it: the `sysadmin` account and members of `[Administrators]`.
 
 ## Endpoint
 
 ```
-/srv.asmx/FlushApplicationCache
+/api/UIInternals/FlushApplicationCache
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/FlushApplicationCache?authenticationTicket=...`
-- **POST** `/srv.asmx/FlushApplicationCache` (form data)
-- **SOAP** Action: `http://tempuri.org/FlushApplicationCache`
+- **GET** `/api/UIInternals/FlushApplicationCache?authenticationTicket=...`
+- **POST** `/api/UIInternals/FlushApplicationCache` (form data)
 
 ## Parameters
 
@@ -60,34 +69,17 @@ Flushes the in-memory application cache, forcing the system to reload configurat
 ### Request (GET)
 
 ```
-GET /srv.asmx/FlushApplicationCache?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/FlushApplicationCache?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/FlushApplicationCache HTTP/1.1
+POST /api/UIInternals/FlushApplicationCache HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/FlushApplicationCache"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <FlushApplicationCache xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </FlushApplicationCache>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -98,7 +90,7 @@ SOAPAction: "http://tempuri.org/FlushApplicationCache"
 async function flushApplicationCache() {
     const ticket = getUserAuthTicket();
 
-    const response = await fetch("/srv.asmx/FlushApplicationCache", {
+    const response = await fetch("/api/UIInternals/FlushApplicationCache", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `authenticationTicket=${encodeURIComponent(ticket)}`
@@ -114,33 +106,6 @@ async function flushApplicationCache() {
     } else {
         const error = root.getAttribute("error");
         throw new Error(error);
-    }
-}
-```
-
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var response = await client.FlushApplicationCacheAsync(authTicket);
-        var root = XElement.Parse(response.ToString());
-
-        if (root.Attribute("success")?.Value == "true")
-        {
-            Console.WriteLine("Application cache flushed successfully.");
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
     }
 }
 ```

@@ -148,7 +148,7 @@ const providers = [...options.querySelectorAll('OidcProvider')].map(p => ({
 
 ## Server Configuration
 
-The providers and authorities come from `config\signon-setting.json` in infoRouter's application folder; [GetSignOnSettings](GetSignOnSettings.md) describes the whole file. `DisplayName` is optional; without it the provider's `Name` is shown.
+The providers and authorities come from `config\signon-setting.json` in infoRouter's application folder; GetSignOnSettings describes the whole file. `DisplayName` is optional; without it the provider's `Name` is shown.
 
 ```json
 "OidcProviders": [
@@ -165,7 +165,7 @@ The providers and authorities come from `config\signon-setting.json` in infoRout
 ]
 ```
 
-A change to these takes effect after [FlushApplicationCache](FlushApplicationCache.md), without a restart. A `ClientSecret` typed in plain text is encrypted in the file when infoRouter reads it.
+A change to these takes effect after FlushApplicationCache, without a restart. A `ClientSecret` typed in plain text is encrypted in the file when infoRouter reads it.
 
 ## Notes
 

@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetSmtpSettings API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Replaces the SMTP settings and applies them at once, without restarting infoRouter. Then connects and signs in to the SMTP server with them, sending nothing, and returns whether that worked. Administrators only; [GetSmtpSettings](GetSmtpSettings.md) reads them.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetSmtpSettings
+/api/UIInternals/SetSmtpSettings
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetSmtpSettings?authenticationTicket=...&systemEmailAddress=...&smtpServer=...&smtpServerPort=...&smtpSSL=...&smtpConnectionTimeout=...&smtpSendUserName=...&smtpSendPassword=...&technicalContactEmail=...`
-- **POST** `/srv.asmx/SetSmtpSettings` (form data)
-- **SOAP** Action: `http://tempuri.org/SetSmtpSettings`
+- **GET** `/api/UIInternals/SetSmtpSettings?authenticationTicket=...&systemEmailAddress=...&smtpServer=...&smtpServerPort=...&smtpSSL=...&smtpConnectionTimeout=...&smtpSendUserName=...&smtpSendPassword=...&technicalContactEmail=...`
+- **POST** `/api/UIInternals/SetSmtpSettings` (form data)
 
 Prefer POST: a GET puts the password in the address, where proxies and server logs can keep it.
 
@@ -87,7 +96,7 @@ The `UpdateApplicationSettingsAndPolicies` administrative right (system administ
 
 ### Request (POST)
 ```
-POST /srv.asmx/SetSmtpSettings HTTP/1.1
+POST /api/UIInternals/SetSmtpSettings HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&systemEmailAddress=inforouter%40example.com&smtpServer=smtp.office365.com&smtpServerPort=587&smtpSSL=true&smtpConnectionTimeout=20&smtpSendUserName=inforouter%40example.com&smtpSendPassword=&technicalContactEmail=it%40example.com
@@ -98,4 +107,4 @@ authenticationTicket=abc123&systemEmailAddress=inforouter%40example.com&smtpServ
 - The settings are saved to `config\smtp-setting.json` in infoRouter's application folder, the password encrypted, and email sent from then on uses them.
 - infoRouter queues its email in a folder named after the system email address. When the address changes, email still queued under the previous one is moved to the new address's folder by the next run of the email job, and sent with the new settings. Email that failed before stays in the previous address's Exceptions folder.
 - To change the file by hand instead, edit it and call [FlushApplicationCache](FlushApplicationCache.md); infoRouter reads it again without a restart. A password typed into the file in plain text is encrypted in the file when infoRouter reads it.
-- [GetApplicationParameters](getApplicationParameters.md) shows the new values at once.
+- [GetApplicationParameters](../getApplicationParameters.md) shows the new values at once.

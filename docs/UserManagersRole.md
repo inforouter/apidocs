@@ -138,7 +138,7 @@ home library.
 | List a library's members below a given right | [GetMembersWithoutAccess](GetMembersWithoutAccess.md) | Administrators for any library; the library's managers for it | `4030` "Access denied. Only library managers can perform this operation." |
 | See other users' workflow tasks | [getTasks](getTasks.md), [GetTasks1](GetTasks1.md) with no document or flow | Administrators for every library; library managers for theirs (`WorkflowOperations.cs`) | not an error: the list holds only the caller's own tasks |
 | Create or delete property set definitions | [CreatePropertySetDefinition](CreatePropertySetDefinition.md), [DeletePropertySetDefinition](DeletePropertySetDefinition.md) | Administrators (`PropertySetOperations.cs`, CreatePropertySet; `InfoRouter.cs`, DeletePropertySetAsync) | `4030` "Only the system administrator can perform this operation" |
-| Flush the application cache | [FlushApplicationCache](FlushApplicationCache.md) | Administrators | `4030`, the role list naming the system administrator only |
+| Flush the application cache | FlushApplicationCache | Administrators | `4030`, the role list naming the system administrator only |
 
 ## Finding out whether the signed-in user has this role
 

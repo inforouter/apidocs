@@ -142,9 +142,9 @@ These additional parameters are returned only when the authenticated user is a s
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `INDEXCATALOG` | string | Where content search goes: a search service catalog's address or SYSTEMINDEX. Kept for existing integrations; new code should use [GetContentSearchSettings](GetContentSearchSettings.md) |
+| `INDEXCATALOG` | string | Where content search goes: a search service catalog's address or SYSTEMINDEX. Kept for existing integrations; new code should use GetContentSearchSettings |
 | `LOGLOGINS` | TRUE/FALSE | Whether user logins are logged |
-| `FILEUPLOADTIMEOUT` | integer | Upload timeout in seconds (default 900). Applied by the server to the REST upload calls: a request that has not finished arriving within this time is ended with `errorCode` `4080`. `0` or less means no limit. See `FileUploadTimeOut` in [GetGeneralAppSettings](GetGeneralAppSettings.md). |
+| `FILEUPLOADTIMEOUT` | integer | Upload timeout in seconds (default 900). Applied by the server to the REST upload calls: a request that has not finished arriving within this time is ended with `errorCode` `4080`. `0` or less means no limit. See `FileUploadTimeOut` in GetGeneralAppSettings. |
 | `ALLOWOWNERSHIPTRANSFER` | TRUE/FALSE | Whether document ownership transfer is allowed |
 | `SUBSCRIPTIONNOTIFICATIONS` | TRUE/FALSE | Whether subscription email notifications are enabled |
 | `SENDEMAIL` | TRUE/FALSE | Whether the Send To email feature is enabled |
@@ -152,7 +152,7 @@ These additional parameters are returned only when the authenticated user is a s
 
 ### SMTP Configuration
 
-These come from `config\smtp-setting.json`. [GetSmtpSettings](GetSmtpSettings.md) returns all the SMTP settings, and [SetSmtpSettings](SetSmtpSettings.md) changes them.
+These come from `config\smtp-setting.json`. GetSmtpSettings returns all the SMTP settings, and SetSmtpSettings changes them.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
