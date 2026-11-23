@@ -24,15 +24,15 @@ Returns the server's current alerts: the things an administrator should know abo
 
 ### Success Response
 ```xml
-<root success="true">
+<response success="true" error="">
   <Alert Type="WarehouseDiskSpaceLow" Subject="D:\" Severity="Warning" SeverityValue="2"
          Description="The disk D:\ is almost full." Detail="18.2 GB free of 500 GB"
          FirstSeen="2026-11-19T09:10:00" LastSeen="2026-11-19T14:10:00"
          Dismissed="true" DismissedBy="jsmith" DismissedOn="2026-11-19T10:02:00" />
-</root>
+</response>
 ```
 
-No alerts is `<root success="true" />`. The most serious alerts come first, then the oldest.
+No alerts is `<response success="true" error="" />`. The most serious alerts come first, then the oldest.
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
@@ -65,8 +65,13 @@ No alerts is `<root success="true" />`. The most serious alerts come first, then
 
 ### Error Response
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="[ErrorCode] Error message" errorCode="4030" />
 ```
+
+| errorCode | When |
+|-----------|------|
+| 4010 | No authentication ticket, or an invalid or expired one |
+| 4030 | The caller is not a system administrator |
 
 ## Required Permissions
 

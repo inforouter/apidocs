@@ -26,19 +26,20 @@ Dismisses one server alert. The alert stays in the list of [GetServerAlerts](Get
 
 ### Success Response
 ```xml
-<root success="true" />
+<response success="true" error="" />
 ```
 
 ### Error Response
 ```xml
-<root success="false" error="[ErrorCode] Error message" />
+<response success="false" error="[ErrorCode] Error message" errorCode="4030" />
 ```
 
-| Situation | Answer |
-|-----------|--------|
-| `alertType` is empty or not an alert type | `4000`, with the list of types |
-| There is no such alert (the server may have cleared it meanwhile) | `4040` |
-| The caller is not a system administrator | `4030` |
+| errorCode | When |
+|-----------|------|
+| 4000 | `alertType` is empty or not an alert type; the error lists the types |
+| 4010 | No authentication ticket, or an invalid or expired one |
+| 4030 | The caller is not a system administrator |
+| 4041 | There is no such alert (the server may have cleared it meanwhile) |
 
 ## Required Permissions
 
