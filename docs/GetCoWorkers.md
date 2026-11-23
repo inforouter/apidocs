@@ -1,5 +1,7 @@
 # GetCoWorkers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the co-workers of the currently authenticated user. Co-workers are all users who share at least one domain/library membership with the current user.
 
 ## Endpoint

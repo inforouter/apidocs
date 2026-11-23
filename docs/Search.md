@@ -1,5 +1,7 @@
 # Search API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Prepares a search result set using criteria provided in XML format. The search is executed server-side and the results are stored in the user's session. Use `GetNextSearchPage` and `GetPreviousSearchPage` to page through the results after calling `Search`.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# AddToFavorites API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds the specified document or folder to the favorites list of the currently authenticated user. Both documents and folders are supported. Document shortcuts are resolved to their target document before being added.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetUserGroupMembers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of members of the specified user group with full detail, sorted by first name and last name ascending.
 
 ## Endpoint

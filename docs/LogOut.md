@@ -1,5 +1,7 @@
 # LogOut API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Logs out the authenticated user by invalidating their authentication ticket and clearing their server-side session variables. After a successful logout, the ticket can no longer be used for API calls. The call is safe to repeat: a ticket that names no session is answered with success.
 
 ## Endpoint

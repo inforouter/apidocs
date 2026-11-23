@@ -1,5 +1,7 @@
 # GetNextSearchPage1 API
 
+**Available in:** infoRouter 9.0 and later
+
 Retrieves the next page of results from a previously prepared search, with the number of rows chosen for this call. It is [GetNextSearchPage](GetNextSearchPage.md) with one more parameter, `rowCount`; the response is the same.
 
 ## Endpoint

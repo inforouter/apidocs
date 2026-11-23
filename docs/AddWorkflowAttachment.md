@@ -1,5 +1,7 @@
 # AddWorkflowAttachment API
 
+**Available in:** infoRouter 9.0 and later
+
 Attaches a document to an active workflow task. The attached document becomes visible in the task's Attachments list and is accessible to the task assignee and supervisors.
 
 ## Endpoint

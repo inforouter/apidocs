@@ -1,5 +1,7 @@
 ﻿# DeleteDocumentVersion API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Permanently deletes a specific version of a document. The deletion is irreversible -" the version's file content and metadata are removed from the warehouse.
 
 ## Endpoint

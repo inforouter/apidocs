@@ -1,5 +1,7 @@
 ﻿# GetAllUsers2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a paged and filtered list of infoRouter users with full detail, supporting all filters from `GetAllUsers1` plus an additional user type filter (author vs read-only).
 
 ## Endpoint

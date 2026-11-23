@@ -1,5 +1,7 @@
 ﻿# AddUsergroupMember API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds the specified user to the member list of the specified user group.
 
 ## Endpoint

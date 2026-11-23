@@ -1,5 +1,7 @@
 # GetDocumentWorkflow API
 
+**Available in:** infoRouter 9.0 and later
+
 Retrieves the details of a specific running workflow instance on a document. Returns workflow metadata including dates, submitter, supervisor lists and on-end settings, and every step of the workflow with each step's tasks in full.
 
 Use [GetDocumentWorkflows](GetDocumentWorkflows.md) to list all workflow instances (current and historical) for a document before calling this API to identify the `workflowId`.

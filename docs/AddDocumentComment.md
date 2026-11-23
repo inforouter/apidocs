@@ -1,5 +1,7 @@
 # AddDocumentComment API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a comment to the specified document. Comments are visible to all users who have access to the document and are tracked with author and timestamp information.
 
 ## Endpoint

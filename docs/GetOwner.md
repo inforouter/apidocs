@@ -1,5 +1,7 @@
 # GetOwner API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the owner of the document or folder at the specified path.
 
 ## Endpoint

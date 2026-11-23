@@ -1,5 +1,7 @@
 ﻿# UnarchiveDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Un-archives a previously archived domain/library, making it an active online library again. This operation changes the library's archive status flag, allowing regular user access and document operations to resume.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # DeleteDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Permanently deletes the specified domain/library and all of its contents, including all folders, documents, versions, and associated data. This operation is irreversible.
 
 ## Endpoint

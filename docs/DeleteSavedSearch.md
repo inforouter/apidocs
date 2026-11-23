@@ -1,5 +1,7 @@
 # DeleteSavedSearch API
 
+**Available in:** infoRouter 9.0 and later
+
 Deletes a saved search or search page definition by ID.
 
 ## Endpoint

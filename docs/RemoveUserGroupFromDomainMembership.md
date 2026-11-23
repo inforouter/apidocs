@@ -1,5 +1,7 @@
 # RemoveUserGroupFromDomainMembership API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the specified user group from the specified domain/library member list.
 
 ## Endpoint

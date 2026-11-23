@@ -1,5 +1,7 @@
 # UploadTiffAsPDFWithHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a TIFF image using a pre-staged chunked upload handler and stores it as a PDF document at the specified path. The server converts the TIFF to PDF automatically before storing. Use this API for large TIFF files that need to be uploaded in chunks.
 
 ## Endpoint

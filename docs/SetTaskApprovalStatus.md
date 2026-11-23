@@ -1,5 +1,7 @@
 # SetTaskApprovalStatus API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the approval decision on a workflow task. This is used for tasks that have an **Approval** requirement, where the assignee must record their approval decision (Approve or Reject) before completing the task.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # SetTaskPriority API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the priority of a workflow task. Priority helps assignees and supervisors gauge the urgency of pending work.
 
 ## Endpoint

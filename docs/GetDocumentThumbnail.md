@@ -1,5 +1,7 @@
 ﻿# GetDocumentThumbnail API
 
+**Available in:** infoRouter 9.0 and later
+
 Retrieves the thumbnail image bytes for a document. Returns the raw JPEG image data, whether the server generated it from the document or it was uploaded via `UpdateDocumentThumbnail`.
 
 ## Endpoint

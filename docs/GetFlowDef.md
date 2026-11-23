@@ -1,5 +1,7 @@
 # GetFlowDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the complete definition of a workflow, including all step definitions and their task definitions.
 
 ## Endpoint

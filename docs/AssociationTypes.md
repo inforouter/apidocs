@@ -1,5 +1,7 @@
 # AssociationTypes API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of association types defined in the system. Each association type has a forward name (used when the current item is the source of the association) and a reverse name (used when the current item is the target). Use this API to populate association type drop-downs, validate `AssociationTypeID` values before calling [AssociateDocument](AssociateDocument.md), or display human-readable type names alongside association data returned by the `Associated*` APIs.
 
 ## Endpoint

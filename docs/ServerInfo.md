@@ -1,5 +1,7 @@
 # ServerInfo API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns information about the infoRouter Server instance including version, server time, license details, and configuration settings.
 
 ## Endpoint

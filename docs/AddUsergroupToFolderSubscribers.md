@@ -1,5 +1,7 @@
 ﻿# AddUsergroupToFolderSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a specified user group to the subscription list of a folder, configuring which events trigger email notifications to all members of that group. Optionally cascades the subscription to all existing sub-folders. This is the user group equivalent of `AddUserToFolderSubscribers` -" it subscribes all members of a group at once rather than individual users.
 
 ## Endpoint

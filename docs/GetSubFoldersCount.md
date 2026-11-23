@@ -1,5 +1,7 @@
 # GetSubFoldersCount API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the count of direct subfolders within the specified folder. This is a lightweight alternative to `GetFolderStatistics` when only the subfolder count is needed.
 
 ## Endpoint

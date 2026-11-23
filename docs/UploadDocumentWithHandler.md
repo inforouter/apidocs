@@ -1,5 +1,7 @@
 # UploadDocumentWithHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Finalizes a chunked file upload and creates a new document or a new version of an existing document at the specified path. The file content must have been uploaded in chunks beforehand using `CreateUploadHandler` and `UploadFileChunk`. This is the base handler-finalization method; use `UploadDocumentWithHandler1` through `UploadDocumentWithHandler3` for additional options.
 
 ## Endpoint

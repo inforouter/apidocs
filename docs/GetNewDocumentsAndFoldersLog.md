@@ -1,5 +1,7 @@
 # GetNewDocumentsAndFoldersLog API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the log of newly created documents and folders matching the specified date range and path filter.
 
 ## Endpoint

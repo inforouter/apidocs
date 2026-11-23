@@ -1,5 +1,7 @@
 ﻿# UpdateHtmlDocument API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the HTML content (and optionally the description) of an existing HTML document. The document is checked out, a new version is created with the provided HTML body, and then published according to `publishOption`.
 
 ## Endpoint

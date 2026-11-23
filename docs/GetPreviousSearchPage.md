@@ -1,5 +1,7 @@
 ﻿# GetPreviousSearchPage API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 
 
 Retrieves the previous page of results from a previously prepared search. This API moves the page cursor backward by one page relative to the current position. It must be called after a successful `Search` call, and is typically used after one or more `GetNextSearchPage` calls to allow the user to navigate back through the result set. When the first page is reached, the `FirstPage` attribute in the response is set to `true`.

@@ -1,5 +1,7 @@
 # GetSubscribedFoldersByUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paginated list of folders that the specified user is subscribed to. This API is similar to `GetSubscriptions` but targets a specific user, returns folders only, and supports pagination.
 
 ## Endpoint

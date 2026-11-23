@@ -1,5 +1,7 @@
 # ChangeUserPassword1 API
 
+**Available in:** infoRouter 9.0 and later
+
 Changes a user's password. **Your own password takes your current password**, checked like a sign-in; another user's password is set by right, as with [ChangeUserPassword](ChangeUserPassword.md).
 
 ## Endpoint

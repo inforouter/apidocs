@@ -1,5 +1,7 @@
 # GetLocalGroups API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of local user groups defined within the specified domain/library, sorted alphabetically by group name.
 
 ## Endpoint

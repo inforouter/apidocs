@@ -1,5 +1,7 @@
 # GetTask API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full details of a single workflow task by its task ID.
 
 ## Endpoint

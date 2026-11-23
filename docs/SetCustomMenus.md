@@ -1,5 +1,7 @@
 # SetCustomMenus API
 
+**Available in:** infoRouter 9.0 and later
+
 Replaces every custom menu the document list draws, and their entries, in the order given. A menu named after a built-in one (`FILE`, `EDIT`, `TOOLS`, `ADVANCED`, `VIEW`, `POPMENU`) adds its items to that menu; `POPMENU` is the right-click menu. Any other name becomes a new heading on the menu bar. [GetCustomMenus](GetCustomMenus.md) answers the new set at once.
 
 ## Endpoint

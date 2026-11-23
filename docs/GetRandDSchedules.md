@@ -1,5 +1,7 @@
 # GetRandDSchedules API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a summary list of all Retention and Disposition (R&D) schedule definitions defined in the system. For full details on a specific schedule, use [GetRandDScheduleInfo](GetRandDScheduleInfo.md).
 
 ## Endpoint

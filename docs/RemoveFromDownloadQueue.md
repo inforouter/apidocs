@@ -1,5 +1,7 @@
 # RemoveFromDownloadQueue API
 
+**Available in:** infoRouter 9.0 and later
+
 Removes a document or folder from the current user's download queue by path.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetDispositionLog API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the disposition log for documents, folders, and libraries matching the specified date range and path filter. Each entry represents a retention and disposition action performed on an object.
 
 ## Endpoint

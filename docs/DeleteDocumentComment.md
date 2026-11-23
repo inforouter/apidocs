@@ -1,5 +1,7 @@
 ﻿# DeleteDocumentComment API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes a specific comment from a document. Comments are uniquely identified by the combination of the comment author's user ID and the date/time the comment was posted.
 
 ## Endpoint

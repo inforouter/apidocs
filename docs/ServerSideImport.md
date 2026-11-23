@@ -1,5 +1,7 @@
 ﻿# ServerSideImport API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 > **Obsolete:** This API has been retired and is no longer functional. All calls return an error regardless of the parameters supplied. Do not use this API in new integrations.
 
 Previously intended to import folders and documents located on the server's file system into an infoRouter path. This functionality has been removed and the endpoint is retained only for backward compatibility.

@@ -1,5 +1,7 @@
 # GetTagDefintions API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 > **Obsolete:** This API name contains a typo (`Defintions` instead of `Definitions`). It is kept for backward compatibility only. Use **[GetTagDefinitions](GetTagDefinitions.md)** for all new integrations.
 
 Returns the list of all tag definitions configured in the infoRouter system. Tags are predefined text labels that can be applied to documents for categorisation, filtering, and search.

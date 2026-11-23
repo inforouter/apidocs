@@ -1,5 +1,7 @@
 # CreateHtmlDocument API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a new HTML document in the specified folder. The HTML content is stored in the document's MetaTag field as an XML-encoded form data structure, which is the native infoRouter format for HTML form documents.
 
 ## Endpoint

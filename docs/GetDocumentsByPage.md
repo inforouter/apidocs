@@ -1,5 +1,7 @@
 ﻿# GetDocumentsByPage API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a single page of documents in the specified infoRouter folder path in **short form**. Supports optional name filtering and 1-based page number navigation. The response uses the same abbreviated element names as `GetDocuments1` but adds paging attributes (`page`, `pageSize`) to the root element. Use this API when iterating through large folders one page at a time.
 
 ## Endpoint

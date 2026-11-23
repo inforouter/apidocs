@@ -1,5 +1,7 @@
 ﻿# DeleteDownloadHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes a download handler and discards its associated temporary file on the server. Use this to clean up after a chunked download is complete or if the download session is cancelled before all chunks are retrieved.
 
 ## Endpoint

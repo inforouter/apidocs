@@ -1,5 +1,7 @@
 # GetAllDomainStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the statistics of every domain/library in the caller's library list, in one call. Each entry is what [GetDomainStatistics](GetDomainStatistics.md) returns for one library, so a statistics page needs no call per library.
 
 ## Endpoint

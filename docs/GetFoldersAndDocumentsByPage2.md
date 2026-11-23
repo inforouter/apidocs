@@ -1,5 +1,7 @@
 # GetFoldersAndDocumentsByPage2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a paged list of documents and folders at the specified path using an advanced XML-based filter and sort criteria. This API integrates with the infoRouter full-text search engine and supports complex multi-field filtering and relevance ranking. After this call, use the search session to retrieve results page by page.
 
 ## Endpoint

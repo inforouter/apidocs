@@ -1,5 +1,7 @@
 # SearchRecycledItems1 API
 
+**Available in:** infoRouter 9.0 and later
+
 Searches the deleted documents and folders of the whole instance, one page at a time, sorted, with the total number of matches. `searchIn` says where to look: the users' recycle bins, the system recycle bin, or both (the default); `path` narrows it to the items deleted from one library or folder. It takes the filters of [SearchRecycledItems](SearchRecycledItems.md), which always searches both bins and returns every match at once, and returns the same item elements. See [What happens to a deleted document or folder](rules/recycle-bin.md#the-system-recycle-bin-and-searching-it).
 
 ## Endpoint

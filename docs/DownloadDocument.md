@@ -1,5 +1,7 @@
 ﻿# DownloadDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Downloads the latest version of a document and returns its content as a raw byte array. This is a single-call download suitable for small to medium-sized files. For large files, use the chunked download workflow (`GetDownloadHandler` -' `DownloadFileChunk` -' `DeleteDownloadHandler`) instead.
 
 ## Endpoint

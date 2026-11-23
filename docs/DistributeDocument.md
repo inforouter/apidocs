@@ -1,5 +1,7 @@
 # DistributeDocument API
 
+**Available in:** infoRouter 9.0 and later
+
 Sends an immediate OnChange distribution notification email to all subscribers of a document. This triggers the same notification that is automatically sent when a document changes, but fires it on demand regardless of whether the document has changed.
 
 ## Endpoint

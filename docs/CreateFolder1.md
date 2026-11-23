@@ -1,5 +1,7 @@
 # CreateFolder1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new subfolder with an optional description inside the specified parent folder. The parent folder must already exist. Use this variant when you need to specify both the parent path and the new folder name separately, and optionally provide a description.
 
 ## Endpoint

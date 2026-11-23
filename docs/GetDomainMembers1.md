@@ -1,5 +1,7 @@
 # GetDomainMembers1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of users and user groups who are members of the specified domain/library, with control over sort order and the level of detail returned for each user.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # SetExpirationDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the expiration date of the specified document. When a document reaches its expiration date, infoRouter can optionally notify a designated user a configurable number of days before expiration. Expiration is informational metadata -" it does not automatically archive or delete the document.
 
 ## Endpoint

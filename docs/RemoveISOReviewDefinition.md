@@ -1,5 +1,7 @@
 # RemoveISOReviewDefinition API
 
+**Available in:** infoRouter 9.0 and later
+
 Removes the ISO review schedule from a document. After removal, no periodic review tasks or workflows will be generated for the document.
 
 ## Endpoint

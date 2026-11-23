@@ -1,5 +1,7 @@
 # GetDocumentExpirationDate API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the expiration date assigned to a document.
 
 ## Endpoint

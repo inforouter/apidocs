@@ -1,5 +1,7 @@
 ﻿# GetSubscribedDocumentsByUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paginated list of documents that the specified user is subscribed to. This API is similar to `GetSubscriptions` but targets a specific user and supports pagination.
 
 ## Endpoint

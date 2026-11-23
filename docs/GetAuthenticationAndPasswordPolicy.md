@@ -1,5 +1,7 @@
 # GetAuthenticationAndPasswordPolicy API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the authentication and password policy settings including password complexity requirements and password re-prompt actions.
 
 ## Endpoint

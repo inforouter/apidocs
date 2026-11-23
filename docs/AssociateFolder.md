@@ -1,5 +1,7 @@
 # AssociateFolder API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates an association between the specified source folder and a target item (document or folder). This lets you link a folder to related content so that users can navigate between conceptually connected items. Use this API to cross-reference a folder with documents or other folders it is related to.
 
 > **Note:** Because the source is always a folder, the association type is always `Related` regardless of the `AssociationTypeID` value supplied. To create typed associations (Rendition, Copy, ParentChild, Derivation), both sides must be documents -" use [AssociateDocument](AssociateDocument.md) instead.

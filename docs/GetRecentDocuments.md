@@ -1,5 +1,7 @@
 ﻿# GetRecentDocuments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of documents recently accessed by the current authenticated user. The list is capped by the system-wide **Recent Document Count** setting (default: 20). Only document items are returned -" no folders. Optional flags control whether additional detail (property sets, security, owner, version history) is included for each document.
 
 ## Endpoint

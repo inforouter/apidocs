@@ -1,5 +1,7 @@
 ﻿# ArchiveDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Archives a domain/library, changing its status to make it an archived (offline) library. Archived libraries are typically hidden from regular user access and searches, used for long-term storage of inactive projects or historical data.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # EmptyAllUserRecycleBins API
 
+**Available in:** infoRouter 9.0 and later
+
 Empties every user's Recycle Bin into the system recycle bin, one user at a time. It is
 [EmptyRecycleBin](EmptyRecycleBin.md) for every user at once. **Nothing is purged.** The users can no longer see
 ([GetRecycleBinContent](GetRecycleBinContent.md)) or restore the items themselves, but a system administrator can still find them

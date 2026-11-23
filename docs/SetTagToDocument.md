@@ -1,5 +1,7 @@
 ﻿# SetTagToDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Applies a tag to the latest version of the specified document. If the document's publishing rule is set to **Tagged** and the supplied tag text matches the rule's configured tag, the latest version is also automatically published. Use this API to mark a document version with a classification or approval label as part of a review or workflow process.
 
 ## Endpoint

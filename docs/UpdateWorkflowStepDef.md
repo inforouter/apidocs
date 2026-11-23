@@ -1,5 +1,7 @@
 # UpdateWorkflowStepDef API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the display name and on-start folder move of an existing workflow step definition.
 
 ## Endpoint

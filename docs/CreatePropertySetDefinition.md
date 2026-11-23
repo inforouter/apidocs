@@ -1,5 +1,7 @@
 # CreatePropertySetDefinition API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new custom property set definition. A property set is a set of custom metadata fields that can be applied to documents, folders, and/or users. The property set name is stored in uppercase and must be unique across the system. This API always creates a **public** (non-private) property set. To create a private property set, use [CreatePropertySetDefinition1](CreatePropertySetDefinition1.md).
 
 ## Endpoint

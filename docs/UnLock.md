@@ -1,5 +1,7 @@
 # UnLock API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Unlocks (checks in) a document or all documents in a folder at the specified path. When `force` is `true`, the calling user can unlock a document currently locked by another user -" this is an administrative action that discards the other user's in-progress changes. When `force` is `false`, only the user who locked the document can unlock it.
 
 ## Endpoint

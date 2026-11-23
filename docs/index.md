@@ -12,6 +12,15 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 2. **Make API Calls**: Use the ticket in subsequent API calls
 3. **Handle Responses**: All responses are in XML format
 
+## Versions
+
+Each API page says, right under its title, which infoRouter versions have that API:
+
+- **Available in: infoRouter 8.7 and 9.x** - the API exists on an 8.7 server and on every 9.x server.
+- **Available in: infoRouter 9.0 and later** - the API is new in version 9; an 8.7 server does not have it.
+
+The pages describe the API as version 9 answers it. On an 8.7 server the same API takes the same parameters, but details of the answer (error codes, added attributes) can differ.
+
 ## API Categories
 
 ### Authentication

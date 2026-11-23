@@ -1,5 +1,7 @@
 # UploadDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array. If no document exists at the path, a new document is created. If a document already exists, a new version is added. This is the base upload method; use numbered variants (`UploadDocument1` through `UploadDocument4`) for additional options such as version comments, post-upload checkout, and extended XML parameters.
 
 ## Endpoint

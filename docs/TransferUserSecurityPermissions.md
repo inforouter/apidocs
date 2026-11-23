@@ -1,5 +1,7 @@
 # TransferUserSecurityPermissions API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers security permissions (ACL entries) from one user to another. The target user receives all folder and document access rights that were individually assigned to the source user.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

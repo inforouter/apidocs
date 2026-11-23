@@ -1,5 +1,7 @@
 ﻿# SearchRecycledItems API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Searches the deleted documents and folders of the whole instance, in the users' recycle bins and the system recycle bin together, using optional filter criteria. To search one of the two only, or a page at a time, use [SearchRecycledItems1](SearchRecycledItems1.md) with `searchIn`. Returns matching recycled items with the same attributes as `GetRecycleBinContent`, including the `Handler` value needed to purge or restore individual items. This is an administrator-only API that provides system-wide visibility into all recycled content. Use it to audit deletion activity, identify items to recover, or build administrative cleanup tooling.
 
 > **This reads the whole instance's recycled items**, not the caller's own, in both recycle bins at

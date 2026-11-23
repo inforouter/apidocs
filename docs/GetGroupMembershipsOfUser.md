@@ -1,5 +1,7 @@
 # GetGroupMembershipsOfUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the user group memberships of the specified user, including both global and domain-level groups.
 
 ## Endpoint

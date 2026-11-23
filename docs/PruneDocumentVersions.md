@@ -1,5 +1,7 @@
 ﻿# PruneDocumentVersions API
 
+**Available in:** infoRouter 9.0 and later
+
 Deletes old versions of a document, retaining the N most recent published and M most recent unpublished versions. All older versions are permanently deleted.
 
 ## Endpoint

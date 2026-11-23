@@ -1,5 +1,7 @@
 # GetDueTaskDocuments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the documents whose due tasks need the caller's attention: tasks **assigned to** them, tasks they **assigned**, and tasks they **supervise**. Overdue tasks are included. Each document is listed once, in the order of its earliest due task, and says in `DueTaskRoles` why it is listed.
 
 ## Endpoint

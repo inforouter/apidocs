@@ -1,5 +1,7 @@
 ﻿# GetDownloadHandlerByVersion API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Stages a specific version of a document as a temporary server-side file and returns a download handler GUID along with file metadata and the negotiated chunk size. This is the version-aware counterpart to `GetDownloadHandler`, which always stages the latest version. Use `DownloadFileChunk` to retrieve the file data in sequential chunks, then `DeleteDownloadHandler` to clean up the temporary file when done.
 
 ## Endpoint

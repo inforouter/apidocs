@@ -1,5 +1,7 @@
 ﻿# GetDocumentTextOnlyContent API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the plain-text alternative content stored alongside the published version of a document, or alongside its latest version when the document has never been published. This text-only content is a separately stored artifact in the document warehouse -" it is only present if it has been explicitly set (for example, by a conversion process or via `SetDocumentTextOnlyContent`). If the document has no versions at all, is offline, or is a shortcut or URL type, an error is returned.
 
 ## Endpoint

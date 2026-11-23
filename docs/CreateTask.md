@@ -1,5 +1,7 @@
 # CreateTask API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a standalone ad-hoc workflow task and assigns it to a document.
 
 ## Endpoint

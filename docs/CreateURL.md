@@ -1,5 +1,7 @@
 ﻿# CreateURL API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new URL document or updates the target address of an existing URL document at the specified path. URL documents are infoRouter items that store a hyperlink -" when opened, they redirect the user to the stored web address.
 
 When the target `Path` does not exist, a new URL document is created. When it already exists, a new version is created with the updated address.

@@ -1,5 +1,7 @@
 # SetDocumentCutoffDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Applies a cutoff date to the specified document. The document is locked from the moment the date is saved, even when the date is in the future: it can no longer be checked out, so no new versions can be added. If the document has a Retention & Disposition (R&D) schedule, its retention and disposition dates are recalculated from the cutoff date. Document subscribers are notified.
 
 > **Note:** If the document already has a cutoff date, this call returns success without changing it. To change the date, call `RemoveDocumentCutoffDate` first, then call `SetDocumentCutoffDate` with the new date.

@@ -1,5 +1,7 @@
 # GetUserViewLogLite API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paginated read/view log history for a specified user filtered by a date range, along with the total matching record count. This is the paginated version of `GetUserViewLog1` — suited for large result sets where you want to retrieve records in pages rather than all at once.
 
 ## Endpoint

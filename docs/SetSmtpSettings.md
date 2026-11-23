@@ -1,5 +1,7 @@
 # SetSmtpSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Replaces the SMTP settings and applies them at once, without restarting infoRouter. Then connects and signs in to the SMTP server with them, sending nothing, and returns whether that worked. Administrators only; [GetSmtpSettings](GetSmtpSettings.md) reads them.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetMembersWithoutAccess API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the members of a domain/library whose right on the library is below a minimum: by default, the members who cannot read its documents.
 
 Membership of a library gives no right of its own. A member with no access list entry gets the **Library Members** entry, and a new library has that as **List**, so a user who is only made a member (by a bulk import, for instance) can see the library and open nothing in it. This call finds those users.

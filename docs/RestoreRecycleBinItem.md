@@ -1,5 +1,7 @@
 ﻿# RestoreRecycleBinItem API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Restores a single document or folder from the Recycle Bin back into the infoRouter folder hierarchy. The item is identified by its `Handler` value, which is obtained from `GetRecycleBinContent`. Optionally, a different target folder can be specified; if omitted the item is restored to its original location. Use this API to recover accidentally deleted content programmatically.
 
 ## Endpoint

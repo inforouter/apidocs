@@ -1,5 +1,7 @@
 ﻿# GetAddInInfo API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns version and description information for the specified infoRouter client Add-in. Add-in clients (such as the Microsoft Word or Outlook add-ins) call this API at startup to check whether their installed version is current. You can also call it programmatically to verify whether a particular add-in has been deployed to the server and to read its published version metadata.
 
 > **This operation takes no authentication ticket.** There is no parameter for one, so every

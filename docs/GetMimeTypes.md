@@ -1,5 +1,7 @@
 # GetMimeTypes API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of all defined MIME types in the system. Each entry includes the file extension, a human-readable description, and the MIME type string. The list is sorted alphabetically by extension type.
 
 ## Endpoint

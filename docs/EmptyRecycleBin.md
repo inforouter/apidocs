@@ -1,5 +1,7 @@
 ﻿# EmptyRecycleBin API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Empties the Recycle Bin of the currently authenticated user: its items move to the system recycle bin. The user no longer sees them in [GetRecycleBinContent](GetRecycleBinContent.md) and can no longer restore them; a system administrator can still find, restore or purge them there. Nothing is deleted for good. To empty every user's Recycle Bin at once, an administrator uses [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md).
 
 ## Endpoint

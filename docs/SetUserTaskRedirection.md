@@ -1,5 +1,7 @@
 ﻿# SetUserTaskRedirection API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets or replaces a task redirection for a user. During the configured date window, incoming tasks assigned to `userName` are automatically forwarded to `redirectTasksToUser` instead.
 
 If the user already has a task redirection configured, it is atomically replaced by the new one.

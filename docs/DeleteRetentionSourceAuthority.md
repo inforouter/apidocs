@@ -1,5 +1,7 @@
 ﻿# DeleteRetentionSourceAuthority API
 
+**Available in:** infoRouter 9.0 and later
+
 Deletes a retention source authority from the system. The authority must not be in use by any retention and disposition schedules.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# DownloadZipWithHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Stages a zip archive of specified documents and folders on the server and returns a download handler GUID for subsequent chunked retrieval via `DownloadFileChunk`. Unlike `DownloadZip`, this API returns XML (not raw bytes), supports partial results, and provides log details when items cannot be included.
 
 ## Endpoint

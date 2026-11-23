@@ -1,5 +1,7 @@
 # SetDocumentRandDSchedule API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Assigns a Retention and Disposition (R&D) schedule to a document identified by path. The schedule controls how long the document must be retained and what happens when the retention period expires.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetSmtpSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the SMTP settings in effect: the address infoRouter's email comes from, the SMTP server, its port, encryption and timeout, the account infoRouter signs in with, and who receives the technical status reports. The password is never returned. Administrators only; [SetSmtpSettings](SetSmtpSettings.md) changes them.
 
 ## Endpoint

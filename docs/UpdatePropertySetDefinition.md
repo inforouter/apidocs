@@ -1,5 +1,7 @@
 # UpdatePropertySetDefinition API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the metadata of an existing custom property set definition: its name, caption, which object types it applies to, and its domain restrictions. The `PrivatePropertySet` flag is **not** changed by this variant -" use [UpdatePropertySetDefinition1](UpdatePropertySetDefinition1.md) to update it.
 
 ## Endpoint

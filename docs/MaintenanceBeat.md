@@ -1,5 +1,7 @@
 ﻿# MaintenanceBeat API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 > ----- **This API is obsolete and no longer functional.** The method body has been fully commented out. Calling this endpoint does nothing and returns no response. It is retained in the API surface for backward compatibility only. Do not use this API in new integrations.
 
 Previously, this endpoint was intended to be called by infoRouter's internal maintenance scheduler to trigger server-side self-maintenance tasks such as index cleanup, session expiry, and background job execution. These maintenance operations are now managed automatically by the server's built-in background service infrastructure without requiring an external HTTP trigger.

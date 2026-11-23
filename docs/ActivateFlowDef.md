@@ -1,5 +1,7 @@
 # ActivateFlowDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Activates a workflow definition, allowing documents to be submitted to the workflow. The workflow must pass all validation rules before it can be activated.
 
 

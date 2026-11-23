@@ -1,5 +1,7 @@
 # DeletePropertySetRowForUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes one or more property set rows from the specified infoRouter user.
 
 ## Endpoint

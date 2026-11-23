@@ -1,5 +1,7 @@
 ﻿# UpdatePropertySetRow API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates an existing property set row on a document or folder identified by path. The path is
 resolved as a document first; if no document is found, it is resolved as a folder.
 

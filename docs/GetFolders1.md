@@ -1,5 +1,7 @@
 # GetFolders1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of direct subfolders of the specified folder in short form (folder names and IDs only). This is a lightweight alternative to `GetFolders` when you do not need rules, property sets, security, or owner details.
 
 ## Endpoint

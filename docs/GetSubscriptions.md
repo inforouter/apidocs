@@ -1,5 +1,7 @@
 ﻿# GetSubscriptions API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of documents and folders that the current authenticated user is subscribed to. Subscriptions are created via the `AddUserToDocumentSubscribers` and `AddUserToFolderSubscribers` APIs. The response uses the same full-detail folder and document element format as `GetFoldersAndDocuments`. Optional flags control whether additional detail (folder rules, property sets, security, owner, version history) is included for each item.
 
 ## Endpoint

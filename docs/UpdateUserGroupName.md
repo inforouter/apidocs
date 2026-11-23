@@ -1,5 +1,7 @@
 # UpdateUserGroupName API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the name of the specified infoRouter user group.
 
 ## Endpoint

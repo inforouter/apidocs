@@ -1,5 +1,7 @@
 # GetAllWorkflowStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the statistics of every workflow definition of a domain/library, or of all the caller's libraries, in one call. Each entry is what [GetWorkflowStatistics](GetWorkflowStatistics.md) returns for one workflow, so a workflow report needs no call per workflow.
 
 ## Endpoint

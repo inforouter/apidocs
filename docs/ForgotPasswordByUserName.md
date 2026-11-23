@@ -1,5 +1,7 @@
 # ForgotPasswordByUserName API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Initiates the self-service password-reset flow for the infoRouter user with the specified login name. The server generates a one-time reset token and sends a password-reset email to the address registered on that account. The token is then used with `ChangePasswordUsingSecretText` to set a new password.
 
 This is the login-name variant of `ForgotPassword`. Use it when the user knows their user name but not the email address associated with their account, or when the calling application works with user names rather than email addresses.

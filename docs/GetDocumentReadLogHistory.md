@@ -1,5 +1,7 @@
 ﻿# GetDocumentReadLogHistory API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 
 
 Returns the complete read/view log history for a **single specified user** on a document. Each entry records one time the user opened or accessed a specific version of the document. This is the per-user variant of `GetDocumentViewLog`: instead of returning all users' access history for a document, it narrows results to the given `UserID`. Use this API to audit whether a specific person has read a particular document and when.

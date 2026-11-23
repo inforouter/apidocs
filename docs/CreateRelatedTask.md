@@ -1,5 +1,7 @@
 # CreateRelatedTask API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a related (linked) ad-hoc task tied to an existing workflow task, sharing the same document context.
 
 ## Endpoint

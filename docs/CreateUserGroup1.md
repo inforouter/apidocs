@@ -1,5 +1,7 @@
 # CreateUserGroup1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new user group with control over member visibility. If a domain/library name is specified, a local user group is created within that domain. If no domain name is provided, a global user group is created.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # SetFolderRandDSchedule API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Assigns a Retention and Disposition (R&D) schedule to a folder identified by path. Optionally also assigns the schedule to all subfolders and/or all documents within the folder hierarchy.
 
 ## Endpoint

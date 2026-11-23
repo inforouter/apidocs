@@ -1,5 +1,7 @@
 # ReassignTask API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Reassigns an active workflow task to a different user with a new due date and instructions. The original task is marked as **Reassigned** and a new task is created for the target user. Task attachments and requirements are inherited by the new task.
 
 ## Endpoint

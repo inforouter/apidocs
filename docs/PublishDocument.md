@@ -1,5 +1,7 @@
 ﻿# PublishDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the published version of a document. The published version is the one that is visible to users who browse or search the library. Pass `0` for the version number to publish the latest version, or pass an internal version number to publish a specific version.
 
 > **Note:** Publishing is a separate concept from uploading a new version. A document can have multiple versions but only one published version at a time. Use `UnpublishDocument` to remove the published designation without replacing it.

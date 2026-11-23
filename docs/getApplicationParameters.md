@@ -1,5 +1,7 @@
 # getApplicationParameters API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns infoRouter application parameters and system configuration settings. The response varies based on the authenticated user's role: anonymous users receive a limited set of public parameters, regular users receive the same public parameters, and system administrators receive the full configuration including SMTP settings, password policies, server information, and warehouse paths.
 
 ## Endpoint

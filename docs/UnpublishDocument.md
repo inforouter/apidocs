@@ -1,5 +1,7 @@
 # UnpublishDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the document at the specified path to an unpublished state. An unpublished document is not visible to regular users who only have read access -" it behaves as if no version has been officially released. This is the reverse of `PublishDocument`. Use this API to retract a previously published document while keeping all versions, metadata, and history intact.
 
 ## Endpoint

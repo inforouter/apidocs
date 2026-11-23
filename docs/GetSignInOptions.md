@@ -1,5 +1,7 @@
 # GetSignInOptions API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns what a user can sign in with on this server: the user name and password form, Windows authentication, anonymous access, the OpenID Connect providers and the authentication authorities. A sign-in page calls it to decide what to show.
 
 ## Endpoint

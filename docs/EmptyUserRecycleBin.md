@@ -1,5 +1,7 @@
 # EmptyUserRecycleBin API
 
+**Available in:** infoRouter 9.0 and later
+
 Empties one user's Recycle Bin into the system recycle bin and answers what moved: how many folders and documents,
 and their total size in bytes. It is [EmptyRecycleBin](EmptyRecycleBin.md) done by an administrator for someone
 else, and [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) for one user. **Nothing is purged.** The user can

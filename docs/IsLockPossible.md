@@ -1,5 +1,7 @@
 ﻿# IsLockPossible API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Checks whether the current authenticated user is able to lock (check out) the document at the specified path. This is a pre-flight check that performs all the same permission and state validations as `Lock` without actually locking the document. Use it to determine in advance whether a lock attempt will succeed and to surface a meaningful reason if it will not.
 
 > **Terminology note:** "Lock" and "Check Out" are synonymous in infoRouter. Locking a document prevents other users from creating new versions until the lock is released.

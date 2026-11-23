@@ -1,5 +1,7 @@
 ﻿# DeleteWorkflow API
 
+**Available in:** infoRouter 9.0 and later
+
 Permanently deletes a workflow definition and all of its associated steps and task definitions from the system.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # TransferUserExpirationNotices API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers document expiration notices from one user to another. The target user takes over responsibility for receiving and acting on document expiration alerts that were assigned to the source user.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

@@ -1,5 +1,7 @@
 # DeleteUser1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes the specified infoRouter user account with administrator password confirmation. Use this API instead of `DeleteUser` when the system requires password re-prompting for user deletion.
 
 > **`UserPassword` is always checked.** It is the caller's own password, not the password of

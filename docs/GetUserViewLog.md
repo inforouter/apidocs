@@ -1,5 +1,7 @@
 ﻿# GetUserViewLog API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 
 
 Returns the complete read/view log history for a specified user, showing all documents accessed by that user. This API retrieves entries from both the current view log (VIEWLOG table) and historical read logs (HISTORY_READ table).

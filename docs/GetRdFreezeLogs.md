@@ -1,5 +1,7 @@
 # GetRdFreezeLogs API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the R&D freeze flag change history for a document or folder by path. Each log entry records when the freeze flag was set or cleared, by whom, and with what comment. The path type is auto-detected.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetFolderAccessListStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Counts the subfolders and documents under a folder whose access list is not the folder's own. These are the items that [SetAccessList](SetAccessList.md) with `ApplyToTree=true` overwrites, so a client can warn the user before applying a folder's security to its whole tree.
 
 ## Endpoint

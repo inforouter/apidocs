@@ -1,5 +1,7 @@
 # GetParentFolderIDs API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the chain of parent folder IDs for the specified folder, from the root down to the folder's immediate parent. This is useful for building breadcrumb navigation or resolving a folder's full ancestry.
 
 ## Endpoint

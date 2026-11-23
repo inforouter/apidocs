@@ -1,5 +1,7 @@
 # GetTagDefinitions API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the list of all tag definitions configured in the infoRouter system. Tags are predefined text labels that can be applied to documents for categorisation, filtering, and search. Use this API to retrieve the available tag values before calling `SetTagToDocument`, or to populate a tag picker in your integration.
 
 ## Endpoint

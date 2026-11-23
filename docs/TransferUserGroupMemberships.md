@@ -1,5 +1,7 @@
 # TransferUserGroupMemberships API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers user group memberships from one user to another. The target user is added to all user groups where the source user is currently a member.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

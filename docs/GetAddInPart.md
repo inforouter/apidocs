@@ -1,5 +1,7 @@
 ﻿# GetAddInPart API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Downloads the installation package (a ZIP archive) for the specified infoRouter client Add-in. Add-in clients call this API to retrieve the latest version of their installation files so they can self-update. Unlike most infoRouter APIs, the response is **raw binary data** (the contents of `parts.zip`), not an XML document.
 
 > **Two things to know before calling this.**

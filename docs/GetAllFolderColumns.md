@@ -1,5 +1,7 @@
 # GetAllFolderColumns API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns all available folder column definitions that can be used for configuring folder display views. Each column definition includes a programmatic name and a localized display text. There are 34 available columns covering document metadata, workflow, retention, and classification fields.
 
 ## Endpoint

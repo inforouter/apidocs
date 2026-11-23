@@ -1,5 +1,7 @@
 ﻿# UpdateDocumentTypeDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the definition of an existing document type. Allows renaming the document type and optionally changing its required property set. Document type definitions are system-wide and affect all documents assigned to that type.
 
 ## Endpoint

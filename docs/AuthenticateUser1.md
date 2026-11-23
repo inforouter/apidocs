@@ -1,5 +1,7 @@
 # AuthenticateUser1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Authenticates a user against infoRouter using their user name and password, and creates a session using the specified language ID. Returns an authentication ticket and basic profile information. Use this variant instead of `AuthenticateUser` when your application needs to force a specific UI language for the session.
 
 ## Endpoint

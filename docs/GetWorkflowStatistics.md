@@ -1,5 +1,7 @@
 # GetWorkflowStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns comprehensive statistics for a specific workflow definition, including pending, completed, and overdue flow counts, with optional date range filtering.
 
 ## Endpoint

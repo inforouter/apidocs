@@ -1,5 +1,7 @@
 # GetSecurityChangeLog API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the security change log for a library, folder, or document. This API merges the functionality of the library-wide security audit log and the object-specific security history into a single endpoint.
 
 From 9.0 the security history is always kept; it is no longer a library policy. It is kept as one entry per operation, on the item the change was made on, plus one entry for each item whose own list or parent that operation changed. An item that merely inherits a change has no entry of its own for it: its history is read from its own entries with the history of the folders it was following spliced in. So a document that has never been given a list of its own still answers with every change of the folders it has been under, each marked `isInherited="true"`, and a list applied to a tree of fifty thousand items is one entry, not fifty thousand.

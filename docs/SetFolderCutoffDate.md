@@ -1,5 +1,7 @@
 # SetFolderCutoffDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the cutoff date on the specified folder and, optionally, on its subfolders and documents. The folder is cut off only when every document and subfolder in it already has a cutoff date, so to cut off a whole tree pass `includeSubFolders=true` and `includeDocuments=true`. From the moment the date is saved, even when the date is in the future, the folder accepts no new documents or subfolders and its documents cannot be checked out.
 
 This call is not all-or-nothing. Items that fail are listed in the response; items that succeeded keep their new cutoff date.

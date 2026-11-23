@@ -1,5 +1,7 @@
 # StopCurrentWorkflow API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Gracefully stops the running workflow on a document. All pending tasks are dropped, email notifications are sent to dropped task assignees, and the workflow submitter and supervisors receive a workflow-finished notification. The on-end event URL is also fired if the workflow definition has one configured.
 
 Unlike [RemoveCurrentWorkflow](RemoveCurrentWorkflow.md), this operation:

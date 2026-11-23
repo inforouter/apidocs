@@ -1,5 +1,7 @@
 ﻿# CreateRandDSchedule API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new Retention and Disposition (R&D) schedule definition. Once created, the schedule can be assigned to documents and folders via [SetDocumentRandDSchedule](SetDocumentRandDSchedule.md) and [SetFolderRandDSchedule](SetFolderRandDSchedule.md).
 
 ## Endpoint

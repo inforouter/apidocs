@@ -1,5 +1,7 @@
 ﻿# RegisterEmail API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Registers an email message as a document in infoRouter at the specified path. The email body, metadata (sender, recipients, CC, BCC, subject, sent date), and any attachments are stored as a single `.EMAIL` document in the target folder. Use this API to archive emails directly from an email client or integration.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # RenewTicket API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Validates the user's credentials and either renews an existing authentication ticket or issues a new one. This is useful for long-running client applications that need to keep a session alive without requiring a full login cycle.
 
 The caller always supplies their credentials (`UID` / `PWD`). If a valid `OldTicket` is provided, it is renewed and its expiration window is reset. If the old ticket has already expired, the credentials are used to authenticate normally and a fresh ticket is returned.

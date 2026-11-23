@@ -1,5 +1,7 @@
 ﻿# AddPropertySetRow API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a new property set row to a document or folder. The target object is resolved by path -" the system first checks if the path refers to a document, then a folder. Multiple property sets and multiple rows per property set can be submitted in a single call.
 
 ## Endpoint

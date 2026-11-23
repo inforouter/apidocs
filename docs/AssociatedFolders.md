@@ -1,5 +1,7 @@
 # AssociatedFolders API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of folders that are associated with the specified document or folder. Both forward associations (where the specified item is the source) and reverse associations (where the specified item is the target) are returned. Use this API to discover all folders linked to a document or folder, regardless of which side created the association.
 
 > **Note:** All folder associations are always of type `Related` (0). Typed associations (Rendition, Copy, ParentChild, Derivation) are only possible between two documents. See [AssociateDocument](AssociateDocument.md) for details.

@@ -1,5 +1,7 @@
 # GetMaintenanceJobsStatus API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the status of all system maintenance jobs including their last execution time, duration, success status, schedule type, and whether they are overdue. This API is restricted to system administrators with the `ViewServerStatus` permission.
 
 ## Endpoint

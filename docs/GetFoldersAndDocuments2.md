@@ -1,5 +1,7 @@
 ﻿# GetFoldersAndDocuments2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of documents and folders at the specified path in a lightweight ("ultra-fast") format. This API is optimized for speed and returns a minimal set of attributes for each item. Use this when you need a quick listing and do not require full property details.
 
 ## Endpoint

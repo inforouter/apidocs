@@ -1,5 +1,7 @@
 # GetContentSearchSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the content search settings in effect: whether content search is on, where it goes (a catalog on the infoRouter Search Service, or Windows Search), the search service's API key, and whether the service is told which documents changed. Administrators only; [SetContentSearchSettings](SetContentSearchSettings.md) changes them.
 
 ## Endpoint

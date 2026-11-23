@@ -1,5 +1,7 @@
 # TransferUserTasks API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers all open workflow tasks from one user to another. Used when a user is leaving or is temporarily unavailable.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

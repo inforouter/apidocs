@@ -1,5 +1,7 @@
 # GetFolderRules API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the rules of a folder: which file types it accepts, which actions it allows, and which property set it prompts for. Every rule it returns can be written back with [SetFolderRules](SetFolderRules.md).
 
 ## Endpoint

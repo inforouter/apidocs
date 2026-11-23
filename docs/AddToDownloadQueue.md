@@ -1,5 +1,7 @@
 # AddToDownloadQueue API
 
+**Available in:** infoRouter 9.0 and later
+
 Adds a document or folder to the current user's download queue by path.
 
 ## Endpoint

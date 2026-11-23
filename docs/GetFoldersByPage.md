@@ -1,5 +1,7 @@
 # GetFoldersByPage API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a page of direct subfolders from the specified parent folder, with optional name filtering. Each page contains up to 20 folders. Use `PageNumber` to navigate through large folder lists.
 
 ## Endpoint

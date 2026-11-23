@@ -1,5 +1,7 @@
 # GetServerAlerts API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the server's current alerts: the things an administrator should know about right now, such as a warehouse disk that is almost full or an internet outage. An alert is removed by the server when its problem is gone, so the list is always the present state. Call it every few minutes to show the alerts in the user interface.
 
 ## Endpoint

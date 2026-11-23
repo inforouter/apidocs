@@ -1,5 +1,7 @@
 ﻿# DocumentExists1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Checks whether a named document exists within a specified folder and returns CRC32 checksums for the latest version and the published version. This is an alternative to `DocumentExists` that accepts the folder path and document name as separate parameters instead of a combined full path.
 
 ## Endpoint

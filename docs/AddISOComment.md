@@ -1,5 +1,7 @@
 ﻿# AddISOComment API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds an ISO compliance review comment to the latest version of the specified document. The comment is recorded as an ISO log entry and the document's last ISO review date is updated. The calling user must have an active ISO Review Task assigned to them for the target document.
 
 ## Endpoint

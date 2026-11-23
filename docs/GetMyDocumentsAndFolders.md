@@ -1,5 +1,7 @@
 ﻿# GetMyDocumentsAndFolders API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns all documents and folders owned by the currently authenticated user, across all locations in the infoRouter system. Optional flags control the level of detail included for each item.
 
 ## Endpoint

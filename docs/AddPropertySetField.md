@@ -1,5 +1,7 @@
 ﻿# AddPropertySetField API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a new field to an existing custom property set definition. The field name is stored in uppercase and must be unique within the property set. Fields cannot be added to system-managed property sets.
 
 ## Endpoint

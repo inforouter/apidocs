@@ -1,5 +1,7 @@
 ﻿# AddSOXComment API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a Sarbanes-Oxley (SOX) compliance comment to the latest version of the specified document. The comment is recorded as a SOX log entry and is permanently stored with the document version. The calling user must have **Add Comment** permission on the document.
 
 ## Endpoint

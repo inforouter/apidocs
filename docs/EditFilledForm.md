@@ -1,5 +1,7 @@
 # EditFilledForm API
 
+**Available in:** infoRouter 9.0 and later
+
 Opens a document that was saved from a form, for the user to edit its values, and checks the document out to the caller. It is the edit counterpart of [UseFormTemplate](UseFormTemplate.md), and answers in the same two shapes, with the saved values filled in:
 
 | The document was saved from | Response `formType` | What the UI gets | What the UI does |

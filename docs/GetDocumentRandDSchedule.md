@@ -1,5 +1,7 @@
 # GetDocumentRandDSchedule API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the Retention and Disposition (R&D) schedule assigned to a document identified by
 path, as the full schedule definition.
 

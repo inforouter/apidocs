@@ -1,5 +1,7 @@
 # GetFolderCatalog API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Builds a catalog of a folder: every subfolder at every depth, and every document in each of them. Each document carries its size, modification date and the checksums of its published and latest versions, so a client can tell which files have changed since it last looked. This is the call a synchronisation client uses. To show a folder in a UI, use the listings compared under [Compared with GetFolders and GetDocuments](#compared-with-getfolders-and-getdocuments).
 
 > **Warning: large folders. Check the size first.**

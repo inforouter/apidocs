@@ -1,5 +1,7 @@
 # DeleteUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes the specified infoRouter user account. If the system is configured to require password confirmation for user deletion, this method will fail and `DeleteUser1` must be used instead.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# TransferToExternalAgency API
 
+**Available in:** infoRouter 9.0 and later
+
 Records that a document or folder has been transferred to the external agency its Retention and Disposition (R&D) schedule names. The path type is auto-detected: a document path records the transfer of that one document; a folder path records the folder's own transfer and, when asked, walks the subfolders and documents below it.
 
 ## Why this operation exists

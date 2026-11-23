@@ -1,5 +1,7 @@
 # GetUserTaskRedirectionsFrom API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the list of users who are currently redirecting their tasks **to** the specified user. Each entry represents a different user whose tasks will be forwarded to the named user during the configured date range.
 
 This is the reverse view of [GetUserTaskRedirectionTo](GetUserTaskRedirectionTo.md).

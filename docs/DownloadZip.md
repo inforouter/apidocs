@@ -1,5 +1,7 @@
 ﻿# DownloadZip API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Zips one or more documents and folders and returns the archive as a raw byte array in a single call. This is suitable for small selections. For large archives, use `DownloadZipWithHandler` to stage the file server-side and retrieve it in chunks with `DownloadFileChunk`.
 
 ## Endpoint

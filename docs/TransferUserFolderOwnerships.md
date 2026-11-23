@@ -1,5 +1,7 @@
 # TransferUserFolderOwnerships API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers folder ownerships from one user to another. All folders owned by the source user are reassigned to the target user.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

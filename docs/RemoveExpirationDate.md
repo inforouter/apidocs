@@ -1,5 +1,7 @@
 ﻿# RemoveExpirationDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the expiration date from the specified document, returning it to an unconstrained (non-expiring) state. When the expiration date is cleared, any associated notification schedule is also removed. If the document did not have an expiration date, the call succeeds without making any changes.
 
 ## Endpoint

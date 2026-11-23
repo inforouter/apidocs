@@ -1,5 +1,7 @@
 ﻿# GetDownloadInfo API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns download metadata for the latest version of a document -" file size, MIME content type, modification date, suggested download file name, and CRC32 checksum -" **without** staging the file on the server or creating a download handler. Use this API when you need to inspect a document's download properties before deciding whether to download it, or when you only need file metadata rather than the file content itself.
 
 To download the actual file content, use `GetDownloadHandler` (chunked) or `DownloadDocument` (single call). To query metadata for a specific version, use `GetDownloadInfoByVersion`.

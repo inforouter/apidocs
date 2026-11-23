@@ -1,5 +1,7 @@
 ﻿# CreateDiskMountURL API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a time-limited WebDAV disk mount URL for the currently authenticated user. The returned URL points to the root of the infoRouter WebDAV share and can be used to mount infoRouter as a network drive in Windows Explorer or any WebDAV-capable client. A dedicated DAV session ticket is generated for the URL; the calling user's normal authentication ticket is not embedded in it.
 
 ## Endpoint

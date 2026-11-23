@@ -1,5 +1,7 @@
 # UploadDocumentWithHandler2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Finalizes a chunked file upload and creates a new document or a new version of an existing document at the specified path, with an optional version comment and explicit manual version numbers (Major.Minor.Revision). This extends `UploadDocumentWithHandler1` by supporting the three-part manual version label that appears in the document's version list.
 
 ## Endpoint

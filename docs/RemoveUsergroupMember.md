@@ -1,5 +1,7 @@
 # RemoveUsergroupMember API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes a member from the specified user group.
 
 ## Endpoint

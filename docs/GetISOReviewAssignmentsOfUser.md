@@ -1,5 +1,7 @@
 ﻿# GetISOReviewAssignmentsOfUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paged list of documents assigned to the specified user for ISO review.
 
 ## Endpoint

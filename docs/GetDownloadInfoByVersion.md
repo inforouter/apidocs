@@ -1,5 +1,7 @@
 ﻿# GetDownloadInfoByVersion API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns download metadata for a **specific version** of a document -" file size, MIME content type, modification date, suggested download file name, and CRC32 checksum -" **without** staging the file on the server or creating a download handler. This is the version-aware counterpart to `GetDownloadInfo`, which always queries the latest version.
 
 To download the actual file content, use `GetDownloadHandlerByVersion` (chunked) or `DownloadDocumentVersion` (single call). To query the latest version without specifying a version number, use `GetDownloadInfo`.

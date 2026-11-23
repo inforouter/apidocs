@@ -1,5 +1,7 @@
 ﻿# GetDocumentKeywords API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the keywords assigned to a document. Keywords are returned as a comma-separated list inside a single `<Keywords>` element.
 
 A document carries two kinds of keyword and this API returns both, the ones the user curated first and the generated ones after them. Keywords a user entered are never touched when generated ones are produced or replaced, which is why the two are kept apart.

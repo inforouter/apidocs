@@ -1,5 +1,7 @@
 ﻿# GetPropertySetFieldOptions API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the available option values for a property set field. For static fields (`COMBO BOX`,
 `LIST BOX`, `RADIO BUTTON`), returns the list of stored option values, sorted alphabetically
 rather than in the order they were added. For `LOOKUP` fields, executes the configured

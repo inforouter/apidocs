@@ -1,5 +1,7 @@
 # DeleteFlowStepDef API
 
+**Available in:** infoRouter 9.0 and later
+
 Deletes a step from the specified workflow definition. The workflow definition must be inactive to delete a step.
 
 ## Endpoint

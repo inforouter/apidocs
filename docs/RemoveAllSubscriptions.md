@@ -1,5 +1,7 @@
 # RemoveAllSubscriptions API
 
+**Available in:** infoRouter 9.0 and later
+
 Removes all folder and document subscriptions for the specified user. This is a bulk operation that clears all subscription entries at once.
 
 ## Endpoint

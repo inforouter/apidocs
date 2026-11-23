@@ -1,5 +1,7 @@
 ﻿# GetNextSearchPage API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 
 
 Retrieves the next page of results from a previously prepared search. This API must be called after a successful `Search` call, which stores the result set in the user's session. Each subsequent call to `GetNextSearchPage` advances the page cursor forward by one page. When the last page has been reached, the `LastPage` attribute in the response is set to `true`.

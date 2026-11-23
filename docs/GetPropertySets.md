@@ -1,5 +1,7 @@
 # GetPropertySets API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns all property set rows that have been applied to a document or folder identified by path. The path is resolved as a document first; if no document is found, it is resolved as a folder. Each applied property set is returned with all its data rows and audit information.
 
 ## Endpoint

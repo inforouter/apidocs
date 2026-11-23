@@ -1,5 +1,7 @@
 # GetFolderStatistics API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns usage statistics for the specified folder, including subfolder count, total document count, checked-out document count, and total storage size of all documents in the folder tree.
 
 ## Endpoint

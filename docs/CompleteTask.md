@@ -1,5 +1,7 @@
 # CompleteTask API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Marks a workflow task as completed. If a comment string is provided it is saved to the task before the status change. After the task is marked complete, the workflow engine automatically evaluates whether the step is finished and advances the workflow to the next step if all tasks in the current step are done.
 
 All task requirements (e.g. Approval, Sign, ISOReview) configured on the task definition must be satisfied before the task can be completed. Use `TestTaskCompletion` to check readiness without changing status.

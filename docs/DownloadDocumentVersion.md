@@ -1,5 +1,7 @@
 ﻿# DownloadDocumentVersion API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Downloads a specific version of a document and returns its content as a raw byte array. Use this when you need a particular historical version rather than the latest. For large files, use the chunked download workflow (`GetDownloadHandlerByVersion` -' `DownloadFileChunk` -' `DeleteDownloadHandler`) instead.
 
 ## Endpoint

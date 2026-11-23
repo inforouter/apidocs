@@ -1,5 +1,7 @@
 # GetDocumentWorkflows API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns all workflow instances (current and historical) for a document, with optional filtering. Each entry in the result contains the same fields as [GetDocumentWorkflow](GetDocumentWorkflow.md).
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # CreateFlowDef2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new workflow definition on the specified domain/library with an optional on-end destination folder and an optional supervisor. The workflow is created in **inactive** state.
 
 > **`Supervisor` is optional and is honoured.** A name that is given is attached to the new

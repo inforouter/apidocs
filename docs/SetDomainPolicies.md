@@ -1,5 +1,7 @@
 # SetDomainPolicies API
 
+**Available in:** infoRouter 9.0 and later
+
 Sets the policies for a domain/library.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetFolders API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of direct subfolders of the specified folder with full property details. Optional flags control whether rules, property sets, security (ACL), and owner information are included for each subfolder.
 
 ## Endpoint

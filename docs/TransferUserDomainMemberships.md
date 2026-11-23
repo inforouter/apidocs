@@ -1,5 +1,7 @@
 # TransferUserDomainMemberships API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers domain/library memberships from one user to another. The target user is added as a member of all domains where the source user is currently a member.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

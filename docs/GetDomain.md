@@ -1,5 +1,7 @@
 # GetDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the properties of the specified domain/library, including its ID, name, visibility settings, archive status, and welcome message.
 
 ## Endpoint

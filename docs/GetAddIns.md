@@ -1,5 +1,7 @@
 # GetAddIns API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a list of all infoRouter client add-ins available on the server, including name, setup version, DLL version, and description.
 
 ## Endpoint

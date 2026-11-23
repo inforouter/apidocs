@@ -1,5 +1,7 @@
 # SetGeneralAppSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the global *General Application Settings* by sending a serialized `GeneralSettings` object. Use this API when you need to modify upload limits, recycle bin policies, workdays/holidays, or other platform-wide configuration options in a single atomic operation.
 
 ## Endpoint

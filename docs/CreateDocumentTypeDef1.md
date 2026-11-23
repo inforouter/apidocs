@@ -1,5 +1,7 @@
 ﻿# CreateDocumentTypeDef1 API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a new document type definition with an optional description, an optional required property set and an optional default retention and disposition schedule. When a document is assigned this type, the configured schedule is automatically applied.
 
 ## Endpoint

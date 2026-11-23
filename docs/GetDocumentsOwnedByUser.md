@@ -1,5 +1,7 @@
 ﻿# GetDocumentsOwnedByUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paged list of documents owned by the specified user, sorted by document name ascending. Supports offset-based paging via `startingRow` and `rowCount`.
 
 ## Endpoint

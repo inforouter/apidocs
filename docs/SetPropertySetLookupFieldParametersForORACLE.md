@@ -1,5 +1,7 @@
 # SetPropertySetLookupFieldParametersForORACLE API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Intended to configure a `LOOKUP` field in a custom property set to query an external
 **Oracle** database, so that the field executes the specified SQL sentence whenever
 [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) is called for it.

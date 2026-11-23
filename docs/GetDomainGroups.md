@@ -1,5 +1,7 @@
 # GetDomainGroups API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of all user groups (both local and global) that are members of the specified domain/library.
 
 ## Endpoint

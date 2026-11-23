@@ -1,5 +1,7 @@
 # DeactivateFlowDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets a workflow definition back to **inactive** state so its steps and tasks can be modified. A workflow must be inactive before steps or tasks can be added, removed, or changed.
 
 This is the counterpart to [ActivateFlowDef](ActivateFlowDef.md). The operation is **idempotent**: calling it on an already-inactive workflow returns success immediately without error.

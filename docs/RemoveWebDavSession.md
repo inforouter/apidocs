@@ -1,5 +1,7 @@
 # RemoveWebDavSession API
 
+**Available in:** infoRouter 9.0 and later
+
 Removes one of the signed-in user's WebDAV session tickets. A drive mapped with the ticket stops working at once: the next request with it is refused.
 
 ## Endpoint

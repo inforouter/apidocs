@@ -1,5 +1,7 @@
 # GetUserTaskRedirectionTo API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the task redirection that is currently configured for a user -" i.e., the user to whom all new tasks assigned to the specified user are being forwarded.
 
 If no redirection is active, the response contains no `<TaskRedirection>` element.

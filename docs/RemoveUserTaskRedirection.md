@@ -1,5 +1,7 @@
 # RemoveUserTaskRedirection API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the task redirection configured for the specified user. After this call, incoming tasks assigned to that user will no longer be automatically forwarded to another user.
 
 If the user has no active task redirection, the call succeeds silently with no error.

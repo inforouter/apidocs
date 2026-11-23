@@ -1,5 +1,7 @@
 # GetGlobalGroups API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of all infoRouter global user groups, sorted alphabetically by group name.
 
 ## Endpoint

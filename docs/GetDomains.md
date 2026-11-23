@@ -1,5 +1,7 @@
 # GetDomains API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the domains/libraries the calling user belongs to, directly or through a user group, together with the ones that allow anonymous access, sorted alphabetically by domain name. Archived and hidden libraries are included on the same terms. No role widens the list: an administrator or a User Manager sees only the libraries they are a member of. For every library a caller may administer, membership aside, use [GetLibrariesForAdministration](GetLibrariesForAdministration.md).
 
 ## Endpoint

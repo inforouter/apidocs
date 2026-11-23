@@ -1,5 +1,7 @@
 ﻿# SetClassificationLevel API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the classification level of the specified document or folder. Classification markings control access visibility and are recorded in the classification change log. Optional downgrade and declassify dates can be provided for classified levels (Confidential, Secret, Top Secret).
 
 ## Endpoint

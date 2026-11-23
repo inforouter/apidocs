@@ -1,5 +1,7 @@
 # CreateFolder API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a folder at the specified path. Multiple sub-folders can be created in a single call by providing a full path. The top-level folder (domain/library) must already exist -" this API cannot create root-level libraries.
 
 ## Endpoint

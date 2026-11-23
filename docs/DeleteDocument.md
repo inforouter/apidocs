@@ -1,5 +1,7 @@
 ﻿# DeleteDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Moves a document to the recycle bin. The document is not permanently removed -" it can be restored using `RestoreRecycleBinItem` or permanently purged using `PurgeRecycleBinItem`.
 
 ## Endpoint

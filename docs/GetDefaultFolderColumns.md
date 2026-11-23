@@ -1,5 +1,7 @@
 # GetDefaultFolderColumns API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the system default folder column configuration. These columns define which metadata fields are displayed by default in folder list views when no user-specific or folder-specific column settings are applied.
 
 ## Endpoint

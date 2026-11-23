@@ -1,5 +1,7 @@
 # GetSavedSearches API
 
+**Available in:** infoRouter 9.0 and later
+
 Lists saved searches and/or search page definitions visible to the authenticated user.
 
 ## Endpoint

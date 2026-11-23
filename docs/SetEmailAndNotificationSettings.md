@@ -1,5 +1,7 @@
 ﻿# SetEmailAndNotificationSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the email and notification settings for the infoRouter system. Requires system administrator privileges.
 
 ## Endpoint

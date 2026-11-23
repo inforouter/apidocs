@@ -1,5 +1,7 @@
 ﻿# GetCheckedoutDocuments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of documents currently checked out by the authenticated user. Only documents belonging to the calling user's active checkouts are included -" no folder items are returned. Results are sorted by document name ascending.
 
 To retrieve checked-out documents for a **different** user (requires elevated permissions), use `GetCheckedoutDocumentsByUser`.

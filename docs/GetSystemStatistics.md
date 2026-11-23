@@ -1,5 +1,7 @@
 # GetSystemStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Retrieves system-wide statistics including user counts, document counts, total document storage size, the number of checked-out documents, and the number of documents registered in the last 30, 60, and 90 days.
 
 ## Endpoint

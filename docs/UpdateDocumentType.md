@@ -1,5 +1,7 @@
 # UpdateDocumentType API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the document type assigned to the specified document. Document types are administrator-defined classifications that can have required property sets attached. Changing the document type may enforce or relax property set requirements on the document.
 
 ## Endpoint

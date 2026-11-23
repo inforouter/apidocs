@@ -1,5 +1,7 @@
 # GetLocalUsers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the local users of the specified domain/library: user accounts that were created in and belong to that library, as opposed to global users who are given membership of it.
 
 ## Endpoint

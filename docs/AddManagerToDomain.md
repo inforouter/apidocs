@@ -1,5 +1,7 @@
 # AddManagerToDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds an existing infoRouter user as a domain/library manager. The user must already be a member of the domain/library before being designated as a manager.
 
 ## Endpoint

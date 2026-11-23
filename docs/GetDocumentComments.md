@@ -1,5 +1,7 @@
 ﻿# GetDocumentComments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns all comments attached to a document. Each comment includes the author's user ID, login name, timestamp, and text content.
 
 ## Endpoint

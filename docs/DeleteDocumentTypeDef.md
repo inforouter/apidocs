@@ -1,5 +1,7 @@
 # DeleteDocumentTypeDef API
 
+**Available in:** infoRouter 9.0 and later
+
 Deletes a document type definition from the system.
 
 ## Endpoint

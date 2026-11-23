@@ -1,5 +1,7 @@
 # UpdateVersionComment API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the version comment (author comment) on a specific document version.
 
 ## Endpoint

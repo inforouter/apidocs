@@ -1,5 +1,7 @@
 # DismissServerAlert API
 
+**Available in:** infoRouter 9.0 and later
+
 Dismisses one server alert. The alert stays in the list of [GetServerAlerts](GetServerAlerts.md), marked dismissed, so the user interface can stop showing it. The mark is one for all administrators.
 
 ## Endpoint

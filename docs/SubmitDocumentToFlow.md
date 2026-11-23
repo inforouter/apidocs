@@ -1,5 +1,7 @@
 # SubmitDocumentToFlow API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Submits a document to a workflow definition. Once submitted, the workflow engine creates running tasks based on the workflow definition, assigns them to the configured task assignees, and sends task notification emails.
 
 To override the task assignees for the first step at submission time, use [SubmitDocumentToFlow1](SubmitDocumentToFlow1.md).

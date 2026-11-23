@@ -1,5 +1,7 @@
 ﻿# Copy API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Copies an existing document or folder to the specified destination path. The copy is placed inside the destination folder under the name derived from `DestinationPath`. Both documents and folders are supported; the source path is resolved as a document first, and as a folder if no document is found.
 
 ## Endpoint

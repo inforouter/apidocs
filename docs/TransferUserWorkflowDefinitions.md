@@ -1,5 +1,7 @@
 # TransferUserWorkflowDefinitions API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers workflow definition roles (assignees and supervisors) from one user to another. The target user replaces the source user in all workflow definitions where the source user is assigned as an assignee or supervisor.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

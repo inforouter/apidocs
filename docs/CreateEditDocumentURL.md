@@ -1,5 +1,7 @@
 ﻿# CreateEditDocumentURL API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a time-limited WebDAV URL for directly opening and editing a specific document in a WebDAV-enabled application such as Microsoft Office. The returned URL points to the document file and can be passed to Office applications to open it for in-place editing via WebDAV.
 
 ## Endpoint

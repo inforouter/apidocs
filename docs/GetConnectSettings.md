@@ -1,5 +1,7 @@
 ﻿# GetConnectSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns what this infoRouter instance can ask the **infoRouter Connect** AI service for: the capabilities the service offers, whether each one is usable right now, and the rules infoRouter applies to them.
 
 Written for a caller building a UI — deciding which AI actions to offer, and what to say about the ones it cannot. Read it **once** when the UI loads rather than per document: it asks the Connect service a question of its own.

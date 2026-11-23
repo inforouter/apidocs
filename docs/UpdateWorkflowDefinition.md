@@ -1,5 +1,7 @@
 # UpdateWorkflowDefinition API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the properties of an existing workflow definition, including its name, active folder, active status, on-end behavior, visibility, and supervisors.
 
 ## Endpoint

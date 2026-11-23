@@ -1,5 +1,7 @@
 ﻿# GetLogs API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the server log entries for a specified log type and date.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetPropertySetDefinitions1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a filtered list of property set definitions, **without** their field definitions.
 
 The three `AppliesTo` flags are an **OR**, not an AND: a set is listed when it applies to any

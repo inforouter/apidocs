@@ -1,5 +1,7 @@
 ﻿# DeletePropertySetRow API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes a property set row from a document or folder. The target object is resolved by path -" the system checks for a document first, then a folder. The row to delete is identified by its row number (`rownbr`); omitting it removes **every** row of that property set from the object. Multiple rows and multiple property sets can be targeted in a single call.
 
 ## Endpoint

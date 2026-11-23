@@ -1,5 +1,7 @@
 # GetLicenseInfo API
 
+**Available in:** infoRouter 9.0 and later
+
 Retrieves the application license information including company details, licensed user counts, subscription dates, and feature flags. This API is restricted to system administrators with the `ViewLicenseInformation` permission.
 
 ## Endpoint

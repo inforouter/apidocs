@@ -1,5 +1,7 @@
 ﻿# GetDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full metadata and properties of a single document identified by its infoRouter path. Optional parameters control whether additional detail (custom property sets, access control list, owner, version history) is included in the response.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetAllUsers1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a paged and filtered list of infoRouter users with full detail, supporting sorting, status filtering, and text-based field filters.
 
 ## Endpoint

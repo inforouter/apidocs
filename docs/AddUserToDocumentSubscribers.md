@@ -1,5 +1,7 @@
 # AddUserToDocumentSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a user to the subscription list of a document. The subscriber receives email notifications for the selected events.
 
 ## Endpoint

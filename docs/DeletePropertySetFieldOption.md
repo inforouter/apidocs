@@ -1,5 +1,7 @@
 # DeletePropertySetFieldOption API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes a static option value from a property set field. Only fields with a `COMBO BOX`, `LIST BOX`, or `RADIO BUTTON` control type have option values. This operation is idempotent - if the option does not exist, the call succeeds without error.
 Its neighbour [DeletePropertySetField](DeletePropertySetField.md) answers `4041` for the
 matching condition, so the two cannot be used the same way.

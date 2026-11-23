@@ -1,5 +1,7 @@
 ﻿# SetDocumentPublishingRule API
 
+**Available in:** infoRouter 9.0 and later
+
 Sets the publishing rule on a document, controlling which version is served as the released (published) version.
 
 ## Endpoint

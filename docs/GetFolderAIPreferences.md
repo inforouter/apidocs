@@ -1,5 +1,7 @@
 ﻿# GetFolderAIPreferences API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the infoRouter Connect (AI) preferences in effect for the specified folder. These preferences control which operations — summarization, description, abstract, classification, keyword extraction, data extraction, OCR — are performed automatically on the documents of the folder, and whether PII is scrubbed before document text is handed to the AI provider. There is one switch per answer: each asks for that answer and nothing else.
 
 A folder that has no preferences of its own inherits them from the nearest parent folder whose `ApplyToSubfolders` preference is on. When there is no such parent folder, every option is off.

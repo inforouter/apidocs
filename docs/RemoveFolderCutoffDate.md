@@ -1,5 +1,7 @@
 # RemoveFolderCutoffDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the cutoff date from the specified folder and, optionally, from its subfolders and documents. Once its cutoff date is removed, the folder accepts new documents and subfolders again. Removal works from the top down: a folder's cutoff date cannot be removed while its parent folder has one.
 
 This call is not all-or-nothing. Items that fail are listed in the response; items that succeeded keep their cutoff date removed.

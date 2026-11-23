@@ -1,5 +1,7 @@
 ﻿# DownloadFileChunk API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Downloads a single chunk of a staged file using an open download handler. Returns the chunk bytes as base64-encoded content inside an XML element, along with metadata about the chunk and the total file. This is the second step in the chunked download workflow.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# GetPropertySetDefinition API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full definition of a single property set, including all field definitions, domain restrictions, and metadata flags. Private property sets are not accessible to anonymous users.
 
 ## Endpoint

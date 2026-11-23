@@ -1,5 +1,7 @@
 ﻿# GetSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the complete subscriber list of a document or folder at the specified path. The response includes both individual user subscribers and user group subscribers, each with their configured event notification flags. Use this API to audit who is subscribed to a document or folder and which events they are watching.
 
 > **This one operation answers `success="TRUE"` in capitals**, where every other operation in the

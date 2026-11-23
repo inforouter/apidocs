@@ -1,5 +1,7 @@
 # UploadDocument2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with a post-upload checkout option. When `checkout=true`, the document is immediately locked (checked out) to the calling user after upload, preventing others from creating new versions.
 
 ## Endpoint

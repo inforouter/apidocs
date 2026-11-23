@@ -1,5 +1,7 @@
 # SetFolderRules API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the rules (policies) for the specified folder using an XML rules definition. Rules control allowed file types, checkout/checkin policies, document and folder deletion permissions, and other folder behaviors. Optionally applies the rules to the entire subfolder tree.
 
 ## Endpoint

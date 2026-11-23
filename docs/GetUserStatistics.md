@@ -1,5 +1,7 @@
 ﻿# GetUserStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns activity and membership statistics for a specified user, including document counts, folder counts, task counts, workflow roles, and library memberships.
 
 ## Endpoint

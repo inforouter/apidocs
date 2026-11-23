@@ -1,5 +1,7 @@
 # ChangeUserStatus API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Changes the status (enabled/disabled) of the specified infoRouter user account.
 
 ## Endpoint

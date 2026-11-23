@@ -1,5 +1,7 @@
 ﻿# DisposeItem API
 
+**Available in:** infoRouter 9.0 and later
+
 Disposes a document or folder by path per its active Retention and Disposition (R&D) schedule. The path type is auto-detected — document paths dispose the single document; folder paths recursively dispose all eligible documents within the folder and the folder itself.
 
 ## Endpoint

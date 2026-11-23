@@ -1,5 +1,7 @@
 # GetCheckoutLog API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the checkout log for documents matching the specified date range and path filter.
 
 ## Endpoint

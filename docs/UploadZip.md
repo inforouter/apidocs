@@ -1,5 +1,7 @@
 # UploadZip API
 
+**Available in:** infoRouter 9.0 and later
+
 Imports a ZIP archive as a folder and document structure into the specified folder.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# GetPropertySetDefinitions API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the property set definitions the caller may see, **without** their field definitions -
 use [GetPropertySetDefinition](GetPropertySetDefinition.md) for those.
 

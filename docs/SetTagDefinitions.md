@@ -1,5 +1,7 @@
 # SetTagDefinitions API
 
+**Available in:** infoRouter 9.0 and later
+
 Replaces the whole list of tag definitions: the tags the document library offers in its tag picker, in the order it offers them. The list is a set of suggestions, not a constraint: [SetTagToDocument](SetTagToDocument.md) still accepts any text, and tags already applied to documents are not changed by this call.
 
 ## Endpoint

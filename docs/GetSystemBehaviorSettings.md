@@ -1,5 +1,7 @@
 # GetSystemBehaviorSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the system behavior settings including login logging configuration, login delay (anti-brute-force) settings, and library manager policy editing permissions. This API is restricted to system administrators with the `UpdateApplicationSettingsAndPolicies` permission.
 
 ## Endpoint

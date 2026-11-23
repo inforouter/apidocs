@@ -1,5 +1,7 @@
 # CreateSavedSearch API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a saved search or a search page. A **saved search** stores criteria a user can run again. A **search page** defines a search form: which fields it offers and what they start with. Both are new in infoRouter 9.
 
 ## Endpoint

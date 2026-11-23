@@ -1,5 +1,7 @@
 ﻿# GetDocumentVersions API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full version history list for a document. Each version entry includes the version author, file size, checksum, creation and publish dates, check-in comment, and approval information.
 
 ## Endpoint

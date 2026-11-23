@@ -1,5 +1,7 @@
 ﻿# GetPublishingRequirements API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the publishing requirements configured for the specified domain/library. Publishing requirements define what conditions must be met before a document in the domain can be published. Use this API to determine whether any pre-publishing checks (such as requiring a document type to be assigned) must be satisfied before calling `PublishDocument`.
 
 ## Endpoint

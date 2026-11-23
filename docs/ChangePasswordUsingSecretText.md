@@ -1,5 +1,7 @@
 # ChangePasswordUsingSecretText API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Changes a user's password using a one-time password-reset token (the "secret text") that was issued by the `ForgotPassword` or `ForgotPasswordByUserName` API and delivered to the user by email.
 
 This method is used to complete the self-service password-reset flow:

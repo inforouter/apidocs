@@ -1,5 +1,7 @@
 # GetUsersWorkflowRoles API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns all workflow roles assigned to a specified user, including supervisor and assignee roles across all workflow definitions. A user may appear in the results because they are directly assigned to a task, assigned through group membership, or designated as a task supervisor.
 
 ## Endpoint

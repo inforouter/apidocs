@@ -1,5 +1,7 @@
 # UpdateDocumentThumbnail API
 
+**Available in:** infoRouter 9.0 and later
+
 Uploads or replaces the thumbnail image for a document. Any existing thumbnail is overwritten.
 
 ## Endpoint

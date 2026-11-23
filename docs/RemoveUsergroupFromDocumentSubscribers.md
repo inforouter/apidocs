@@ -1,5 +1,7 @@
 ﻿# RemoveUsergroupFromDocumentSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes a specified user group from the subscription list of a document. After removal, members of that group will no longer receive email notifications via the group subscription for any events on that document. Use this API to clean up group subscriptions when a group no longer needs to track a document.
 
 ## Endpoint

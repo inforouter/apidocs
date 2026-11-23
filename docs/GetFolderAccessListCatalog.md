@@ -1,5 +1,7 @@
 # GetFolderAccessListCatalog API
 
+**Available in:** infoRouter 9.0 and later
+
 Lists the subfolders and documents under a folder that hold an access list of their own, each with counts of what inherits from it. These are the places where [SetAccessList](SetAccessList.md) with `ApplyToTree=true` would overwrite something. [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) gives the totals for the warning; this call shows the user which items the totals are made of, so they can decide before applying.
 
 Items that merely inherit are not listed. They are counted on the node they inherit from, so on a tree of 10,000 folders and 100,000 documents the answer holds a few hundred nodes at most: nodes exist only where someone set a list.

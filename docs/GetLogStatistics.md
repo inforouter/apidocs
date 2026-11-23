@@ -1,5 +1,7 @@
 ﻿# GetLogStatistics API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns log dates and entry counts for a specified log type over the last 365 days. Returns one entry per day in the window, including days with zero entries. Use this API to discover which dates have log data before calling `GetLogs` to retrieve the actual entries.
 
 To control the lookback window explicitly, use [`GetLogStatistics1`](GetLogStatistics1.md).

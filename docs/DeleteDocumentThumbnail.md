@@ -1,5 +1,7 @@
 # DeleteDocumentThumbnail API
 
+**Available in:** infoRouter 9.0 and later
+
 Removes the thumbnail image from a document.
 
 ## Endpoint

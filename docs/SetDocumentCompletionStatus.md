@@ -1,5 +1,7 @@
 ﻿# SetDocumentCompletionStatus API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the completion status of the specified document using a `PercentComplete` value and an optional `CompletionDate`. A document with `PercentComplete = 100` is considered fully completed and can no longer be checked out or modified. Document subscribers are notified on a successful change.
 
 ## Endpoint

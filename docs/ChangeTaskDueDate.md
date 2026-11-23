@@ -1,5 +1,7 @@
 # ChangeTaskDueDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Changes the due date and the allowed start time span of an active workflow task. The new due date must be in the future. The task's reminder date, supervisor notification date, and allowed start date are all recalculated automatically based on the new due date.
 
 The task must be in **InProgress** or **DueDateChanged** status -" the due date cannot be changed on tasks that have not yet started, or that are already completed, dropped, or reassigned.

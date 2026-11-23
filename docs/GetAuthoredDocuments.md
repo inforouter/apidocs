@@ -1,5 +1,7 @@
 ﻿# GetAuthoredDocuments API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paged list of documents authored by a specified user.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # FolderAccessAllowed API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns whether the currently authenticated user is allowed to perform the specified action on a given folder.
 
 ## Endpoint

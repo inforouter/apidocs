@@ -1,5 +1,7 @@
 # GetFolder API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the properties of the folder at the specified path, with optional detail levels for rules, property sets, security (ACL), and owner information.
 
 ## Endpoint

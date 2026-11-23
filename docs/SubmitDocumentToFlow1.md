@@ -1,5 +1,7 @@
 # SubmitDocumentToFlow1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Submits a document to a workflow definition, with the ability to specify which users and/or groups should be assigned to the **first step** of the workflow at submission time. This overrides the default task assignees configured in the workflow definition for the first step only.
 
 For all subsequent steps, the workflow definition's configured assignees are used.

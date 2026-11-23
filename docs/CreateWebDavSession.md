@@ -1,5 +1,7 @@
 # CreateWebDavSession API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a WebDAV session ticket for the signed-in user, to map infoRouter as a drive in Windows File Explorer or any WebDAV client. The ticket travels in the URL, `https://server/dav/sid-{ticket}/`, so the client needs no sign-in of its own, and the caller's own authentication ticket is not exposed. Answers with the new session as [GetWebDavSessions](GetWebDavSessions.md) lists it.
 
 ## Endpoint

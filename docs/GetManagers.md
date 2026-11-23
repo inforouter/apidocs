@@ -1,5 +1,7 @@
 # GetManagers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of users who are designated as managers of the specified domain/library. Domain managers can administer members, workflows, and other domain settings.
 
 ## Endpoint

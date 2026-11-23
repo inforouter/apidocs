@@ -1,5 +1,7 @@
 ﻿# AddFlowStepDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a new step to an existing workflow definition. Steps are numbered sequentially starting at 1; the new step receives the next available number automatically. The workflow definition must be in **inactive** (deactivated) state -" you cannot add steps to an active workflow.
 
 Use `AddFlowStepDef1` if you also need to specify a folder where documents are moved when this step starts.

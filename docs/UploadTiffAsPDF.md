@@ -1,5 +1,7 @@
 # UploadTiffAsPDF API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a TIFF image and stores it as a PDF. The converted document is created with a `.pdf` name rather than the `.tif` name in `Path`: a new document if that path is free, a new version if it is not.
 
 ## Endpoint

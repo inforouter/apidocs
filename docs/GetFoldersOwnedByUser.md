@@ -1,5 +1,7 @@
 ﻿# GetFoldersOwnedByUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paged list of folders owned by the specified user. Supports offset-based paging via `startingRow` and `rowCount`.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# GetDomainMembershipsOfUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of all domain/library memberships for the specified user. Shows every domain the user has access to as a member, sorted alphabetically by domain name.
 
 ## Endpoint

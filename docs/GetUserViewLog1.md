@@ -1,5 +1,7 @@
 ﻿# GetUserViewLog1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 
 
 Returns the read/view log history for a specified user filtered by a date range. This API retrieves document access entries from both the current view log (VIEWLOG table) and historical read logs (HISTORY_READ table) that fall within the specified date range.

@@ -1,5 +1,7 @@
 ﻿# SetRdFreezeFlag API
 
+**Available in:** infoRouter 9.0 and later
+
 Sets or clears the Retention and Disposition (R&D) freeze flag on a document or folder by path. When frozen, the item is excluded from automatic disposition processing. The path type is auto-detected — document paths update the single document; folder paths recursively update all eligible documents within the folder.
 
 ## Endpoint

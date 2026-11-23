@@ -1,5 +1,7 @@
 # AuthenticateUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Authenticates a user against infoRouter using their user name and password, and returns an authentication ticket along with basic profile information. The ticket must be passed to all subsequent API calls as `authenticationTicket`.
 
 ## Endpoint

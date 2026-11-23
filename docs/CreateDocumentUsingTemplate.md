@@ -1,5 +1,7 @@
 ﻿# CreateDocumentUsingTemplate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 > **Obsolete.** This API is superseded by [SaveFilledForm](SaveFilledForm.md), which has an identical signature and behaviour but a clearer name. `CreateDocumentUsingTemplate` remains fully functional for backward compatibility but new integrations should use `SaveFilledForm`.
 
 Creates a new HTML document or a new version of an existing document at the specified path, using an infoRouter template document and XML content data to populate the template fields.

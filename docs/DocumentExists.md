@@ -1,5 +1,7 @@
 ﻿# DocumentExists API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Checks whether a document exists at the specified path and returns CRC32 checksums for the latest version and the published version. A successful response confirms the document exists; an error response indicates the path was not found.
 
 ## Endpoint

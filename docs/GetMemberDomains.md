@@ -1,5 +1,7 @@
 # GetMemberDomains API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of domains/libraries where the currently authenticated user is a member. Results are sorted alphabetically by domain name.
 
 ## Endpoint

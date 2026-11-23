@@ -1,5 +1,7 @@
 # GetAllUsers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of all infoRouter users with full detail, sorted alphabetically by first and last name.
 
 ## Endpoint

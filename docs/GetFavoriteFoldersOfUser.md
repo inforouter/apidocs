@@ -1,5 +1,7 @@
 # GetFavoriteFoldersOfUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paged list of folders marked as favorites by the specified user.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # TransferUserDocumentOwnerships API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers document ownerships from one user to another. All documents owned by the source user are reassigned to the target user.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

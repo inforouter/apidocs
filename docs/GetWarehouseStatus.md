@@ -1,5 +1,7 @@
 # GetWarehouseStatus API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns warehouse storage status information including total document count, total warehouse size, per-warehouse path statistics, and disk drive information. This API is restricted to system administrators with the `ViewWarehouseStatus` permission.
 
 ## Endpoint

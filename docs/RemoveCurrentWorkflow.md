@@ -1,5 +1,7 @@
 # RemoveCurrentWorkflow API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Permanently removes the running workflow from a document. All workflow tasks, task attachments, running workflow steps, and the workflow execution record are deleted. The document's workflow fields are cleared so it can be submitted to a new workflow.
 
 This is a hard delete with **no email notifications**. To stop a workflow gracefully (with notifications to task assignees), use [StopCurrentWorkflow](StopCurrentWorkflow.md) instead.

@@ -1,5 +1,7 @@
 # TestTaskCompletion API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Tests whether a workflow task can currently be completed by checking all of its configured requirements. This is a **dry-run** -" no state is changed, no task is completed. Use it to validate preconditions before calling [CompleteTask](CompleteTask.md).
 
 Returns `success="true"` if all requirements are met, or `success="false"` with an error message describing the first unmet requirement.

@@ -1,5 +1,7 @@
 ﻿# RegisterEmail1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Registers an email message as a document in infoRouter at the specified path, and also sets user-defined keywords on the created document in a single call. This is identical to `RegisterEmail` with the addition of the `keywords` parameter.
 
 ## Endpoint

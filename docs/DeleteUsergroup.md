@@ -1,5 +1,7 @@
 # DeleteUsergroup API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes the specified infoRouter user group.
 
 ## Endpoint

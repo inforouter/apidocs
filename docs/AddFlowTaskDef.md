@@ -1,5 +1,7 @@
 # AddFlowTaskDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a task definition to a specified step of an existing workflow definition. The entire task configuration -" name, deadline, assignees, permissions, requirements, and instructions -" is passed as a single XML string in the `TaskDefXML` parameter.
 
 The workflow definition must be in **inactive** (deactivated) state. Multiple tasks can be added to the same step; each call adds one task to the step.

@@ -1,5 +1,7 @@
 # CreateFlowDef3 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new workflow definition on the specified domain/library with the full set of configuration options: on-end destination folder, supervisor, webhook event URL, and visibility. The workflow is created in **inactive** state.
 
 > **`Supervisor` is optional and is honoured.** A name that is given is attached to the new

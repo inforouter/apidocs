@@ -1,5 +1,7 @@
 ﻿# GetDocuments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full metadata and properties of every document in the specified folder path. Optional flags control whether additional detail (custom property sets, access control list, owner, version history) is included for each document in the response. Documents are returned sorted by name in ascending order.
 
 ## Endpoint

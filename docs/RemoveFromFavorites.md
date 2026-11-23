@@ -1,5 +1,7 @@
 ﻿# RemoveFromFavorites API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the specified document or folder from the currently authenticated user's favorites list. If the item is not currently in the favorites list, the call completes successfully without making any changes.
 
 ## Endpoint

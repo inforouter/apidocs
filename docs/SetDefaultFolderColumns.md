@@ -1,5 +1,7 @@
 # SetDefaultFolderColumns API
 
+**Available in:** infoRouter 9.0 and later
+
 Sets the system default folder columns using a comma-separated list of column names. The columns define which metadata fields are displayed by default in folder list views. All column names are validated against the list of available columns before being saved.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetAccessList API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the current access list (security settings) for a document or folder at the specified path.
 
 ## Endpoint

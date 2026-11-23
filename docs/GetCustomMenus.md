@@ -1,5 +1,7 @@
 # GetCustomMenus API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the custom menus this infoRouter installation adds to the document list, as an administrator set them with [SetCustomMenus](SetCustomMenus.md). These are the entries an administrator wires up to reach pages or external systems of their own — the document list menu bar and the right-click menu are extended with them.
 
 The definitions are installation-wide: every signed-in user sees the same set, and the response does not vary by folder, domain, or permissions.

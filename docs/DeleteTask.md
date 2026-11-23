@@ -1,5 +1,7 @@
 # DeleteTask API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes an active workflow task by its task ID. All task attachments are also removed as part of the operation.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# SetDocumentSummary API
 
+**Available in:** infoRouter 9.0 and later
+
 Stores (inserts or updates) a document's summary in the `DOCSUMMARY` table. This is the **explicit** counterpart to [`GetDocumentSummary`](GetDocumentSummary.md): it writes the summary text you provide directly to the database and does **not** call the infoRouter Connect service.
 
 A document has one summary, however many versions it has. `versionNumber` says which version the text describes and is recorded on the row as provenance - it does **not** make a second summary. Calling this again overwrites what is stored, whatever version either call named.

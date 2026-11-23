@@ -1,5 +1,7 @@
 # FlushApplicationCache API
 
+**Available in:** infoRouter 9.0 and later
+
 Flushes the in-memory application cache, forcing the system to reload configuration and cached data from the database and file system. It also reads the content search settings file, `config\content-search-setting.json`, the SMTP settings file, `config\smtp-setting.json`, the infoRouter Connect settings file, `config\irconnect-setting.json`, and the sign-on settings file, `config\signon-setting.json`, again and puts them in effect, so a change made to any of these files by hand needs no restart. Only administrators can call it: the `sysadmin` account and members of `[Administrators]`.
 
 ## Endpoint

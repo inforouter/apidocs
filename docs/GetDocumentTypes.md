@@ -1,5 +1,7 @@
 ﻿# GetDocumentTypes API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of all document type definitions configured in the system. Document types allow documents to be classified and associated with a required custom property set.
 
 ## Endpoint

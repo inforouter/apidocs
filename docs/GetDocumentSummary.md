@@ -1,5 +1,7 @@
 ﻿# GetDocumentSummary API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a document's summary. A document has one summary, however many versions it has. Summaries are stored in the `DOCSUMMARY` table and are usually produced by the local **infoRouter Connect** summarization service.
 
 This API **only reads**. It never calls the Connect service, and it never queues work: a document with no stored summary answers with a dash, not with a job. Producing a summary is a separate, deliberate act - either a folder preference that summarizes documents as they are uploaded, or an explicit request to produce one - and only that act spends the instance's AI budget.

@@ -1,5 +1,7 @@
 # SetDocumentRetention API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 > **Obsolete since infoRouter 8.1.155.** This API always returns an error and must not be used in new integrations. Use [`SetDocumentRandDSchedule`](SetDocumentRandDSchedule.md) to manage document retention.
 
 Sets the retention period of the specified document. This method was used to mark a document as having no retention, permanent retention, or retention until a specified date. As of version 8.1.155, the API is disabled -" every call returns an error regardless of the parameters supplied. All retention management is now handled through the Retention & Disposition schedule system.

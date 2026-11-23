@@ -1,5 +1,7 @@
 # RemoveAssociation API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes an existing association between two infoRouter items (documents or folders). The source item can be a document or a folder; the target item can likewise be a document or a folder. Use this API to clean up stale cross-references or to undo an association created by [AssociateDocument](AssociateDocument.md) or [AssociateFolder](AssociateFolder.md).
 
 ## Endpoint

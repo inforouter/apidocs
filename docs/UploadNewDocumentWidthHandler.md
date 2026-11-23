@@ -1,5 +1,7 @@
 # UploadNewDocumentWidthHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a **new** document (never an existing-document version) to the specified folder path using a pre-staged upload handler, with extended options via an XML parameters string. The folder path and document name are specified separately, allowing the caller to place the new file independently of any existing document path.
 
 > **Note:** The method name contains a typo ("Width" instead of "With") -" this is the original API name and is preserved for backward compatibility.

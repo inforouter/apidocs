@@ -1,5 +1,7 @@
 # CreatePropertySetDefinition1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new custom property set definition with full control over privacy settings. This is an extended version of [CreatePropertySetDefinition](CreatePropertySetDefinition.md) that adds the `PrivatePropertySet` parameter to control whether anonymous users can see the property set.
 
 ## Endpoint

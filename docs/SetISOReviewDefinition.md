@@ -1,5 +1,7 @@
 # SetISOReviewDefinition API
 
+**Available in:** infoRouter 9.0 and later
+
 Sets the ISO review schedule on a document. Defines when and how the document should be periodically reviewed, who should perform the review (via task or workflow), and what task permissions and completion requirements apply.
 
 ## Endpoint

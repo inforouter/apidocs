@@ -1,5 +1,7 @@
 # GetAppliedRDScheduleLogs API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the history of Retention and Disposition (R&D) schedules that have been applied to a document or folder by path. Each log entry records which schedule was assigned, by whom, and when. The path type is auto-detected.
 
 ## Endpoint

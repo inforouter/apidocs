@@ -1,5 +1,7 @@
 # UpdateDocumentProperties1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the core properties of the specified document: display name, description, update instructions, source, language, and author. All fields are optional -" only the fields provided are updated. This is an extended version of `UpdateDocumentProperties` that adds source, language, and author fields. To also update importance, use `UpdateDocumentProperties2`.
 
 ## Endpoint

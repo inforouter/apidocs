@@ -1,5 +1,7 @@
 # AddUserToFolderSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a user to the subscription list of a folder. The subscriber receives email notifications for the selected events on the folder and, optionally, all subfolders and their documents.
 
 ## Endpoint

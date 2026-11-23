@@ -1,5 +1,7 @@
 ﻿# GetFoldersAndDocuments1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the immediate sub-folders and documents in the specified infoRouter path in **short form**. This is a lightweight, high-performance variant of `GetFoldersAndDocuments` that uses abbreviated element names and a minimal attribute set. Folder items contain only their ID and name; document items contain a small set of essential fields. No optional enrichment flags are available -" use `GetFoldersAndDocuments` when full document or folder metadata is required.
 
 ## Endpoint

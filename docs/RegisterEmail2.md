@@ -1,5 +1,7 @@
 ﻿# RegisterEmail2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Registers an email message as a document in infoRouter, specifying the destination folder path and the email document name as two separate parameters instead of a combined path. This makes it convenient when the folder and file name are already available as distinct values. Behavior is otherwise identical to `RegisterEmail1`.
 
 ## Endpoint

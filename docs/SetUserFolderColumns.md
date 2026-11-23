@@ -1,5 +1,7 @@
 ﻿# SetUserFolderColumns API
 
+**Available in:** infoRouter 9.0 and later
+
 Saves the column layout and custom property set preference for the authenticated user on the specified folder. The setting applies only to the calling user and does not affect other users.
 
 > **Wrong values are refused.** A column name that is not a column, a `sortBy` that is not one

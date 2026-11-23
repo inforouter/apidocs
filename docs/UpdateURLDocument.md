@@ -1,5 +1,7 @@
 # UpdateURLDocument API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the hyperlink address of an existing URL shortcut document (`.url` extension) by publishing a new version with the new address stored in the document's MetaTag field.
 
 ## Endpoint

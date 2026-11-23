@@ -1,5 +1,7 @@
 # UpdateUserEmail API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the email address of the specified infoRouter user.
 
 ## Endpoint

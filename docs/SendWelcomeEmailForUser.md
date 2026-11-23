@@ -1,5 +1,7 @@
 # SendWelcomeEmailForUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Sends a welcome email to a specified user. For native-authenticated users the email includes a 48-hour password reset link. For externally-authenticated users it includes their authentication source name. Requires an administrator, a User Manager, or a manager of the user's library.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # SetContentSearchSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Replaces the content search settings and applies them at once, without restarting infoRouter. Then asks the search service whether it answers with them and returns the answer. Administrators only; [GetContentSearchSettings](GetContentSearchSettings.md) reads them.
 
 ## Endpoint

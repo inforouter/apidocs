@@ -1,5 +1,7 @@
 ﻿# RemoveTagFromDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 
 
 Removes a specific applied tag from a document. Because a document may have the same tag applied multiple times (e.g. by different users or at different times), the API requires an exact match on **all** identifying fields -" tag text, version number, date applied, and the user who applied it. Use this API to remove a tag that was applied via a workflow step or via `SetTagToDocument` when it is no longer appropriate.

@@ -1,5 +1,7 @@
 ﻿# CreateUploadHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a server-side temporary upload handler that enables large file uploads to be sent in smaller chunks. Returns a handler GUID and the negotiated chunk size to use for subsequent `UploadFileChunk` calls.
 
 This is the first step in the chunked upload workflow. The handler acts as a staging area on the server until the upload is finalized by `UploadDocumentWithHandler`.

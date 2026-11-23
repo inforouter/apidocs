@@ -1,5 +1,7 @@
 # GetRetentionSourceAuthorities API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a list of all retention source authorities defined in the system. Retention source authorities are used to specify the governing body or regulation that mandates retention requirements for records and documents.
 
 ## Endpoint

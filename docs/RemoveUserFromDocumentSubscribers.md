@@ -1,5 +1,7 @@
 ﻿# RemoveUserFromDocumentSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes a specified user from the subscription list of a document. After removal, the user will no longer receive email notifications for any events on that document. Use this API to clean up subscriptions when a user no longer needs to track a document, or as part of a user offboarding workflow.
 
 ## Endpoint

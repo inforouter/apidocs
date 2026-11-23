@@ -1,5 +1,7 @@
 ﻿# UpdateDocumentKeywords API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the user-defined keywords of the specified document. Keywords are free-text tags that help categorize and search for documents. This API replaces the entire existing keyword string with the new value. To append keywords, first retrieve the current keywords using `GetDocumentKeywords`, then append the new keywords and call this API.
 
 ## Endpoint

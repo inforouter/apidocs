@@ -1,5 +1,7 @@
 # GetCurrentUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the properties of the currently authenticated user. This is a convenience wrapper around `GetUser` that does not require a `userName` parameter - the user is determined from the authentication ticket.
 
 ## Endpoint

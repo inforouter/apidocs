@@ -1,5 +1,7 @@
 # AssociatedFoldersAndDocuments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the combined list of all items -" both documents and folders -" that are associated with the specified document or folder. Both forward associations (where the specified item is the source) and reverse associations (where the specified item is the target) are included in each group. Use this API as a single call to discover all associations of an item without making separate calls to [AssociatedDocuments](AssociatedDocuments.md) and [AssociatedFolders](AssociatedFolders.md).
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # UpdateDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the properties of an existing domain/library, including its name, anonymous access setting, visibility, and welcome message.
 
 ## Endpoint

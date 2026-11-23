@@ -1,5 +1,7 @@
 # GetSignOnSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the sign-on settings in effect: the external authentication authorities, the OpenID Connect providers, the account sysadmin's password is also checked against, the trusted LDAP account, whether a temporary sysadmin password is set, and how a signed-in session behaves. Secrets are never returned: a client secret only masked, the temporary password not at all. Administrators only. Read-only: the settings are changed in their file (see Notes).
 
 ## Endpoint

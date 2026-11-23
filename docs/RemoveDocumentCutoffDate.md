@@ -1,5 +1,7 @@
 # RemoveDocumentCutoffDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the cutoff date from the specified document so that it can be checked out and given new versions again. Other rules that block check-out, such as folder rules or a completed status, still apply. If the document has a Retention & Disposition (R&D) schedule, retention and disposition dates that were calculated from the cutoff date are cleared; dates calculated from the creation date are kept.
 
 > **Note:** A document's cutoff date cannot be removed while the folder it is in has a cutoff date. Remove the folder's cutoff date first with `RemoveFolderCutoffDate`.

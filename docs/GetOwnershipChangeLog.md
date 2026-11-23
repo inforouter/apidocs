@@ -1,5 +1,7 @@
 # GetOwnershipChangeLog API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the ownership change log for documents and folders matching the specified date range and path filter. Each entry records a transfer of ownership, including the previous owner, the new owner, and who performed the change.
 
 ## Endpoint

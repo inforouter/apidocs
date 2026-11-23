@@ -1,5 +1,7 @@
 # getTasks API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a filtered list of workflow tasks based on XML search criteria. Tasks can be filtered by completion status, priority, date range, assignee, supervisor, workflow definition, document, and more. Results can be sorted by various task properties in ascending or descending order.
 
 ## Endpoint

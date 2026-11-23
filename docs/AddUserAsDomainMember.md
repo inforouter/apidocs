@@ -1,5 +1,7 @@
 # AddUserAsDomainMember API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds an existing infoRouter user to the member list of the specified domain/library. Once added as a member, the user gains access to the domain's content according to the domain's permissions configuration.
 
 ## Endpoint

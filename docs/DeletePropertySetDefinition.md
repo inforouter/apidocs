@@ -1,5 +1,7 @@
 # DeletePropertySetDefinition API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Permanently deletes a custom property set definition and all data associated with it. This includes all field definitions, field options, all property set rows that have been applied to documents, folders, and users, and the underlying database table. **This operation cannot be undone.**
 
 ## Endpoint

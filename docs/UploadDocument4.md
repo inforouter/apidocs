@@ -1,5 +1,7 @@
 # UploadDocument4 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with extended options supplied through an XML parameters string. This is the most flexible direct-upload variant and supports all upload options including version comment, checkout, publish option, keywords, text-only content, custom dates, and more.
 
 ## Endpoint

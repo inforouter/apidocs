@@ -1,5 +1,7 @@
 ﻿# GetUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the detailed properties of the specified infoRouter user, including profile information, authentication source, and notification preferences.
 
 > **The booleans on `<User>` do not agree with each other.** `exists` is `"true"` in lower case;

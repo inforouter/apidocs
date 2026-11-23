@@ -1,5 +1,7 @@
 # GetRandDScheduleInfo API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full definition of a specific Retention and Disposition (R&D) schedule identified by its numeric ID.
 
 ## Endpoint

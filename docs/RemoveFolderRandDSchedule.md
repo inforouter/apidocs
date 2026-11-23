@@ -1,5 +1,7 @@
 # RemoveFolderRandDSchedule API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes (unassigns) the Retention and Disposition (R&D) schedule from a folder identified by path. Optionally also removes the schedule from all subfolders and/or all documents within the folder hierarchy.
 
 ## Endpoint

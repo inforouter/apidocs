@@ -1,5 +1,7 @@
 # GetDomainPolicies API
 
+**Available in:** infoRouter 9.0 and later
+
 Gets the policies and domain rules for a domain/library, including per-policy metadata describing allowed configuration ranges.
 
 ## Endpoint

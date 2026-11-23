@@ -1,5 +1,7 @@
 ﻿# Lock API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Locks (checks out) the document at the specified path, so that other users cannot create new versions of it until the lock is released with `UnLock`.
 
 **It does not lock a folder.** A folder path is accepted and answered success, but nothing is locked - see the JavaScript section below.

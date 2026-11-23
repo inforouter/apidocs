@@ -1,5 +1,7 @@
 # AuthenticateUserViaWindows API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Authenticates the currently logged-in Windows user against infoRouter using the HTTP request's Windows identity (NTLM/Kerberos), and returns an authentication ticket. No user name or password is passed in the request -" the Windows account is determined automatically from the authenticated HTTP context.
 
 Use this method when the infoRouter server is deployed behind IIS or Kestrel with Windows Authentication enabled, and you want seamless single-sign-on for domain users.

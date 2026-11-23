@@ -1,5 +1,7 @@
 ﻿# UserExists API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Determines whether the given user name refers to an existing infoRouter user.
 
 > **"No" is reported as a failure.** A user who exists answers `success="true"`; a user who does

@@ -1,5 +1,7 @@
 # SetDocumentImportance API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the importance level of the specified document. Importance is a metadata flag used to communicate the urgency or priority of a document to readers. The value can be one of five levels ranging from no marking through vital. Any authenticated user with write access to the document can update this flag.
 
 ## Endpoint

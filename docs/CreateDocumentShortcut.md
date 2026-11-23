@@ -1,5 +1,7 @@
 ﻿# CreateDocumentShortcut API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a document shortcut (`.lnk` file) at the specified path that points to an existing target document. Shortcuts allow the same document to appear in multiple locations without duplicating the file content.
 
 ## Endpoint

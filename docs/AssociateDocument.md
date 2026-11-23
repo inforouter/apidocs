@@ -1,5 +1,7 @@
 ﻿# AssociateDocument API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates an association between the specified source document and a target item (document or folder). Associations let you link related content together so that users can navigate between items that are conceptually connected. The association type controls the semantic relationship -" for example, marking one document as a rendition or a copy of another. Use this API to build cross-references between documents, or to link documents to folders.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # UploadDocument3 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with both a version comment and a post-upload checkout option. This combines the features of `UploadDocument1` (version comment) and `UploadDocument2` (checkout).
 
 ## Endpoint

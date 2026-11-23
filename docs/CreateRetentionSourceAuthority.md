@@ -1,5 +1,7 @@
 # CreateRetentionSourceAuthority API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a new retention source authority in the system. Retention source authorities specify the governing body or regulation that mandates retention requirements for records and documents.
 
 ## Endpoint

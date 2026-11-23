@@ -1,5 +1,7 @@
 ﻿# GetWorkflowDefinitions API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns all workflow definitions defined in the system, optionally filtered by domain/library and/or active status.
 
 Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowDef.md) to retrieve the full definition with steps and tasks for a specific workflow.

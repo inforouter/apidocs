@@ -1,5 +1,7 @@
 # GetManagedDomainsByUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the list of domains/libraries that a user has management (administration) rights on. Omitting `userName` retrieves the managed domains of the currently authenticated user. Another user's managed domains are answered to whoever may look that user up: administrators, User Managers, the managers of the user's library, and the user's co-workers. Up to 9.0 it was administrators only.
 
 ## Endpoint

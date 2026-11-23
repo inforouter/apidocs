@@ -1,5 +1,7 @@
 # RemoveUserFromFolderSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the specified user from the subscription list of a folder. Optionally removes the user from all sub-folders and documents within the folder.
 
 ## Endpoint

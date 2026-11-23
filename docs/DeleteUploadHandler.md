@@ -1,5 +1,7 @@
 ﻿# DeleteUploadHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes an upload handler and discards its staged temporary file on the server. Use this to clean up if a chunked upload is cancelled or if an error occurs before the upload is finalized with `UploadDocumentWithHandler`.
 
 ## Endpoint

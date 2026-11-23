@@ -1,5 +1,7 @@
 ﻿# GetRecycleBinContent API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of all documents and folders currently in the Recycle Bin of the authenticated user. Each item includes its original path, deletion date, size, the user who deleted it, and a handler value that can be used with `PurgeRecycleBinItem` or `RestoreRecycleBinItem`. Use this API to inspect the contents of a user's Recycle Bin before deciding whether to restore or permanently delete items.
 
 > This reads **the caller's own** recycled items.

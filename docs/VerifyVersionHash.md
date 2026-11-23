@@ -1,5 +1,7 @@
 # VerifyVersionHash API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Verifies the integrity of a specific version of a document by comparing the stored content hash against the actual file in the warehouse storage. Returns whether the hash matches, indicating the file has not been corrupted or tampered with since it was stored.
 
 ## Endpoint

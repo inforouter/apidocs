@@ -1,5 +1,7 @@
 # GetAccessListHistory API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the current access list plus the historical access list records for a document or folder at the specified path.
 
 ## Endpoint

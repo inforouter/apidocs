@@ -1,5 +1,7 @@
 # UploadDocument1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a new document or creates a new version of an existing document at the specified path using a raw byte array, with an optional version comment. This is identical to `UploadDocument` with the addition of a `versionComment` parameter that is recorded in the document's version history.
 
 ## Endpoint

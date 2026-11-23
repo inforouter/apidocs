@@ -1,5 +1,7 @@
 # UploadZipWithHandler API
 
+**Available in:** infoRouter 9.0 and later
+
 Imports a ZIP archive as a folder and document structure into the specified folder. The ZIP file is supplied as a pre-uploaded chunked upload handler GUID rather than raw bytes, making this the recommended approach for large ZIP archives.
 
 ## Endpoint

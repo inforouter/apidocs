@@ -1,5 +1,7 @@
 # GetDocumentTasks API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the **standalone** tasks of a document - the ones `CreateTask` and `CreateRelatedTask`
 made - with optional filtering by completion status. Tasks are sorted by due date ascending.
 

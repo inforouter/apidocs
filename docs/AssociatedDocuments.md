@@ -1,5 +1,7 @@
 ﻿# AssociatedDocuments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of documents that are associated with the specified document or folder. Both forward associations (where the specified item is the source) and reverse associations (where the specified item is the target) are returned. Use this API to discover all documents linked to an item, regardless of which side created the association.
 
 ## Endpoint

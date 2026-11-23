@@ -1,5 +1,7 @@
 # CreateFlowDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new workflow definition on the specified domain/library. The workflow is created in **inactive** state -" steps and tasks must be added with `AddFlowStepDef` and `AddFlowTaskDef` before activating it with `ActivateFlowDef`.
 
 This is the minimal variant. Use the numbered variants for additional configuration:

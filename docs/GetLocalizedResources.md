@@ -1,5 +1,7 @@
 ﻿# GetLocalizedResources API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the localized display strings for the named message resources. infoRouter keeps its UI text, error messages and labels in the `IRBase.Messages` resource set, whose keys are **names** - `AccessDenied`, `Abort`, `DocumentNotFound` - and this operation looks a comma separated list of those names up in the language of the caller's session. Client add-ins and integrations call it so that their own screens read in the same language as the rest of infoRouter. Without a ticket the server's default language is used.
 
 > **`resourceIds` takes resource *names*, not numbers**, despite what the parameter is called.

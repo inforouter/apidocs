@@ -1,5 +1,7 @@
 ﻿# GetDocumentAbstract1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full-text abstract (indexed text content) of a specified version of a document. This is the current preferred API for retrieving document abstracts. It uses a consistent XML response structure for both success and error cases, unlike the obsolete [`GetDocumentAbstract`](GetDocumentAbstract.md).
 
 ## Endpoint

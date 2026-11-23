@@ -1,5 +1,7 @@
 # GetVersionRendition API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a derived rendition of a document version: the structured markdown or the redacted text infoRouter Connect produced for it.
 
 A rendition is derived from the version rather than uploaded with it — every one can be produced again from the document, and losing one is a rebuild rather than a restore. They live beside the version in the warehouse, not in the database, because each is the size of the document.

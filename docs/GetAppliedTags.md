@@ -1,5 +1,7 @@
 # GetAppliedTags API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns all tags applied to a document. Each tag entry includes the tag text, the date it was applied, the user who applied it, the document version it belongs to, and workflow context when the tag was applied via a workflow step.
 
 ## Endpoint

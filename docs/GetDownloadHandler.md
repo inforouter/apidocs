@@ -1,5 +1,7 @@
 ﻿# GetDownloadHandler API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Stages the latest version of a document as a temporary server-side file and returns a download handler GUID along with file metadata and the negotiated chunk size. This is the first step in the chunked download workflow for large files. Use `DownloadFileChunk` to retrieve the file data in sequential chunks, then `DeleteDownloadHandler` to clean up the temporary file when done.
 
 To download a specific version rather than the latest, use `GetDownloadHandlerByVersion`.

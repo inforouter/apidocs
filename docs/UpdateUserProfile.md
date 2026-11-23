@@ -1,5 +1,7 @@
 # UpdateUserProfile API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the profile of the specified infoRouter user, including their name, username, and authentication source.
 
 ## Endpoint

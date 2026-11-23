@@ -1,5 +1,7 @@
 # TransferUserCheckedOutDocuments API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers checked-out documents from one user to another. The check-out ownership is reassigned so the target user can check in or cancel the check-out.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

@@ -1,5 +1,7 @@
 # RunMaintenanceJob API
 
+**Available in:** infoRouter 9.0 and later
+
 Runs one maintenance job now, on the caller's request, the way the scheduler runs it: the start and the end go to the job log, so `GetMaintenanceJobsStatus` shows the run. The call answers when the job is through. Administrators only.
 
 ## Endpoint

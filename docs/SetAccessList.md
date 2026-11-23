@@ -1,5 +1,7 @@
 # SetAccessList API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the access list (security permissions) for the document or folder at the specified path.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetLibrariesForAdministration API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the domains/libraries the calling user may administer, whether or not they belong to them: every library in the system, hidden and archived ones included, for an administrator, a member of `[User Managers]` or a member of `[Policy Managers]`; the libraries they manage for a library manager; an empty list for anyone else. Sorted alphabetically by domain name. New in 9.0.
 
 [GetDomains](GetDomains.md) answers only the libraries the caller belongs to, whatever their role, so a User Manager had no way to list the libraries they can put users into, make someone a manager of, or set the policies of. This is that list.

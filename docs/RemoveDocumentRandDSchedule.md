@@ -1,5 +1,7 @@
 # RemoveDocumentRandDSchedule API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes (unassigns) the Retention and Disposition (R&D) schedule from a document identified by path. After this call the document has no R&D schedule.
 
 ## Endpoint

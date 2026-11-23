@@ -1,5 +1,7 @@
 ﻿# UploadFileChunk API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Uploads a single binary chunk to a server-side upload handler as part of a chunked large-file upload workflow. Each chunk is verified against its CRC32 checksum before being appended. When `lastChunk=true`, the handler is marked as complete and ready for finalization.
 
 ## Endpoint

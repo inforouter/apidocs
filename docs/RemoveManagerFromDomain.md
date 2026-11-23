@@ -1,5 +1,7 @@
 # RemoveManagerFromDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes domain manager status from the specified user in the given domain/library. The user remains a member of the domain but loses manager privileges.
 
 ## Endpoint

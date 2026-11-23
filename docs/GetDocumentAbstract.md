@@ -1,5 +1,7 @@
 ﻿# GetDocumentAbstract API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 > **OBSOLETE** -" This API is retained for backward compatibility only. Use [`GetDocumentAbstract1`](GetDocumentAbstract1.md) for new integrations. `GetDocumentAbstract1` returns a consistent XML structure for both success and error cases; this API does not.
 
 Returns the full-text abstract (indexed text content) of a specified version of a document.

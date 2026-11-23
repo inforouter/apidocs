@@ -1,5 +1,7 @@
 ﻿# CreateDocumentTypeDef API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new document type definition in the system. Document types allow documents to be categorized and optionally associated with a required custom property set, enforcing metadata collection for documents of that type.
 
 ## Endpoint

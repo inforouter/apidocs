@@ -1,5 +1,7 @@
 # UpdateRandDSchedule API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates an existing Retention and Disposition (R&D) schedule definition. Optionally recalculates retention and disposition dates for all documents and folders currently using this schedule.
 
 ## Endpoint

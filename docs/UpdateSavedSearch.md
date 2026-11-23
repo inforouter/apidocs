@@ -1,5 +1,7 @@
 # UpdateSavedSearch API
 
+**Available in:** infoRouter 9.0 and later
+
 Replaces the name, description, access and fields of a saved search or search page. With `searchPageId=0` it creates one instead, exactly as [CreateSavedSearch](CreateSavedSearch.md) does.
 
 ## Endpoint

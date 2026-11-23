@@ -1,5 +1,7 @@
 # DeletePropertySetField API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Permanently deletes a field from a custom property set definition. This drops the column from the underlying database table, removes all stored values for that field across every document, folder, and user that had this property set applied, and deletes any associated lookup configuration. **This operation cannot be undone.**
 
 ## Endpoint

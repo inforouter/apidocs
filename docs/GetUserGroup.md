@@ -1,5 +1,7 @@
 # GetUserGroup API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns information on the specified infoRouter user group.
 
 ## Endpoint

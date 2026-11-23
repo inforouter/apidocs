@@ -1,5 +1,7 @@
 # GetClassificationLogs API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the full classification history log for the specified document or folder path. Each log entry records a change to the security classification level, including the new level, who made the change, the reason, and any associated downgrade or declassify dates. Use this API to audit classification changes for compliance and governance reporting.
 
 ## Endpoint

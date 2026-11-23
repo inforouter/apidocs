@@ -1,5 +1,7 @@
 # GetUserFolderColumns API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the effective column layout and custom property set preference saved for the authenticated user on the specified folder. Falls back to the user's global preference, then to the system default, when no folder-specific setting exists.
 
 ## Endpoint

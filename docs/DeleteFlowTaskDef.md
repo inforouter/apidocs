@@ -1,5 +1,7 @@
 # DeleteFlowTaskDef API
 
+**Available in:** infoRouter 9.0 and later
+
 Deletes a task definition from the specified workflow step. The workflow definition must be inactive to delete a task definition.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 ﻿# GetFoldersAndDocuments API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the complete list of immediate sub-folders and documents in the specified infoRouter path. Both folders and documents are returned in a single response -" folders first, followed by documents sorted by name ascending. Optional parameters control how much detail is included for each item, allowing callers to request property sets, security lists, owner information, and version history as needed.
 
 ## Endpoint

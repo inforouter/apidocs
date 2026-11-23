@@ -1,5 +1,7 @@
 ﻿# UpdateRetentionSourceAuthority API
 
+**Available in:** infoRouter 9.0 and later
+
 
 
 Updates (renames) a retention source authority in the system. The new authority name must be unique and not already exist.

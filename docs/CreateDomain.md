@@ -1,5 +1,7 @@
 # CreateDomain API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new infoRouter domain/library with the specified name and configuration. Domains (also called libraries) are the top-level containers in infoRouter that hold folders, documents, and workflow definitions.
 
 ## Endpoint

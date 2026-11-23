@@ -1,5 +1,7 @@
 # UpdateWorkflowTaskDef API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates an existing task definition within a step of an inactive workflow definition. The entire updated task configuration — name, deadline, assignees, permissions, requirements, and instructions — is passed as a single XML string in the `TaskDefXML` parameter, replacing the current values.
 
 The workflow definition must be in **inactive** (deactivated) state. Use [DeactivateFlowDef](DeactivateFlowDef.md) first if the workflow is currently active.

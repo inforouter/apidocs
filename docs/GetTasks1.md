@@ -1,5 +1,7 @@
 # GetTasks1 API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paged list of workflow tasks based on XML search criteria. Identical to [getTasks](getTasks.md) but adds `startingRow` and `rowCount` parameters for pagination. The response includes `startingRow` and `rowCount` attributes in addition to `taskCount` so clients can page through large result sets.
 
 ## Endpoint

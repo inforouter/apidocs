@@ -1,5 +1,7 @@
 # GetVersionDeleteLog API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the version deletion log for documents matching the specified date range and path filter. Each entry represents a version being deleted from a document, including whether it was the last remaining version.
 
 ## Endpoint

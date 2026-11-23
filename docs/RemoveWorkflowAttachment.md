@@ -1,5 +1,7 @@
 # RemoveWorkflowAttachment API
 
+**Available in:** infoRouter 9.0 and later
+
 Removes a previously attached document from an active workflow task. The document is detached from the task's Attachments list.
 
 ## Endpoint

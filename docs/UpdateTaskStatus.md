@@ -1,5 +1,7 @@
 ﻿# UpdateTaskStatus API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the status, finish date, and comment of a workflow task in a single call. This is the composite operation that mirrors the UPDATESTATUS form submission in the task UI — it saves the comment first, then applies the new status and finish date.
 
 ## Endpoint

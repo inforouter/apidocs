@@ -1,5 +1,7 @@
 # GetRecycleBinStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Answers what the recycle bins of the whole instance hold, by where it is: the **system recycle bin**, the
 **users' recycle bins** and the **purge queue**, each with how many folders and documents it holds and their total
 size in bytes. With `withDetails=true`, the users' recycle bins are listed one by one as well. It only reads.

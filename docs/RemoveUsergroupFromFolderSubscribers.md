@@ -1,5 +1,7 @@
 ﻿# RemoveUsergroupFromFolderSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the specified user group from the subscription list of a folder. After removal, members of that group will no longer receive email notifications via the group subscription for any events on that folder. Optionally removes the group from all sub-folders and documents within the folder as well.
 
 ## Endpoint

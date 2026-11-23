@@ -1,5 +1,7 @@
 # GetEmailAndNotificationSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns all email and notification settings for the infoRouter system. Requires an administrator or a Policy Manager.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # Rename API
 
+**Available in:** infoRouter 9.0 and later
+
 Renames a document or a folder in place. Only the name changes: the item stays in its folder and keeps its id, description, update instructions, versions, security and everything else.
 
 ## Endpoint

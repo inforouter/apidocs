@@ -1,5 +1,7 @@
 # AddPropertySetFieldOption API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a static option value to a property set field. Only fields with a `COMBO BOX`, `LIST BOX`, or `RADIO BUTTON` control type support options.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # GetWebDavSessions API
 
+**Available in:** infoRouter 9.0 and later
+
 Lists the WebDAV session tickets of the signed-in user. A WebDAV session ticket is what Windows File Explorer (or any WebDAV client) maps a drive with: the ticket travels in the URL, `https://server/dav/sid-{ticket}/`, so the client needs no sign-in of its own. This API, with [CreateWebDavSession](CreateWebDavSession.md) and [RemoveWebDavSession](RemoveWebDavSession.md), replaces the 8.7 *WebDAV sessions* page.
 
 ## Endpoint

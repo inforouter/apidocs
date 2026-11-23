@@ -1,5 +1,7 @@
 # GetTransactionStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the transaction runner's counters: for every database operation that runs inside a retried transaction, how many times it ran, how each call ended, how often it was retried after a deadlock and how long it held its rows. The counters start when the server starts, or at the last reset. Restricted to callers who may view the server status.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # UpdateUserPreferences API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the display and notification preferences of the specified infoRouter user.
 
 ## Endpoint

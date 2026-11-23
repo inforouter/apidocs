@@ -1,5 +1,7 @@
 ﻿# SetFolderAIPreferences API
 
+**Available in:** infoRouter 9.0 and later
+
 Sets the infoRouter Connect (AI) preferences of the specified folder from an XML preferences definition. Only the preferences listed in the XML are changed; the ones that are not listed keep their current value.
 
 When the `ApplyToSubfolders` preference is on, the preferences are also written onto the whole existing subfolder tree, and subfolders created later inherit them at creation time.

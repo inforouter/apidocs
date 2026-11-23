@@ -1,5 +1,7 @@
 # CreateTicketforUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates an authentication ticket for any specified infoRouter user without requiring that user's password. Instead, a server-side **trusted user password** (configured in the application settings) is presented by the calling application. This enables secure server-to-server impersonation and integration scenarios.
 
 A typical use case is a trusted back-end service that needs to act on behalf of different users without storing or knowing individual passwords.

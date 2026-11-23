@@ -1,5 +1,7 @@
 # UpdateUserContactInfo API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the email address and mobile number of the specified infoRouter user in a single call.
 
 ## Endpoint

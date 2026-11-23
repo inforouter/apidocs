@@ -1,5 +1,7 @@
 ﻿# GetVersionTextOnlyContent API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the plain-text alternative content stored alongside a specific version of a document. This text-only content is a separately stored artifact in the document warehouse -" it is only present if it has been explicitly set (for example, by a conversion process or via `SetVersionTextOnlyContent`). Passing `0` for the version number retrieves the latest version's content, equivalent to calling `GetDocumentTextOnlyContent`.
 
 ## Endpoint

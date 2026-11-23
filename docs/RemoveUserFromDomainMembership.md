@@ -1,5 +1,7 @@
 # RemoveUserFromDomainMembership API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Removes the specified user from the member list of the given domain/library. The user loses access to the domain's content after removal.
 
 ## Endpoint

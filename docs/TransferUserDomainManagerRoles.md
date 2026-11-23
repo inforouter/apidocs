@@ -1,5 +1,7 @@
 # TransferUserDomainManagerRoles API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers domain/library manager roles from one user to another. The target user is granted manager status for all domains where the source user is currently a manager.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

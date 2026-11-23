@@ -1,5 +1,7 @@
 # GetDomainStatistics API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns statistics for the specified domain/library.
 
 ## Endpoint

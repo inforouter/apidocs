@@ -1,5 +1,7 @@
 # GetFolders2 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of direct subfolders of the specified folder in short form, applying the system's configured maximum folder display count limit. This API is used by the infoRouter UI folder panel to avoid overloading the interface with extremely large folder lists.
 
 ## Endpoint

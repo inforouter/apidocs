@@ -1,5 +1,7 @@
 # GetAllUsersWithoutDetails API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a paged and filtered list of infoRouter users without preference detail (lighter response), supporting the same filters and sorting as `GetAllUsers2`.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # TransferUserISOTasks API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers ISO review tasks from one user to another. Used when an ISO reviewer is unavailable or leaving the organization.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

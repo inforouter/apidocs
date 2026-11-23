@@ -1,5 +1,7 @@
 # DomainExists API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Determines whether a domain/library with the given name exists in the infoRouter system. Returns success if the domain exists, or an error if it does not.
 
 ## Endpoint

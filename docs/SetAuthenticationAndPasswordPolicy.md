@@ -1,5 +1,7 @@
 # SetAuthenticationAndPasswordPolicy API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the authentication and password policy settings by sending a serialized `AuthenticationAndPasswordPolicy` object. This API allows you to configure password complexity rules, expiration policies, and actions that require password re-confirmation.
 
 ## Endpoint

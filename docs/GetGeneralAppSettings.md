@@ -1,5 +1,7 @@
 # GetGeneralAppSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the general application settings including upload limits, work days configuration, holidays, and system preferences.
 
 ## Endpoint

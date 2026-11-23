@@ -1,5 +1,7 @@
 # UseFormTemplate API
 
+**Available in:** infoRouter 9.0 and later
+
 Prepares a new form from a form template, for the user to fill in. What comes back depends on the template's file type:
 
 | Template | Recognised by | Response `formType` | What the UI gets | What the UI does |

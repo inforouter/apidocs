@@ -1,5 +1,7 @@
 # GetDomainFlows API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a list of workflow definitions associated with the specified domain/library. Each workflow definition includes its ID, name, status, and associated folder path.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # AddPropertySetRowForUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds one or more property set rows to the specified infoRouter user. Property sets are custom metadata schemas; each row contains field values for a given property set definition.
 
 ## Endpoint

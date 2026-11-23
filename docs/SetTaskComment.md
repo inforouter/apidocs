@@ -1,5 +1,7 @@
 # SetTaskComment API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Sets the user comment on a workflow task. The comment is stored with the task and visible to supervisors and other users with access to the workflow.
 
 Pass an empty string to clear an existing comment.

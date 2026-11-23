@@ -1,5 +1,7 @@
 ﻿# GetISOReviewDefinition API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the ISO review schedule definition currently set on a document. Includes the schedule, reviewer assignment, deadline, task permissions, and task requirements.
 
 ## Endpoint

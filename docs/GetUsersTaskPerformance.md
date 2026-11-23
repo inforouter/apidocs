@@ -1,5 +1,7 @@
 # GetUsersTaskPerformance API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a list of users with their task performance statistics, including due and overdue task counts. This API is useful for monitoring user workload and identifying bottlenecks in workflow processing.
 
 ## Endpoint

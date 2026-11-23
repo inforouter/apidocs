@@ -1,5 +1,7 @@
 ﻿# GetFoldersAndDocumentsByPage API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns a page of documents and folders at the specified path, with optional name filtering for both folders and documents. Each page contains up to 20 items. Use `PageNumber` to navigate through large listings.
 
 ## Endpoint

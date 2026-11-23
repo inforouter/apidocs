@@ -1,5 +1,7 @@
 # GetDomains1 API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the list of domains/libraries, optionally with the managers of each one. It is [GetDomains](GetDomains.md) with one parameter, `withManagers`; with it, a list of libraries needs no [GetManagers](GetManagers.md) call per row.
 
 ## Endpoint

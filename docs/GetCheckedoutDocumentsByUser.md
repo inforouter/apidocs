@@ -1,5 +1,7 @@
 ﻿# GetCheckedoutDocumentsByUser API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a paged list of documents currently checked out by the specified user.
 
 ## Endpoint

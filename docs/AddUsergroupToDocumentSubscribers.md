@@ -1,5 +1,7 @@
 # AddUsergroupToDocumentSubscribers API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds a user group to the subscription list of a document. All members of the group receive email notifications for the selected events.
 
 ## Endpoint

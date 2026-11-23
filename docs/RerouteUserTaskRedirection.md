@@ -1,5 +1,7 @@
 ﻿# RerouteUserTaskRedirection API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Changes the target user of an existing task redirection without modifying the start and end dates. Use this when a user's tasks are already being redirected and you want to point them to a different person.
 
 To create a new redirection from scratch, use [SetUserTaskRedirection](SetUserTaskRedirection.md). To remove a redirection entirely, use [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md).

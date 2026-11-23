@@ -1,5 +1,7 @@
 # AddUserGroupAsDomainMember API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Adds an existing infoRouter global user group to the member list of the specified domain/library. All users in the group gain access to the domain according to its permissions configuration.
 
 ## Endpoint

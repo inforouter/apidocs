@@ -1,5 +1,7 @@
 # SetSystemBehaviorSettings API
 
+**Available in:** infoRouter 9.0 and later
+
 Updates the system behavior settings including login logging configuration and login delay (anti-brute-force) settings.
 
 ## Endpoint

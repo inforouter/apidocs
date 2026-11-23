@@ -1,5 +1,7 @@
 # FolderExists API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Determines whether a folder exists at the specified path. Returns success if the path resolves to an existing folder, or an error if the folder is not found or cannot be accessed.
 
 ## Endpoint

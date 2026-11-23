@@ -1,5 +1,7 @@
 # CreateDomainFromTemplate API
 
+**Available in:** infoRouter 9.0 and later
+
 Creates a library from another one used as a template: the template's policies and rules, members, managers and local groups, the root folder's own settings and access list, the folder tree with each folder's settings and list, and the documents, under a new name. The answer is the new library.
 
 ## Why this operation exists

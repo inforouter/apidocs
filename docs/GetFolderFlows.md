@@ -1,5 +1,7 @@
 # GetFolderFlows API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the workflow definitions that are active on a specified folder. Optionally includes workflows inherited from parent folders.
 
 Step definitions are **not** included in the response. Use [GetFlowDef](GetFlowDef.md) to retrieve the full definition with steps and tasks for a specific workflow.

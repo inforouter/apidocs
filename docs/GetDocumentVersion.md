@@ -1,5 +1,7 @@
 ﻿# GetDocumentVersion API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the metadata for a specific version of a document, identified by document path and version number. The response includes the version author, size, checksum, creation and publish dates, check-in comment, and approval information.
 
 ## Endpoint

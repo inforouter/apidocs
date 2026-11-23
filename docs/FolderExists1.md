@@ -1,5 +1,7 @@
 # FolderExists1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Determines whether a subfolder with the given name exists inside the specified parent folder. Returns success if the subfolder is found, or an error if it does not exist. Use this variant when you have the parent path and the subfolder name as separate values.
 
 ## Endpoint

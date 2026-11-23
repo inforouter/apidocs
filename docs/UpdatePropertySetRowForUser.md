@@ -1,5 +1,7 @@
 ﻿# UpdatePropertySetRowForUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates an existing property set row for the specified user.
 
 It can only rewrite a row that is already there; use

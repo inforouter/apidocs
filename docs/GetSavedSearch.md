@@ -1,5 +1,7 @@
 # GetSavedSearch API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a saved search or search page: its name, owner, access, and every field with its value and visibility. The response carries everything [UpdateSavedSearch](UpdateSavedSearch.md) needs, in the form it takes.
 
 ## Endpoint

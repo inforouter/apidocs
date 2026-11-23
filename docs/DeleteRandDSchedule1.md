@@ -1,5 +1,7 @@
 # DeleteRandDSchedule1 API
 
+**Available in:** infoRouter 9.0 and later
+
 Deletes an existing Retention and Disposition (R&D) schedule definition. When `forceDelete` is `true`, the schedule is automatically unassigned from all documents and folders before deletion, bypassing the assignment check. When `false`, behaves identically to [DeleteRandDSchedule](DeleteRandDSchedule.md).
 
 ## Endpoint

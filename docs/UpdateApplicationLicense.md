@@ -1,5 +1,7 @@
 # UpdateApplicationLicense API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the infoRouter application license by writing a new license file. This API is restricted to system administrators. The license data is validated, saved to disk, and the in-memory settings are immediately refreshed.
 
 ## Endpoint

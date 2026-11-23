@@ -1,5 +1,7 @@
 ﻿# SetPropertySetLookupFieldParametersForSQLServer API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Configures a `LOOKUP` field in a custom property set to query an external **SQL Server** database. After calling this API the field will execute the specified SQL sentence against the SQL Server instance whenever [GetPropertySetFieldOptions](GetPropertySetFieldOptions.md) is called for it.
 
 ## Endpoint

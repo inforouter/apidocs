@@ -1,5 +1,7 @@
 ﻿# GetDownloadQue API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the list of documents and folders that the current authenticated user has added to their **download queue**. The download queue is a personal per-user collection of items staged for bulk download. The response uses the same full-detail folder and document element format as `GetFoldersAndDocuments`. Optional flags control whether additional detail (folder rules, property sets, security, owner, version history) is included for each item.
 
 ## Endpoint

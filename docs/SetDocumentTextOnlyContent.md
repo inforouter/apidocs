@@ -1,5 +1,7 @@
 # SetDocumentTextOnlyContent API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the plain-text alternative content of the latest version of the specified document. The text-only content is a searchable plain-text representation stored alongside the binary document file. It is used for full-text indexing when the binary content cannot be indexed directly (e.g. encrypted or proprietary formats). Calling this API replaces any previously stored text-only content for the latest version.
 
 ## Endpoint

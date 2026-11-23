@@ -1,5 +1,7 @@
 ﻿# SendEmail API
 
+**Available in:** infoRouter 9.0 and later
+
 Sends one or more infoRouter documents and/or folders to a list of recipients by email. Each item is included as a clickable library link in the email body.
 
 ## Endpoint

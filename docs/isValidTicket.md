@@ -1,5 +1,7 @@
 # isValidTicket API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Checks whether an existing authentication ticket is still valid and returns the session profile associated with it. Unlike `RenewTicket`, this method does not require credentials and does not extend the ticket's expiration -" it is a passive, read-only check.
 
 Use this method when a client application needs to confirm that a previously obtained ticket is still alive before making further API calls.

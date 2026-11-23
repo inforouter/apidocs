@@ -1,5 +1,7 @@
 ﻿# RegisterEmail3 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Registers an email message as a document in infoRouter, passing all email fields as a single XML string. The destination folder and document name are specified as separate parameters. This variant is useful when the calling application already has the email data in an XML structure, and avoids the need to pass many individual query-string or form parameters. Behavior is otherwise identical to `RegisterEmail2`.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # ChangeUserPassword API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 > **Obsolete.** Use [ChangeUserPassword1](ChangeUserPassword1.md) instead. `ChangeUserPassword` remains functional for backward compatibility - it still sets another user's password - but it refuses your own, and new integrations should use `ChangeUserPassword1`.
 
 Sets another infoRouter user's password; this requires the **User Manager** administrative role. **Your own password is not changed here:** use [ChangeUserPassword1](ChangeUserPassword1.md), which takes your current password.

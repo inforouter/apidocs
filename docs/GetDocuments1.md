@@ -1,5 +1,7 @@
 ﻿# GetDocuments1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the documents in the specified infoRouter folder path in **short form**. This is a lightweight, high-performance variant of `GetDocuments` that uses abbreviated element names and a minimal attribute set. No optional enrichment flags are available -" use `GetDocuments` when full document metadata (property sets, security, owner, versions) is required.
 
 ## Endpoint

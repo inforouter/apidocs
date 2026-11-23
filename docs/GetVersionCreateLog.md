@@ -1,5 +1,7 @@
 # GetVersionCreateLog API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns the version creation log for documents matching the specified date range and path filter. Each entry represents a new version being created for a document.
 
 ## Endpoint

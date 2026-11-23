@@ -1,5 +1,7 @@
 # GetAllUsers3 API
 
+**Available in:** infoRouter 9.0 and later
+
 Returns a list of users with paging, filtering and sorting, and two parameters more than [GetAllUsers2](GetAllUsers2.md): `onlyUsersInNoLibrary`, to list the users who belong to no library, and `lastLogonBefore`, to list the accounts nobody has used since a date.
 
 A user who is not a member of any library, and is in no user group that is, can sign in and reach nothing. `onlyUsersInNoLibrary=true` finds them.

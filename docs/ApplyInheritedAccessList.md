@@ -1,5 +1,7 @@
 # ApplyInheritedAccessList API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Applies the inherited (parent) access list to the specified document or folder, overwriting any custom security settings.
 
 ## Endpoint

@@ -1,5 +1,7 @@
 # CreateUser API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new infoRouter user account.
 
 ## Endpoint

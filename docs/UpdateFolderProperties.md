@@ -1,5 +1,7 @@
 # UpdateFolderProperties API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the name and/or description of the specified folder. The folder itself must already exist; only its metadata is changed.
 
 ## Endpoint

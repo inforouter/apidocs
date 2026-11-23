@@ -1,5 +1,7 @@
 # UpdateTaskFinishDate API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Updates the finish date of a **completed** workflow task. Use this to retroactively correct a task's recorded completion date when the original timestamp was inaccurate.
 
 This operation only applies to already-completed tasks. To change the due date of an active task, use [ChangeTaskDueDate](ChangeTaskDueDate.md).

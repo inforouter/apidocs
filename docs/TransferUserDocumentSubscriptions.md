@@ -1,5 +1,7 @@
 # TransferUserDocumentSubscriptions API
 
+**Available in:** infoRouter 9.0 and later
+
 Transfers document subscriptions from one user to another. The target user is subscribed to all documents that the source user currently subscribes to.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may

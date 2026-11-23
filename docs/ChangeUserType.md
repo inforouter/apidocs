@@ -1,5 +1,7 @@
 ﻿# ChangeUserType API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Changes the type of the specified infoRouter user account between author and read-only user.
 
 > **The change is read back from [GetUser](GetUser.md)**, which reports `UserType` - the same

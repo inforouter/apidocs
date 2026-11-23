@@ -1,5 +1,7 @@
 # DeleteFolder API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Deletes the folder at the specified path, including all its contents (subfolders and documents). The folder goes to the caller's recycle bin with everything in it, and can be restored from there with [RestoreRecycleBinItem](RestoreRecycleBinItem.md) until it is purged.
 
 ## Endpoint

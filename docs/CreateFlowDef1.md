@@ -1,5 +1,7 @@
 # CreateFlowDef1 API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Creates a new workflow definition on the specified domain/library, with an optional destination folder for documents when the workflow ends. The workflow is created in **inactive** state.
 
 This extends `CreateFlowDef` by adding the `OnEndMoveToPath` parameter. For the full parameter set see `CreateFlowDef3`.

@@ -1,5 +1,7 @@
 # Move API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Moves a document or folder from the source path to the destination path. Both documents and folders can be moved in a single call. The destination path must specify the target location including the new name.
 
 ## Endpoint

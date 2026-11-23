@@ -1,5 +1,7 @@
 # GetDeleteLog API
 
+**Available in:** infoRouter 8.7 and 9.x
+
 Returns the deletion audit log for documents, folders, and libraries matching the specified date range and path filter. Each entry records a single delete-related action (recycle, purge, empty recycle bin, or restore) along with who performed it and when.
 
 ## Endpoint
