@@ -439,7 +439,7 @@ The `errorCode` values this operation returns, checked against a running server:
 
 ## React Implementer Guide
 
-Production-ready patterns derived from the reference demo at `IRWebCore/wwwRoot/form-template-demo.html`. This API is always called after `UseFormTemplate` (create flow) or `EditFilledForm` (update flow) has collected the user's form data via an iframe.
+Production-ready patterns. This API is always called after `UseFormTemplate` (create flow) or `EditFilledForm` (update flow) has collected the user's form data via an iframe.
 
 ### Building xmlContent from iframe form data
 

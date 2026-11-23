@@ -71,8 +71,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetServerAlerts](GetServerAlerts.md) - Get the server's current alerts: full disk, internet outage (admin only)
 - [DismissServerAlert](DismissServerAlert.md) - Dismiss one server alert for all administrators (admin only)
 - [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) - Get status of all system maintenance jobs (admin only)
-- [GetTransactionStatistics](GetTransactionStatistics.md) - Get the transaction runner's counters: calls, outcomes, retries, lock waits and holds per operation (admin only)
-- [RunMaintenanceJob](RunMaintenanceJob.md) - Run one maintenance job now and answer when it is through (admin only)
 - [GetWarehouseStatus](GetWarehouseStatus.md) - Get warehouse storage status, document counts, and disk information (admin only)
 - [ServerInfo](ServerInfo.md) - Get server version, time, and basic license info (no authentication required)
 - [UpdateApplicationLicense](UpdateApplicationLicense.md) - Update the application license file (admin only)

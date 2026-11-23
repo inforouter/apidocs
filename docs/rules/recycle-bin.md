@@ -158,8 +158,7 @@ list shows it and nothing restores it. There are three ways in:
 
 **The purge job** then removes the queued items for real:
 
-- It runs **every five minutes** and takes up to **1,000 items** a run, oldest first. An administrator can also
-  run it at once ([RunMaintenanceJob](../RunMaintenanceJob.md), job `14`).
+- It runs **every five minutes** and takes up to **1,000 items** a run, oldest first.
 - Each document is purged in **one transaction**: every row that belongs to it goes (versions, properties,
   keywords, tags, associations, subscriptions, favorites, tasks, workflow steps, shortcuts pointing at it,
   queued Connect work), and its **files are deleted from the warehouse last**, inside the same transaction. If

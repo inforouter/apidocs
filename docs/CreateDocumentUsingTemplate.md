@@ -295,7 +295,7 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ## React Implementer Guide
 
-Production-ready patterns derived from the reference demo at `IRWebCore/wwwRoot/form-template-demo.html`. This API is always called after `UseFormTemplate` (create flow) or `EditFilledForm` (update flow) has collected the user's form data via an iframe. **Prefer [`SaveFilledForm`](SaveFilledForm.md) for new integrations.**
+Production-ready patterns. This API is always called after `UseFormTemplate` (create flow) or `EditFilledForm` (update flow) has collected the user's form data via an iframe. **Prefer [`SaveFilledForm`](SaveFilledForm.md) for new integrations.**
 
 ### Building xmlContent from iframe form data
 
