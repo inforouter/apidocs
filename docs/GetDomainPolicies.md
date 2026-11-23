@@ -77,7 +77,7 @@ Gets the policies and domain rules for a domain/library, including per-policy me
 |-----------|------|-------------|
 | `domainName` | string | The library the policies belong to |
 | `isArchive` | boolean | Whether the library is archived |
-| `editable` | boolean | Whether [SetDomainPolicies](SetDomainPolicies.md) would accept this caller for this library. Added in 9.0. Always `true` for administrators and Policy Managers. For a library manager it is `true` only while the system behaviour setting *Allow library managers to edit policies* is on; that setting can be read only through GetSystemBehaviorSettings, which needs the Policy Manager role, so this attribute is the manager's way to find out. A UI shows the policy editor when it is `true` and a read-only view otherwise. |
+| `editable` | boolean | Whether SetDomainPolicies would accept this caller for this library. Added in 9.0. Always `true` for administrators and Policy Managers. For a library manager it is `true` only while the system behaviour setting *Allow library managers to edit policies* is on; that setting can be read only through GetSystemBehaviorSettings, which needs the Policy Manager role, so this attribute is the manager's way to find out. A UI shows the policy editor when it is `true` and a read-only view otherwise. |
 
 ## DomainRules Elements
 
@@ -278,7 +278,7 @@ for (const policy of policies.querySelectorAll('ActionPolicies > Policy')) {
 `<DomainRules>` holds the publishing and visibility rules as child elements whose text is `true` or
 `false`. `<ActionPolicies>` holds one `<Policy>` per action, saying who may do it - anonymous, library
 manager, object owner, sub-object owner - and the right it needs.
-[SetDomainPolicies](SetDomainPolicies.md) writes the same shape back.
+SetDomainPolicies writes the same shape back.
 
 ## Notes
 

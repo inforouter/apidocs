@@ -181,7 +181,7 @@ A `<Capability>` says three separate things: `enabledOnService` is whether the s
 
 - Cache it. The report changes when an administrator changes something, not between two documents.
 - A capability being `usable` is not a promise that a particular document can be processed: the file still has to be one the service can read. See `<SupportedExtensions>`.
-- Ask for the work itself with [GetConnectProfile](../GetConnectProfile.md), which reports per answer what became of the request.
+- Ask for the work itself with [GetConnectProfile](GetConnectProfile.md), which reports per answer what became of the request.
 
 ## Error Codes
 
@@ -199,6 +199,6 @@ The `errorCode` values this operation returns, checked against a running server:
 
 ## Related APIs
 
-- [GetConnectProfile](../GetConnectProfile.md) - Ask the service to produce content for a document
+- [GetConnectProfile](GetConnectProfile.md) - Ask the service to produce content for a document
 - [SetFolderAIPreferences](../SetFolderAIPreferences.md) - Have content produced automatically on upload
 - [GetLogs](../GetLogs.md) - Read the daily record of the calls made to the service

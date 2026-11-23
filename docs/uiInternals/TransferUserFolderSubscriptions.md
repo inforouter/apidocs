@@ -1,8 +1,18 @@
-# TransferUserExpirationNotices API
+---
+search:
+  exclude: true
+---
+
+# TransferUserFolderSubscriptions API
 
 **Available in:** infoRouter 9.0 and later
 
-Transfers document expiration notices from one user to another. The target user takes over responsibility for receiving and acting on document expiration alerts that were assigned to the source user.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Transfers folder subscriptions from one user to another. The target user is subscribed to all folders that the source user currently subscribes to.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may
 > not name one account: the call is refused with `4000`, because moving everything away from an
@@ -12,22 +22,21 @@ Transfers document expiration notices from one user to another. The target user 
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserExpirationNotices
+/api/UIInternals/TransferUserFolderSubscriptions
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserExpirationNotices?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserExpirationNotices` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserExpirationNotices`
+- **GET** `/api/UIInternals/TransferUserFolderSubscriptions?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserFolderSubscriptions` (form data)
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `fromUserName` | string | Yes | The username whose document expiration notices will be transferred. |
-| `toUserName` | string | Yes | The username who will receive the document expiration notices. |
+| `fromUserName` | string | Yes | The username whose folder subscriptions will be transferred. |
+| `toUserName` | string | Yes | The username who will receive the folder subscriptions. |
 
 ---
 
@@ -42,7 +51,7 @@ Transfers document expiration notices from one user to another. The target user 
 ### Success Response (with warnings)
 
 ```xml
-<root success="true" warnings="Some expiration notices could not be transferred." />
+<root success="true" warnings="Some folder subscriptions could not be transferred." />
 ```
 
 ### Error Response
@@ -55,7 +64,7 @@ Transfers document expiration notices from one user to another. The target user 
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
 **System administrator.** Only system administrators can transfer user data between accounts.
 
@@ -66,7 +75,7 @@ Transfers document expiration notices from one user to another. The target user 
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserExpirationNotices
+GET /api/UIInternals/TransferUserFolderSubscriptions
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -76,30 +85,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserExpirationNotices HTTP/1.1
+POST /api/UIInternals/TransferUserFolderSubscriptions HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserExpirationNotices>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserExpirationNotices>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -108,7 +100,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -120,10 +112,10 @@ async function call(action, params) {
 }
 ```
 
-Moves the expiration notices addressed to one user to another user.
+Moves one user's folder subscriptions to another user.
 
 ```javascript
-const root = await call('TransferUserExpirationNotices', {
+const root = await call('TransferUserFolderSubscriptions', {
   authenticationTicket: ticket,
   fromUserName: 'jsmith',
   toUserName: 'agarcia',
@@ -133,15 +125,16 @@ const root = await call('TransferUserExpirationNotices', {
 const warnings = root.getAttribute('warnings');
 ```
 
-An answer may carry a `warnings` attribute when some of the expiration notices could not be moved - a conflict at
+An answer may carry a `warnings` attribute when some of the folder subscriptions could not be moved - a conflict at
 the destination, most often. It is absent when everything moved.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
 
-- Transfers the notification target for document expiration dates from `fromUserName` to `toUserName`.
+- The `toUserName` is subscribed to all folders that `fromUserName` is currently subscribed to.
+- Folders where `toUserName` is already subscribed are skipped without error.
 - The response root element is `<root>`, not `<response>`.
 - Typically used as part of a user offboarding process before deleting the source user.
 
@@ -149,9 +142,9 @@ not go with it.
 
 ## Related APIs
 
-- [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships
 - [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) - Transfer document subscriptions
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md) - Transfer folder ownerships
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 

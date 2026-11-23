@@ -1,6 +1,16 @@
-﻿# GetConnectProfile API
+---
+search:
+  exclude: true
+---
+
+# GetConnectProfile API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Has the local **infoRouter Connect** service profile a document version — a summary, a description, an abstract, keywords, the document type, the text of a scan, the values of a property set — and reports where each of the things you asked for has got to.
 
@@ -11,14 +21,13 @@ This API **never calls the Connect service itself**. Producing any of this takes
 ## Endpoint
 
 ```
-/srv.asmx/GetConnectProfile
+/api/UIInternals/GetConnectProfile
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetConnectProfile?AuthenticationTicket=...&Path=...&VersionNumber=0&ForceRefresh=false&IncludeSummary=true&IncludeDescription=true&IncludeAbstract=false&IncludeKeywords=true&IncludeDocumentType=false&IncludeOcrText=false&IncludeMarkdown=false&IncludeRedactedText=false&IncludeExtractData=&MaxKeywordCount=0&ScrubPii=`
-- **POST** `/srv.asmx/GetConnectProfile` (form data)
-- **SOAP** Action: `http://tempuri.org/GetConnectProfile`
+- **GET** `/api/UIInternals/GetConnectProfile?AuthenticationTicket=...&Path=...&VersionNumber=0&ForceRefresh=false&IncludeSummary=true&IncludeDescription=true&IncludeAbstract=false&IncludeKeywords=true&IncludeDocumentType=false&IncludeOcrText=false&IncludeMarkdown=false&IncludeRedactedText=false&IncludeExtractData=&MaxKeywordCount=0&ScrubPii=`
+- **POST** `/api/UIInternals/GetConnectProfile` (form data)
 
 ## Parameters
 
@@ -46,15 +55,15 @@ This API **never calls the Connect service itself**. Producing any of this takes
 
 | Switch | Produces | Read it back with |
 |--------|----------|-------------------|
-| `IncludeSummary` | A summary of this version | [GetDocumentSummary](GetDocumentSummary.md) |
-| `IncludeDescription` | A one line description | [GetDocument](GetDocument.md) |
-| `IncludeAbstract` | The longer abstract | [GetDocumentAbstract](GetDocumentAbstract.md) |
-| `IncludeKeywords` | Generated keywords | [GetDocumentKeywords](GetDocumentKeywords.md) |
-| `IncludeDocumentType` | The document type, and the values of its required property set | [GetDocument](GetDocument.md) |
-| `IncludeOcrText` | The text of a scan, in the warehouse | [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md) |
-| `IncludeMarkdown` | Structured markdown, in the warehouse | [GetVersionRendition](GetVersionRendition.md) |
-| `IncludeRedactedText` | Redacted text, in the warehouse | [GetVersionRendition](GetVersionRendition.md) |
-| `IncludeExtractData` | The values of the property set you named | [GetDocument](GetDocument.md) |
+| `IncludeSummary` | A summary of this version | [GetDocumentSummary](../GetDocumentSummary.md) |
+| `IncludeDescription` | A one line description | [GetDocument](../GetDocument.md) |
+| `IncludeAbstract` | The longer abstract | [GetDocumentAbstract](../GetDocumentAbstract.md) |
+| `IncludeKeywords` | Generated keywords | [GetDocumentKeywords](../GetDocumentKeywords.md) |
+| `IncludeDocumentType` | The document type, and the values of its required property set | [GetDocument](../GetDocument.md) |
+| `IncludeOcrText` | The text of a scan, in the warehouse | [GetDocumentTextOnlyContent](../GetDocumentTextOnlyContent.md) |
+| `IncludeMarkdown` | Structured markdown, in the warehouse | [GetVersionRendition](../GetVersionRendition.md) |
+| `IncludeRedactedText` | Redacted text, in the warehouse | [GetVersionRendition](../GetVersionRendition.md) |
+| `IncludeExtractData` | The values of the property set you named | [GetDocument](../GetDocument.md) |
 
 `IncludeMarkdown` and `IncludeRedactedText` cost no AI call at all, so they can ride along with anything else at no extra charge. Both need a file type Connect can read, and the redaction covers the **whole** document even where the AI answers saw only its beginning.
 
@@ -135,9 +144,9 @@ Every successful call carries the aggregate `status`, the `plannedCalls` count, 
 | `status` | `Ready`, `Queued`, `Processing`, `Failed` or `Disabled`. |
 | `error` | Why, on `Failed` and `Disabled`. Absent otherwise. |
 
-`<Content>` is present only on a `Ready` row that has something to carry. **`OcrText` never carries content** even when ready: it runs to megabytes, and a response you are polling every few seconds is the wrong place for it. Read it with [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md).
+`<Content>` is present only on a `Ready` row that has something to carry. **`OcrText` never carries content** even when ready: it runs to megabytes, and a response you are polling every few seconds is the wrong place for it. Read it with [GetDocumentTextOnlyContent](../GetDocumentTextOnlyContent.md).
 
-An `ExtractedData` row carries the values that were read, one `FIELDNAME: value` per line, in a form that does not change with the server's locale — dates as `yyyy-MM-dd` and numbers with a dot. They are on the document too; read them in full with [GetDocument](GetDocument.md).
+An `ExtractedData` row carries the values that were read, one `FIELDNAME: value` per line, in a form that does not change with the server's locale — dates as `yyyy-MM-dd` and numbers with a dot. They are on the document too; read them in full with [GetDocument](../GetDocument.md).
 
 ### Status values
 
@@ -214,7 +223,7 @@ The calling user must be able to change the document's properties.
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetConnectProfile
+GET /api/UIInternals/GetConnectProfile
   ?AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &Path=/Finance/Reports/Q1-2024-Report.pdf
   &VersionNumber=0
@@ -234,7 +243,7 @@ HTTP/1.1
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetConnectProfile HTTP/1.1
+POST /api/UIInternals/GetConnectProfile HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -252,30 +261,6 @@ AuthenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &ScrubPii=no
 ```
 
-### Request (SOAP)
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:GetConnectProfile>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:Path>/Finance/Reports/Q1-2024-Report.pdf</tns:Path>
-      <tns:VersionNumber>0</tns:VersionNumber>
-      <tns:ForceRefresh>false</tns:ForceRefresh>
-      <tns:IncludeSummary>true</tns:IncludeSummary>
-      <tns:IncludeDescription>true</tns:IncludeDescription>
-      <tns:IncludeAbstract>true</tns:IncludeAbstract>
-      <tns:IncludeKeywords>true</tns:IncludeKeywords>
-      <tns:IncludeDocumentType>false</tns:IncludeDocumentType>
-      <tns:IncludeOcrText>false</tns:IncludeOcrText>
-      <tns:IncludeExtractData></tns:IncludeExtractData>
-      <tns:MaxKeywordCount>0</tns:MaxKeywordCount>
-      <tns:ScrubPii></tns:ScrubPii>
-    </tns:GetConnectProfile>
-  </soap:Body>
-</soap:Envelope>
-```
-
 ## JavaScript
 
 Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
@@ -283,7 +268,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -323,11 +308,11 @@ provisioned for is a wasted round trip.
 
 ## Notes
 
-- Folders can have any of this produced automatically for documents added to them; see [SetFolderAIPreferences](SetFolderAIPreferences.md). A folder that asks for profiling gets the description, abstract, summary, keywords and document type from one call, the same way this API does. A folder cannot ask for a named property set — that is a per-request decision.
-- Generated keywords are a separate kind from the ones a user curated, so this API never destroys a keyword somebody entered — `ForceRefresh` replaces the generated ones and leaves the user's own alone. To clear those, set them with [UpdateDocumentKeywords](UpdateDocumentKeywords.md) first.
+- Folders can have any of this produced automatically for documents added to them; see [SetFolderAIPreferences](../SetFolderAIPreferences.md). A folder that asks for profiling gets the description, abstract, summary, keywords and document type from one call, the same way this API does. A folder cannot ask for a named property set — that is a per-request decision.
+- Generated keywords are a separate kind from the ones a user curated, so this API never destroys a keyword somebody entered — `ForceRefresh` replaces the generated ones and leaves the user's own alone. To clear those, set them with [UpdateDocumentKeywords](../UpdateDocumentKeywords.md) first.
 - Every call tells Connect which document it is about (the document's path) and, when a person asked for it, that person's user id and login name, so the service can keep its own record of who requested what. A call a folder preference queued on upload names no user at all.
-- Every call this API queues can be recorded in the daily `IRConnect` log — what was asked for, what came back, how long it took, and what it cost. See `IRConnect.CallLogging` and [GetLogs](GetLogs.md).
-- Generation requires infoRouter Connect to be configured, in `config\irconnect-setting.json` in infoRouter's application folder (the `IRConnect.*` settings on this page are the values in that file), and covered by the licence: Connect stops the day after the maintenance contract's end date, with no grace period. See `ConnectIsOn` in [ServerInfo](ServerInfo.md).
+- Every call this API queues can be recorded in the daily `IRConnect` log — what was asked for, what came back, how long it took, and what it cost. See `IRConnect.CallLogging` and [GetLogs](../GetLogs.md).
+- Generation requires infoRouter Connect to be configured, in `config\irconnect-setting.json` in infoRouter's application folder (the `IRConnect.*` settings on this page are the values in that file), and covered by the licence: Connect stops the day after the maintenance contract's end date, with no grace period. See `ConnectIsOn` in [ServerInfo](../ServerInfo.md).
 
 ## Error Codes
 
@@ -360,10 +345,10 @@ Errors carry an `errorcode` attribute alongside the message. The code is the HTT
 
 ## Related APIs
 
-- [GetDocumentSummary](GetDocumentSummary.md) - Read a stored summary; it never produces one
-- [GetDocumentAbstract](GetDocumentAbstract.md) - Read a stored abstract
-- [GetDocumentKeywords](GetDocumentKeywords.md) - Read every keyword on a document
-- [GetDocumentTextOnlyContent](GetDocumentTextOnlyContent.md) - Read the stored text, including OCR output
-- [SetFolderAIPreferences](SetFolderAIPreferences.md) - Have this produced automatically on upload
-- [GetDocument](GetDocument.md) - Read the description, document type and property set values
-- [GetLogs](GetLogs.md) - Read the daily record of the Connect calls this API queued
+- [GetDocumentSummary](../GetDocumentSummary.md) - Read a stored summary; it never produces one
+- [GetDocumentAbstract](../GetDocumentAbstract.md) - Read a stored abstract
+- [GetDocumentKeywords](../GetDocumentKeywords.md) - Read every keyword on a document
+- [GetDocumentTextOnlyContent](../GetDocumentTextOnlyContent.md) - Read the stored text, including OCR output
+- [SetFolderAIPreferences](../SetFolderAIPreferences.md) - Have this produced automatically on upload
+- [GetDocument](../GetDocument.md) - Read the description, document type and property set values
+- [GetLogs](../GetLogs.md) - Read the daily record of the Connect calls this API queued

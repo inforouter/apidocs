@@ -121,7 +121,7 @@ await call('DeleteUser', { authenticationTicket: ticket, UserName: 'jsmith' });
 ```
 
 What the user owned does not go with them. Move it first with the `TransferUser...` family -
-[TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) and its neighbours - or it is
+TransferUserDocumentOwnerships and its neighbours - or it is
 left pointing at an account that is gone.
 
 ## Notes
@@ -138,8 +138,8 @@ left pointing at an account that is gone.
 
 - [DeleteUser1](DeleteUser1.md) - Delete a user with administrator password confirmation
 - [UserExists](UserExists.md) - Check if a user exists before attempting deletion
-- [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships before deletion
-- [TransferUserTasks](TransferUserTasks.md) - Transfer workflow tasks before deletion
+- TransferUserDocumentOwnerships - Transfer document ownerships before deletion
+- TransferUserTasks - Transfer workflow tasks before deletion
 - [ChangeUserStatus](ChangeUserStatus.md) - Disable a user account without deleting it
 
 ---

@@ -1,6 +1,16 @@
+---
+search:
+  exclude: true
+---
+
 # TransferUserFolderOwnerships API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Transfers folder ownerships from one user to another. All folders owned by the source user are reassigned to the target user.
 
@@ -12,14 +22,13 @@ Transfers folder ownerships from one user to another. All folders owned by the s
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserFolderOwnerships
+/api/UIInternals/TransferUserFolderOwnerships
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserFolderOwnerships?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserFolderOwnerships` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserFolderOwnerships`
+- **GET** `/api/UIInternals/TransferUserFolderOwnerships?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserFolderOwnerships` (form data)
 
 ## Parameters
 
@@ -55,7 +64,7 @@ Transfers folder ownerships from one user to another. All folders owned by the s
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
 **System administrator.** Only system administrators can transfer user data between accounts.
 
@@ -66,7 +75,7 @@ Transfers folder ownerships from one user to another. All folders owned by the s
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserFolderOwnerships
+GET /api/UIInternals/TransferUserFolderOwnerships
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -76,30 +85,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserFolderOwnerships HTTP/1.1
+POST /api/UIInternals/TransferUserFolderOwnerships HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserFolderOwnerships>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserFolderOwnerships>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -108,7 +100,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -136,7 +128,7 @@ const warnings = root.getAttribute('warnings');
 An answer may carry a `warnings` attribute when some of the folder ownerships could not be moved - a conflict at
 the destination, most often. It is absent when everything moved.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
@@ -151,8 +143,8 @@ not go with it.
 
 - [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships
 - [TransferUserFolderSubscriptions](TransferUserFolderSubscriptions.md) - Transfer folder subscriptions
-- [SetOwner](SetOwner.md) - Manually set owner of a folder or document
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [SetOwner](../SetOwner.md) - Manually set owner of a folder or document
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 

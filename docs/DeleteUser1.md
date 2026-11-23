@@ -139,8 +139,8 @@ await call('DeleteUser1', {
 
 - [DeleteUser](DeleteUser.md) - Delete a user without password confirmation (when allowed)
 - [UserExists](UserExists.md) - Check if a user exists before attempting deletion
-- [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships before deletion
-- [TransferUserTasks](TransferUserTasks.md) - Transfer workflow tasks before deletion
+- TransferUserDocumentOwnerships - Transfer document ownerships before deletion
+- TransferUserTasks - Transfer workflow tasks before deletion
 
 ---
 

@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetDomainPolicies API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Sets the policies for a domain/library.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetDomainPolicies
+/api/UIInternals/SetDomainPolicies
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetDomainPolicies?authenticationTicket=...&domainName=...&xmlPolicies=...`
-- **POST** `/srv.asmx/SetDomainPolicies` (form data)
-- **SOAP** Action: `http://tempuri.org/SetDomainPolicies`
+- **GET** `/api/UIInternals/SetDomainPolicies?authenticationTicket=...&domainName=...&xmlPolicies=...`
+- **POST** `/api/UIInternals/SetDomainPolicies` (form data)
 
 ## Parameters
 
@@ -180,52 +189,17 @@ earlier. When both are present on one `Policy` element, the `GetDomainPolicies` 
 
 The caller must have **UpdateLibraryPolicies** permission on the specified domain: an administrator, a member of **[Policy Managers]**, or a manager of the library when the system behaviour setting *Allow library managers to edit policies* is on.
 
-A library manager cannot read that setting (GetSystemBehaviorSettings needs the Policy Manager role), and the `4030` this call answers while it is off names only the roles that would have passed. [GetDomainPolicies](GetDomainPolicies.md) answers `editable="true"` on its `DomainPolicies` element exactly when this call would accept the caller, so read that before offering an editor.
+A library manager cannot read that setting (GetSystemBehaviorSettings needs the Policy Manager role), and the `4030` this call answers while it is off names only the roles that would have passed. [GetDomainPolicies](../GetDomainPolicies.md) answers `editable="true"` on its `DomainPolicies` element exactly when this call would accept the caller, so read that before offering an editor.
 
 ## Example
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/SetDomainPolicies HTTP/1.1
+POST /api/UIInternals/SetDomainPolicies HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456&domainName=MyLibrary&xmlPolicies=<Policies><DomainRules><AnonymousHideIncomplete>true</AnonymousHideIncomplete></DomainRules><ActionPolicies><Policy Action="DocumentDelete" RightDomainManager="true" RightObjectOwner="true" RightRequired="FULLCONTROL" LogAction="true"/></ActionPolicies></Policies>
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/SetDomainPolicies"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <SetDomainPolicies xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-      <domainName>MyLibrary</domainName>
-      <xmlPolicies><![CDATA[
-        <Policies>
-          <DomainRules>
-            <AnonymousHideIncomplete>true</AnonymousHideIncomplete>
-            <ReaderHideIncomplete>false</ReaderHideIncomplete>
-          </DomainRules>
-          <ActionPolicies>
-            <Policy Action="DocumentDelete"
-                    RightAnonymous="false"
-                    RightDomainManager="true"
-                    RightObjectOwner="true"
-                    RightSubobjectOwner="false"
-                    RightRequired="CHANGE"
-                    LogAction="true"/>
-          </ActionPolicies>
-        </Policies>
-      ]]></xmlPolicies>
-    </SetDomainPolicies>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## JavaScript
@@ -235,7 +209,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -248,7 +222,7 @@ async function call(action, params) {
 ```
 
 Writes a library's rules and action policies, in the shape
-[GetDomainPolicies](GetDomainPolicies.md) returns.
+[GetDomainPolicies](../GetDomainPolicies.md) returns.
 
 ```javascript
 // Change one thing: send that one thing. Every rule and policy the XML does not name stays as it is.
@@ -285,7 +259,7 @@ by model binding with HTTP 400.
 - `RightRequired` is applied only when it names one of that policy's `AllowedRights`, which `GetDomainPolicies` reports; any other value leaves the current requirement alone
 - System policies cannot be modified and will be ignored
 - The `DocumentDelete` and `FolderDelete` actions always have logging enabled regardless of the `LogAction` setting
-- From 9.0 the same holds for `SecurityChange`: the security history ([GetSecurityChangeLog](GetSecurityChangeLog.md)) is always written. The policy reports `LogOption="false"` and `LogAction="true"`, and a `LogAction` sent for it is accepted and ignored, as for the deletes. Until 9.0 it decided whether anything was recorded.
+- From 9.0 the same holds for `SecurityChange`: the security history ([GetSecurityChangeLog](../GetSecurityChangeLog.md)) is always written. The policy reports `LogOption="false"` and `LogAction="true"`, and a `LogAction` sent for it is accepted and ignored, as for the deletes. Until 9.0 it decided whether anything was recorded.
 - The `DocumentRead` action always applies to anonymous users regardless of the `RightAnonymous` setting
 - Archive domains have checkout disabled regardless of policy settings
 - Setting `PublishReqDoctype` to `true` unpublishes every document in the library that has no document type (their publishing rules go with it). From 9.0 that runs right after the policies are saved, 500 documents a statement, so a large library no longer holds the global lock for the whole sweep; the call still returns when it is through. Should the server stop part-way, saving the policies again finishes it

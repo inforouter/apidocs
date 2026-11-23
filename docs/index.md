@@ -134,7 +134,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetAuthoredDocuments](GetAuthoredDocuments.md) - Get a paged list of documents authored by a specified user
 - [GetCheckedoutDocuments](GetCheckedoutDocuments.md) - Get checked out documents for the current authenticated user
 - [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md) - Get checked out documents for a specified user
-- [GetConnectProfile](GetConnectProfile.md) - Have infoRouter Connect profile a document version - summary, description, abstract, keywords, document type, OCR text or property set values
 - [GetDocumentExpirationDate](GetDocumentExpirationDate.md) - Get the expiration date set on a document
 - [GetDocumentsOwnedByUser](GetDocumentsOwnedByUser.md) - Get a paged list of documents owned by a specified user
 - [GetDocument](GetDocument.md) - Get the full properties of a document by path or short ID
@@ -264,7 +263,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetMemberDomains](GetMemberDomains.md) - Get the domains/libraries where the current user is a member
 - [RemoveManagerFromDomain](RemoveManagerFromDomain.md) - Remove manager status from a user in a domain/library
 - [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) - Remove a user from a domain/library member list
-- [SetDomainPolicies](SetDomainPolicies.md) - Set policies for a domain/library
 - [UnarchiveDomain](UnarchiveDomain.md) - Un-archive a domain/library to make it an active online library
 - [UpdateDomain](UpdateDomain.md) - Update domain/library properties (name, anonymous access, visibility, welcome message)
 
@@ -440,7 +438,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [RemoveUsergroupFromFolderSubscribers](RemoveUsergroupFromFolderSubscribers.md) - Remove a user group from a folder's subscription list
 
 ### Recycle Bin
-- [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin into the system recycle bin, one user at a time (admin only)
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's Recycle Bin into the system recycle bin
 - [EmptyUserRecycleBin](EmptyUserRecycleBin.md) - Empty one user's Recycle Bin into the system recycle bin, with counts and total size (admin only)
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List all documents and folders currently in the current user's Recycle Bin
@@ -469,26 +466,11 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetLocalUsers](GetLocalUsers.md) - Get direct (local) user members of a domain/library
 - [GetUser](GetUser.md) - Get full properties of a specific user
 - [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md) - Send a welcome email to a user with login URL and password reset link (admin only)
-- [TransferUserCheckedOutDocuments](TransferUserCheckedOutDocuments.md) - Transfer checked-out document ownership between users
-- [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships between users
-- [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) - Transfer document subscriptions between users
-- [TransferUserDomainManagerRoles](TransferUserDomainManagerRoles.md) - Transfer domain manager roles between users
-- [TransferUserDomainMemberships](TransferUserDomainMemberships.md) - Transfer domain/library memberships between users
-- [TransferUserExpirationNotices](TransferUserExpirationNotices.md) - Transfer document expiration notices between users
-- [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md) - Transfer folder ownerships between users
-- [TransferUserFolderSubscriptions](TransferUserFolderSubscriptions.md) - Transfer folder subscriptions between users
-- [TransferUserGroupMemberships](TransferUserGroupMemberships.md) - Transfer user group memberships between users
-- [TransferUserISOTasks](TransferUserISOTasks.md) - Transfer ISO review tasks between users
-- [TransferUserSecurityPermissions](TransferUserSecurityPermissions.md) - Transfer security (ACL) permissions between users
-- [TransferUserTasks](TransferUserTasks.md) - Transfer open workflow tasks between users
-- [TransferUserWorkflowDefinitions](TransferUserWorkflowDefinitions.md) - Transfer workflow definition roles between users
 - [UpdateUserContactInfo](UpdateUserContactInfo.md) - Update a user's email address and mobile number
 - [UpdateUserEmail](UpdateUserEmail.md) - Update a user's email address
 - [UpdateUserPreferences](UpdateUserPreferences.md) - Update a user's display and notification preferences
 - [UpdateUserProfile](UpdateUserProfile.md) - Update a user's name, username, and authentication source
 - [UserExists](UserExists.md) - Check if a username exists
-
-### User Interface Settings
 
 ### Miscellaneous
 - [GetAddInInfo](GetAddInInfo.md) - Get version and description information for a deployed client Add-in

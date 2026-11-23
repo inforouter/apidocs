@@ -1,6 +1,16 @@
+---
+search:
+  exclude: true
+---
+
 # TransferUserGroupMemberships API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Transfers user group memberships from one user to another. The target user is added to all user groups where the source user is currently a member.
 
@@ -12,14 +22,13 @@ Transfers user group memberships from one user to another. The target user is ad
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserGroupMemberships
+/api/UIInternals/TransferUserGroupMemberships
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserGroupMemberships?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserGroupMemberships` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserGroupMemberships`
+- **GET** `/api/UIInternals/TransferUserGroupMemberships?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserGroupMemberships` (form data)
 
 ## Parameters
 
@@ -55,7 +64,7 @@ Transfers user group memberships from one user to another. The target user is ad
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
 **User Managers**, and library managers when **both** users are local to libraries they manage.
 
@@ -68,7 +77,7 @@ Transfers user group memberships from one user to another. The target user is ad
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserGroupMemberships
+GET /api/UIInternals/TransferUserGroupMemberships
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -78,30 +87,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserGroupMemberships HTTP/1.1
+POST /api/UIInternals/TransferUserGroupMemberships HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserGroupMemberships>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserGroupMemberships>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -110,7 +102,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -138,7 +130,7 @@ const warnings = root.getAttribute('warnings');
 An answer carries a `warnings` attribute when role-group memberships were left behind because the caller is not
 an administrator. It is absent when everything moved.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
@@ -155,7 +147,7 @@ not go with it.
 
 - [TransferUserDomainMemberships](TransferUserDomainMemberships.md) - Transfer domain memberships
 - [TransferUserDomainManagerRoles](TransferUserDomainManagerRoles.md) - Transfer domain manager roles
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 

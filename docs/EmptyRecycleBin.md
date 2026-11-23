@@ -2,7 +2,7 @@
 
 **Available in:** infoRouter 8.7 and 9.x
 
-Empties the Recycle Bin of the currently authenticated user: its items move to the system recycle bin. The user no longer sees them in [GetRecycleBinContent](GetRecycleBinContent.md) and can no longer restore them; a system administrator can still find, restore or purge them there. Nothing is deleted for good. To empty every user's Recycle Bin at once, an administrator uses [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md).
+Empties the Recycle Bin of the currently authenticated user: its items move to the system recycle bin. The user no longer sees them in [GetRecycleBinContent](GetRecycleBinContent.md) and can no longer restore them; a system administrator can still find, restore or purge them there. Nothing is deleted for good. To empty every user's Recycle Bin at once, an administrator uses EmptyAllUserRecycleBins.
 
 ## Endpoint
 
@@ -44,7 +44,7 @@ Empties the Recycle Bin of the currently authenticated user: its items move to t
 
 All three are `0` when the recycle bin was already empty. The same three attributes as
 [EmptyUserRecycleBin](EmptyUserRecycleBin.md) and each `<recyclebin>` of
-[EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md). Until 2026-11-06 the answer carried none of them.
+EmptyAllUserRecycleBins. Until 2026-11-06 the answer carried none of them.
 
 ### Error Response
 
@@ -149,7 +149,7 @@ console.log(`${moved.getAttribute('documentCount')} documents, ${moved.getAttrib
 
 - **Empty Bin is Not an Error**: If the recycle bin is already empty, the API returns `success="true"` with all three counts `0`.
 
-- **Other Users' Bins**: This API cannot empty another user's bin. A system administrator empties one user's bin with [EmptyUserRecycleBin](EmptyUserRecycleBin.md), or every user's bin at once with [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md).
+- **Other Users' Bins**: This API cannot empty another user's bin. A system administrator empties one user's bin with [EmptyUserRecycleBin](EmptyUserRecycleBin.md), or every user's bin at once with EmptyAllUserRecycleBins.
 
 - **Selective Deletion**: To permanently delete individual items rather than the entire bin, use `PurgeRecycleBinItem`.
 

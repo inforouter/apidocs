@@ -1,8 +1,18 @@
-# TransferUserFolderSubscriptions API
+---
+search:
+  exclude: true
+---
+
+# TransferUserCheckedOutDocuments API
 
 **Available in:** infoRouter 9.0 and later
 
-Transfers folder subscriptions from one user to another. The target user is subscribed to all folders that the source user currently subscribes to.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Transfers checked-out documents from one user to another. The check-out ownership is reassigned so the target user can check in or cancel the check-out.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may
 > not name one account: the call is refused with `4000`, because moving everything away from an
@@ -12,22 +22,21 @@ Transfers folder subscriptions from one user to another. The target user is subs
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserFolderSubscriptions
+/api/UIInternals/TransferUserCheckedOutDocuments
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserFolderSubscriptions?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserFolderSubscriptions` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserFolderSubscriptions`
+- **GET** `/api/UIInternals/TransferUserCheckedOutDocuments?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserCheckedOutDocuments` (form data)
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `fromUserName` | string | Yes | The username whose folder subscriptions will be transferred. |
-| `toUserName` | string | Yes | The username who will receive the folder subscriptions. |
+| `fromUserName` | string | Yes | The username whose checked-out documents will be transferred. |
+| `toUserName` | string | Yes | The username who will take ownership of the checked-out documents. |
 
 ---
 
@@ -42,7 +51,7 @@ Transfers folder subscriptions from one user to another. The target user is subs
 ### Success Response (with warnings)
 
 ```xml
-<root success="true" warnings="Some folder subscriptions could not be transferred." />
+<root success="true" warnings="Some checked-out documents could not be transferred." />
 ```
 
 ### Error Response
@@ -55,7 +64,7 @@ Transfers folder subscriptions from one user to another. The target user is subs
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
 **System administrator.** Only system administrators can transfer user data between accounts.
 
@@ -66,7 +75,7 @@ Transfers folder subscriptions from one user to another. The target user is subs
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserFolderSubscriptions
+GET /api/UIInternals/TransferUserCheckedOutDocuments
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -76,30 +85,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserFolderSubscriptions HTTP/1.1
+POST /api/UIInternals/TransferUserCheckedOutDocuments HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserFolderSubscriptions>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserFolderSubscriptions>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -108,7 +100,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -120,10 +112,10 @@ async function call(action, params) {
 }
 ```
 
-Moves one user's folder subscriptions to another user.
+Moves the documents one user has checked out to another user.
 
 ```javascript
-const root = await call('TransferUserFolderSubscriptions', {
+const root = await call('TransferUserCheckedOutDocuments', {
   authenticationTicket: ticket,
   fromUserName: 'jsmith',
   toUserName: 'agarcia',
@@ -133,16 +125,16 @@ const root = await call('TransferUserFolderSubscriptions', {
 const warnings = root.getAttribute('warnings');
 ```
 
-An answer may carry a `warnings` attribute when some of the folder subscriptions could not be moved - a conflict at
+An answer may carry a `warnings` attribute when some of the checked out documents could not be moved - a conflict at
 the destination, most often. It is absent when everything moved.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
 
-- The `toUserName` is subscribed to all folders that `fromUserName` is currently subscribed to.
-- Folders where `toUserName` is already subscribed are skipped without error.
+- Reassigns the check-out lock ownership from `fromUserName` to `toUserName`.
+- Documents remain checked out; only the ownership of the check-out changes.
 - The response root element is `<root>`, not `<response>`.
 - Typically used as part of a user offboarding process before deleting the source user.
 
@@ -150,9 +142,9 @@ not go with it.
 
 ## Related APIs
 
-- [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) - Transfer document subscriptions
+- [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships
 - [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md) - Transfer folder ownerships
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 

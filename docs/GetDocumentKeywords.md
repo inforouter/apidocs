@@ -193,7 +193,7 @@ never on the space. A keyword that itself contains a comma cannot be told apart 
 
 - Keywords are returned as a single comma-separated string inside `<Keywords>`, not as individual child elements.
 
-- The list holds both kinds of keyword and does not say which is which. Use [`UpdateDocumentKeywords`](UpdateDocumentKeywords.md) to set the user's own, and [`GetConnectProfile`](GetConnectProfile.md) with `IncludeKeywords=true` to have generated ones produced.
+- The list holds both kinds of keyword and does not say which is which. Use [`UpdateDocumentKeywords`](UpdateDocumentKeywords.md) to set the user's own, and `GetConnectProfile` with `IncludeKeywords=true` to have generated ones produced.
 
 - A keyword may be a phrase and may contain spaces, so split the list on commas rather than on whitespace.
 

@@ -205,7 +205,6 @@ nav:
     - GetDocumentExpirationDate: GetDocumentExpirationDate.md
     - SetDocumentPublishingRule: SetDocumentPublishingRule.md
     - GetDocumentsOwnedByUser: GetDocumentsOwnedByUser.md
-    - GetConnectProfile: GetConnectProfile.md
     - DistributeDocument: DistributeDocument.md
     - EditFilledForm: EditFilledForm.md
     - SaveFilledForm: SaveFilledForm.md
@@ -336,7 +335,6 @@ nav:
     - DeleteDomain: DeleteDomain.md
     - ArchiveDomain: ArchiveDomain.md
     - UnarchiveDomain: UnarchiveDomain.md
-    - SetDomainPolicies: SetDomainPolicies.md
     - SetAuthenticationAndPasswordPolicy - Implementation Summary: SetAuthenticationAndPasswordPolicy-IMPLEMENTATION-SUMMARY.md
     - AddManagerToDomain: AddManagerToDomain.md
     - RemoveManagerFromDomain: RemoveManagerFromDomain.md
@@ -534,23 +532,7 @@ nav:
     - RestoreRecycleBinItem: RestoreRecycleBinItem.md
     - PurgeRecycleBinItem: PurgeRecycleBinItem.md
     - EmptyRecycleBin: EmptyRecycleBin.md
-    - EmptyAllUserRecycleBins: EmptyAllUserRecycleBins.md
     - EmptyUserRecycleBin: EmptyUserRecycleBin.md
-
-  - Transfer Operations:
-    - TransferUserCheckedOutDocuments: TransferUserCheckedOutDocuments.md
-    - TransferUserDocumentOwnerships: TransferUserDocumentOwnerships.md
-    - TransferUserDocumentSubscriptions: TransferUserDocumentSubscriptions.md
-    - TransferUserDomainManagerRoles: TransferUserDomainManagerRoles.md
-    - TransferUserDomainMemberships: TransferUserDomainMemberships.md
-    - TransferUserExpirationNotices: TransferUserExpirationNotices.md
-    - TransferUserFolderOwnerships: TransferUserFolderOwnerships.md
-    - TransferUserFolderSubscriptions: TransferUserFolderSubscriptions.md
-    - TransferUserGroupMemberships: TransferUserGroupMemberships.md
-    - TransferUserISOTasks: TransferUserISOTasks.md
-    - TransferUserSecurityPermissions: TransferUserSecurityPermissions.md
-    - TransferUserTasks: TransferUserTasks.md
-    - TransferUserWorkflowDefinitions: TransferUserWorkflowDefinitions.md
 
   - System & Administration:
     - ServerInfo: ServerInfo.md

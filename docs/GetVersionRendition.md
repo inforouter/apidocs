@@ -31,9 +31,9 @@ A rendition is derived from the version rather than uploaded with it — every o
 
 | Value | What it is | Produced by |
 |-------|-----------|-------------|
-| `Markdown` | The document as markdown — real headings and real pipe tables, which flat text extraction loses. For a digital PDF this is the only way to get its tables out. | [GetConnectProfile](GetConnectProfile.md) with `IncludeMarkdown=true` |
-| `RedactedText` | The text with personal data replaced by `[REDACTED]`. One way: there is no key that puts the real values back. Covers the whole document even where the AI answers saw only its beginning. | [GetConnectProfile](GetConnectProfile.md) with `IncludeRedactedText=true` |
-| `Text` | The plain text, from a text layer or from OCR. The same content [GetVersionTextOnlyContent](GetVersionTextOnlyContent.md) returns. | [GetConnectProfile](GetConnectProfile.md) with `IncludeOcrText=true` |
+| `Markdown` | The document as markdown — real headings and real pipe tables, which flat text extraction loses. For a digital PDF this is the only way to get its tables out. | GetConnectProfile with `IncludeMarkdown=true` |
+| `RedactedText` | The text with personal data replaced by `[REDACTED]`. One way: there is no key that puts the real values back. Covers the whole document even where the AI answers saw only its beginning. | GetConnectProfile with `IncludeRedactedText=true` |
+| `Text` | The plain text, from a text layer or from OCR. The same content [GetVersionTextOnlyContent](GetVersionTextOnlyContent.md) returns. | GetConnectProfile with `IncludeOcrText=true` |
 
 ## Response
 
@@ -52,7 +52,7 @@ A rendition is derived from the version rather than uploaded with it — every o
 <response success="true" error="" rendition="Markdown"></response>
 ```
 
-Empty and **successful**, not an error: a document nobody has asked Connect to produce a rendition for is a perfectly ordinary document. Ask [GetConnectProfile](GetConnectProfile.md) to find out whether one exists, whether one is on its way, or to have one produced.
+Empty and **successful**, not an error: a document nobody has asked Connect to produce a rendition for is a perfectly ordinary document. Ask GetConnectProfile to find out whether one exists, whether one is on its way, or to have one produced.
 
 ### Error Response
 ```xml

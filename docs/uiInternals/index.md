@@ -74,3 +74,28 @@ Each operation keeps its own permission check. The public web API is documented 
 - [CreateWebDavSession](CreateWebDavSession.md) - Creates a WebDAV session ticket for the signed-in user, to map infoRouter as a drive in Windows File Explorer or any WebDAV client
 - [GetWebDavSessions](GetWebDavSessions.md) - Lists the WebDAV session tickets of the signed-in user
 - [RemoveWebDavSession](RemoveWebDavSession.md) - Removes one of the signed-in user's WebDAV session tickets
+
+## Libraries and Connect
+
+- [SetDomainPolicies](SetDomainPolicies.md) - Sets the policies for a domain/library
+- [GetConnectProfile](GetConnectProfile.md) - Has the local **infoRouter Connect** service profile a document version — a summary, a description, an abstract, keywords, the document type, the text of a scan, the values of a property set — and reports where each of the things you asked for has got to
+
+## Recycle bin
+
+- [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) - Empties every user's Recycle Bin into the system recycle bin, one user at a time
+
+## User offboarding
+
+- [TransferUserTasks](TransferUserTasks.md) - Transfers all open workflow tasks from one user to another
+- [TransferUserDomainMemberships](TransferUserDomainMemberships.md) - Transfers domain/library memberships from one user to another
+- [TransferUserGroupMemberships](TransferUserGroupMemberships.md) - Transfers user group memberships from one user to another
+- [TransferUserDomainManagerRoles](TransferUserDomainManagerRoles.md) - Transfers domain/library manager roles from one user to another
+- [TransferUserSecurityPermissions](TransferUserSecurityPermissions.md) - Transfers security permissions (ACL entries) from one user to another
+- [TransferUserWorkflowDefinitions](TransferUserWorkflowDefinitions.md) - Transfers workflow definition roles (assignees and supervisors) from one user to another
+- [TransferUserISOTasks](TransferUserISOTasks.md) - Transfers ISO review tasks from one user to another
+- [TransferUserCheckedOutDocuments](TransferUserCheckedOutDocuments.md) - Transfers checked-out documents from one user to another
+- [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md) - Transfers folder ownerships from one user to another
+- [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfers document ownerships from one user to another
+- [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) - Transfers document subscriptions from one user to another
+- [TransferUserFolderSubscriptions](TransferUserFolderSubscriptions.md) - Transfers folder subscriptions from one user to another
+- [TransferUserExpirationNotices](TransferUserExpirationNotices.md) - Transfers document expiration notices from one user to another

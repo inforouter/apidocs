@@ -29,7 +29,7 @@ Returns the full classification history log for the specified document or folder
 
 The `Path` is resolved to a document or folder, and the caller passes when **either** holds:
 
-- the library's **read classification log** policy grants them the item. By default that is the item's **owner**, the library's **managers**, and users with **Full Control** on it; each library can change this in its policies ([SetDomainPolicies](SetDomainPolicies.md));
+- the library's **read classification log** policy grants them the item. By default that is the item's **owner**, the library's **managers**, and users with **Full Control** on it; each library can change this in its policies (SetDomainPolicies);
 - they are an **administrator**, a member of **[Audit Managers]**, or a **manager of the item's library**.
 
 The item is reached through the audit role as well: an Audit Manager reads the log of an item in a library they are not a member of.

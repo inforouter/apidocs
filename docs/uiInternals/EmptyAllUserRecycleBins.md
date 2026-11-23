@@ -1,25 +1,34 @@
+---
+search:
+  exclude: true
+---
+
 # EmptyAllUserRecycleBins API
 
 **Available in:** infoRouter 9.0 and later
 
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
 Empties every user's Recycle Bin into the system recycle bin, one user at a time. It is
-[EmptyRecycleBin](EmptyRecycleBin.md) for every user at once. **Nothing is purged.** The users can no longer see
-([GetRecycleBinContent](GetRecycleBinContent.md)) or restore the items themselves, but a system administrator can still find them
-([SearchRecycledItems1](SearchRecycledItems1.md)), restore them ([RestoreRecycleBinItem](RestoreRecycleBinItem.md))
-or purge them for good ([PurgeRecycleBinItem](PurgeRecycleBinItem.md)) in the system recycle bin. The system
+[EmptyRecycleBin](../EmptyRecycleBin.md) for every user at once. **Nothing is purged.** The users can no longer see
+([GetRecycleBinContent](../GetRecycleBinContent.md)) or restore the items themselves, but a system administrator can still find them
+([SearchRecycledItems1](../SearchRecycledItems1.md)), restore them ([RestoreRecycleBinItem](../RestoreRecycleBinItem.md))
+or purge them for good ([PurgeRecycleBinItem](../PurgeRecycleBinItem.md)) in the system recycle bin. The system
 recycle bin's automatic purge, if it is configured, applies to them from then on.
 
 ## Endpoint
 
 ```
-/srv.asmx/EmptyAllUserRecycleBins
+/api/UIInternals/EmptyAllUserRecycleBins
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/EmptyAllUserRecycleBins?authenticationTicket=...`
-- **POST** `/srv.asmx/EmptyAllUserRecycleBins` (form data)
-- **SOAP** Action: `http://tempuri.org/EmptyAllUserRecycleBins`
+- **GET** `/api/UIInternals/EmptyAllUserRecycleBins?authenticationTicket=...`
+- **POST** `/api/UIInternals/EmptyAllUserRecycleBins` (form data)
 
 ## Parameters
 
@@ -50,7 +59,7 @@ On the root, the totals of the whole call:
 | `totalSize` | The total size of what this call moved, in bytes, as a plain integer (no separators). |
 
 One `<recyclebin>` per user recycle bin this call emptied, in the order it emptied them, with the same three
-numbers for that bin alone (the answer of [EmptyUserRecycleBin](EmptyUserRecycleBin.md) for that user):
+numbers for that bin alone (the answer of [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) for that user):
 
 | Attribute | Description |
 |-----------|-------------|
@@ -79,32 +88,17 @@ The root's `totalSize` and the `<recyclebin>` elements are new on 2026-11-06.
 ### GET Request
 
 ```
-GET /srv.asmx/EmptyAllUserRecycleBins?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301 HTTP/1.1
+GET /api/UIInternals/EmptyAllUserRecycleBins?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301 HTTP/1.1
 ```
 
 ### POST Request
 
 ```
-POST /srv.asmx/EmptyAllUserRecycleBins HTTP/1.1
+POST /api/UIInternals/EmptyAllUserRecycleBins HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:EmptyAllUserRecycleBins>
-      <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
-    </tns:EmptyAllUserRecycleBins>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -113,7 +107,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -150,7 +144,7 @@ for (const bin of result.getElementsByTagName('recyclebin')) {
   got no answer simply calls it again. The counts of a repeated call cover only what that call moved; a call that
   is cut off answers nothing, so what it did is not reported anywhere but in the delete log.
 - **Nothing is destroyed.** To remove the items for good, purge them from the system recycle bin with
-  [PurgeRecycleBinItem](PurgeRecycleBinItem.md).
+  [PurgeRecycleBinItem](../PurgeRecycleBinItem.md).
 - **Logged.** Every moved item is written to the delete log as a recycle-bin empty by the calling administrator,
   with each document and subfolder inside a moved folder logged as well, exactly as `EmptyRecycleBin` logs a
   user's own empty.
@@ -161,11 +155,11 @@ for (const bin of result.getElementsByTagName('recyclebin')) {
 
 ## Related APIs
 
-- [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's own Recycle Bin into the system recycle bin
-- [EmptyUserRecycleBin](EmptyUserRecycleBin.md) - Empty one user's Recycle Bin, with counts and total size (admin only)
-- [SearchRecycledItems1](SearchRecycledItems1.md) - Search the Recycle Bins a page at a time; `searchIn=1` for the system recycle bin only (admin only)
-- [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a recycled item
-- [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)
+- [EmptyRecycleBin](../EmptyRecycleBin.md) - Empty the current user's own Recycle Bin into the system recycle bin
+- [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) - Empty one user's Recycle Bin, with counts and total size (admin only)
+- [SearchRecycledItems1](../SearchRecycledItems1.md) - Search the Recycle Bins a page at a time; `searchIn=1` for the system recycle bin only (admin only)
+- [RestoreRecycleBinItem](../RestoreRecycleBinItem.md) - Restore a recycled item
+- [PurgeRecycleBinItem](../PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)
 
 ---
 

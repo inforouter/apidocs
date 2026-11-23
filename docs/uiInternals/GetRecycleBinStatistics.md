@@ -143,7 +143,7 @@ for (const bin of stats.querySelectorAll('userRecycleBins > recyclebin')) {
 - **The whole instance.** The numbers cover every user's recycle bin, not the caller's. A user's own recycle bin is
   listed by [GetRecycleBinContent](../GetRecycleBinContent.md).
 - **Counted the way the empties count.** The three numbers are the ones [EmptyRecycleBin](../EmptyRecycleBin.md),
-  [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) and [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md) answer
+  [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) and [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) answer
   for what they moved: emptying a user's recycle bin moves its numbers from that `<recyclebin>` to
   `<systemRecycleBin>`.
 - **A snapshot.** The numbers are read in one pass at the moment of the call; deletes, empties and the purge job
@@ -156,7 +156,7 @@ for (const bin of stats.querySelectorAll('userRecycleBins > recyclebin')) {
 
 - [SearchRecycledItems1](../SearchRecycledItems1.md) - The items themselves, a page at a time; `searchIn` for one recycle bin, `path` for one library or folder (admin only)
 - [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) - Empty one user's Recycle Bin into the system recycle bin (admin only)
-- [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin into the system recycle bin (admin only)
+- [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin into the system recycle bin (admin only)
 - [PurgeRecycleBinItem](../PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)
 
 ---

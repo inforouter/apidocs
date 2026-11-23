@@ -1,8 +1,18 @@
-# TransferUserISOTasks API
+---
+search:
+  exclude: true
+---
+
+# TransferUserDocumentOwnerships API
 
 **Available in:** infoRouter 9.0 and later
 
-Transfers ISO review tasks from one user to another. Used when an ISO reviewer is unavailable or leaving the organization.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Transfers document ownerships from one user to another. All documents owned by the source user are reassigned to the target user.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may
 > not name one account: the call is refused with `4000`, because moving everything away from an
@@ -12,22 +22,21 @@ Transfers ISO review tasks from one user to another. Used when an ISO reviewer i
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserISOTasks
+/api/UIInternals/TransferUserDocumentOwnerships
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserISOTasks?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserISOTasks` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserISOTasks`
+- **GET** `/api/UIInternals/TransferUserDocumentOwnerships?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserDocumentOwnerships` (form data)
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `fromUserName` | string | Yes | The username whose ISO review tasks will be transferred. |
-| `toUserName` | string | Yes | The username who will receive the ISO review tasks. |
+| `fromUserName` | string | Yes | The username whose document ownerships will be transferred. |
+| `toUserName` | string | Yes | The username who will become the new owner of the documents. |
 
 ---
 
@@ -42,7 +51,7 @@ Transfers ISO review tasks from one user to another. Used when an ISO reviewer i
 ### Success Response (with warnings)
 
 ```xml
-<root success="true" warnings="Some ISO tasks could not be transferred." />
+<root success="true" warnings="Some document ownerships could not be transferred." />
 ```
 
 ### Error Response
@@ -55,7 +64,7 @@ Transfers ISO review tasks from one user to another. Used when an ISO reviewer i
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
 **System administrator.** Only system administrators can transfer user data between accounts.
 
@@ -66,7 +75,7 @@ Transfers ISO review tasks from one user to another. Used when an ISO reviewer i
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserISOTasks
+GET /api/UIInternals/TransferUserDocumentOwnerships
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -76,30 +85,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserISOTasks HTTP/1.1
+POST /api/UIInternals/TransferUserDocumentOwnerships HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserISOTasks>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserISOTasks>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -108,7 +100,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -120,10 +112,10 @@ async function call(action, params) {
 }
 ```
 
-Moves the ISO review tasks assigned to one user to another user.
+Moves the documents one user owns to another user.
 
 ```javascript
-const root = await call('TransferUserISOTasks', {
+const root = await call('TransferUserDocumentOwnerships', {
   authenticationTicket: ticket,
   fromUserName: 'jsmith',
   toUserName: 'agarcia',
@@ -133,16 +125,15 @@ const root = await call('TransferUserISOTasks', {
 const warnings = root.getAttribute('warnings');
 ```
 
-An answer may carry a `warnings` attribute when some of the ISO tasks could not be moved - a conflict at
+An answer may carry a `warnings` attribute when some of the document ownerships could not be moved - a conflict at
 the destination, most often. It is absent when everything moved.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
 
-- Transfers ISO document review assignments from the source user to the target user.
-- If some tasks cannot be transferred, a `warnings` attribute is included in the success response.
+- Reassigns the ownership of all documents where `fromUserName` is currently the owner.
 - The response root element is `<root>`, not `<response>`.
 - Typically used as part of a user offboarding process before deleting the source user.
 
@@ -150,9 +141,10 @@ not go with it.
 
 ## Related APIs
 
-- [TransferUserTasks](TransferUserTasks.md) - Transfer general workflow tasks
-- [TransferUserWorkflowDefinitions](TransferUserWorkflowDefinitions.md) - Transfer workflow definition roles
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md) - Transfer folder ownerships
+- [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md) - Transfer document subscriptions
+- [SetOwner](../SetOwner.md) - Manually set owner of a document or folder
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 

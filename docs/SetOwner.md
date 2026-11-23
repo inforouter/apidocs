@@ -175,8 +175,8 @@ parameter: a lower-case `t` in `ApplytoTree`, unlike `ApplyToTree` on
 ## Related APIs
 
 - [GetOwner](GetOwner.md) - Retrieve the current owner of a document or folder
-- [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Bulk-transfer document ownership from one user to another
-- [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md) - Bulk-transfer folder ownership from one user to another
+- TransferUserDocumentOwnerships - Bulk-transfer document ownership from one user to another
+- TransferUserFolderOwnerships - Bulk-transfer folder ownership from one user to another
 - [GetAccessList](GetAccessList.md) - Retrieve the access list for a document or folder
 
 ---

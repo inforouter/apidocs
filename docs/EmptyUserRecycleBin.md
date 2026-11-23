@@ -4,7 +4,7 @@
 
 Empties one user's Recycle Bin into the system recycle bin and answers what moved: how many folders and documents,
 and their total size in bytes. It is [EmptyRecycleBin](EmptyRecycleBin.md) done by an administrator for someone
-else, and [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) for one user. **Nothing is purged.** The user can
+else, and EmptyAllUserRecycleBins for one user. **Nothing is purged.** The user can
 no longer see ([GetRecycleBinContent](GetRecycleBinContent.md)) or restore the items themselves, but a system
 administrator can still find them ([SearchRecycledItems1](SearchRecycledItems1.md) with `searchIn=1`), restore
 them ([RestoreRecycleBinItem](RestoreRecycleBinItem.md)) or purge them for good
@@ -48,7 +48,7 @@ purge, if it is configured, applies to them from then on.
 
 All three are `0` when the user's Recycle Bin was already empty, or when the user never had one. They are the
 same three attributes [EmptyRecycleBin](EmptyRecycleBin.md) answers for the caller's own recycle bin, and that
-each `<recyclebin>` of [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) carries.
+each `<recyclebin>` of EmptyAllUserRecycleBins carries.
 
 ### Error Response
 
@@ -142,7 +142,7 @@ console.log(`${moved.getAttribute('documentCount')} documents and ${moved.getAtt
 ## Related APIs
 
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's own Recycle Bin into the system recycle bin
-- [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin, one user at a time (admin only)
+- EmptyAllUserRecycleBins - Empty every user's Recycle Bin, one user at a time (admin only)
 - [SearchRecycledItems1](SearchRecycledItems1.md) - Search the Recycle Bins a page at a time; `searchIn=1` for the system recycle bin only (admin only)
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a recycled item
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)

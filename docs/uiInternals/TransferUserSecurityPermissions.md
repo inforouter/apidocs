@@ -1,8 +1,18 @@
-# TransferUserWorkflowDefinitions API
+---
+search:
+  exclude: true
+---
+
+# TransferUserSecurityPermissions API
 
 **Available in:** infoRouter 9.0 and later
 
-Transfers workflow definition roles (assignees and supervisors) from one user to another. The target user replaces the source user in all workflow definitions where the source user is assigned as an assignee or supervisor.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Transfers security permissions (ACL entries) from one user to another. The target user receives all folder and document access rights that were individually assigned to the source user.
 
 > **A transfer to the same user is accepted... no longer.** `fromUserName` and `toUserName` may
 > not name one account: the call is refused with `4000`, because moving everything away from an
@@ -12,22 +22,21 @@ Transfers workflow definition roles (assignees and supervisors) from one user to
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserWorkflowDefinitions
+/api/UIInternals/TransferUserSecurityPermissions
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserWorkflowDefinitions?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserWorkflowDefinitions` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserWorkflowDefinitions`
+- **GET** `/api/UIInternals/TransferUserSecurityPermissions?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserSecurityPermissions` (form data)
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
-| `fromUserName` | string | Yes | The username whose workflow definition roles will be transferred. |
-| `toUserName` | string | Yes | The username who will take over the workflow definition roles. |
+| `fromUserName` | string | Yes | The username whose security permissions will be transferred. |
+| `toUserName` | string | Yes | The username who will receive the security permissions. |
 
 ---
 
@@ -42,7 +51,7 @@ Transfers workflow definition roles (assignees and supervisors) from one user to
 ### Success Response (with warnings)
 
 ```xml
-<root success="true" warnings="Some workflow roles could not be transferred." />
+<root success="true" warnings="Some permissions could not be transferred." />
 ```
 
 ### Error Response
@@ -55,7 +64,7 @@ Transfers workflow definition roles (assignees and supervisors) from one user to
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
 **System administrator.** Only system administrators can transfer user data between accounts.
 
@@ -66,7 +75,7 @@ Transfers workflow definition roles (assignees and supervisors) from one user to
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserWorkflowDefinitions
+GET /api/UIInternals/TransferUserSecurityPermissions
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -76,30 +85,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserWorkflowDefinitions HTTP/1.1
+POST /api/UIInternals/TransferUserSecurityPermissions HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserWorkflowDefinitions>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserWorkflowDefinitions>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -108,7 +100,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -120,10 +112,10 @@ async function call(action, params) {
 }
 ```
 
-Moves the workflow definitions one user supervises to another user.
+Moves the permissions granted to one user on folders and documents to another user.
 
 ```javascript
-const root = await call('TransferUserWorkflowDefinitions', {
+const root = await call('TransferUserSecurityPermissions', {
   authenticationTicket: ticket,
   fromUserName: 'jsmith',
   toUserName: 'agarcia',
@@ -133,15 +125,16 @@ const root = await call('TransferUserWorkflowDefinitions', {
 const warnings = root.getAttribute('warnings');
 ```
 
-An answer may carry a `warnings` attribute when some of the workflow definitions could not be moved - a conflict at
+An answer may carry a `warnings` attribute when some of the permissions could not be moved - a conflict at
 the destination, most often. It is absent when everything moved.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
 
-- Transfers the source user's roles in workflow **definitions** (templates), not active workflow instances (tasks). To transfer active tasks, use `TransferUserTasks`.
+- Transfers individually assigned ACL entries on folders and documents. Permissions granted through user group membership are not affected.
+- If `toUserName` already has an explicit permission entry on a given object, the existing entry may be updated or merged.
 - The response root element is `<root>`, not `<response>`.
 - Typically used as part of a user offboarding process before deleting the source user.
 
@@ -149,9 +142,10 @@ not go with it.
 
 ## Related APIs
 
-- [TransferUserTasks](TransferUserTasks.md) - Transfer active workflow tasks
-- [TransferUserISOTasks](TransferUserISOTasks.md) - Transfer ISO review tasks
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [TransferUserDomainMemberships](TransferUserDomainMemberships.md) - Transfer domain memberships
+- [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md) - Transfer folder ownerships
+- [SetAccessList](../SetAccessList.md) - Manually set access lists
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 

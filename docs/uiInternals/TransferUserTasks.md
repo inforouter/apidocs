@@ -1,6 +1,16 @@
+---
+search:
+  exclude: true
+---
+
 # TransferUserTasks API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Transfers all open workflow tasks from one user to another. Used when a user is leaving or is temporarily unavailable.
 
@@ -12,14 +22,13 @@ Transfers all open workflow tasks from one user to another. Used when a user is 
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserTasks
+/api/UIInternals/TransferUserTasks
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserTasks?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserTasks` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserTasks`
+- **GET** `/api/UIInternals/TransferUserTasks?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserTasks` (form data)
 
 ## Parameters
 
@@ -55,7 +64,7 @@ Transfers all open workflow tasks from one user to another. Used when a user is 
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
 **System administrator.** Only system administrators can transfer user data between accounts.
 
@@ -66,7 +75,7 @@ Transfers all open workflow tasks from one user to another. Used when a user is 
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserTasks
+GET /api/UIInternals/TransferUserTasks
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -76,30 +85,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserTasks HTTP/1.1
+POST /api/UIInternals/TransferUserTasks HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserTasks>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserTasks>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -108,7 +100,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -139,7 +131,7 @@ one ("The designated task assignee is not a member of the retention & dispositio
 group."): a Dispose or Transfer task can only be completed by a member of that group, so it will have
 to move again. It is absent when everything moved and nothing is lost.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
@@ -157,7 +149,7 @@ not go with it.
 - [TransferUserDomainMemberships](TransferUserDomainMemberships.md) - Transfer domain memberships
 - [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships
 - [TransferUserWorkflowDefinitions](TransferUserWorkflowDefinitions.md) - Transfer workflow definition roles
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 

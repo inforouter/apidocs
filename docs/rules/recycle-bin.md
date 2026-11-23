@@ -92,7 +92,7 @@ emptied. Nothing is destroyed. There are five ways:
 |---|---|---|
 | [EmptyRecycleBin](../EmptyRecycleBin.md) | Any signed-in user | Their own |
 | [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) | System administrators | One user's, named; answers the counts and the total size |
-| [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md) | System administrators | Every user's, one after another |
+| EmptyAllUserRecycleBins | System administrators | Every user's, one after another |
 | The monthly move (setting `MoveUsersRecycleBinToSystemRecycleBinIn`) | The daily job | Every item deleted more than that many months ago |
 | Deleting the user ([DeleteUser](../DeleteUser.md)) | Whoever deletes the user | That user's |
 
@@ -276,6 +276,6 @@ A folder's entry is written for the folder and for every document and subfolder 
   restored from there, and the log recorded all of it as purged.
 - **9.0 (2026-11-06):** GetRecycleBinStatistics.
 - **9.0 (2026-11-06):** [EmptyUserRecycleBin](../EmptyUserRecycleBin.md), for one user's recycle bin.
-- **9.0 (2026-11-06):** [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md). Emptying moves each item
+- **9.0 (2026-11-06):** EmptyAllUserRecycleBins. Emptying moves each item
   with its log in one transaction. Before, an item two empties reached at once was logged twice, and an emptying
   cut off between the two writes left a moved item without its log entry.

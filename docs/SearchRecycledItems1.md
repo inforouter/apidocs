@@ -90,7 +90,7 @@ GET /srv.asmx/SearchRecycledItems1?authenticationTicket=abc123&startingRowNumber
 - A `startingRowNumber` past the last match returns no items and the same `totalCount`.
 - Items that tie on the sort column keep one order from page to page, so no item is repeated or skipped while the bin does not change. An item deleted or purged between two calls shifts the pages after it.
 - Only items still in a recycle bin are searched; items already queued for purging are not, whatever `searchIn` says.
-- `searchIn=1` is how an administrator works through the system recycle bin alone, for instance to purge what [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) moved there, item by item, without touching what users can still restore themselves. [SearchRecycledItems](SearchRecycledItems.md) has no such filter. (8.7 did this in its user interface, by opening the system recycle bin as a library.)
+- `searchIn=1` is how an administrator works through the system recycle bin alone, for instance to purge what EmptyAllUserRecycleBins moved there, item by item, without touching what users can still restore themselves. [SearchRecycledItems](SearchRecycledItems.md) has no such filter. (8.7 did this in its user interface, by opening the system recycle bin as a library.)
 - The numbers of `searchIn` are its own, not the `RecycledItemStatusId` values: `searchIn=1` finds the items with `RecycledItemStatusId="1"`, but `searchIn=2` finds those with `RecycledItemStatusId="0"`, and `0` is everywhere.
 - `searchIn` and `path` are checked after the caller is found to be a system administrator, so anyone else is refused with `4030` whatever they say.
 - `path` matches where each item was **deleted from**, which is recorded with the item when it is deleted: its library, and `DeletePath`, the folder it was in. It is not where the item is now: a deleted item sits in a recycle bin.
@@ -103,7 +103,7 @@ GET /srv.asmx/SearchRecycledItems1?authenticationTicket=abc123&startingRowNumber
 ## Related APIs
 
 - [SearchRecycledItems](SearchRecycledItems.md) - The same search in both bins, returning every match at once
-- [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin into the system recycle bin
+- EmptyAllUserRecycleBins - Empty every user's Recycle Bin into the system recycle bin
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List the current user's own Recycle Bin
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore an item by its handler
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete an item by its handler

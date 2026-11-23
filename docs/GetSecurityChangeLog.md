@@ -246,7 +246,7 @@ parameter is required." `userName` really is optional; leave it empty for anybod
 - Results are ordered by date applied, newest first, for every scope. Until 9.0 a library-level query answered oldest first.
 - A library-level or folder-level query answers at most 10,000 changes. The limit is fixed, not a setting. Above it the call fails with `4000` and a message asking to narrow the query. Until 9.0 the limit counted the items reached rather than the changes, so one list applied to a tree of more than 10,000 items could not be read at all, and a smaller one was expanded item by item.
 - UTC dates are automatically converted to local server time.
-- From 9.0 the security history is always recorded. The `SecurityChange` policy's `LogAction` ([SetDomainPolicies](SetDomainPolicies.md)) has no effect on it any more. Until 9.0 nothing was recorded where that policy was off.
+- From 9.0 the security history is always recorded. The `SecurityChange` policy's `LogAction` (SetDomainPolicies) has no effect on it any more. Until 9.0 nothing was recorded where that policy was off.
 - An item's entries name the folder it was under when each change was made. A document or folder that inherits follows the folder it is under: the changes of the folder it was moved out of up to the move, and of the one it was moved into from then on, which is an entry of its own by the system account.
 - Both document and folder security changes are included in library-level and folder-level queries.
 

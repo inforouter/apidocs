@@ -43,7 +43,7 @@ Names are case-insensitive.
 | `ScrubPII` | Scrub PII before document text is handed to the AI provider. |
 | `ApplyToSubfolders` | Apply the preferences to the subfolder tree as well (see Notes). |
 
-> **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in, imported, copied or moved into the folder afterwards - a copied or moved document is not asked again for what its `AIEnhanced` flags say it already has. To produce content for a document already there, ask for it directly with [GetConnectProfile](GetConnectProfile.md).
+> **Switching one on does not process the documents already in the folder.** Preferences take effect for documents uploaded, checked in, imported, copied or moved into the folder afterwards - a copied or moved document is not asked again for what its `AIEnhanced` flags say it already has. To produce content for a document already there, ask for it directly with GetConnectProfile.
 
 > **Every answer is its own switch, and asks for nothing else.** A folder that switches on `AutoDescribe` alone gets a description - not a summary, keywords or a document type along with it. Switching several on still costs one call, because one call answers all of them; see [GetFolderAIPreferences](GetFolderAIPreferences.md) for exactly what gets queued.
 

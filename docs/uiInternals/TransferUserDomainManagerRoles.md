@@ -1,6 +1,16 @@
+---
+search:
+  exclude: true
+---
+
 # TransferUserDomainManagerRoles API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Transfers domain/library manager roles from one user to another. The target user is granted manager status for all domains where the source user is currently a manager.
 
@@ -12,14 +22,13 @@ Transfers domain/library manager roles from one user to another. The target user
 ## Endpoint
 
 ```
-/srv.asmx/TransferUserDomainManagerRoles
+/api/UIInternals/TransferUserDomainManagerRoles
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/TransferUserDomainManagerRoles?authenticationTicket=...&fromUserName=...&toUserName=...`
-- **POST** `/srv.asmx/TransferUserDomainManagerRoles` (form data)
-- **SOAP** Action: `http://tempuri.org/TransferUserDomainManagerRoles`
+- **GET** `/api/UIInternals/TransferUserDomainManagerRoles?authenticationTicket=...&fromUserName=...&toUserName=...`
+- **POST** `/api/UIInternals/TransferUserDomainManagerRoles` (form data)
 
 ## Parameters
 
@@ -55,11 +64,11 @@ Transfers domain/library manager roles from one user to another. The target user
 
 ## Required Permissions
 
-**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](AdministrativeRoles.md).
+**An administrator's work** (the `sysadmin` account or a member of `[Administrators]` as `fromUserName`) can be transferred by administrators only; anyone else is refused with `4030`. Transferring work *to* an administrator is not restricted. See [AdministrativeRoles](../AdministrativeRoles.md).
 
-An **administrator** or a **User Manager**. Unlike the other transfers, the managers of the users' library are not admitted: moving manager roles appoints a manager, which [AddManagerToDomain](AddManagerToDomain.md) reserves for administrators and User Managers, and they are refused with `4030` before anything moves.
+An **administrator** or a **User Manager**. Unlike the other transfers, the managers of the users' library are not admitted: moving manager roles appoints a manager, which [AddManagerToDomain](../AddManagerToDomain.md) reserves for administrators and User Managers, and they are refused with `4030` before anything moves.
 
-The target must already be a member of each library; where they are not, that library's manager role stays with the source user. A User Manager cannot name **themselves** as the target: like [AddManagerToDomain](AddManagerToDomain.md), it would make them a manager of those libraries. That is refused with `4030` before anything is transferred.
+The target must already be a member of each library; where they are not, that library's manager role stays with the source user. A User Manager cannot name **themselves** as the target: like [AddManagerToDomain](../AddManagerToDomain.md), it would make them a manager of those libraries. That is refused with `4030` before anything is transferred.
 
 Up to 8.7 this call transferred nothing: the target never became a manager, and the source lost its role only where the target already managed the same library.
 
@@ -70,7 +79,7 @@ Up to 8.7 this call transferred nothing: the target never became a manager, and 
 ### GET Request
 
 ```
-GET /srv.asmx/TransferUserDomainManagerRoles
+GET /api/UIInternals/TransferUserDomainManagerRoles
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &fromUserName=jdoe
   &toUserName=jsmith
@@ -80,30 +89,13 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/TransferUserDomainManagerRoles HTTP/1.1
+POST /api/UIInternals/TransferUserDomainManagerRoles HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &fromUserName=jdoe
 &toUserName=jsmith
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:TransferUserDomainManagerRoles>
-      <tns:AuthenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:AuthenticationTicket>
-      <tns:FromUserName>jdoe</tns:FromUserName>
-      <tns:ToUserName>jsmith</tns:ToUserName>
-    </tns:TransferUserDomainManagerRoles>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -112,7 +104,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -140,7 +132,7 @@ const warnings = root.getAttribute('warnings');
 An answer may carry a `warnings` attribute when some of the library manager roles could not be moved - a conflict at
 the destination, most often. It is absent when everything moved.
 
-This is one of the calls to make before [DeleteUser](DeleteUser.md): what the account holds does
+This is one of the calls to make before [DeleteUser](../DeleteUser.md): what the account holds does
 not go with it.
 
 ## Notes
@@ -155,8 +147,8 @@ not go with it.
 ## Related APIs
 
 - [TransferUserDomainMemberships](TransferUserDomainMemberships.md) - Transfer domain memberships
-- [AddManagerToDomain](AddManagerToDomain.md) - Manually add a manager to a domain
-- [DeleteUser](DeleteUser.md) - Delete a user after transferring their data
+- [AddManagerToDomain](../AddManagerToDomain.md) - Manually add a manager to a domain
+- [DeleteUser](../DeleteUser.md) - Delete a user after transferring their data
 
 ---
 
