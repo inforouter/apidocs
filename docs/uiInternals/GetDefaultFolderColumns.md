@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetDefaultFolderColumns API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the system default folder column configuration. These columns define which metadata fields are displayed by default in folder list views when no user-specific or folder-specific column settings are applied.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetDefaultFolderColumns
+/api/UIInternals/GetDefaultFolderColumns
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetDefaultFolderColumns?authenticationTicket=...`
-- **POST** `/srv.asmx/GetDefaultFolderColumns` (form data)
-- **SOAP** Action: `http://tempuri.org/GetDefaultFolderColumns`
+- **GET** `/api/UIInternals/GetDefaultFolderColumns?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetDefaultFolderColumns` (form data)
 
 ## Parameters
 
@@ -84,34 +93,17 @@ Returns the system default folder column configuration. These columns define whi
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetDefaultFolderColumns?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetDefaultFolderColumns?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetDefaultFolderColumns HTTP/1.1
+POST /api/UIInternals/GetDefaultFolderColumns HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetDefaultFolderColumns"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetDefaultFolderColumns xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetDefaultFolderColumns>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -121,7 +113,7 @@ SOAPAction: "http://tempuri.org/GetDefaultFolderColumns"
 ```javascript
 async function getDefaultFolderColumns() {
     const ticket = getUserAuthTicket();
-    const url = `/srv.asmx/GetDefaultFolderColumns?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetDefaultFolderColumns?authenticationTicket=${encodeURIComponent(ticket)}`;
 
     const response = await fetch(url);
     const xmlText = await response.text();
@@ -151,44 +143,6 @@ async function initFolderView() {
         console.log("Default columns:", defaultColumns.map(c => c.columnName).join(", "));
     } catch (error) {
         console.error("Failed to get default folder columns:", error);
-    }
-}
-```
-
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var response = await client.GetDefaultFolderColumnsAsync(authTicket);
-        var root = XElement.Parse(response.ToString());
-
-        if (root.Attribute("success")?.Value == "true")
-        {
-            var columns = root.Descendants("FolderColumnDef")
-                .Select(col => new
-                {
-                    ColumnName = col.Element("ColumnName")?.Value ?? "",
-                    ColumnText = col.Element("ColumnText")?.Value ?? ""
-                })
-                .ToList();
-
-            foreach (var col in columns)
-            {
-                Console.WriteLine($"{col.ColumnName}: {col.ColumnText}");
-            }
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
     }
 }
 ```

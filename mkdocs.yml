@@ -109,14 +109,10 @@ nav:
     - AuthenticateUser: AuthenticateUser.md
     - AuthenticateUser1: AuthenticateUser1.md
     - AuthenticateUserViaWindows: AuthenticateUserViaWindows.md
-    - GetSignInOptions: GetSignInOptions.md
     - isValidTicket: isValidTicket.md
     - RenewTicket: RenewTicket.md
     - LogOut: LogOut.md
     - CreateTicketforUser: CreateTicketforUser.md
-    - CreateWebDavSession: CreateWebDavSession.md
-    - GetWebDavSessions: GetWebDavSessions.md
-    - RemoveWebDavSession: RemoveWebDavSession.md
     - ForgotPassword: ForgotPassword.md
     - ForgotPasswordByUserName: ForgotPasswordByUserName.md
     - ChangePasswordUsingSecretText: ChangePasswordUsingSecretText.md
@@ -139,8 +135,6 @@ nav:
     - GetFoldersByPage: GetFoldersByPage.md
     - GetSubFoldersCount: GetSubFoldersCount.md
     - GetMyDocumentsAndFolders: GetMyDocumentsAndFolders.md
-    - GetDefaultFolderColumns: GetDefaultFolderColumns.md
-    - GetAllFolderColumns: GetAllFolderColumns.md
     - GetParentFolderIDs: GetParentFolderIDs.md
     - GetNewDocumentsAndFoldersLog: GetNewDocumentsAndFoldersLog.md
     - CreateFolder: CreateFolder.md
@@ -153,7 +147,6 @@ nav:
     - FolderExists1: FolderExists1.md
     - FolderAccessAllowed: FolderAccessAllowed.md
     - SetFolderRules: SetFolderRules.md
-    - SetDefaultFolderColumns: SetDefaultFolderColumns.md
     - SetFolderCutoffDate: SetFolderCutoffDate.md
     - RemoveFolderCutoffDate: RemoveFolderCutoffDate.md
     - UpdateFolderProperties: UpdateFolderProperties.md
@@ -294,7 +287,6 @@ nav:
     - GetCoWorkers: GetCoWorkers.md
     - GetCoWorkers1: GetCoWorkers1.md
     - GetManagers: GetManagers.md
-    - GetUserStatistics: GetUserStatistics.md
     - GetUsersTaskPerformance: GetUsersTaskPerformance.md
     - GetUsersWorkflowRoles: GetUsersWorkflowRoles.md
     - GetGroupMembershipsOfUser: GetGroupMembershipsOfUser.md
@@ -328,16 +320,13 @@ nav:
     - GetDomainGroups: GetDomainGroups.md
     - GetDomainMembers: GetDomainMembers.md
     - GetDomainMembers1: GetDomainMembers1.md
-    - GetMembersWithoutAccess: GetMembersWithoutAccess.md
     - GetDomainMembershipsOfUser: GetDomainMembershipsOfUser.md
     - GetDomainPolicies: GetDomainPolicies.md
     - GetDomainStatistics: GetDomainStatistics.md
-    - GetAllDomainStatistics: GetAllDomainStatistics.md
     - GetDomainUsers: GetDomainUsers.md
     - GetDomainUsers1: GetDomainUsers1.md
     - GetManagedDomainsByUser: GetManagedDomainsByUser.md
     - GetMemberDomains: GetMemberDomains.md
-    - GetLibrariesForAdministration: GetLibrariesForAdministration.md
     - GetGlobalGroups: GetGlobalGroups.md
     - GetLocalGroups: GetLocalGroups.md
     - DomainExists: DomainExists.md
@@ -416,8 +405,6 @@ nav:
   - Security & Access:
     - GetAccessList: GetAccessList.md
     - GetAccessListHistory: GetAccessListHistory.md
-    - GetFolderAccessListCatalog: GetFolderAccessListCatalog.md
-    - GetFolderAccessListStatistics: GetFolderAccessListStatistics.md
     - GetOwner: GetOwner.md
     - GetOwnershipChangeLog: GetOwnershipChangeLog.md
     - GetSecurityChangeLog: GetSecurityChangeLog.md
@@ -509,7 +496,6 @@ nav:
     - SetTagToDocument: SetTagToDocument.md
     - RemoveTagFromDocument: RemoveTagFromDocument.md
     - GetTagDefinitions: GetTagDefinitions.md
-    - SetTagDefinitions: SetTagDefinitions.md
     - GetAppliedTags: GetAppliedTags.md
 
   - Document Associations:
@@ -550,7 +536,6 @@ nav:
     - EmptyRecycleBin: EmptyRecycleBin.md
     - EmptyAllUserRecycleBins: EmptyAllUserRecycleBins.md
     - EmptyUserRecycleBin: EmptyUserRecycleBin.md
-    - GetRecycleBinStatistics: GetRecycleBinStatistics.md
 
   - Transfer Operations:
     - TransferUserCheckedOutDocuments: TransferUserCheckedOutDocuments.md
@@ -582,9 +567,4 @@ nav:
     - CreateURL: CreateURL.md
     - MaintenanceBeat: MaintenanceBeat.md
     - GetLogStatistics1: GetLogStatistics1.md
-    - GetAddIns: GetAddIns.md
-    - GetCustomMenus: GetCustomMenus.md
-    - SetCustomMenus: SetCustomMenus.md
-    - GetUserFolderColumns: GetUserFolderColumns.md
-    - SetUserFolderColumns: SetUserFolderColumns.md
     - SendEmail: SendEmail.md

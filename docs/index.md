@@ -31,22 +31,15 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [ChangeUserPassword](ChangeUserPassword.md) - **[Obsolete]** Set another user's password — use ChangeUserPassword1 instead
 - [ChangeUserPassword1](ChangeUserPassword1.md) - Change your own password with the current one, or another user's
 - [CreateTicketforUser](CreateTicketforUser.md) - Create an authentication ticket for any user using the server-side trusted password (server-to-server impersonation)
-- [CreateWebDavSession](CreateWebDavSession.md) - Create a WebDAV session ticket for mapping a drive in Windows File Explorer
 - [ForgotPassword](ForgotPassword.md) - Initiate a password reset by sending a one-time token to the user's registered email address
 - [ForgotPasswordByUserName](ForgotPasswordByUserName.md) - Initiate a password reset by login name (sends token to the user's registered email address)
-- [GetSignInOptions](GetSignInOptions.md) - Get what a user can sign in with: password form, Windows authentication, guest access, single sign-on providers (no authentication required)
-- [GetWebDavSessions](GetWebDavSessions.md) - List the current user's WebDAV session tickets with their mount paths and expiry dates
 - [isValidTicket](isValidTicket.md) - Check whether an authentication ticket is still valid without supplying credentials or extending the expiration
 - [LogOut](LogOut.md) - Invalidate an authentication ticket and clear the server-side session
-- [RemoveWebDavSession](RemoveWebDavSession.md) - Remove one of the current user's WebDAV session tickets, ending its mapped drive
 - [RenewTicket](RenewTicket.md) - Validate credentials and renew an existing ticket or issue a fresh one
 
 ### Application Settings & Configuration
 - [getApplicationParameters](getApplicationParameters.md) - Get application parameters (role-based response: public, regular user, or full admin view)
-- [GetAllFolderColumns](GetAllFolderColumns.md) - Get all 34 available folder column definitions
-- [GetDefaultFolderColumns](GetDefaultFolderColumns.md) - Get the system default folder columns for list views
 - [GetMimeTypes](GetMimeTypes.md) - Get the list of all defined MIME types in the system
-- [SetDefaultFolderColumns](SetDefaultFolderColumns.md) - Set the system default folder columns using comma-separated column names
 
 ### Server & License Management
 - [GetLogs](GetLogs.md) - Get server log entries by type and date (admin only)
@@ -242,8 +235,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [FolderAccessAllowed](FolderAccessAllowed.md) - Check whether the calling user is allowed to perform a specific action on a folder
 - [GetAccessList](GetAccessList.md) - Get the current access list (security permissions) for a document or folder
 - [GetAccessListHistory](GetAccessListHistory.md) - Get the current and historical access list records for a document or folder
-- [GetFolderAccessListCatalog](GetFolderAccessListCatalog.md) - List the subfolders and documents under a folder that hold an access list of their own, with counts of what inherits from each
-- [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) - Count the subfolders and documents under a folder that do not carry the folder's access list
 - [GetOwner](GetOwner.md) - Get the owner of a document or folder
 - [SetAccessList](SetAccessList.md) - Set the access list (security permissions) for a document or folder
 - [SetOwner](SetOwner.md) - Set the owner of a document or folder
@@ -263,16 +254,13 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetDomainMembers1](GetDomainMembers1.md) - Get domain/library members with sort order and detail-mode control
 - [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md) - Get all domain/library memberships for a specified user
 - [GetDomainPolicies](GetDomainPolicies.md) - Get policies and rules for a domain/library
-- [GetAllDomainStatistics](GetAllDomainStatistics.md) - Get statistics for every domain/library in one call
 - [GetDomainStatistics](GetDomainStatistics.md) - Get statistics for a domain/library
 - [GetDomainUsers](GetDomainUsers.md) - Get all users of a domain/library including indirect group members
 - [GetDomainUsers1](GetDomainUsers1.md) - Get all domain/library users with sort order and detail-mode control
 - [GetDomains](GetDomains.md) - Get the libraries the caller belongs to, plus the ones open to anonymous users
 - [GetDomains1](GetDomains1.md) - Get the list of domains/libraries, optionally with the managers of each
-- [GetLibrariesForAdministration](GetLibrariesForAdministration.md) - Get the libraries the caller may administer, membership aside: all of them for User and Policy Managers
 - [GetManagedDomainsByUser](GetManagedDomainsByUser.md) - Get domains/libraries managed by a specified user
 - [GetManagers](GetManagers.md) - Get the list of managers of a domain/library
-- [GetMembersWithoutAccess](GetMembersWithoutAccess.md) - Get the library members whose right on the library is below a minimum
 - [GetMemberDomains](GetMemberDomains.md) - Get the domains/libraries where the current user is a member
 - [RemoveManagerFromDomain](RemoveManagerFromDomain.md) - Remove manager status from a user in a domain/library
 - [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md) - Remove a user from a domain/library member list
@@ -434,7 +422,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetTagDefinitions](GetTagDefinitions.md) - Get the list of all tag definitions configured in the system
 - [GetTagDefintions](GetTagDefintions.md) - **Obsolete** (typo in name) — use GetTagDefinitions instead
 - [RemoveTagFromDocument](RemoveTagFromDocument.md) - Remove a tag from a document
-- [SetTagDefinitions](SetTagDefinitions.md) - Replace the whole list of tag definitions offered in the tag picker
 - [SetTagToDocument](SetTagToDocument.md) - Apply a tag to the latest version of a document
 
 ### Subscription Management
@@ -457,7 +444,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [EmptyRecycleBin](EmptyRecycleBin.md) - Empty the current user's Recycle Bin into the system recycle bin
 - [EmptyUserRecycleBin](EmptyUserRecycleBin.md) - Empty one user's Recycle Bin into the system recycle bin, with counts and total size (admin only)
 - [GetRecycleBinContent](GetRecycleBinContent.md) - List all documents and folders currently in the current user's Recycle Bin
-- [GetRecycleBinStatistics](GetRecycleBinStatistics.md) - Folders, documents and total size in the system recycle bin, the users' recycle bins and the purge queue (admin only)
 - [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single item from the Recycle Bin by handler (admin only)
 - [RestoreRecycleBinItem](RestoreRecycleBinItem.md) - Restore a single Recycle Bin item to its original or a specified folder location
 - [SearchRecycledItems](SearchRecycledItems.md) - Search the users' Recycle Bins and the system recycle bin together, with optional filters (admin only)
@@ -482,7 +468,6 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md) - Get domain/library memberships of a specified user
 - [GetLocalUsers](GetLocalUsers.md) - Get direct (local) user members of a domain/library
 - [GetUser](GetUser.md) - Get full properties of a specific user
-- [GetUserStatistics](GetUserStatistics.md) - Get activity and membership statistics for a user
 - [SendWelcomeEmailForUser](SendWelcomeEmailForUser.md) - Send a welcome email to a user with login URL and password reset link (admin only)
 - [TransferUserCheckedOutDocuments](TransferUserCheckedOutDocuments.md) - Transfer checked-out document ownership between users
 - [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md) - Transfer document ownerships between users
@@ -504,14 +489,9 @@ The pages describe the API as version 9 answers it. On an 8.7 server the same AP
 - [UserExists](UserExists.md) - Check if a username exists
 
 ### User Interface Settings
-- [GetCustomMenus](GetCustomMenus.md) - Get the custom document list menus defined for this installation
-- [SetCustomMenus](SetCustomMenus.md) - Replace every custom document list menu and its entries
-- [GetUserFolderColumns](GetUserFolderColumns.md) - Get the column layout and property set preference for the authenticated user on a folder
-- [SetUserFolderColumns](SetUserFolderColumns.md) - Save the column layout and property set preference for the authenticated user on a folder
 
 ### Miscellaneous
 - [GetAddInInfo](GetAddInInfo.md) - Get version and description information for a deployed client Add-in
-- [GetAddIns](GetAddIns.md) - List all available client add-ins with name, version, and description
 - [GetAddInPart](GetAddInPart.md) - Download the installation package (parts.zip) for a deployed client Add-in as a byte array
 - [GetLocalizedResources](GetLocalizedResources.md) - Get localized display strings for specified infoRouter resource IDs
 - [MaintenanceBeat](MaintenanceBeat.md) - **Obsolete** -" formerly triggered server self-maintenance tasks; the implementation is a no-op and returns no response

@@ -1,20 +1,29 @@
-﻿# GetUserStatistics API
+---
+search:
+  exclude: true
+---
+
+# GetUserStatistics API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns activity and membership statistics for a specified user, including document counts, folder counts, task counts, workflow roles, and library memberships.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetUserStatistics
+/api/UIInternals/GetUserStatistics
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetUserStatistics?authenticationTicket=...&userName=...`
-- **POST** `/srv.asmx/GetUserStatistics` (form data)
-- **SOAP** Action: `http://tempuri.org/GetUserStatistics`
+- **GET** `/api/UIInternals/GetUserStatistics?authenticationTicket=...&userName=...`
+- **POST** `/api/UIInternals/GetUserStatistics` (form data)
 
 ## Parameters
 
@@ -140,42 +149,24 @@ Returns activity and membership statistics for a specified user, including docum
 
 - The caller must be authenticated.
 - A user may call this API for themselves.
-- Allowed for yourself, for administrators and User Managers, and for the managers of the user's home library (`ListingUserOwnerships`, the role [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) asks). Anyone else is refused with `4030`. A co-worker (a user who shares a library with the target) may look the user up with [GetUser](GetUser.md) but is refused here: the answer carries task counts and workflow, ISO and manager roles.
+- Allowed for yourself, for administrators and User Managers, and for the managers of the user's home library (`ListingUserOwnerships`, the role [GetUsersWorkflowRoles](../GetUsersWorkflowRoles.md) asks). Anyone else is refused with `4030`. A co-worker (a user who shares a library with the target) may look the user up with [GetUser](../GetUser.md) but is refused here: the answer carries task counts and workflow, ISO and manager roles.
 
 ## Example
 
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetUserStatistics?authenticationTicket=abc123-def456&userName=jsmith HTTP/1.1
+GET /api/UIInternals/GetUserStatistics?authenticationTicket=abc123-def456&userName=jsmith HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetUserStatistics HTTP/1.1
+POST /api/UIInternals/GetUserStatistics HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456&userName=jsmith
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetUserStatistics"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetUserStatistics xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-      <userName>jsmith</userName>
-    </GetUserStatistics>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## JavaScript
@@ -185,7 +176,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -217,11 +208,11 @@ The `<Value>` element holds twenty-one counters, each as its own child element:
 `TaskFilterDates`.
 
 Every count is `0` for a new account. This is the call to make before
-[DeleteUser](DeleteUser.md) to find out whether there is anything to transfer.
+[DeleteUser](../DeleteUser.md) to find out whether there is anything to transfer.
 
 ## Opening the list behind a count
 
-**Every task count is one [getTasks](getTasks.md) call**, and is named after the
+**Every task count is one [getTasks](../getTasks.md) call**, and is named after the
 `TaskCompletionStatus` filter that reproduces it. Pass `AssigneeId` as the user's id in all of them:
 
 | Count | `CompletionStatus` | `StartDate` | `EndDate` |

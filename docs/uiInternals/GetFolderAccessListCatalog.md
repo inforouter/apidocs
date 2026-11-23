@@ -1,22 +1,31 @@
+---
+search:
+  exclude: true
+---
+
 # GetFolderAccessListCatalog API
 
 **Available in:** infoRouter 9.0 and later
 
-Lists the subfolders and documents under a folder that hold an access list of their own, each with counts of what inherits from it. These are the places where [SetAccessList](SetAccessList.md) with `ApplyToTree=true` would overwrite something. [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) gives the totals for the warning; this call shows the user which items the totals are made of, so they can decide before applying.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Lists the subfolders and documents under a folder that hold an access list of their own, each with counts of what inherits from it. These are the places where [SetAccessList](../SetAccessList.md) with `ApplyToTree=true` would overwrite something. [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) gives the totals for the warning; this call shows the user which items the totals are made of, so they can decide before applying.
 
 Items that merely inherit are not listed. They are counted on the node they inherit from, so on a tree of 10,000 folders and 100,000 documents the answer holds a few hundred nodes at most: nodes exist only where someone set a list.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetFolderAccessListCatalog
+/api/UIInternals/GetFolderAccessListCatalog
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetFolderAccessListCatalog?authenticationTicket=...&folderPath=...&depth=1&includeDocuments=true`
-- **POST** `/srv.asmx/GetFolderAccessListCatalog` (form data)
-- **SOAP** Action: `http://tempuri.org/GetFolderAccessListCatalog`
+- **GET** `/api/UIInternals/GetFolderAccessListCatalog?authenticationTicket=...&folderPath=...&depth=1&includeDocuments=true`
+- **POST** `/api/UIInternals/GetFolderAccessListCatalog` (form data)
 
 ## Parameters
 
@@ -24,8 +33,8 @@ Items that merely inherit are not listed. They are counted on the node they inhe
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `folderPath` | string | Yes | Full infoRouter path of the folder (e.g. `/Finance/Contracts`), or `~F` followed by the folder id (e.g. `~F2417`). |
-| `depth` | int | No | Default `1`: only the nearest items below the folder whose list differs; nothing is listed below them. `0`: every level. `2`, `3`, ...: that many list levels down. Over SOAP the parameter is required; pass `1` for the default. |
-| `includeDocuments` | bool | No | Default `true`. With `false` no `<document>` nodes are listed; the document counts on folders stay. Over SOAP the parameter is required. |
+| `depth` | int | No | Default `1`: only the nearest items below the folder whose list differs; nothing is listed below them. `0`: every level. `2`, `3`, ...: that many list levels down. |
+| `includeDocuments` | bool | No | Default `true`. With `false` no `<document>` nodes are listed; the document counts on folders stay. |
 
 ---
 
@@ -53,7 +62,7 @@ Items that merely inherit are not listed. They are counted on the node they inhe
 
 ### What is a node
 
-A folder or document whose access list is not its parent's. Only the identity of the list is compared, never its rights: a folder whose list was typed in to equal its parent's is still a node, and shows `InheritedSecurity="false"` in [GetAccessList](GetAccessList.md). [ApplyInheritedAccessList](ApplyInheritedAccessList.md) makes such an item inherit again.
+A folder or document whose access list is not its parent's. Only the identity of the list is compared, never its rights: a folder whose list was typed in to equal its parent's is still a node, and shows `InheritedSecurity="false"` in [GetAccessList](../GetAccessList.md). [ApplyInheritedAccessList](../ApplyInheritedAccessList.md) makes such an item inherit again.
 
 ### `<catalog>` and `<folder>` attributes
 
@@ -99,7 +108,7 @@ With `depth=0`, the nodes account for those numbers exactly: each `<folder>` nod
 
 ## Required Permissions
 
-The calling user must be allowed to **change the security** of the folder, the same right [SetAccessList](SetAccessList.md) and [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) ask for. Nothing is filtered by read right: the nodes are the items the caller could overwrite, and they are listed whether or not the caller may open them.
+The calling user must be allowed to **change the security** of the folder, the same right [SetAccessList](../SetAccessList.md) and [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) ask for. Nothing is filtered by read right: the nodes are the items the caller could overwrite, and they are listed whether or not the caller may open them.
 
 ---
 
@@ -108,7 +117,7 @@ The calling user must be allowed to **change the security** of the folder, the s
 ### GET Request
 
 ```
-GET /srv.asmx/GetFolderAccessListCatalog
+GET /api/UIInternals/GetFolderAccessListCatalog
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &folderPath=/Finance/Contracts
   &depth=0
@@ -118,7 +127,7 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/GetFolderAccessListCatalog HTTP/1.1
+POST /api/UIInternals/GetFolderAccessListCatalog HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -127,24 +136,6 @@ authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &includeDocuments=true
 ```
 
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:GetFolderAccessListCatalog>
-      <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
-      <tns:folderPath>/Finance/Contracts</tns:folderPath>
-      <tns:depth>1</tns:depth>
-      <tns:includeDocuments>true</tns:includeDocuments>
-    </tns:GetFolderAccessListCatalog>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
-
 ## JavaScript
 
 Every call answers XML with HTTP 200, success or not, so `success` is the thing to branch on and
@@ -152,7 +143,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -211,10 +202,10 @@ const applyToTree = confirm(
 ## Related APIs
 
 - [GetFolderAccessListStatistics](GetFolderAccessListStatistics.md) - The totals: how many items below a folder do not carry its access list
-- [SetAccessList](SetAccessList.md) - Set the access list, optionally on the whole tree
-- [GetAccessList](GetAccessList.md) - Get the access list of one document or folder
-- [ApplyInheritedAccessList](ApplyInheritedAccessList.md) - Put an item back to inheriting from its parent
-- [GetFolderCatalog](GetFolderCatalog.md) - The whole tree, every folder and document
+- [SetAccessList](../SetAccessList.md) - Set the access list, optionally on the whole tree
+- [GetAccessList](../GetAccessList.md) - Get the access list of one document or folder
+- [ApplyInheritedAccessList](../ApplyInheritedAccessList.md) - Put an item back to inheriting from its parent
+- [GetFolderCatalog](../GetFolderCatalog.md) - The whole tree, every folder and document
 
 ---
 

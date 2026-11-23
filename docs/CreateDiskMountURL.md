@@ -189,11 +189,11 @@ handing back a mount path that looks usable but is already expired. `customExpir
 
 - [CreateEditDocumentURL](CreateEditDocumentURL.md) - Create a WebDAV editing URL for a specific document
 
-- [CreateWebDavSession](CreateWebDavSession.md) - Create the same WebDAV session and get its ticket, expiry and path
+- CreateWebDavSession - Create the same WebDAV session and get its ticket, expiry and path
 
-- [GetWebDavSessions](GetWebDavSessions.md) - List the WebDAV sessions this API and CreateWebDavSession created
+- GetWebDavSessions - List the WebDAV sessions this API and CreateWebDavSession created
 
-- [RemoveWebDavSession](RemoveWebDavSession.md) - Remove one of them
+- RemoveWebDavSession - Remove one of them
 
 - [GetDocument](GetDocument.md) - Retrieve document properties including the document path
 

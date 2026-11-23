@@ -85,7 +85,7 @@ authenticationTicket=abc123&domainName=Invoices
 
 - [GetWorkflowStatistics](GetWorkflowStatistics.md) - The statistics of one workflow
 - [GetWorkflowDefinitions](GetWorkflowDefinitions.md) - The workflow definitions
-- [GetAllDomainStatistics](GetAllDomainStatistics.md) - The statistics of every library in one call
+- GetAllDomainStatistics - The statistics of every library in one call
 
 ## Error Codes
 

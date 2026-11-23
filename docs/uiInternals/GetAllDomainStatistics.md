@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetAllDomainStatistics API
 
 **Available in:** infoRouter 9.0 and later
 
-Returns the statistics of every domain/library in the caller's library list, in one call. Each entry is what [GetDomainStatistics](GetDomainStatistics.md) returns for one library, so a statistics page needs no call per library.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Returns the statistics of every domain/library in the caller's library list, in one call. Each entry is what [GetDomainStatistics](../GetDomainStatistics.md) returns for one library, so a statistics page needs no call per library.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetAllDomainStatistics
+/api/UIInternals/GetAllDomainStatistics
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetAllDomainStatistics?authenticationTicket=...`
-- **POST** `/srv.asmx/GetAllDomainStatistics` (form data)
-- **SOAP** Action: `http://tempuri.org/GetAllDomainStatistics`
+- **GET** `/api/UIInternals/GetAllDomainStatistics?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetAllDomainStatistics` (form data)
 
 ## Parameters
 
@@ -26,7 +35,7 @@ Returns the statistics of every domain/library in the caller's library list, in 
 
 ### Success Response
 
-A `<Libraries>` element with one `<LibraryStatistics>` per library, in the order of [GetDomains](GetDomains.md) (by name). `DomainId` and `DomainName` say which library an entry is of; the other elements are described in [GetDomainStatistics](GetDomainStatistics.md).
+A `<Libraries>` element with one `<LibraryStatistics>` per library, in the order of [GetDomains](../GetDomains.md) (by name). `DomainId` and `DomainName` say which library an entry is of; the other elements are described in [GetDomainStatistics](../GetDomainStatistics.md).
 
 ```xml
 <response success="true" error="">
@@ -68,7 +77,7 @@ Any authenticated (not anonymous) user. The libraries are the ones `GetDomains` 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetAllDomainStatistics HTTP/1.1
+POST /api/UIInternals/GetAllDomainStatistics HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123
@@ -81,9 +90,9 @@ authenticationTicket=abc123
 
 ## Related APIs
 
-- [GetDomainStatistics](GetDomainStatistics.md) - The statistics of one library
-- [GetDomains](GetDomains.md) - The library list
-- [GetAllWorkflowStatistics](GetAllWorkflowStatistics.md) - The statistics of every workflow in one call
+- [GetDomainStatistics](../GetDomainStatistics.md) - The statistics of one library
+- [GetDomains](../GetDomains.md) - The library list
+- [GetAllWorkflowStatistics](../GetAllWorkflowStatistics.md) - The statistics of every workflow in one call
 
 ## Error Codes
 

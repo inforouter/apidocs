@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # RemoveWebDavSession API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Removes one of the signed-in user's WebDAV session tickets. A drive mapped with the ticket stops working at once: the next request with it is refused.
 
 ## Endpoint
 
 ```
-/srv.asmx/RemoveWebDavSession
+/api/UIInternals/RemoveWebDavSession
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/RemoveWebDavSession?authenticationTicket=...&ticket=...`
-- **POST** `/srv.asmx/RemoveWebDavSession` (form data)
-- **SOAP** Action: `http://tempuri.org/RemoveWebDavSession`
+- **GET** `/api/UIInternals/RemoveWebDavSession?authenticationTicket=...&ticket=...`
+- **POST** `/api/UIInternals/RemoveWebDavSession` (form data)
 
 ## Parameters
 
@@ -39,13 +48,13 @@ Removes one of the signed-in user's WebDAV session tickets. A drive mapped with 
 
 ## Required Permissions
 
-Any authenticated, non-anonymous user, for their own WebDAV sessions only. Another user's WebDAV session, or one of the caller's ordinary sign-in sessions, is answered as not found (`4041`) and left alone; this API cannot end sessions it does not manage, or tell whether a ticket exists. To end the current sign-in use [LogOut](LogOut.md).
+Any authenticated, non-anonymous user, for their own WebDAV sessions only. Another user's WebDAV session, or one of the caller's ordinary sign-in sessions, is answered as not found (`4041`) and left alone; this API cannot end sessions it does not manage, or tell whether a ticket exists. To end the current sign-in use [LogOut](../LogOut.md).
 
 ## Example
 
 ### Request (POST)
 ```
-POST /srv.asmx/RemoveWebDavSession HTTP/1.1
+POST /api/UIInternals/RemoveWebDavSession HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&ticket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
@@ -53,7 +62,7 @@ authenticationTicket=abc123&ticket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 
 ### Request (GET)
 ```
-GET /srv.asmx/RemoveWebDavSession?authenticationTicket=abc123&ticket=sid-3f2504e0-4f89-11d3-9a0c-0305e82c3301 HTTP/1.1
+GET /api/UIInternals/RemoveWebDavSession?authenticationTicket=abc123&ticket=sid-3f2504e0-4f89-11d3-9a0c-0305e82c3301 HTTP/1.1
 ```
 
 ## Notes
@@ -64,7 +73,7 @@ GET /srv.asmx/RemoveWebDavSession?authenticationTicket=abc123&ticket=sid-3f2504e
 
 - [GetWebDavSessions](GetWebDavSessions.md) - List the caller's WebDAV session tickets
 - [CreateWebDavSession](CreateWebDavSession.md) - Create a WebDAV session ticket
-- [LogOut](LogOut.md) - End the current sign-in
+- [LogOut](../LogOut.md) - End the current sign-in
 
 ## Error Codes
 

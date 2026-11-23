@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetSignInOptions API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns what a user can sign in with on this server: the user name and password form, Windows authentication, anonymous access, the OpenID Connect providers and the authentication authorities. A sign-in page calls it to decide what to show.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetSignInOptions
+/api/UIInternals/GetSignInOptions
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetSignInOptions`
-- **POST** `/srv.asmx/GetSignInOptions`
-- **SOAP** Action: `http://tempuri.org/GetSignInOptions`
+- **GET** `/api/UIInternals/GetSignInOptions`
+- **POST** `/api/UIInternals/GetSignInOptions`
 
 > This API does not require authentication. It is the call a sign-in page makes before anybody has signed in.
 
@@ -61,9 +70,9 @@ A server with no single sign-on and no external authority returns the two lists 
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `PasswordSignIn` | boolean | Whether to show the user name and password form, which signs in with [AuthenticateUser](AuthenticateUser.md). Always `true` today; read it rather than assuming. |
-| `WindowsAuthentication` | boolean | Whether Windows authentication is on. When `true`, offer a sign-in that calls [AuthenticateUserViaWindows](AuthenticateUserViaWindows.md). The same value as `WindowsAuthenticationIsOn` in [ServerInfo](ServerInfo.md). |
-| `AnonymousAccess` | boolean | Whether this server allows anonymous access. When `true`, a guest entry can be offered. The same value as `AnonymousAccessIsOn` in [ServerInfo](ServerInfo.md). |
+| `PasswordSignIn` | boolean | Whether to show the user name and password form, which signs in with [AuthenticateUser](../AuthenticateUser.md). Always `true` today; read it rather than assuming. |
+| `WindowsAuthentication` | boolean | Whether Windows authentication is on. When `true`, offer a sign-in that calls [AuthenticateUserViaWindows](../AuthenticateUserViaWindows.md). The same value as `WindowsAuthenticationIsOn` in [ServerInfo](../ServerInfo.md). |
+| `AnonymousAccess` | boolean | Whether this server allows anonymous access. When `true`, a guest entry can be offered. The same value as `AnonymousAccessIsOn` in [ServerInfo](../ServerInfo.md). |
 
 ## OidcProvider Attributes
 
@@ -91,33 +100,23 @@ None. Anyone who can reach the server can call it, signed in or not.
 
 ## What Is Not Returned
 
-Because the call needs no ticket, it returns names and sign-in links only. It never returns a provider's authority address, client id, client secret, scopes or claim settings, or the address of an authentication authority. A system administrator can read the authority names in [getApplicationParameters](getApplicationParameters.md) as well.
+Because the call needs no ticket, it returns names and sign-in links only. It never returns a provider's authority address, client id, client secret, scopes or claim settings, or the address of an authentication authority. A system administrator can read the authority names in [getApplicationParameters](../getApplicationParameters.md) as well.
 
 ## Example
 
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetSignInOptions HTTP/1.1
+GET /api/UIInternals/GetSignInOptions HTTP/1.1
 Host: yourserver
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetSignInOptions HTTP/1.1
+POST /api/UIInternals/GetSignInOptions HTTP/1.1
 Host: yourserver
 Content-Length: 0
-```
-
-### SOAP 1.1 Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetSignInOptions xmlns="http://tempuri.org/" />
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## JavaScript
@@ -125,7 +124,7 @@ Content-Length: 0
 Builds the sign-in page's choices from the answer.
 
 ```javascript
-const response = await fetch('/srv.asmx/GetSignInOptions');
+const response = await fetch('/api/UIInternals/GetSignInOptions');
 const root = new DOMParser()
   .parseFromString(await response.text(), 'text/xml')
   .documentElement;
@@ -176,10 +175,10 @@ A change to these takes effect after FlushApplicationCache, without a restart. A
 
 ## Related APIs
 
-- [AuthenticateUser](AuthenticateUser.md) - Sign in with a user name and password.
-- [AuthenticateUserViaWindows](AuthenticateUserViaWindows.md) - Sign in with the Windows identity of the request.
-- [ServerInfo](ServerInfo.md) - Server version and feature switches, also callable before sign-in.
-- [getApplicationParameters](getApplicationParameters.md) - Application parameters, including the authority names for an administrator.
+- [AuthenticateUser](../AuthenticateUser.md) - Sign in with a user name and password.
+- [AuthenticateUserViaWindows](../AuthenticateUserViaWindows.md) - Sign in with the Windows identity of the request.
+- [ServerInfo](../ServerInfo.md) - Server version and feature switches, also callable before sign-in.
+- [getApplicationParameters](../getApplicationParameters.md) - Application parameters, including the authority names for an administrator.
 
 ## Error Codes
 

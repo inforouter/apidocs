@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetDefaultFolderColumns API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Sets the system default folder columns using a comma-separated list of column names. The columns define which metadata fields are displayed by default in folder list views. All column names are validated against the list of available columns before being saved.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetDefaultFolderColumns
+/api/UIInternals/SetDefaultFolderColumns
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetDefaultFolderColumns?authenticationTicket=...&columnNames=...`
-- **POST** `/srv.asmx/SetDefaultFolderColumns` (form data)
-- **SOAP** Action: `http://tempuri.org/SetDefaultFolderColumns`
+- **GET** `/api/UIInternals/SetDefaultFolderColumns?authenticationTicket=...&columnNames=...`
+- **POST** `/api/UIInternals/SetDefaultFolderColumns` (form data)
 
 ## Parameters
 
@@ -65,35 +74,17 @@ All column names in the `columnNames` parameter are validated against the 34 ava
 ### Request (GET)
 
 ```
-GET /srv.asmx/SetDefaultFolderColumns?authenticationTicket=abc123-def456&columnNames=ItemName,DocumentSize,ModificationDate,OwnerName,CreationDate HTTP/1.1
+GET /api/UIInternals/SetDefaultFolderColumns?authenticationTicket=abc123-def456&columnNames=ItemName,DocumentSize,ModificationDate,OwnerName,CreationDate HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/SetDefaultFolderColumns HTTP/1.1
+POST /api/UIInternals/SetDefaultFolderColumns HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456&columnNames=ItemName,DocumentSize,ModificationDate,OwnerName,CreationDate
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/SetDefaultFolderColumns"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <SetDefaultFolderColumns xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-      <columnNames>ItemName,DocumentSize,ModificationDate,OwnerName,CreationDate</columnNames>
-    </SetDefaultFolderColumns>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Examples
@@ -104,7 +95,7 @@ SOAPAction: "http://tempuri.org/SetDefaultFolderColumns"
 async function setDefaultFolderColumns(columnNames) {
     const ticket = getUserAuthTicket();
 
-    const response = await fetch("/srv.asmx/SetDefaultFolderColumns", {
+    const response = await fetch("/api/UIInternals/SetDefaultFolderColumns", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `authenticationTicket=${encodeURIComponent(ticket)}&columnNames=${encodeURIComponent(columnNames)}`
@@ -125,34 +116,6 @@ async function setDefaultFolderColumns(columnNames) {
 
 // Usage example
 setDefaultFolderColumns("ItemName,DocumentSize,DocumentFormat,ModificationDate,OwnerName,CreationDate");
-```
-
-### C# Client Usage
-
-```csharp
-using (var client = new SrvSoapClient())
-{
-    try
-    {
-        var columnNames = "ItemName,DocumentSize,DocumentFormat,ModificationDate,OwnerName,CreationDate";
-        var response = await client.SetDefaultFolderColumnsAsync(authTicket, columnNames);
-        var root = XElement.Parse(response.ToString());
-
-        if (root.Attribute("success")?.Value == "true")
-        {
-            Console.WriteLine("Default folder columns updated successfully.");
-        }
-        else
-        {
-            var error = root.Attribute("error")?.Value;
-            Console.WriteLine($"Error: {error}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
-    }
-}
 ```
 
 ## Notes

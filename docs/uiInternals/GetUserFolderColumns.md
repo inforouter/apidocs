@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetUserFolderColumns API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the effective column layout and custom property set preference saved for the authenticated user on the specified folder. Falls back to the user's global preference, then to the system default, when no folder-specific setting exists.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetUserFolderColumns
+/api/UIInternals/GetUserFolderColumns
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetUserFolderColumns?authenticationTicket=...&folderPath=...`
-- **POST** `/srv.asmx/GetUserFolderColumns` (form data)
-- **SOAP** Action: `http://tempuri.org/GetUserFolderColumns`
+- **GET** `/api/UIInternals/GetUserFolderColumns?authenticationTicket=...&folderPath=...`
+- **POST** `/api/UIInternals/GetUserFolderColumns` (form data)
 
 ## Parameters
 
@@ -107,34 +116,16 @@ Returns the effective column layout and custom property set preference saved for
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetUserFolderColumns?authenticationTicket=abc123&folderPath=/MyDomain/Reports HTTP/1.1
+GET /api/UIInternals/GetUserFolderColumns?authenticationTicket=abc123&folderPath=/MyDomain/Reports HTTP/1.1
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetUserFolderColumns HTTP/1.1
+POST /api/UIInternals/GetUserFolderColumns HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&folderPath=/MyDomain/Reports
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetUserFolderColumns"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetUserFolderColumns xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123</authenticationTicket>
-      <folderPath>/MyDomain/Reports</folderPath>
-    </GetUserFolderColumns>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Error Codes
@@ -154,7 +145,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

@@ -154,7 +154,7 @@ if (bytes.length === 0) {
 
 - **Binary response, not XML**: Unlike all other infoRouter APIs, `GetAddInPart` returns raw binary data. Do not attempt to parse the response as XML.
 - **Case-insensitive name**: `AddInName` is converted to uppercase before lookup. `wordaddin`, `WordAddin`, and `WORDADDIN` all resolve to the same directory.
-- **No authentication ticket**: this endpoint has no `AuthenticationTicket` parameter and is intended to be called before a user session is established. [GetAddIns](GetAddIns.md), which lists the same add-ins, does take one.
+- **No authentication ticket**: this endpoint has no `AuthenticationTicket` parameter and is intended to be called before a user session is established. GetAddIns, which lists the same add-ins, does take one.
 - **Failures are an empty body with HTTP 200**: if the add-in directory or `parts.zip` does not exist, the body is empty and the `X-InfoRouter-ErrorCode` header is `4041`. Until 9.0 the answer was a single `0x00` byte, so callers had to check the decoded length.
 - **Server-side file location**: The `parts.zip` file must be present inside a subdirectory named after the add-in (uppercase) within the server's configured add-in path. Use [GetAddInInfo](GetAddInInfo.md) first to verify the add-in is deployed before downloading its parts.
 - **Self-update workflow**: The typical client flow is: (1) call `GetAddInInfo` to read the current server version, (2) compare with the locally installed version, (3) if the server version is newer, call `GetAddInPart` to download and install the update.

@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetWebDavSessions API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Lists the WebDAV session tickets of the signed-in user. A WebDAV session ticket is what Windows File Explorer (or any WebDAV client) maps a drive with: the ticket travels in the URL, `https://server/dav/sid-{ticket}/`, so the client needs no sign-in of its own. This API, with [CreateWebDavSession](CreateWebDavSession.md) and [RemoveWebDavSession](RemoveWebDavSession.md), replaces the 8.7 *WebDAV sessions* page.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetWebDavSessions
+/api/UIInternals/GetWebDavSessions
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetWebDavSessions?authenticationTicket=...`
-- **POST** `/srv.asmx/GetWebDavSessions` (form data)
-- **SOAP** Action: `http://tempuri.org/GetWebDavSessions`
+- **GET** `/api/UIInternals/GetWebDavSessions?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetWebDavSessions` (form data)
 
 ## Parameters
 
@@ -66,12 +75,12 @@ Any authenticated, non-anonymous user. A user sees only their own WebDAV session
 
 ### Request (GET)
 ```
-GET /srv.asmx/GetWebDavSessions?authenticationTicket=abc123 HTTP/1.1
+GET /api/UIInternals/GetWebDavSessions?authenticationTicket=abc123 HTTP/1.1
 ```
 
 ### Request (POST)
 ```
-POST /srv.asmx/GetWebDavSessions HTTP/1.1
+POST /api/UIInternals/GetWebDavSessions HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123
@@ -86,7 +95,7 @@ authenticationTicket=abc123
 
 - [CreateWebDavSession](CreateWebDavSession.md) - Create a WebDAV session ticket
 - [RemoveWebDavSession](RemoveWebDavSession.md) - Remove a WebDAV session ticket
-- [CreateDiskMountURL](CreateDiskMountURL.md) - Create a WebDAV session and return only its mount path
+- [CreateDiskMountURL](../CreateDiskMountURL.md) - Create a WebDAV session and return only its mount path
 
 ## Error Codes
 

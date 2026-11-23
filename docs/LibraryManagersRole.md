@@ -67,7 +67,7 @@ case does not arise in practice.
 | Read a local user's activity lists | [GetUserViewLog](GetUserViewLog.md), [GetUserViewLog1](GetUserViewLog1.md), [GetUserViewLogLite](GetUserViewLogLite.md), [GetAuthoredDocuments](GetAuthoredDocuments.md), [GetCheckedoutDocumentsByUser](GetCheckedoutDocumentsByUser.md), [GetDocumentsOwnedByUser](GetDocumentsOwnedByUser.md), [GetFavoriteDocumentsOfUser](GetFavoriteDocumentsOfUser.md), [GetISOReviewAssignmentsOfUser](GetISOReviewAssignmentsOfUser.md), [GetSubscribedDocumentsByUser](GetSubscribedDocumentsByUser.md), [GetFavoriteFoldersOfUser](GetFavoriteFoldersOfUser.md), [GetFoldersOwnedByUser](GetFoldersOwnedByUser.md), [GetSubscribedFoldersByUser](GetSubscribedFoldersByUser.md), [Search](Search.md) with `SUBSCRIPTIONSOF`, `FAVORITESOF`, `DOWNLOADQUEOF` or `VIEWCRITERIA` + `USERNAME` | self, User Managers; Audit Managers for the three view logs | `ListingAuditLogOfUser` (`UserExtensions.cs`; `SearchServices.cs`); `ViewAuditLogs` as the fallback for the view logs |
 | Read a local user's group memberships | [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) | self, User Managers | `ListingGroupMembershipOfUser` |
 | Read a local user's workflow roles | [GetUsersWorkflowRoles](GetUsersWorkflowRoles.md) | self, User Managers | `ListingUserOwnerships` |
-| Read a local user's statistics and library memberships | [GetUserStatistics](GetUserStatistics.md), [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md) | self, User Managers | `ListingUserOwnerships` / `ListingGroupMembershipOfUser` after the lookup; a co-worker passes the lookup and is refused here |
+| Read a local user's statistics and library memberships | GetUserStatistics, [GetDomainMembershipsOfUser](GetDomainMembershipsOfUser.md) | self, User Managers | `ListingUserOwnerships` / `ListingGroupMembershipOfUser` after the lookup; a co-worker passes the lookup and is refused here |
 | Manage a local user's task redirections | [SetUserTaskRedirection](SetUserTaskRedirection.md), [RemoveUserTaskRedirection](RemoveUserTaskRedirection.md), [RerouteUserTaskRedirection](RerouteUserTaskRedirection.md), [GetUserTaskRedirectionsFrom](GetUserTaskRedirectionsFrom.md) | self, User Managers; for rerouting also the user the redirection points to | `SetUserTaskRedirections` / `RerouteUserTaskRedirection`; the read, GetUserTaskRedirectionsFrom, asks `ListingUserOwnerships` (`UserExtensions.cs`) |
 | Property set rows on a local user | [AddPropertySetRowForUser](AddPropertySetRowForUser.md), [UpdatePropertySetRowForUser](UpdatePropertySetRowForUser.md), [DeletePropertySetRowForUser](DeletePropertySetRowForUser.md) | User Managers; not self | `ApplyRemoveCustomMetaData` (`PropertySetOperations.cs`) |
 | Transfer one local user's work to another local user | all Transfer calls: [TransferUserTasks](TransferUserTasks.md), [TransferUserDocumentOwnerships](TransferUserDocumentOwnerships.md), [TransferUserFolderOwnerships](TransferUserFolderOwnerships.md), [TransferUserGroupMemberships](TransferUserGroupMemberships.md), [TransferUserDomainMemberships](TransferUserDomainMemberships.md), [TransferUserSecurityPermissions](TransferUserSecurityPermissions.md), [TransferUserCheckedOutDocuments](TransferUserCheckedOutDocuments.md), [TransferUserDocumentSubscriptions](TransferUserDocumentSubscriptions.md), [TransferUserFolderSubscriptions](TransferUserFolderSubscriptions.md), [TransferUserWorkflowDefinitions](TransferUserWorkflowDefinitions.md), [TransferUserExpirationNotices](TransferUserExpirationNotices.md), [TransferUserISOTasks](TransferUserISOTasks.md); not [TransferUserDomainManagerRoles](TransferUserDomainManagerRoles.md), see below | User Managers | `TransferUserOwnershipsAndTasks` is checked on **both** users with each one's `DomainId` (`UserTakeOverOperations.cs`, RunAsync); the from-user must not be an administrator; role groups never move for a non-administrator |
@@ -83,8 +83,8 @@ case does not arise in practice.
 |---|---|---|---|
 | Add or remove library members | [AddUserAsDomainMember](AddUserAsDomainMember.md), [RemoveUserFromDomainMembership](RemoveUserFromDomainMembership.md), [AddUserGroupAsDomainMember](AddUserGroupAsDomainMember.md), [RemoveUserGroupFromDomainMembership](RemoveUserGroupFromDomainMembership.md) | User Managers | `AddRemoveLibraryMembers` with the library's id (`DomainExtensions.cs`, `DomainOperations.cs`); only global users and global groups can be added; the last member cannot be removed |
 | Reach the library by name | every call with a `DomainName`, e.g. [GetDomain](GetDomain.md), [GetManagers](GetManagers.md), [GetDomainMembers](GetDomainMembers.md), [GetDomainMembers1](GetDomainMembers1.md), [GetDomainUsers](GetDomainUsers.md), [GetDomainUsers1](GetDomainUsers1.md), [GetDomainGroups](GetDomainGroups.md), [GetLocalUsers](GetLocalUsers.md), [GetDomainStatistics](GetDomainStatistics.md) | members of the library, anyone where it allows anonymous access, User Managers and Policy Managers for every library | `DomainOperations.GetLibraryByNameAsync` and `GetLibraryByIdAsync` share `MayReachAsync`: membership, or `ListLibrariesForAdministration` with the library's id, which a manager passes. An unreachable library is 4041 "Library not found". These listing calls make no further check: any signed-in user who reaches the library gets them |
-| List the libraries to administer | [GetLibrariesForAdministration](GetLibrariesForAdministration.md) | User Managers and Policy Managers, who get every library | A manager gets the libraries they manage (`UserOperations.cs`, GetLibraryListForAdministrationAsync, `localDomainId` 0 so the role step fails and the managed list is read instead); anyone else gets an empty list |
-| See which members cannot open the library | [GetMembersWithoutAccess](GetMembersWithoutAccess.md) | nobody else: User and Policy Managers are refused | With no `domainName`, every managed library; with one, it must be managed (4030 "Access denied. Only library managers can perform this operation.") (`LibraryServices.cs`, GetMembersWithoutAccessAsync) |
+| List the libraries to administer | GetLibrariesForAdministration | User Managers and Policy Managers, who get every library | A manager gets the libraries they manage (`UserOperations.cs`, GetLibraryListForAdministrationAsync, `localDomainId` 0 so the role step fails and the managed list is read instead); anyone else gets an empty list |
+| See which members cannot open the library | GetMembersWithoutAccess | nobody else: User and Policy Managers are refused | With no `domainName`, every managed library; with one, it must be managed (4030 "Access denied. Only library managers can perform this operation.") (`LibraryServices.cs`, GetMembersWithoutAccessAsync) |
 | Read the library's policies | [GetDomainPolicies](GetDomainPolicies.md) | Policy Managers | `Domain.AccessAllowedToReadPoliciesAsync`: `UpdateLibraryPolices`, or `CheckDomainManagementAsync` |
 | Change the library's policies | [SetDomainPolicies](SetDomainPolicies.md) | Policy Managers | `UpdateLibraryPolices`; `allowLibManagers` is set only when the system behaviour setting `AllowLibraryManagersToEditPolicy` is on (`IRSecurity.cs`, IsAllowed; stored as `LIBMANAGERS_EDITPOLICY`) |
 
@@ -139,20 +139,20 @@ These are outside the matrix.
 | Define retention schedules, dispose of documents | [CreateRandDSchedule](CreateRandDSchedule.md), [DisposeItem](DisposeItem.md) and the other R&D calls | Administrators, R&D Managers | 4030 |
 | Flush the cache | FlushApplicationCache | Administrators only | 4030 |
 | See a library they do not manage and do not belong to | any call with that `DomainName` | members, Administrators, User Managers, Policy Managers | 4041 "Library not found" |
-| See the members without access of a library they do not manage | [GetMembersWithoutAccess](GetMembersWithoutAccess.md) | Administrators | 4030 "Access denied. Only library managers can perform this operation." |
+| See the members without access of a library they do not manage | GetMembersWithoutAccess | Administrators | 4030 "Access denied. Only library managers can perform this operation." |
 
 ## Finding out whether the signed-in user has this role
 
 - [GetManagedDomainsByUser](GetManagedDomainsByUser.md) with the caller's own name, or an empty name:
   the libraries the caller manages (`UserServices.cs`, GetManagedDomainsByUserAsync; the list is
   `DOMAINMANAGERS` rows). An empty list means the caller manages nothing.
-- [GetLibrariesForAdministration](GetLibrariesForAdministration.md): for a pure library manager, the managed
+- GetLibrariesForAdministration: for a pure library manager, the managed
   libraries; but a User Manager or Policy Manager gets every library from the same call, so use
   GetManagedDomainsByUser to tell the two apart, or [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md)
   with the caller's own name for the role groups (`GroupID` 100 to 105).
 - [GetManagers](GetManagers.md) with a library name answers any signed-in user who reaches the library;
   [GetDomains1](GetDomains1.md) can return the managers of every library the caller belongs to in one call.
-- [GetUserStatistics](GetUserStatistics.md) carries a count of managed libraries
+- GetUserStatistics carries a count of managed libraries
   (`UserStatistics.DomainManagerRoles`; the attribute name in the answer was not verified here).
 
 ## Notes
@@ -179,7 +179,7 @@ These are outside the matrix.
 - The matrix message lists "Library manager(s)" only when the library step was reachable. A manager refused
   on a global user sees a message that does not mention library managers; that is the message, not a sign
   that the role never applies.
-- [GetMembersWithoutAccess](GetMembersWithoutAccess.md) is the one library-management call that admits
+- GetMembersWithoutAccess is the one library-management call that admits
   library managers and administrators but refuses User Managers and Policy Managers, who otherwise
   administer every library; the refusal says "Only library managers can perform this operation".
 - `UserOperations.IsDomainManagerAsync` is a plain row lookup with no caching; manager changes take effect

@@ -64,7 +64,7 @@ Returns the sign-on settings in effect: the external authentication authorities,
 | Element | Description |
 |---------|-------------|
 | `AuthenticationAuthorities` | The external authentication services. A user whose authentication source is an authority's `Name` signs in through the service at its `Url`. |
-| `OidcProviders` | The OpenID Connect providers the sign-in page offers (see [GetSignInOptions](../GetSignInOptions.md)). `ClientSecret` is masked: eight asterisks and the secret's last 10 characters, enough to tell which secret is in use (a secret shorter than 20 characters shows only its last half). `ClientSecretSet` says whether there is one. `Scopes` is space separated. The callback address registered with the provider is `/oidc/callback/{Name}`. |
+| `OidcProviders` | The OpenID Connect providers the sign-in page offers (see [GetSignInOptions](GetSignInOptions.md)). `ClientSecret` is masked: eight asterisks and the secret's last 10 characters, enough to tell which secret is in use (a secret shorter than 20 characters shows only its last half). `ClientSecretSet` says whether there is one. `Scopes` is space separated. The callback address registered with the provider is `/oidc/callback/{Name}`. |
 | `SysadminCheckAccount` | `user@authority`. When set, sysadmin's password is also accepted when that authority accepts it for that account. Empty: not used. |
 | `TrustedLDAPAccount` | `user@authority`. [CreateTicketforUser](../CreateTicketforUser.md) callers sign in with this account's password. Empty: not used. |
 | `SysadminTempPasswordSet` | Whether a temporary password is set for sysadmin. It is stored only as a salted hash and cannot be read back. |
@@ -131,4 +131,4 @@ authenticationTicket=abc123
 - Edit the file and call [FlushApplicationCache](FlushApplicationCache.md) to apply a change without a restart. OpenID Connect providers follow too: a new one can be signed in with at once, a changed one uses its new settings from its next sign-in, a removed one is no longer offered.
 - Every sign-in with the temporary password is written to the error log, unless it is also sysadmin's own password. Remove `SysadminTempPassword` from the file once it is no longer needed.
 - infoRouter 8.7 kept the authorities, `TrustedLDAPAccount`, `SysadminCheckAccount`, `SysadminTempPassword` and the session values in `web.config`; the upgrade to 9.0 moves them to this file. An 8.7 `web.config` without `httpOnlyCookies` gets `true`.
-- [GetSignInOptions](../GetSignInOptions.md) returns the provider and authority names to everyone, and [GetApplicationParameters](../getApplicationParameters.md) the authority names to administrators.
+- [GetSignInOptions](GetSignInOptions.md) returns the provider and authority names to everyone, and [GetApplicationParameters](../getApplicationParameters.md) the authority names to administrators.

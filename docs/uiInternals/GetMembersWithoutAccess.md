@@ -1,6 +1,16 @@
+---
+search:
+  exclude: true
+---
+
 # GetMembersWithoutAccess API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the members of a domain/library whose right on the library is below a minimum: by default, the members who cannot read its documents.
 
@@ -9,14 +19,13 @@ Membership of a library gives no right of its own. A member with no access list 
 ## Endpoint
 
 ```
-/srv.asmx/GetMembersWithoutAccess
+/api/UIInternals/GetMembersWithoutAccess
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetMembersWithoutAccess?authenticationTicket=...&domainName=...&minimumRight=...`
-- **POST** `/srv.asmx/GetMembersWithoutAccess` (form data)
-- **SOAP** Action: `http://tempuri.org/GetMembersWithoutAccess`
+- **GET** `/api/UIInternals/GetMembersWithoutAccess?authenticationTicket=...&domainName=...&minimumRight=...`
+- **POST** `/api/UIInternals/GetMembersWithoutAccess` (form data)
 
 ## Parameters
 
@@ -81,7 +90,7 @@ System administrators, for any library. A library manager, for the libraries the
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetMembersWithoutAccess HTTP/1.1
+POST /api/UIInternals/GetMembersWithoutAccess HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&domainName=Finance&minimumRight=2
@@ -96,9 +105,9 @@ authenticationTicket=abc123&domainName=Finance&minimumRight=2
 
 ## Related APIs
 
-- [GetAccessList](GetAccessList.md) - The access list of a folder or document
-- [SetAccessList](SetAccessList.md) - Change it, to give the members found here a right
-- [GetDomainUsers](GetDomainUsers.md) - Every member of a library
+- [GetAccessList](../GetAccessList.md) - The access list of a folder or document
+- [SetAccessList](../SetAccessList.md) - Change it, to give the members found here a right
+- [GetDomainUsers](../GetDomainUsers.md) - Every member of a library
 
 ## Error Codes
 

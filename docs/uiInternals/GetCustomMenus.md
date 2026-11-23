@@ -1,6 +1,16 @@
+---
+search:
+  exclude: true
+---
+
 # GetCustomMenus API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns the custom menus this infoRouter installation adds to the document list, as an administrator set them with [SetCustomMenus](SetCustomMenus.md). These are the entries an administrator wires up to reach pages or external systems of their own — the document list menu bar and the right-click menu are extended with them.
 
@@ -9,14 +19,13 @@ The definitions are installation-wide: every signed-in user sees the same set, a
 ## Endpoint
 
 ```
-/srv.asmx/GetCustomMenus
+/api/UIInternals/GetCustomMenus
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetCustomMenus?authenticationTicket=...`
-- **POST** `/srv.asmx/GetCustomMenus` (form data)
-- **SOAP** Action: `http://tempuri.org/GetCustomMenus`
+- **GET** `/api/UIInternals/GetCustomMenus?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetCustomMenus` (form data)
 
 ## Parameters
 
@@ -88,34 +97,17 @@ An installation with no custom menus returns an empty `<CustomMenus ignoredEntri
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetCustomMenus?authenticationTicket=abc123-def456 HTTP/1.1
+GET /api/UIInternals/GetCustomMenus?authenticationTicket=abc123-def456 HTTP/1.1
 Host: server.example.com
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetCustomMenus HTTP/1.1
+POST /api/UIInternals/GetCustomMenus HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetCustomMenus"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetCustomMenus xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123-def456</authenticationTicket>
-    </GetCustomMenus>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Integration Example
@@ -123,7 +115,7 @@ SOAPAction: "http://tempuri.org/GetCustomMenus"
 ```javascript
 async function getCustomMenus() {
     const ticket = getUserAuthTicket();
-    const url = `/srv.asmx/GetCustomMenus?authenticationTicket=${encodeURIComponent(ticket)}`;
+    const url = `/api/UIInternals/GetCustomMenus?authenticationTicket=${encodeURIComponent(ticket)}`;
 
     const response = await fetch(url);
     const xmlDoc = new DOMParser().parseFromString(await response.text(), "text/xml");
@@ -156,7 +148,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

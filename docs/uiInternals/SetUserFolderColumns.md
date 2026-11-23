@@ -1,6 +1,16 @@
-﻿# SetUserFolderColumns API
+---
+search:
+  exclude: true
+---
+
+# SetUserFolderColumns API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Saves the column layout and custom property set preference for the authenticated user on the specified folder. The setting applies only to the calling user and does not affect other users.
 
@@ -15,14 +25,13 @@ Saves the column layout and custom property set preference for the authenticated
 ## Endpoint
 
 ```
-/srv.asmx/SetUserFolderColumns
+/api/UIInternals/SetUserFolderColumns
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetUserFolderColumns?authenticationTicket=...&folderPath=...&columnIds=...&propertySetId=...`
-- **POST** `/srv.asmx/SetUserFolderColumns` (form data)
-- **SOAP** Action: `http://tempuri.org/SetUserFolderColumns`
+- **GET** `/api/UIInternals/SetUserFolderColumns?authenticationTicket=...&folderPath=...&columnIds=...&propertySetId=...`
+- **POST** `/api/UIInternals/SetUserFolderColumns` (form data)
 
 ## Parameters
 
@@ -31,7 +40,7 @@ Saves the column layout and custom property set preference for the authenticated
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser` |
 | `folderPath` | string | Yes | Full infoRouter path of the folder (e.g. `/Domain/Folder`) |
 | `columnNames` | string | Yes | Comma-separated list of column names to display (e.g. `"ItemName,DocumentSize,ModificationDate"`). Required: an empty string is refused with HTTP 400 before the operation is reached. A name that is not a column is refused `4000`, and the refusal names every column there is. |
-| `propertySetId` | int | Yes | ID of the custom property set to display alongside the standard columns. Pass `0` for none. An id no property set has is refused `4041`. The id is the `Id` attribute [GetPropertySetDefinition](GetPropertySetDefinition.md) reports. |
+| `propertySetId` | int | Yes | ID of the custom property set to display alongside the standard columns. Pass `0` for none. An id no property set has is refused `4041`. The id is the `Id` attribute [GetPropertySetDefinition](../GetPropertySetDefinition.md) reports. |
 | `sortBy` | string | Yes | Column name to sort by (e.g. `"ModificationDate"`). Required: an empty string is refused with HTTP 400. A name that is not in `enum_IR.ColumnList` is refused `4000`. Not looked at at all when `sortByPropertySetId` is non-zero. |
 | `sortVector` | string | Yes | Sort direction: `"asc"` or `"desc"`, read without regard to case. Required: an empty string is refused with HTTP 400. Anything else is refused `4000`. Until 9.0 the comparison was case-sensitive, so `"ASC"` was quietly stored as no sort direction at all. |
 | `sortByPropertySetId` | int | Yes | Property set ID when sorting by a custom property field. Pass `0` when not sorting by a custom property. An id no property set has is refused `4041`. |
@@ -99,34 +108,10 @@ Saves the column layout and custom property set preference for the authenticated
 ### Request (POST)
 
 ```
-POST /srv.asmx/SetUserFolderColumns HTTP/1.1
+POST /api/UIInternals/SetUserFolderColumns HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&folderPath=/MyDomain/Reports&columnNames=ItemName,DocumentSize,ModificationDate,OwnerName&propertySetId=5&sortBy=ModificationDate&sortVector=desc&sortByPropertySetId=0&sortByPropertySetColumnName=
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/SetUserFolderColumns"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <SetUserFolderColumns xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123</authenticationTicket>
-      <folderPath>/MyDomain/Reports</folderPath>
-      <columnNames>ItemName,DocumentSize,ModificationDate,OwnerName</columnNames>
-      <propertySetId>5</propertySetId>
-      <sortBy>ModificationDate</sortBy>
-      <sortVector>desc</sortVector>
-      <sortByPropertySetId>0</sortByPropertySetId>
-      <sortByPropertySetColumnName></sortByPropertySetColumnName>
-    </SetUserFolderColumns>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Error Codes
@@ -171,7 +156,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

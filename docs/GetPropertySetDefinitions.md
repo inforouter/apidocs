@@ -74,7 +74,7 @@ For filtered results, use [GetPropertySetDefinitions1](GetPropertySetDefinitions
 
 | Attribute | Values | Description |
 |-----------|--------|-------------|
-| `Id` | int | The internal id, which [SetUserFolderColumns](SetUserFolderColumns.md) takes as `propertySetId`. New in 9.0. |
+| `Id` | int | The internal id, which SetUserFolderColumns takes as `propertySetId`. New in 9.0. |
 | `Name` | string | Internal uppercase name. |
 | `Caption` | string | Display label shown in the UI. |
 | `AppliesToDocuments` | `TRUE` / `FALSE` | Whether the property set can be applied to documents. |

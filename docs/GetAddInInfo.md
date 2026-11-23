@@ -6,7 +6,7 @@ Returns version and description information for the specified infoRouter client 
 
 > **This operation takes no authentication ticket.** There is no parameter for one, so every
 > caller is anonymous and the installed add-ins and their versions can be read by anybody who can
-> reach the server. [GetAddIns](GetAddIns.md), which lists the same facts, does take a ticket.
+> reach the server. GetAddIns, which lists the same facts, does take a ticket.
 
 ## Endpoint
 
@@ -146,7 +146,7 @@ cased before the folder is looked for, so case does not matter.
 ## Notes
 
 - **Case-insensitive name**: The `AddInName` parameter is converted to uppercase before the server looks up the add-in directory. `wordaddin`, `WordAddin`, and `WORDADDIN` all resolve to the same directory.
-- **No authentication ticket**: unlike nearly all other infoRouter APIs, this endpoint has no `AuthenticationTicket` parameter at all, so the installed add-ins and their versions can be read by anybody who can reach the server. It is designed to be called by the add-in before a user has logged in. [GetAddIns](GetAddIns.md), which lists the same facts, does take a ticket.
+- **No authentication ticket**: unlike nearly all other infoRouter APIs, this endpoint has no `AuthenticationTicket` parameter at all, so the installed add-ins and their versions can be read by anybody who can reach the server. It is designed to be called by the add-in before a user has logged in. GetAddIns, which lists the same facts, does take a ticket.
 - **Server-side file location**: The add-in metadata is read from an `info.ini` file inside a subdirectory named after the add-in (uppercase) within the server's configured add-in path. If the directory or file does not exist the API returns the "not found" error message.
 - **Non-standard error message**: when the add-in is not found, the error string is a three-line message intended to be shown to the end user as it stands. The `errorCode` is `4041` as everywhere else.
 - **Version fields may be empty**: If `Version`, `DLLVersion`, or `Description` keys are absent from `info.ini` the corresponding attributes are returned as empty strings.

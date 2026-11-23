@@ -46,7 +46,7 @@ All of these call `AccessAllowedforAdminFunctionsAsync(UpdateApplicationSettings
 | Read the system behaviour settings | GetSystemBehaviorSettings | nobody else | `SettingServices.GetSystemBehaviorSettingsAsync`. |
 | Change the e-mail and notification settings | SetEmailAndNotificationSettings | nobody else | Role checked before the XML is parsed; a refused caller gets 4030, not 4000. |
 | Read the e-mail and notification settings | GetEmailAndNotificationSettings | nobody else | `SettingServices.GetEmailAndNotificationSettingsAsync` checks the same action as the writer. No SMTP server or credentials are in it. |
-| Set the system default folder columns | [SetDefaultFolderColumns](SetDefaultFolderColumns.md) | nobody else | Anonymous callers get 4010 first; then the role (`SettingServices.SetDefaultFolderColumnsAsync`), then `InfoRouter.SaveSystemDefaultColumnSettings` checks it again. No administrators-only check remains. |
+| Set the system default folder columns | SetDefaultFolderColumns | nobody else | Anonymous callers get 4010 first; then the role (`SettingServices.SetDefaultFolderColumnsAsync`), then `InfoRouter.SaveSystemDefaultColumnSettings` checks it again. No administrators-only check remains. |
 
 ### Library policies
 
@@ -55,7 +55,7 @@ All of these call `AccessAllowedforAdminFunctionsAsync(UpdateApplicationSettings
 | Read a library's policies | [GetDomainPolicies](GetDomainPolicies.md) | the library's managers, always | `Domain.AccessAllowedToReadPoliciesAsync` (`DomainExtensions.cs`): `UpdateLibraryPolices` first, then `CheckDomainManagementAsync` for the library's managers. The library is looked up by name first; one the caller cannot reach is 4041 `Library not found`. |
 | Change a library's policies, or put them back on the factory defaults (`<Policies reset="defaults" />`) | [SetDomainPolicies](SetDomainPolicies.md) | the library's managers, only when `AllowLibraryManagersToEditPolicy` is on | `LibraryServices.SetDomainPoliciesAsync` checks `UpdateLibraryPolices` with the library id, and `DomainPolicyOperations.UpdatePoliciesAsync` checks it again. System policies in the XML are skipped. The change is logged to `Logs\PolicyUpdates`. |
 | Reach any library by name, member or not | every call that takes a `DomainName` | User Managers for every library; a library's own managers for it; members; anyone, for a library that allows anonymous access | `DomainOperations.MayReachAsync`: membership or anonymous access (`DomainsStore.GetViewableLibraryListAsync`), else `ListLibrariesForAdministration` with the library's id. Reaching is only the lookup; each call then makes its own check. |
-| List every library, membership aside | [GetLibrariesForAdministration](GetLibrariesForAdministration.md) | User Managers; library managers get the libraries they manage; anyone else gets an empty list | `UserOperations.GetLibraryListForAdministrationAsync`: `ListLibrariesForAdministration` with library id 0 passes the role, then `DomainsStore.GetAllLibrariesAsync` (hidden and archived included). Anonymous callers get 4010. |
+| List every library, membership aside | GetLibrariesForAdministration | User Managers; library managers get the libraries they manage; anyone else gets an empty list | `UserOperations.GetLibraryListForAdministrationAsync`: `ListLibrariesForAdministration` with library id 0 passes the role, then `DomainsStore.GetAllLibrariesAsync` (hidden and archived included). Anonymous callers get 4010. |
 
 ### Settings reads that need no role
 
@@ -65,7 +65,7 @@ These are listed so the UI does not hide them from anyone; they are not what the
 |---|---|---|---|
 | Read the general settings | GetGeneralAppSettings | anyone signed in | Anonymous callers get 4010 (`IsAuthenticatedUser()`). |
 | Read the authentication and password policy | GetAuthenticationAndPasswordPolicy | anyone signed in | Same check. |
-| Read the default and available folder columns | [GetDefaultFolderColumns](GetDefaultFolderColumns.md), [GetAllFolderColumns](GetAllFolderColumns.md) | anyone, the anonymous user included | No check in `SettingServices`; a call with no ticket runs as the anonymous user (`GetUserInfoFromInfoRouterAsync.IRServiceLogin`). |
+| Read the default and available folder columns | GetDefaultFolderColumns, GetAllFolderColumns | anyone, the anonymous user included | No check in `SettingServices`; a call with no ticket runs as the anonymous user (`GetUserInfoFromInfoRouterAsync.IRServiceLogin`). |
 | Read the public application parameters | [getApplicationParameters](getApplicationParameters.md) | anyone signed in | `SettingsWebServices.GetApplicationParametersAsync`. The block after `ALLOWPARTIALEMAILUPLOADS` (`INDEXCATALOG`, `LOGLOGINS`, `FILEUPLOADTIMEOUT`, `ALLOWOWNERSHIPTRANSFER`, `SUBSCRIPTIONNOTIFICATIONS`, `SENDEMAIL`, `SENDTO_DISPLAYUSERLIST`, `SMTPSERVER`, `SMTPSERVERPORT`, `SMTPCONNECTIONTIMEOUT`, `SMTPSENDUSERNAME`, `SMTPSENDPASSWORD` masked, `PWD*`, `AuthenticationAuthorities`, `ServerName`, `IPAddressList`, `WarehousePaths`) is written only when `IsAdministrator()` is true. A Policy Manager gets the public block only. |
 | Read the Connect settings report | GetConnectSettings | anyone signed in | `ConnectServices.GetConnectSettingsAsync`: 4010 for anonymous, no role. |
 
@@ -89,7 +89,7 @@ These are listed so the UI does not hide them from anyone; they are not what the
 ## Finding out whether the signed-in user has this role
 
 - [GetGroupMembershipsOfUser](GetGroupMembershipsOfUser.md) with the caller's own name: `ListingGroupMembershipOfUser` allows self (`UserServices.cs:992`, `User.AccessAllowedForUserAsync` passes `USER` and the user's id). A `GroupID` of `102` in the answer is this role; `104` is an administrator, who passes every check on this page without being in group 102.
-- [GetLibrariesForAdministration](GetLibrariesForAdministration.md): every library for a Policy Manager, User Manager or administrator; only the managed ones for a library manager; empty for anyone else. It does not say which of the three the caller is.
+- GetLibrariesForAdministration: every library for a Policy Manager, User Manager or administrator; only the managed ones for a library manager; empty for anyone else. It does not say which of the three the caller is.
 - GetSystemBehaviorSettings succeeds only for a Policy Manager or an administrator, so a 4030 from it means the caller is neither.
 - [getApplicationParameters](getApplicationParameters.md): the `SMTPSERVER` or `WarehousePaths` element is present only for an administrator; it says nothing about this role.
 

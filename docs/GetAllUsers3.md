@@ -89,7 +89,7 @@ authenticationTicket=abc123&startingRowNumber=1&numberOfRow=25&userStatusFilter=
 - [GetAllUsers2](GetAllUsers2.md) - The same list without the membership filter
 - [GetGlobalGroups](GetGlobalGroups.md) - The global groups, with how many libraries each is a member of
 - [AddUserAsDomainMember](AddUserAsDomainMember.md) - Make a user a member of a library
-- [GetMembersWithoutAccess](GetMembersWithoutAccess.md) - Members of a library who cannot open its documents
+- GetMembersWithoutAccess - Members of a library who cannot open its documents
 
 ## Error Codes
 

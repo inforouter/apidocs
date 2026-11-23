@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetAddIns API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Returns a list of all infoRouter client add-ins available on the server, including name, setup version, DLL version, and description.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetAddIns
+/api/UIInternals/GetAddIns
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetAddIns?authenticationTicket=...`
-- **POST** `/srv.asmx/GetAddIns` (form data)
-- **SOAP** Action: `http://tempuri.org/GetAddIns`
+- **GET** `/api/UIInternals/GetAddIns?authenticationTicket=...`
+- **POST** `/api/UIInternals/GetAddIns` (form data)
 
 ## Parameters
 
@@ -69,33 +78,16 @@ When no add-ins are installed the `<addins>` element is present but empty.
 ### Request (GET)
 
 ```
-GET /srv.asmx/GetAddIns?authenticationTicket=abc123 HTTP/1.1
+GET /api/UIInternals/GetAddIns?authenticationTicket=abc123 HTTP/1.1
 ```
 
 ### Request (POST)
 
 ```
-POST /srv.asmx/GetAddIns HTTP/1.1
+POST /api/UIInternals/GetAddIns HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123
-```
-
-### Request (SOAP 1.1)
-
-```xml
-POST /srv.asmx HTTP/1.1
-Content-Type: text/xml; charset=utf-8
-SOAPAction: "http://tempuri.org/GetAddIns"
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetAddIns xmlns="http://tempuri.org/">
-      <authenticationTicket>abc123</authenticationTicket>
-    </GetAddIns>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## Error Codes
@@ -113,7 +105,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;

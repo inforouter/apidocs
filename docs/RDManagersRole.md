@@ -105,7 +105,7 @@ its owner, the managers of its library, and users with CHANGE or Full Control on
 | Purge disposed items from the recycle bin, or restore items from another user's bin | [PurgeRecycleBinItem](PurgeRecycleBinItem.md), [RestoreRecycleBinItem](RestoreRecycleBinItem.md) | Administrators (`RecycleBinOperations`, `IsAdministrator()`) | `4030` "Only the system administrator can perform this operation" |
 | Define document types and their default schedules | [CreateDocumentTypeDef](CreateDocumentTypeDef.md), [CreateDocumentTypeDef1](CreateDocumentTypeDef1.md), [UpdateDocumentTypeDef](UpdateDocumentTypeDef.md), [UpdateDocumentTypeDef1](UpdateDocumentTypeDef1.md), [DeleteDocumentTypeDef](DeleteDocumentTypeDef.md) | Administrators (`DocumentTypeOperations`, `IsAdministrator()`) | `4030` "Only the system administrator can perform this operation" |
 | Change the `RetentionPeriodChange` policy of a library | [SetDomainPolicies](SetDomainPolicies.md) | Policy Managers; the library's managers when *Allow library managers to edit policies* is on | `4030` |
-| List libraries they are not a member of | [GetLibrariesForAdministration](GetLibrariesForAdministration.md) | User Managers, Policy Managers (every library); library managers (theirs) | Not an error: the answer holds only the libraries the caller manages, usually none (`UserOperations.GetLibraryListForAdministrationAsync`). [GetDomains](GetDomains.md) lists the member libraries. |
+| List libraries they are not a member of | GetLibrariesForAdministration | User Managers, Policy Managers (every library); library managers (theirs) | Not an error: the answer holds only the libraries the caller manages, usually none (`UserOperations.GetLibraryListForAdministrationAsync`). [GetDomains](GetDomains.md) lists the member libraries. |
 | Add or remove members of `[R&D Managers]` | [AddUsergroupMember](AddUsergroupMember.md), [RemoveUsergroupMember](RemoveUsergroupMember.md) | Administrators | `4030` "Access denied. This action is restricted to the following roles: The system administrator" |
 
 ## Finding out whether the signed-in user has this role
@@ -116,7 +116,7 @@ its owner, the managers of its library, and users with CHANGE or Full Control on
   who pass every R&D check without being in group 103.
 - There is no R&D-specific call that reveals the role. [GetRandDSchedules](GetRandDSchedules.md) answers
   every signed-in user, so a successful answer does not mean the caller holds the role.
-- [GetLibrariesForAdministration](GetLibrariesForAdministration.md) says nothing about this role: it answers
+- GetLibrariesForAdministration says nothing about this role: it answers
   an R&D Manager with the libraries they manage, like any other user.
 
 ## Notes

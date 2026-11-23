@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetTagDefinitions API
 
 **Available in:** infoRouter 9.0 and later
 
-Replaces the whole list of tag definitions: the tags the document library offers in its tag picker, in the order it offers them. The list is a set of suggestions, not a constraint: [SetTagToDocument](SetTagToDocument.md) still accepts any text, and tags already applied to documents are not changed by this call.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Replaces the whole list of tag definitions: the tags the document library offers in its tag picker, in the order it offers them. The list is a set of suggestions, not a constraint: [SetTagToDocument](../SetTagToDocument.md) still accepts any text, and tags already applied to documents are not changed by this call.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetTagDefinitions
+/api/UIInternals/SetTagDefinitions
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetTagDefinitions?authenticationTicket=...&tagDefinitionsXml=...`
-- **POST** `/srv.asmx/SetTagDefinitions` (form data)
-- **SOAP** Action: `http://tempuri.org/SetTagDefinitions`
+- **GET** `/api/UIInternals/SetTagDefinitions?authenticationTicket=...&tagDefinitionsXml=...`
+- **POST** `/api/UIInternals/SetTagDefinitions` (form data)
 
 ## Parameters
 
@@ -33,7 +42,7 @@ Replaces the whole list of tag definitions: the tags the document library offers
 </TagDefinitions>
 ```
 
-- Every `TagDefinition` element is read, wherever it is, so the whole answer of [GetTagDefinitions](GetTagDefinitions.md) can be sent back as it is.
+- Every `TagDefinition` element is read, wherever it is, so the whole answer of [GetTagDefinitions](../GetTagDefinitions.md) can be sent back as it is.
 - The order of the elements is the order the picker shows.
 - Each text is trimmed. Blank entries are dropped, and so are repeats, compared case-insensitively, the first one kept.
 - Each text must pass the rule `SetTagToDocument` applies to a tag: at most 128 characters, letters, digits, underscore, dash and space. The first text that does not is named in a `4000` refusal and nothing is saved.
@@ -68,24 +77,10 @@ The `UpdateApplicationSettingsAndPolicies` administrative right: the `sysadmin` 
 ### Request (POST)
 
 ```
-POST /srv.asmx/SetTagDefinitions HTTP/1.1
+POST /api/UIInternals/SetTagDefinitions HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456&tagDefinitionsXml=%3CTagDefinitions%3E%3CTagDefinition%3EApproved%3C%2FTagDefinition%3E%3CTagDefinition%3EDraft%3C%2FTagDefinition%3E%3C%2FTagDefinitions%3E
-```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:SetTagDefinitions>
-      <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
-      <tns:tagDefinitionsXml>&lt;TagDefinitions&gt;&lt;TagDefinition&gt;Approved&lt;/TagDefinition&gt;&lt;/TagDefinitions&gt;</tns:tagDefinitionsXml>
-    </tns:SetTagDefinitions>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## JavaScript
@@ -111,6 +106,6 @@ await call('SetTagDefinitions', { authenticationTicket: ticket, tagDefinitionsXm
 
 ## Related APIs
 
-- [GetTagDefinitions](GetTagDefinitions.md) - Get the list
-- [SetTagToDocument](SetTagToDocument.md) - Apply a tag to a document
-- [RemoveTagFromDocument](RemoveTagFromDocument.md) - Remove a tag from a document
+- [GetTagDefinitions](../GetTagDefinitions.md) - Get the list
+- [SetTagToDocument](../SetTagToDocument.md) - Apply a tag to a document
+- [RemoveTagFromDocument](../RemoveTagFromDocument.md) - Remove a tag from a document

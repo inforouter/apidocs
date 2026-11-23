@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # SetCustomMenus API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Replaces every custom menu the document list draws, and their entries, in the order given. A menu named after a built-in one (`FILE`, `EDIT`, `TOOLS`, `ADVANCED`, `VIEW`, `POPMENU`) adds its items to that menu; `POPMENU` is the right-click menu. Any other name becomes a new heading on the menu bar. [GetCustomMenus](GetCustomMenus.md) answers the new set at once.
 
 ## Endpoint
 
 ```
-/srv.asmx/SetCustomMenus
+/api/UIInternals/SetCustomMenus
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/SetCustomMenus?authenticationTicket=...&customMenusXml=...`
-- **POST** `/srv.asmx/SetCustomMenus` (form data)
-- **SOAP** Action: `http://tempuri.org/SetCustomMenus`
+- **GET** `/api/UIInternals/SetCustomMenus?authenticationTicket=...&customMenusXml=...`
+- **POST** `/api/UIInternals/SetCustomMenus` (form data)
 
 ## Parameters
 
@@ -79,24 +88,10 @@ The `UpdateApplicationSettingsAndPolicies` administrative right: the `sysadmin` 
 ### Request (POST)
 
 ```
-POST /srv.asmx/SetCustomMenus HTTP/1.1
+POST /api/UIInternals/SetCustomMenus HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123-def456&customMenusXml=%3CCustomMenus%3E%3CMenu%20name%3D%22TOOLS%22%3E%3CMenuItem%20name%3D%22mnuFax%22%20caption%3D%22Fax%22%20action%3D%22faxto.aspx%22%20%2F%3E%3C%2FMenu%3E%3C%2FCustomMenus%3E
-```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:SetCustomMenus>
-      <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
-      <tns:customMenusXml>&lt;CustomMenus&gt;&lt;Menu name="TOOLS"&gt;&lt;MenuItem name="mnuFax" caption="Fax" action="faxto.aspx" /&gt;&lt;/Menu&gt;&lt;/CustomMenus&gt;</tns:customMenusXml>
-    </tns:SetCustomMenus>
-  </soap:Body>
-</soap:Envelope>
 ```
 
 ## JavaScript

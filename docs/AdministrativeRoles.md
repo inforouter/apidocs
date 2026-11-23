@@ -62,7 +62,7 @@ There is no single "my roles" call. Use these:
   only administrators get the extended block.
 - [GetManagedDomainsByUser](GetManagedDomainsByUser.md) with the caller's own name, or an empty name, lists
   the libraries the caller manages.
-- [GetLibrariesForAdministration](GetLibrariesForAdministration.md) lists the libraries the caller may
+- GetLibrariesForAdministration lists the libraries the caller may
   administer: every library for Administrators, User Managers and Policy Managers, the managed ones for a
   library manager, nothing for anyone else.
 
@@ -87,4 +87,4 @@ There is no single "my roles" call. Use these:
   mark them.
 - **Which libraries to offer.** [GetDomains](GetDomains.md) lists only the libraries the caller belongs to,
   whatever their role. A page that manages users, memberships, managers or policies should list
-  [GetLibrariesForAdministration](GetLibrariesForAdministration.md) instead.
+  GetLibrariesForAdministration instead.

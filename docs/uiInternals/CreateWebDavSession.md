@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # CreateWebDavSession API
 
 **Available in:** infoRouter 9.0 and later
+
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
 
 Creates a WebDAV session ticket for the signed-in user, to map infoRouter as a drive in Windows File Explorer or any WebDAV client. The ticket travels in the URL, `https://server/dav/sid-{ticket}/`, so the client needs no sign-in of its own, and the caller's own authentication ticket is not exposed. Answers with the new session as [GetWebDavSessions](GetWebDavSessions.md) lists it.
 
 ## Endpoint
 
 ```
-/srv.asmx/CreateWebDavSession
+/api/UIInternals/CreateWebDavSession
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/CreateWebDavSession?authenticationTicket=...&customExpirationDate=...`
-- **POST** `/srv.asmx/CreateWebDavSession` (form data)
-- **SOAP** Action: `http://tempuri.org/CreateWebDavSession`
+- **GET** `/api/UIInternals/CreateWebDavSession?authenticationTicket=...&customExpirationDate=...`
+- **POST** `/api/UIInternals/CreateWebDavSession` (form data)
 
 ## Parameters
 
@@ -61,7 +70,7 @@ Any authenticated, non-anonymous user. The ticket grants WebDAV access to what t
 
 ### Request (POST)
 ```
-POST /srv.asmx/CreateWebDavSession HTTP/1.1
+POST /api/UIInternals/CreateWebDavSession HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=abc123&customExpirationDate=2026-12-31T23:59:59
@@ -69,19 +78,7 @@ authenticationTicket=abc123&customExpirationDate=2026-12-31T23:59:59
 
 ### Request (GET, sliding expiry)
 ```
-GET /srv.asmx/CreateWebDavSession?authenticationTicket=abc123 HTTP/1.1
-```
-
-### SOAP Request
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:CreateWebDavSession>
-      <tns:authenticationTicket>abc123</tns:authenticationTicket>
-      <tns:customExpirationDate>2026-12-31T23:59:59</tns:customExpirationDate>
-    </tns:CreateWebDavSession>
-  </soap:Body>
-</soap:Envelope>
+GET /api/UIInternals/CreateWebDavSession?authenticationTicket=abc123 HTTP/1.1
 ```
 
 ## Notes
@@ -93,7 +90,7 @@ GET /srv.asmx/CreateWebDavSession?authenticationTicket=abc123 HTTP/1.1
 
 - [GetWebDavSessions](GetWebDavSessions.md) - List the caller's WebDAV session tickets
 - [RemoveWebDavSession](RemoveWebDavSession.md) - Remove a WebDAV session ticket
-- [CreateDiskMountURL](CreateDiskMountURL.md) - Create a WebDAV session and return only its mount path
+- [CreateDiskMountURL](../CreateDiskMountURL.md) - Create a WebDAV session and return only its mount path
 
 ## Error Codes
 

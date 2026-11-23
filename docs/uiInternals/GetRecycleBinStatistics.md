@@ -1,30 +1,39 @@
+---
+search:
+  exclude: true
+---
+
 # GetRecycleBinStatistics API
 
 **Available in:** infoRouter 9.0 and later
 
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
 Answers what the recycle bins of the whole instance hold, by where it is: the **system recycle bin**, the
 **users' recycle bins** and the **purge queue**, each with how many folders and documents it holds and their total
 size in bytes. With `withDetails=true`, the users' recycle bins are listed one by one as well. It only reads.
-See [What happens to a deleted document or folder](rules/recycle-bin.md) for what the three places are.
+See [What happens to a deleted document or folder](../rules/recycle-bin.md) for what the three places are.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetRecycleBinStatistics
+/api/UIInternals/GetRecycleBinStatistics
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetRecycleBinStatistics?authenticationTicket=...&withDetails=...`
-- **POST** `/srv.asmx/GetRecycleBinStatistics` (form data)
-- **SOAP** Action: `http://tempuri.org/GetRecycleBinStatistics`
+- **GET** `/api/UIInternals/GetRecycleBinStatistics?authenticationTicket=...&withDetails=...`
+- **POST** `/api/UIInternals/GetRecycleBinStatistics` (form data)
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `authenticationTicket` | string | Yes | Authentication ticket of a system administrator, obtained from `AuthenticateUser`. |
-| `withDetails` | bool | No | Default `false`. `true` adds one `<recyclebin>` per user's recycle bin that holds anything, sorted by user name. Over SOAP the parameter is required; pass `false` for the default. |
+| `withDetails` | bool | No | Default `false`. `true` adds one `<recyclebin>` per user's recycle bin that holds anything, sorted by user name. |
 
 ---
 
@@ -46,7 +55,7 @@ See [What happens to a deleted document or folder](rules/recycle-bin.md) for wha
 
 | Element | What it counts |
 |---------|----------------|
-| `<systemRecycleBin>` | What has been emptied out of the users' recycle bins. Only a system administrator can find, restore or purge it ([SearchRecycledItems1](SearchRecycledItems1.md) with `searchIn=1`). |
+| `<systemRecycleBin>` | What has been emptied out of the users' recycle bins. Only a system administrator can find, restore or purge it ([SearchRecycledItems1](../SearchRecycledItems1.md) with `searchIn=1`). |
 | `<userRecycleBins>` | What is still in the users' own recycle bins, where each user can restore it. `recycleBinCount` is how many users' recycle bins hold anything. |
 | `<recyclebin>` | Only with `withDetails=true`: one user's recycle bin. `username` is empty for a recycle bin nobody owns any more. The numbers of all `<recyclebin>` elements add up to those of `<userRecycleBins>`. |
 | `<purgeQueue>` | What is queued for the purge job, which removes it for good within minutes. Nothing in it can be restored or found by a search. |
@@ -81,33 +90,17 @@ usually left out of it, since it is about to be gone.
 ### GET Request
 
 ```
-GET /srv.asmx/GetRecycleBinStatistics?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&withDetails=true HTTP/1.1
+GET /api/UIInternals/GetRecycleBinStatistics?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&withDetails=true HTTP/1.1
 ```
 
 ### POST Request
 
 ```
-POST /srv.asmx/GetRecycleBinStatistics HTTP/1.1
+POST /api/UIInternals/GetRecycleBinStatistics HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301&withDetails=true
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:GetRecycleBinStatistics>
-      <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
-      <tns:withDetails>true</tns:withDetails>
-    </tns:GetRecycleBinStatistics>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -116,7 +109,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -148,9 +141,9 @@ for (const bin of stats.querySelectorAll('userRecycleBins > recyclebin')) {
 ## Notes
 
 - **The whole instance.** The numbers cover every user's recycle bin, not the caller's. A user's own recycle bin is
-  listed by [GetRecycleBinContent](GetRecycleBinContent.md).
-- **Counted the way the empties count.** The three numbers are the ones [EmptyRecycleBin](EmptyRecycleBin.md),
-  [EmptyUserRecycleBin](EmptyUserRecycleBin.md) and [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) answer
+  listed by [GetRecycleBinContent](../GetRecycleBinContent.md).
+- **Counted the way the empties count.** The three numbers are the ones [EmptyRecycleBin](../EmptyRecycleBin.md),
+  [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) and [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md) answer
   for what they moved: emptying a user's recycle bin moves its numbers from that `<recyclebin>` to
   `<systemRecycleBin>`.
 - **A snapshot.** The numbers are read in one pass at the moment of the call; deletes, empties and the purge job
@@ -161,10 +154,10 @@ for (const bin of stats.querySelectorAll('userRecycleBins > recyclebin')) {
 
 ## Related APIs
 
-- [SearchRecycledItems1](SearchRecycledItems1.md) - The items themselves, a page at a time; `searchIn` for one recycle bin, `path` for one library or folder (admin only)
-- [EmptyUserRecycleBin](EmptyUserRecycleBin.md) - Empty one user's Recycle Bin into the system recycle bin (admin only)
-- [EmptyAllUserRecycleBins](EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin into the system recycle bin (admin only)
-- [PurgeRecycleBinItem](PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)
+- [SearchRecycledItems1](../SearchRecycledItems1.md) - The items themselves, a page at a time; `searchIn` for one recycle bin, `path` for one library or folder (admin only)
+- [EmptyUserRecycleBin](../EmptyUserRecycleBin.md) - Empty one user's Recycle Bin into the system recycle bin (admin only)
+- [EmptyAllUserRecycleBins](../EmptyAllUserRecycleBins.md) - Empty every user's Recycle Bin into the system recycle bin (admin only)
+- [PurgeRecycleBinItem](../PurgeRecycleBinItem.md) - Permanently delete a single recycled item (admin only)
 
 ---
 

@@ -52,7 +52,7 @@ delete, say) stops it with "the library contains documents"; the caller must be 
   `DomainsStore.GetViewableLibraryListAsync` for the item lookups (`DocumentLoadOperation.GetDocumentAsync`,
   `FolderOperations.GetFolderAsync`).
 - Tests: `DomainBatchApiTests`, `DomainBatch2ApiTests`, `GetLibrariesForAdministrationApiTests`.
-- Pages: [GetDomains](../GetDomains.md), [GetLibrariesForAdministration](../GetLibrariesForAdministration.md),
+- Pages: [GetDomains](../GetDomains.md), GetLibrariesForAdministration,
   [CreateDomain](../CreateDomain.md), [Library Managers](../LibraryManagersRole.md).
 
 ## Since

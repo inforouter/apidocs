@@ -1,20 +1,29 @@
+---
+search:
+  exclude: true
+---
+
 # GetFolderAccessListStatistics API
 
 **Available in:** infoRouter 9.0 and later
 
-Counts the subfolders and documents under a folder whose access list is not the folder's own. These are the items that [SetAccessList](SetAccessList.md) with `ApplyToTree=true` overwrites, so a client can warn the user before applying a folder's security to its whole tree.
+!!! warning "Internal API"
+    Made for infoRouter's own user interface. It is not part of the public web API: there is no SOAP
+    form and no promise of backward compatibility, and it may change or be removed in any release
+    without notice. Do not use it in an integration.
+
+Counts the subfolders and documents under a folder whose access list is not the folder's own. These are the items that [SetAccessList](../SetAccessList.md) with `ApplyToTree=true` overwrites, so a client can warn the user before applying a folder's security to its whole tree.
 
 ## Endpoint
 
 ```
-/srv.asmx/GetFolderAccessListStatistics
+/api/UIInternals/GetFolderAccessListStatistics
 ```
 
 ## Methods
 
-- **GET** `/srv.asmx/GetFolderAccessListStatistics?authenticationTicket=...&folderPath=...`
-- **POST** `/srv.asmx/GetFolderAccessListStatistics` (form data)
-- **SOAP** Action: `http://tempuri.org/GetFolderAccessListStatistics`
+- **GET** `/api/UIInternals/GetFolderAccessListStatistics?authenticationTicket=...&folderPath=...`
+- **POST** `/api/UIInternals/GetFolderAccessListStatistics` (form data)
 
 ## Parameters
 
@@ -63,7 +72,7 @@ An item is counted as not inherited when the access list it carries is a differe
 - the item was given an access list of its own;
 - the item inherits from a subfolder that was given one. A subfolder with its own list takes everything below it out of the given folder's list.
 
-So the numbers are measured against the folder that was asked about, not against each item's direct parent. In [GetAccessList](GetAccessList.md), `InheritedSecurity` compares an item with its direct parent; a document that reports `InheritedSecurity="true"` there is still counted here when its folder has a list of its own.
+So the numbers are measured against the folder that was asked about, not against each item's direct parent. In [GetAccessList](../GetAccessList.md), `InheritedSecurity` compares an item with its direct parent; a document that reports `InheritedSecurity="true"` there is still counted here when its folder has a list of its own.
 
 Items in the recycle bin are not part of the tree and are not counted.
 
@@ -71,7 +80,7 @@ Items in the recycle bin are not part of the tree and are not counted.
 
 ## Required Permissions
 
-The calling user must be allowed to **change the security** of the folder, the same right [SetAccessList](SetAccessList.md) asks for. The counts include subfolders and documents the caller may not be able to see.
+The calling user must be allowed to **change the security** of the folder, the same right [SetAccessList](../SetAccessList.md) asks for. The counts include subfolders and documents the caller may not be able to see.
 
 ---
 
@@ -80,7 +89,7 @@ The calling user must be allowed to **change the security** of the folder, the s
 ### GET Request
 
 ```
-GET /srv.asmx/GetFolderAccessListStatistics
+GET /api/UIInternals/GetFolderAccessListStatistics
   ?authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
   &folderPath=/Finance/Contracts
 HTTP/1.1
@@ -89,28 +98,12 @@ HTTP/1.1
 ### POST Request
 
 ```
-POST /srv.asmx/GetFolderAccessListStatistics HTTP/1.1
+POST /api/UIInternals/GetFolderAccessListStatistics HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 authenticationTicket=3f2504e0-4f89-11d3-9a0c-0305e82c3301
 &folderPath=/Finance/Contracts
 ```
-
-### SOAP Request
-
-```xml
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-               xmlns:tns="http://tempuri.org/">
-  <soap:Body>
-    <tns:GetFolderAccessListStatistics>
-      <tns:authenticationTicket>3f2504e0-4f89-11d3-9a0c-0305e82c3301</tns:authenticationTicket>
-      <tns:folderPath>/Finance/Contracts</tns:folderPath>
-    </tns:GetFolderAccessListStatistics>
-  </soap:Body>
-</soap:Envelope>
-```
-
----
 
 ## JavaScript
 
@@ -119,7 +112,7 @@ Every call answers XML with HTTP 200, success or not, so `success` is the thing 
 
 ```javascript
 async function call(action, params) {
-  const response = await fetch(`/srv.asmx/${action}?${new URLSearchParams(params)}`);
+  const response = await fetch(`/api/UIInternals/${action}?${new URLSearchParams(params)}`);
   const root = new DOMParser()
     .parseFromString(await response.text(), 'text/xml')
     .documentElement;
@@ -165,10 +158,10 @@ if (folders > 0 || documents > 0) {
 ## Related APIs
 
 - [GetFolderAccessListCatalog](GetFolderAccessListCatalog.md) - Which items the not-inherited numbers are made of, as paths with counts
-- [SetAccessList](SetAccessList.md) - Set the access list, optionally on the whole tree
-- [GetAccessList](GetAccessList.md) - Get the access list of one document or folder
-- [ApplyInheritedAccessList](ApplyInheritedAccessList.md) - Put an item back to inheriting from its parent
-- [GetFolderStatistics](GetFolderStatistics.md) - Count the subfolders and documents of a folder
+- [SetAccessList](../SetAccessList.md) - Set the access list, optionally on the whole tree
+- [GetAccessList](../GetAccessList.md) - Get the access list of one document or folder
+- [ApplyInheritedAccessList](../ApplyInheritedAccessList.md) - Put an item back to inheriting from its parent
+- [GetFolderStatistics](../GetFolderStatistics.md) - Count the subfolders and documents of a folder
 
 ---
 
