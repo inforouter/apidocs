@@ -59,6 +59,8 @@ The infoRouter Web Services API provides programmatic access to infoRouter's doc
 - [GetLogs](GetLogs.md) - Get server log entries by type and date (admin only)
 - [GetLogStatistics](GetLogStatistics.md) - Get log dates and entry counts by log type, fixed 90-day window (admin only)
 - [GetLogStatistics1](GetLogStatistics1.md) - Get log dates and entry counts by log type with a caller-supplied lookback window (admin only)
+- [GetServerAlerts](GetServerAlerts.md) - Get the server's current alerts: full disk, internet outage (admin only)
+- [DismissServerAlert](DismissServerAlert.md) - Dismiss one server alert for all administrators (admin only)
 - [GetMaintenanceJobsStatus](GetMaintenanceJobsStatus.md) - Get status of all system maintenance jobs (admin only)
 - [GetTransactionStatistics](GetTransactionStatistics.md) - Get the transaction runner's counters: calls, outcomes, retries, lock waits and holds per operation (admin only)
 - [RunMaintenanceJob](RunMaintenanceJob.md) - Run one maintenance job now and answer when it is through (admin only)

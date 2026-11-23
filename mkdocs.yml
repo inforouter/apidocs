@@ -577,6 +577,8 @@ nav:
     - UpdateApplicationLicense: UpdateApplicationLicense.md
     - GetLogs: GetLogs.md
     - GetLogStatistics: GetLogStatistics.md
+    - GetServerAlerts: GetServerAlerts.md
+    - DismissServerAlert: DismissServerAlert.md
     - GetMaintenanceJobsStatus: GetMaintenanceJobsStatus.md
     - GetTransactionStatistics: GetTransactionStatistics.md
     - RunMaintenanceJob: RunMaintenanceJob.md

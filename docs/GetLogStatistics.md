@@ -36,6 +36,7 @@ To control the lookback window explicitly, use [`GetLogStatistics1`](GetLogStati
 | `Upgrade` | What an upgrade did |
 | `Maintenance` | What the daily maintenance jobs did |
 | `IRConnect` | One record per infoRouter Connect call — see below |
+| `Alerts` | What happened to the server alerts: raised, severity changed, dismissed (by whom), cleared — see [GetServerAlerts](GetServerAlerts.md) |
 
 > **New in 9.2.** `Information`, `Warning`, `Upgrade` and `Maintenance` have always been written by
 > the server but could not be read back through this API until 9.2. `IRConnect` is new.
@@ -153,7 +154,7 @@ How many entries each day holds, as `<Value>` pairs of `<LogDate>` and `<Count>`
 `<Statistics>`.
 
 The log types it accepts are `Errors`, `LoginAttempts`, `Logins`, `Notifications`, `Information`,
-`Warning`, `Upgrade`, `Maintenance` and `IRConnect`. Anything else is answered `4000` with that list
+`Warning`, `Upgrade`, `Maintenance`, `IRConnect` and `Alerts`. Anything else is answered `4000` with that list
 in the message.
 
 ```javascript
@@ -164,10 +165,11 @@ for (const day of root.querySelectorAll('Statistics > Value')) {
 }
 ```
 
-**Two of the nine listed types do not work.** `Information` and `Warning` answer `5000` carrying a
-`DirectoryNotFoundException` on an installation that has never written one of those logs - nothing
-creates the directory and this does not tolerate its absence. Reading the log itself does not behave
-that way: `GetLogs` for a date with nothing in it answers success.
+**A log that has never been written to is an empty log.** A log's directory is created when its first
+record is written, so an installation where, say, nobody has failed to sign in yet has no
+`LoginAttempts` directory. The statistics then answer success with `Count=0` for every day, as
+`GetLogs` answers success for a date with nothing in it. (Before 9.0.300 this answered `5000` carrying
+a `DirectoryNotFoundException`.)
 
 ## Notes
 
@@ -186,5 +188,4 @@ The `errorCode` values this operation returns, checked against a running server:
 | `4010` | the ticket is expired or unknown |
 | `4030` | the caller is neither an administrator nor an Audit Manager - including a caller with no ticket |
 | `4000` | a log type it does not recognise - the message lists the ones it does |
-| `5000` | `Information` or `Warning` where that log has never been written - see above |
 

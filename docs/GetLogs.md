@@ -35,6 +35,7 @@ Returns the server log entries for a specified log type and date.
 | `Upgrade` | What an upgrade did |
 | `Maintenance` | What the daily maintenance jobs did |
 | `IRConnect` | One record per infoRouter Connect call — see below |
+| `Alerts` | What happened to the server alerts: raised, severity changed, dismissed (by whom), cleared — see [GetServerAlerts](GetServerAlerts.md) |
 
 > **New in 9.2.** `Information`, `Warning`, `Upgrade` and `Maintenance` have always been written by
 > the server but could not be read back through this API until 9.2. `IRConnect` is new.
@@ -277,7 +278,7 @@ async function call(action, params) {
 One day's entries, under `<Value>`. The date is `yyyy-MM-dd`.
 
 The log types it accepts are `Errors`, `LoginAttempts`, `Logins`, `Notifications`, `Information`,
-`Warning`, `Upgrade`, `Maintenance` and `IRConnect`. Anything else is answered `4000` with that list
+`Warning`, `Upgrade`, `Maintenance`, `IRConnect` and `Alerts`. Anything else is answered `4000` with that list
 in the message.
 
 ```javascript

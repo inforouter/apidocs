@@ -21,7 +21,7 @@ Returns a list of members of the specified user group with configurable sort ord
 | `authenticationTicket` | string | Yes | Authentication ticket obtained from `AuthenticateUser`. |
 | `domainName` | string | No | The domain/library name if the group is a local group. Pass empty or null for global groups. |
 | `groupName` | string | Yes | The name of the user group whose members will be returned. |
-| `sortBy` | int | Yes | Sort field. Valid values: `1` = username, `2` = first name + last name, `3` = last name + first name, `4` = email, `5` = status, `6` = authentication source, `7` = domain/library, `8` = user type. |
+| `sortBy` | int | Yes | Sort field. Valid values: `1` = username, `2` = first name + last name, `3` = last name + first name, `4` = email, `5` = status, `6` = authentication source, `7` = domain/library, `8` = user type, `9` = last sign-in (ascending: those who never signed in first; added 2026-11-06). |
 | `sortAscending` | bool | Yes | If `true`, sort in ascending order; if `false`, sort in descending order. |
 | `detailMode` | bool | Yes | If `true`, returns full user details including the `<Preferences>` child element. If `false`, returns basic identity attributes only (UserID, FirstName, LastName, Email, Enabled, UserName). |
 
