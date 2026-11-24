@@ -74,6 +74,7 @@ nav:
   - Server:
     - Overview: Server/index.md
     - System requirements: Server/system-requirements.md
+    - Implementation guide: Server/implementationGuide/index.md
   - Server rules:
     - Overview: rules/index.md
     - Questions index: rules/questions.md
