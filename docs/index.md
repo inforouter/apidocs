@@ -21,6 +21,10 @@ Each API page says, right under its title, which infoRouter versions have that A
 
 The pages describe the API as version 9 answers it. On an 8.7 server the same API takes the same parameters, but details of the answer (error codes, added attributes) can differ.
 
+## Server
+
+- [System requirements](Server/system-requirements.md) - What the infoRouter Version 9 server and the client workstations need
+
 ## API Categories
 
 ### Authentication

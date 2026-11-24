@@ -71,6 +71,9 @@ copyright: Copyright &copy; 2026 infoRouter. All rights reserved.
 
 nav:
   - Home: index.md
+  - Server:
+    - Overview: Server/index.md
+    - System requirements: Server/system-requirements.md
   - Server rules:
     - Overview: rules/index.md
     - Questions index: rules/questions.md
